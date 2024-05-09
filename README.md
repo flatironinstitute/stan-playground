@@ -26,10 +26,9 @@ curl http://localhost:8083/probe
 
 ## For developers
 
-The source code for the frontend is in [this monorepo](https://github.com/magland/fi-sci/tree/main/apps/stan-playground).
+The source code for the frontend is in the gui folder. See the readme there.
 
-
-The source code for the server that does the compilation is in [docker](docker).
+The source code for the dockerized server is in the docker folder.
 
 ## Notes
 
