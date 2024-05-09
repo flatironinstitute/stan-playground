@@ -1,6 +1,8 @@
 # stan-playground
 
-Run Stan models in the browser
+:warning: This is a very preliminary version. Not ready to be used seriously.
+
+Run Stan models locally in the browser
 
 ## Instructions
 
@@ -33,3 +35,5 @@ The source code for the dockerized server is in the docker folder.
 ## Notes
 
 Right now the sampler runs in the main thread, so it freezes the UI. We'll need to put this in a worker thread.
+
+**How is this different from the previous stan-playground?** That other stan-playground was also about running Stan models via the browser, but the sampling was done on a server. For this project (same name) the sampling is done locally in the browser.
