@@ -10,21 +10,23 @@ For now, you need to run a server locally to do the compilation of the models.
 docker run -p 8083:8080 -it magland/stan-wasm-server:latest
 ```
 
-Verify that the server is responding
+Then visit
+
+https://stan-playground.vercel.app/
+
+Compile and run the sampling
+
+## Troubleshooting
+
+If you have doubts about whether the compilation server is working, you can verify that it is responding:
 
 ```
 curl http://localhost:8083/probe
 ```
-
-Visit
-
-https://stan-playground.vercel.app/
-
-Compile and sample
 
 ## For developers
 
 The source code for the frontend is in [this monorepo](https://github.com/magland/fi-sci/tree/main/apps/stan-playground).
 
 
-
+The source code for the server that does the compilation is in [docker](docker).
