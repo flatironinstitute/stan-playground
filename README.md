@@ -30,3 +30,7 @@ The source code for the frontend is in [this monorepo](https://github.com/maglan
 
 
 The source code for the server that does the compilation is in [docker](docker).
+
+## Notes
+
+Right now the sampler runs in the main thread, so it freezes the UI. We'll need to put this in a worker thread.
