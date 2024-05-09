@@ -1,5 +1,7 @@
 # stan-playground
 
+:warning: This is a very preliminary version. Not ready to be used seriously.
+
 Run Stan models in the browser
 
 ## Instructions
