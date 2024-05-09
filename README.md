@@ -37,4 +37,4 @@ The source code for the server that does the compilation is in [docker](docker).
 
 Right now the sampler runs in the main thread, so it freezes the UI. We'll need to put this in a worker thread.
 
-**How is this different from the previous stan-playground?** That other stan-playground was also about running Stan models via the browser, but the sampling was done in the cloud. For this project (different project, same name) the sampling is done locally in the browser.
+**How is this different from the previous stan-playground?** That other stan-playground was also about running Stan models via the browser, but the sampling was done on a server. For this project (same name) the sampling is done locally in the browser.
