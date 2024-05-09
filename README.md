@@ -2,7 +2,7 @@
 
 :warning: This is a very preliminary version. Not ready to be used seriously.
 
-Run Stan models in the browser
+Run Stan models locally in the browser
 
 ## Instructions
 
@@ -36,3 +36,5 @@ The source code for the server that does the compilation is in [docker](docker).
 ## Notes
 
 Right now the sampler runs in the main thread, so it freezes the UI. We'll need to put this in a worker thread.
+
+**How is this different from the previous stan-playground?** That other stan-playground was also about running Stan models via the browser, but the sampling was done in the cloud. For this project (different project, same name) the sampling is done locally in the browser.
