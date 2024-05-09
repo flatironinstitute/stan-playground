@@ -10,8 +10,9 @@ RUN apt-get update && apt-get install -y \
     cmake \
     make
 
-# Clone the TinyStan repository
-RUN git clone https://github.com/WardBrian/tinystan.git --recursive --shallow-submodules --depth 1
+# Clone the TinyStan repository and checkout a specific commit 5/9/2024
+RUN git clone https://github.com/WardBrian/tinystan.git --recursive --shallow-submodules && \
+    cd tinystan && git checkout "1deb4e5f68dd83cb523cf83073813a9ae1507cad"
 
 # Clone the oneTBB library and checkout the specific commit
 RUN git clone https://github.com/oneapi-src/oneTBB.git && \
