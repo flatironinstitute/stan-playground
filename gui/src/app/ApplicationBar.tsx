@@ -3,6 +3,7 @@ import { QuestionMark } from "@mui/icons-material";
 import { AppBar, Toolbar } from "@mui/material";
 import { FunctionComponent, useCallback } from "react";
 import useRoute from "./useRoute";
+import CompilationServerConnectionControl from "./CompilationServerConnectionControl/CompilationServerConnectionControl";
 
 export const applicationBarColor = '#bac'
 export const applicationBarColorDarkened = '#546'
@@ -40,6 +41,7 @@ const ApplicationBar: FunctionComponent<Props> = () => {
                     <img src={logoUrl} alt="logo" height={30} style={{paddingBottom: 5, cursor: 'pointer'}} onClick={onHome} />
                     <div onClick={onHome} style={{cursor: 'pointer', color: titleColor}}>&nbsp;&nbsp;&nbsp;Stan Playground</div>
                     <span style={{marginLeft: 'auto'}} />
+                    <CompilationServerConnectionControl />
                     <span>
                         <SmallIconButton
                             icon={<QuestionMark />}

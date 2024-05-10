@@ -13,6 +13,7 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@fi-sci/misc": "^0.0.8",
+    "@fi-sci/modal-window": "^0.0.2",
     "@fi-sci/splitter": "^0.0.3",
     "@monaco-editor/react": "^4.6.0",
     "@mui/icons-material": "^5.15.17",

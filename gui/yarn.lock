@@ -479,6 +479,14 @@
   resolved "https://registry.yarnpkg.com/@fi-sci/misc/-/misc-0.0.8.tgz#56b0c5402fc64df873c8a7b0d65966c3df3f0dd7"
   integrity sha512-lhbKCriIv9TxBw3xSZ/q7mlfVDc+OsJ1x6jesyeHEVMdqqYHDIRTZTdUIrnA0jdL4nMj3FbYNHE49Z7K+iouiQ==
 
+"@fi-sci/modal-window@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@fi-sci/modal-window/-/modal-window-0.0.2.tgz#ab50fe92925a2efd01fd8d3ab54f8f47bf7821b3"
+  integrity sha512-CHeCWWLblUNUtqCWIhnR6+2TYzzcoJlKj0PGgnw5XYEOFHhV7TBDGFQ5jzc609jAPRfc3grkUYJy6lru+BnFWA==
+  dependencies:
+    "@mui/icons-material" "^5.14.19"
+    "@mui/material" "^5.14.20"
+
 "@fi-sci/splitter@^0.0.3":
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/@fi-sci/splitter/-/splitter-0.0.3.tgz#b296c2091f229b33f7c0176bcc10decce84d8733"
@@ -596,14 +604,14 @@
   resolved "https://registry.yarnpkg.com/@mui/core-downloads-tracker/-/core-downloads-tracker-5.15.17.tgz#ce8f3dff6ec11c8294d346997f6065eb23fa99be"
   integrity sha512-DVAejDQkjNnIac7MfP8sLzuo7fyrBPxNdXe+6bYqOqg1z2OPTlfFAejSNzWe7UenRMuFu9/AyFXj/X2vN2w6dA==
 
-"@mui/icons-material@^5.15.17":
+"@mui/icons-material@^5.14.19", "@mui/icons-material@^5.15.17":
   version "5.15.17"
   resolved "https://registry.yarnpkg.com/@mui/icons-material/-/icons-material-5.15.17.tgz#518c02354036f7df28c8f9890b1db6a3269fcc2f"
   integrity sha512-xVzl2De7IY36s/keHX45YMiCpsIx3mNv2xwDgtBkRSnZQtVk+Gqufwj1ktUxEyjzEhBl0+PiNJqYC31C+n1n6A==
   dependencies:
     "@babel/runtime" "^7.23.9"
 
-"@mui/material@^5.15.17":
+"@mui/material@^5.14.20", "@mui/material@^5.15.17":
   version "5.15.17"
   resolved "https://registry.yarnpkg.com/@mui/material/-/material-5.15.17.tgz#1e30bacc940573813cc418aebd4484708a407ba6"
   integrity sha512-ru/MLvTkCh0AZXmqwIpqGTOoVBS/sX48zArXq/DvktxXZx4fskiRA2PEc7Rk5ZlFiZhKh4moL4an+l8zZwq49Q==

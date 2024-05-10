@@ -45,7 +45,8 @@ const StanFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSave
         const onStatus = (msg: string) => {
             setCompileMessage(msg)
         }
-        const {mainJsUrl} = await compileStanProgram(fileContent, onStatus)
+        const stanWasmServerUrl = localStorage.getItem('stanWasmServerUrl') || 'https://trom-stan-wasm-server.magland.org'
+        const {mainJsUrl} = await compileStanProgram(stanWasmServerUrl, fileContent, onStatus)
 
         if (!mainJsUrl) {
             setCompileStatus('failed')
@@ -56,6 +57,7 @@ const StanFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSave
     }, [fileContent])
 
     useEffect(() => {
+        if (!compileMainJsUrl) return
         let canceled = false
         ;(async () => {
             const js = await import(/* @vite-ignore */ compileMainJsUrl);

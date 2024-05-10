@@ -71,7 +71,7 @@ const HomePage: FunctionComponent<Props> = ({width, height}) => {
                 editedFileContent={editedFileContent}
                 setEditedFileContent={setEditedFileContent}
                 readOnly={false}
-                onStanModelLoaded={model => setStanModel(model)}
+                onStanModelLoaded={setStanModel}
             />
             <RightView
                 width={0}

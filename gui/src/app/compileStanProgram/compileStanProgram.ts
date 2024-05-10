@@ -1,7 +1,7 @@
-const compileStanProgram = async (stanProgram: string, onStatus: (s: string) => void): Promise<{mainJsUrl: string | undefined}> => {
+const compileStanProgram = async (stanWasmServerUrl: string, stanProgram: string, onStatus: (s: string) => void): Promise<{mainJsUrl: string | undefined}> => {
     try {
         onStatus("initiating job");
-        const initiateJobUrl = "http://localhost:8083/job/initiate"
+        const initiateJobUrl = `${stanWasmServerUrl}/job/initiate`
         // post
         const a = await fetch(initiateJobUrl, {
             method: "POST",
@@ -22,7 +22,7 @@ const compileStanProgram = async (stanProgram: string, onStatus: (s: string) => 
         }
 
         onStatus(`job initiated: ${job_id}`);
-        const uploadFileUrl = `http://localhost:8083/job/${job_id}/upload/main.stan`;
+        const uploadFileUrl = `${stanWasmServerUrl}/job/${job_id}/upload/main.stan`;
         const b = await fetch(uploadFileUrl, {
             method: "POST",
             headers: {
@@ -37,7 +37,7 @@ const compileStanProgram = async (stanProgram: string, onStatus: (s: string) => 
         onStatus("file uploaded successfully");
 
         onStatus("compiling...");
-        const runJobUrl = `http://localhost:8083/job/${job_id}/run`;
+        const runJobUrl = `${stanWasmServerUrl}/job/${job_id}/run`;
         const c = await fetch(runJobUrl, {
             method: "POST",
             headers: {
@@ -54,8 +54,8 @@ const compileStanProgram = async (stanProgram: string, onStatus: (s: string) => 
             return {mainJsUrl: undefined}
         }
 
-        const downloadMainJsUrl = `http://localhost:8083/job/${job_id}/download/main.js`;
-        // const downloadMainWasmUrl = `http://localhost:8083/job/${job_id}/download/main.wasm`;
+        const downloadMainJsUrl = `${stanWasmServerUrl}/job/${job_id}/download/main.js`;
+        // const downloadMainWasmUrl = `${stanWasmServerUrl}/job/${job_id}/download/main.wasm`;
 
         // download to make sure it is there
         onStatus("downloading main.js");
