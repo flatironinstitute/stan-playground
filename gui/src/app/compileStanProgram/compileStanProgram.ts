@@ -1,4 +1,4 @@
-const compileStanProgram = async (stanWasmServerUrl: string, stanProgram: string, onStatus: (s: string) => void): Promise<{mainJsUrl: string | undefined}> => {
+const compileStanProgram = async (stanWasmServerUrl: string, stanProgram: string, onStatus: (s: string) => void): Promise<{mainJsUrl?: string, jobId?: string}> => {
     try {
         onStatus("initiating job");
         const initiateJobUrl = `${stanWasmServerUrl}/job/initiate`
@@ -12,13 +12,13 @@ const compileStanProgram = async (stanWasmServerUrl: string, stanProgram: string
         });
         if (!a.ok) {
             onStatus(`failed to initiate job: ${a.statusText}`);
-            return {mainJsUrl: undefined}
+            return {}
         }
         const resp = await a.json();
         const job_id = resp.job_id;
         if (!job_id) {
             onStatus(`failed to initiate job: ${JSON.stringify(resp)}`);
-            return {mainJsUrl: undefined}
+            return {}
         }
 
         onStatus(`job initiated: ${job_id}`);
@@ -32,7 +32,7 @@ const compileStanProgram = async (stanWasmServerUrl: string, stanProgram: string
         });
         if (!b.ok) {
             onStatus(`failed to upload file: ${b.statusText}`);
-            return {mainJsUrl: undefined}
+            return {}
         }
         onStatus("file uploaded successfully");
 
@@ -46,12 +46,12 @@ const compileStanProgram = async (stanWasmServerUrl: string, stanProgram: string
         });
         if (!c.ok) {
             onStatus(`failed to run job: ${c.statusText}`);
-            return {mainJsUrl: undefined}
+            return {}
         }
         const respC = await c.json();
         if (respC.status !== 'completed') {
             onStatus(`job failed: ${JSON.stringify(respC)}`);
-            return {mainJsUrl: undefined}
+            return {}
         }
 
         const downloadMainJsUrl = `${stanWasmServerUrl}/job/${job_id}/download/main.js`;
@@ -62,7 +62,7 @@ const compileStanProgram = async (stanWasmServerUrl: string, stanProgram: string
         const d = await fetch(downloadMainJsUrl);
         if (!d.ok) {
             onStatus(`failed to download main.js: ${d.statusText}`);
-            return {mainJsUrl: undefined}
+            return {}
         }
         // const mainJs = await d.text();
 
@@ -71,7 +71,7 @@ const compileStanProgram = async (stanWasmServerUrl: string, stanProgram: string
         // const e = await fetch(downloadMainWasmUrl);
         // if (!e.ok) {
         //     onStatus(`failed to download main.wasm: ${e.statusText}`);
-        //     return {mainJsUrl: undefined}
+        //     return {}
         // }
         // const mainWasm = await e.arrayBuffer();
 
@@ -82,7 +82,7 @@ const compileStanProgram = async (stanWasmServerUrl: string, stanProgram: string
         // setStatusMessage("Created main.js and main.wasm files. See the browser console for more details.");
 
         onStatus("compiled");
-        return {mainJsUrl: downloadMainJsUrl}
+        return {mainJsUrl: downloadMainJsUrl, jobId: job_id}
     }
     catch (e) {
         onStatus(`failed to compile: ${e}`);

@@ -36,6 +36,7 @@ const StanFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSave
     }, [editedFileContent, setEditedFileContent])
 
     const [compileStatus, setCompileStatus] = useState<CompileStatus>('')
+    const [theStanFileContentThasHasBeenCompiled, setTheStanFileContentThasHasBeenCompiled] = useState<string>('')
     const [compileMessage, setCompileMessage] = useState<string>('')
     const [compileMainJsUrl, setCompileMainJsUrl] = useState<string>('')
 
@@ -46,7 +47,7 @@ const StanFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSave
             setCompileMessage(msg)
         }
         const stanWasmServerUrl = localStorage.getItem('stanWasmServerUrl') || 'https://trom-stan-wasm-server.magland.org'
-        const {mainJsUrl} = await compileStanProgram(stanWasmServerUrl, fileContent, onStatus)
+        const {mainJsUrl, jobId} = await compileStanProgram(stanWasmServerUrl, fileContent, onStatus)
 
         if (!mainJsUrl) {
             setCompileStatus('failed')
@@ -54,7 +55,47 @@ const StanFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSave
         }
         setCompileMainJsUrl(mainJsUrl)
         setCompileStatus('compiled')
+        setTheStanFileContentThasHasBeenCompiled(fileContent)
+
+        // record in local storage that we compiled this particular stan file
+        if (jobId) {
+            try {
+                const key = getKeyNameForCompiledFile(stanWasmServerUrl, fileContent)
+                const value = JSON.stringify({jobId, mainJsUrl})
+                localStorage.setItem(key, value)
+            }
+            catch (e: any) {
+                console.error('Problem recording compiled file in local storage')
+                console.error(e)
+            }
+        }
     }, [fileContent])
+
+    useEffect(() => {
+        // if the compiled content is not the same as the current content,
+        // then the state should not be compiled or failed
+        if (fileContent !== theStanFileContentThasHasBeenCompiled) {
+            if (compileStatus === 'compiled' || compileStatus === 'failed') {
+                setCompileStatus('')
+            }
+        }
+    }, [fileContent, theStanFileContentThasHasBeenCompiled, compileStatus])
+
+    const [didInitialCompile, setDidInitialCompile] = useState(false)
+    useEffect(() => {
+        // if we think this has been compiled before, let's go ahead and compile it (should be in cache on server)
+        // but we are only going to do this on initial load
+        if (didInitialCompile) return
+        const stanWasmServerUrl = localStorage.getItem('stanWasmServerUrl') || ''
+        if (!stanWasmServerUrl) return
+        const key = getKeyNameForCompiledFile(stanWasmServerUrl, fileContent)
+        const value = localStorage.getItem(key)
+        if (!value) return
+        handleCompile()
+        if (fileContent) {
+            setDidInitialCompile(true)
+        }
+    }, [fileContent, handleCompile, didInitialCompile])
 
     useEffect(() => {
         if (!compileMainJsUrl) return
@@ -145,5 +186,21 @@ const StanFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSave
         </Splitter>
     )
 }
+
+const getKeyNameForCompiledFile = (stanWasmServerUrl: string, stanFileContent: string) => {
+    return `compiled-file|${stanWasmServerUrl}|${stringChecksum(stanFileContent)}`
+}
+
+const stringChecksum = (str: string) => {
+    let hash = 0;
+    if (str.length == 0) return hash;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash;
+}
+
 
 export default StanFileEditor
