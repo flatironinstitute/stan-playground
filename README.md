@@ -1,8 +1,10 @@
 # stan-playground
 
-:warning: This is a very preliminary version. Not ready to be used seriously.
+:warning: This is a very preliminary version. Not ready for practical use.
 
 Run Stan models locally in the browser
+
+[Visit the live site!](https://stan-playground.vercel.app)
 
 ## Instructions
 
