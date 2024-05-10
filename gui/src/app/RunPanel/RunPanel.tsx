@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FunctionComponent, useCallback, useMemo, useState } from 'react';
+import { FunctionComponent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import StanModel from '../tinystan/StanModel';
+import { setSamplerPrintHandler } from '../pages/HomePage/HomePage';
 
 type RunPanelProps = {
     width: number;
@@ -12,16 +13,38 @@ type RunPanelProps = {
 
 type RunStatus = '' | 'running' | 'done' | 'failed';
 
+type Progress = {
+    chain: number;
+    iteration: number;
+    totalIterations: number;
+    percent: number;
+    warmup: boolean;
+}
+
 const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, stanModel, data, dataIsSaved }) => {
     const [runStatus, setRunStatus] = useState<RunStatus>('');
     const [errorMessage, setErrorMessage] = useState<string>(''); // [1
     const [samples, setSamples] = useState<number[][] | undefined>(undefined);
     const [stanModelOfLastRun, setStanModelOfLastRun] = useState<StanModel | undefined>(undefined);
     const [dataOfLastRun, setDataOfLastRun] = useState<string | undefined>(undefined);
+    const progress = useRef<Progress | undefined>(undefined);
     const handleRun = useCallback(async () => {
         if (!stanModel) return;
         if (!data) return;
         if (runStatus === 'running') return;
+        setSamplerPrintHandler((msg: string) => {
+            // example message: Chain [4] Iteration: 1800 / 2000 [ 90%] (Sampling)
+            console.log(msg)
+            // Example: Chain [1] Iteration: 2000 / 2000 [100%]  (Sampling)
+            if (!msg.startsWith('Chain')) return;
+            const parts = msg.split(' ');
+            const chain = parseInt(parts[1].slice(1, -1));
+            const iteration = parseInt(parts[3]);
+            const totalIterations = parseInt(parts[5]);
+            const percent = parseInt(parts[7].slice(0, -2));
+            const warmup = parts[8] === '(Warmup)';
+            progress.current = { chain, iteration, totalIterations, percent, warmup };
+        });
         setRunStatus('running');
         setErrorMessage('');
         setSamples(undefined);
@@ -31,7 +54,7 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, stanModel, 
         let samples: any
         try {
             console.log('sampling')
-            samples = stanModel.sample(data)
+            samples = stanModel.sample({data})
         }
         catch (err: any) {
             console.error(err)
@@ -71,7 +94,12 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, stanModel, 
                     <button onClick={handleRun} disabled={runStatus === 'running'}>Run</button>
                     {
                         runStatus === 'running' && (
-                            <span>&nbsp;&nbsp;sampling...</span>
+                            <div>
+                                <h4>Sampling</h4>
+                                <SamplingProgressComponent
+                                    progressRef={progress}
+                                />
+                            </div>
                         )
                     }
                     {
@@ -92,6 +120,27 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, stanModel, 
                     </div>
                 )}
             </div>
+        </div>
+    )
+}
+
+type SamplingProgressComponentProps = {
+    progressRef: React.MutableRefObject<Progress | undefined>
+}
+
+const SamplingProgressComponent: FunctionComponent<SamplingProgressComponentProps> = ({ progressRef }) => {
+    const [progress, setProgress] = useState<Progress | undefined>(undefined);
+    useEffect(() => {
+        // poll
+        const interval = setInterval(() => {
+            setProgress(progressRef.current);
+        }, 100);
+        return () => clearInterval(interval);
+    }, [progressRef]);
+    if (!progress) return <span />
+    return (
+        <div>
+            Chain {progress.chain} Iteration: {progress.iteration} / {progress.totalIterations} [ {progress.percent}%] ({progress.warmup ? 'Warmup' : 'Sampling'})
         </div>
     )
 }

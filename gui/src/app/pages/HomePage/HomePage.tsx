@@ -22,6 +22,17 @@ const initialDataFileContent = localStorage.getItem('data.json') || defaultDataC
 
 const initialMetaContent = localStorage.getItem('meta.json') || defaultMetaContent
 
+let globalPrintHandler: (msg: string) => void = (msg: string) => {
+    // default print handler
+    console.log(msg)
+}
+export const setSamplerPrintHandler = (handler: (msg: string) => void) => {
+    globalPrintHandler = handler
+}
+const globalPrintCallback = (msg: string) => {
+    globalPrintHandler(msg)
+}
+
 const HomePage: FunctionComponent<Props> = ({width, height}) => {
     const [fileContent, saveFileContent] = useState(initialFileContent)
     const [editedFileContent, setEditedFileContent] = useState('')
@@ -118,6 +129,7 @@ const HomePage: FunctionComponent<Props> = ({width, height}) => {
                         setEditedFileContent={setEditedFileContent}
                         readOnly={false}
                         onStanModelLoaded={setStanModel}
+                        printCallback={globalPrintCallback}
                     />
                     <RightView
                         width={0}

@@ -47,20 +47,63 @@ export enum HMCMetric {
 
 export type PrintCallback = (s: string) => void;
 
+export interface SamplerParams {
+  data: string | object;
+  num_chains: number;
+  seed: number | null;
+  id: number;
+  init_radius: number;
+  num_warmup: number;
+  num_samples: number;
+  metric: HMCMetric;
+  adapt: boolean;
+  delta: number;
+  gamma: number;
+  kappa: number;
+  t0: number;
+  init_buffer: number;
+  term_buffer: number;
+  window: number;
+  save_warmup: boolean;
+  stepsize: number;
+  stepsize_jitter: number;
+  max_depth: number;
+  refresh: number;
+  num_threads: number;
+}
+
+const defaultSamplerParams: SamplerParams = {
+  data: "",
+  num_chains: 4,
+  seed: null,
+  id: 1,
+  init_radius: 2.0,
+  num_warmup: 1000,
+  num_samples: 1000,
+  metric: HMCMetric.DIAGONAL,
+  adapt: true,
+  delta: 0.8,
+  gamma: 0.05,
+  kappa: 0.75,
+  t0: 10,
+  init_buffer: 75,
+  term_buffer: 50,
+  window: 25,
+  save_warmup: false,
+  stepsize: 1.0,
+  stepsize_jitter: 0.0,
+  max_depth: 10,
+  refresh: 100,  // this is how often it prints out progress
+  num_threads: -1,
+};
 
 export default class StanModel {
   private m: WasmModule;
-  private printCallback: PrintCallback | null = null;
-  private stdoutHolder: { text: string };
+  private printCallback: PrintCallback | null;
 
-  private constructor(
-    m: WasmModule,
-    printCallback: PrintCallback | null = null,
-    stdoutHolder: { text: string },
-  ) {
+  private constructor(m: WasmModule, pc: PrintCallback | null) {
     this.m = m;
-    this.printCallback = printCallback;
-    this.stdoutHolder = stdoutHolder;
+    this.printCallback = pc;
   }
 
   public static async load(
@@ -70,19 +113,10 @@ export default class StanModel {
     // Create the initial object which will have the rest of the WASM
     // functions attached to it
     // See https://emscripten.org/docs/api_reference/module.html
-
-    const stdoutHolder = { text: "" };
-
-    const prototype: { [k: string]: unknown } = {};
-    if (printCallback !== null) {
-      prototype.print = (...args: unknown[]) => {
-        const text = args.join(" ");
-        stdoutHolder.text = stdoutHolder.text + text + "\n";
-      };
-    }
+    const prototype = { print: printCallback };
 
     const module = await createModule(prototype);
-    return new StanModel(module, printCallback, stdoutHolder);
+    return new StanModel(module, printCallback);
   }
 
   private encodeString(s: string): cstr {
@@ -130,30 +164,32 @@ export default class StanModel {
   // - inits
   // - init inv metric
   // - save_metric
-  public sample(
-    data: string | object = "",
-    num_chains: number = 4,
-    seed: number | null = null,
-    id: number = 1,
-    init_radius: number = 2.0,
-    num_warmup: number = 1000,
-    num_samples: number = 1000,
-    metric: HMCMetric = HMCMetric.DIAGONAL,
-    adapt: boolean = true,
-    delta: number = 0.8,
-    gamma: number = 0.05,
-    kappa: number = 0.75,
-    t0: number = 10,
-    init_buffer: number = 75,
-    term_buffer: number = 50,
-    window: number = 25,
-    save_warmup: boolean = false,
-    stepsize: number = 1.0,
-    stepsize_jitter: number = 0.0,
-    max_depth: number = 10,
-    refresh: number = 100,
-    num_threads: number = -1,
-  ): number[][] {
+  public sample(p: Partial<SamplerParams>): number[][] {
+    const {
+      data,
+      num_chains,
+      seed,
+      id,
+      init_radius,
+      num_warmup,
+      num_samples,
+      metric,
+      adapt,
+      delta,
+      gamma,
+      kappa,
+      t0,
+      init_buffer,
+      term_buffer,
+      window,
+      save_warmup,
+      stepsize,
+      stepsize_jitter,
+      max_depth,
+      refresh,
+      num_threads,
+    } = { ...defaultSamplerParams, ...p };
+
     if (num_chains < 1) {
       throw new Error("num_chains must be at least 1");
     }
@@ -164,11 +200,12 @@ export default class StanModel {
       throw new Error("num_samples must be at least 1");
     }
 
-    if (seed === null) {
-      seed = Math.floor(Math.random() * (2 ^ 32));
+    let seed_ = seed;
+    if (seed_ === null) {
+      seed_ = Math.floor(Math.random() * (2 ^ 32));
     }
 
-    return this.withModel(data, seed, model => {
+    return this.withModel(data, seed_, model => {
       // Get the parameter names
       const paramNames = this.m.UTF8ToString(
         this.m._tinystan_model_param_names(model),
@@ -183,13 +220,12 @@ export default class StanModel {
       const out_ptr = this.m._malloc(n_out * Float64Array.BYTES_PER_ELEMENT);
 
       // Sample from the model
-      this.stdoutHolder.text = "";
       const err_ptr = this.m._malloc(4);
       const result = this.m._tinystan_sample(
         model,
         num_chains,
         NULLSTR, // inits
-        seed || 0, // jfm added default of 0 because seed could be null
+        seed_ || 0,
         id,
         init_radius,
         num_warmup,
@@ -215,9 +251,6 @@ export default class StanModel {
         NULL,
         err_ptr,
       );
-      if (this.printCallback !== null) {
-        this.printCallback(this.stdoutHolder.text);
-      }
 
       if (result != 0) {
         this.handleError(err_ptr);

@@ -19,11 +19,12 @@ type Props = {
     width: number
     height: number
     onStanModelLoaded: (model: StanModel | undefined) => void
+    printCallback?: (s: string) => void
 }
 
 type CompileStatus = 'preparing' | 'compiling' | 'compiled' | 'failed' | ''
 
-const StanFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSaveContent, editedFileContent, setEditedFileContent, readOnly, width, height, onStanModelLoaded}) => {
+const StanFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSaveContent, editedFileContent, setEditedFileContent, readOnly, width, height, onStanModelLoaded, printCallback}) => {
     const [validSyntax, setValidSyntax] = useState<boolean>(false)
     const handleAutoFormat = useCallback(() => {
         if (editedFileContent === undefined) return
@@ -104,12 +105,12 @@ const StanFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSave
         ;(async () => {
             const js = await import(/* @vite-ignore */ compileMainJsUrl);
             if (canceled) return
-            const module = await StanModel.load(js.default, null);
+            const model = await StanModel.load(js.default, printCallback || null);
             if (canceled) return
-            onStanModelLoaded(module)
+            onStanModelLoaded(model)
         })()
         return () => { canceled = true }
-    }, [compileMainJsUrl, onStanModelLoaded])
+    }, [compileMainJsUrl, onStanModelLoaded, printCallback])
 
     const toolbarItems: ToolbarItem[] = useMemo(() => {
         const ret: ToolbarItem[] = []
