@@ -44,6 +44,7 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, stanModel, 
             const percent = parseInt(parts[7].slice(0, -2));
             const warmup = parts[8] === '(Warmup)';
             progress.current = { chain, iteration, totalIterations, percent, warmup };
+            localStorage.setItem('progress', JSON.stringify(progress.current));
         });
         setRunStatus('running');
         setErrorMessage('');
