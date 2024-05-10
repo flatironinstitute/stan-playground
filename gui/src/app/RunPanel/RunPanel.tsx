@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FunctionComponent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import StanModel from '../tinystan/StanModel';
 import { setSamplerPrintHandler } from '../pages/HomePage/HomePage';
 
 type RunPanelProps = {
     width: number;
     height: number;
-    stanModel: StanModel | undefined;
+    modelWorker: Worker | undefined;
     data: any | undefined
     dataIsSaved: boolean
 };
@@ -21,15 +20,15 @@ type Progress = {
     warmup: boolean;
 }
 
-const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, stanModel, data, dataIsSaved }) => {
+const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, modelWorker, data, dataIsSaved }) => {
     const [runStatus, setRunStatus] = useState<RunStatus>('');
     const [errorMessage, setErrorMessage] = useState<string>(''); // [1
     const [samples, setSamples] = useState<number[][] | undefined>(undefined);
-    const [stanModelOfLastRun, setStanModelOfLastRun] = useState<StanModel | undefined>(undefined);
+    // const [stanModelOfLastRun, setStanModelOfLastRun] = useState<StanModel | undefined>(undefined);
     const [dataOfLastRun, setDataOfLastRun] = useState<string | undefined>(undefined);
     const progress = useRef<Progress | undefined>(undefined);
     const handleRun = useCallback(async () => {
-        if (!stanModel) return;
+        if (!modelWorker) return;
         if (!data) return;
         if (runStatus === 'running') return;
         setSamplerPrintHandler((msg: string) => {
@@ -49,13 +48,15 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, stanModel, 
         setRunStatus('running');
         setErrorMessage('');
         setSamples(undefined);
-        setStanModelOfLastRun(stanModel);
+        // setStanModelOfLastRun(stanModel);
         setDataOfLastRun(JSON.stringify(data));
         await new Promise(resolve => setTimeout(resolve, 500)); // for effect
         let samples: any
         try {
             console.log('sampling')
-            samples = stanModel.sample({data})
+            modelWorker
+                .postMessage({ purpose: "sample", sampleConfig: {data} });
+
         }
         catch (err: any) {
             console.error(err)
@@ -65,32 +66,29 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, stanModel, 
         }
         setRunStatus('done')
         setSamples(samples)
-    }, [stanModel, data, runStatus]);
-    const modelAndDataAreConsistentWithLastRun = useMemo(() => {
-        return stanModel === stanModelOfLastRun && JSON.stringify(data) === dataOfLastRun
-    }, [stanModel, data, stanModelOfLastRun, dataOfLastRun]);
-    if (!stanModel) return (
-        <div style={{padding: 30}}>
+    }, [modelWorker, data, runStatus]);
+    if (!modelWorker) return (
+        <div style={{ padding: 30 }}>
             Stan model not compiled
         </div>
     )
     if (!data) {
         return (
-            <div style={{padding: 30}}>
+            <div style={{ padding: 30 }}>
                 No data
             </div>
         )
     }
     if (!dataIsSaved) {
         return (
-            <div style={{padding: 30}}>
+            <div style={{ padding: 30 }}>
                 Data not saved
             </div>
         )
     }
     return (
-        <div style={{position: 'absolute', width, height, overflowY: 'auto'}}>
-            <div style={{padding: 20}}>
+        <div style={{ position: 'absolute', width, height, overflowY: 'auto' }}>
+            <div style={{ padding: 20 }}>
                 <div>
                     <button onClick={handleRun} disabled={runStatus === 'running'}>Run</button>
                     {
@@ -103,7 +101,7 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, stanModel, 
                             </div>
                         )
                     }
-                    {
+                    {/* {
                         runStatus === 'done' && modelAndDataAreConsistentWithLastRun && (
                             <span>&nbsp;&nbsp;done sampling</span>
                         )
@@ -112,7 +110,7 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, stanModel, 
                         runStatus === 'failed' && modelAndDataAreConsistentWithLastRun && (
                             <span>&nbsp;&nbsp;failed: {errorMessage} (see browser console for more details)</span>
                         )
-                    }
+                    } */}
                 </div>
                 {runStatus === 'done' && samples && (
                     <div>

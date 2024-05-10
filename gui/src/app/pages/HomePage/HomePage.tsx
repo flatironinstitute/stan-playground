@@ -3,7 +3,6 @@ import StanFileEditor from "../../FileEditor/StanFileEditor";
 import { Splitter } from "@fi-sci/splitter";
 import DataFileEditor from "../../FileEditor/DataFileEditor";
 import RunPanel from "../../RunPanel/RunPanel";
-import StanModel from "../../tinystan/StanModel";
 import { Hyperlink } from "@fi-sci/misc";
 import examplesStanies, { Stanie, StanieMetaData } from "../../exampleStanies/exampleStanies";
 
@@ -28,9 +27,6 @@ let globalPrintHandler: (msg: string) => void = (msg: string) => {
 }
 export const setSamplerPrintHandler = (handler: (msg: string) => void) => {
     globalPrintHandler = handler
-}
-const globalPrintCallback = (msg: string) => {
-    globalPrintHandler(msg)
 }
 
 const HomePage: FunctionComponent<Props> = ({width, height}) => {
@@ -80,7 +76,8 @@ const HomePage: FunctionComponent<Props> = ({width, height}) => {
         };
     }, [fileContent, dataFileContent, metaContent, doNotSaveOnUnload]);
 
-    const [stanModel, setStanModel] = useState<StanModel | undefined>(undefined)
+
+    const [modelWorker, setModelWorker] = useState<Worker | undefined>(undefined);
 
     const leftPanelWidth = width > 400 ? 200 : 0
 
@@ -128,8 +125,7 @@ const HomePage: FunctionComponent<Props> = ({width, height}) => {
                         editedFileContent={editedFileContent}
                         setEditedFileContent={setEditedFileContent}
                         readOnly={false}
-                        onStanModelLoaded={setStanModel}
-                        printCallback={globalPrintCallback}
+                        onWorkerCreate={setModelWorker}
                     />
                     <RightView
                         width={0}
@@ -138,7 +134,7 @@ const HomePage: FunctionComponent<Props> = ({width, height}) => {
                         saveDataFileContent={saveDataFileContent}
                         editedDataFileContent={editedDataFileContent}
                         setEditedDataFileContent={setEditedDataFileContent}
-                        stanModel={stanModel}
+                        modelWorker={modelWorker}
                     />
                 </Splitter>
             </div>
@@ -153,10 +149,10 @@ type RightViewProps = {
     saveDataFileContent: (text: string) => void
     editedDataFileContent: string
     setEditedDataFileContent: (text: string) => void
-    stanModel: StanModel | undefined
+    modelWorker: Worker | undefined
 }
 
-const RightView: FunctionComponent<RightViewProps> = ({width, height, dataFileContent, saveDataFileContent, editedDataFileContent, setEditedDataFileContent, stanModel}) => {
+const RightView: FunctionComponent<RightViewProps> = ({width, height, dataFileContent, saveDataFileContent, editedDataFileContent, setEditedDataFileContent, modelWorker}) => {
     const parsedData = useMemo(() => {
         try {
             return JSON.parse(dataFileContent)
@@ -185,7 +181,7 @@ const RightView: FunctionComponent<RightViewProps> = ({width, height, dataFileCo
             <RunPanel
                 width={0}
                 height={0}
-                stanModel={stanModel}
+                modelWorker={modelWorker}
                 data={parsedData}
                 dataIsSaved={dataFileContent === editedDataFileContent}
             />

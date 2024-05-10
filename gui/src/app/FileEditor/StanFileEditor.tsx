@@ -5,8 +5,7 @@ import StanCompileResultWindow from "./StanCompileResultWindow";
 import TextEditor, { ToolbarItem } from "./TextEditor";
 import runStanc from "./runStanc";
 import compileStanProgram from '../compileStanProgram/compileStanProgram';
-import StanModel from '../tinystan/StanModel';
-
+import StanWorker from '../tinystan/worker?worker';
 
 type Props = {
     fileName: string
@@ -18,22 +17,21 @@ type Props = {
     readOnly: boolean
     width: number
     height: number
-    onStanModelLoaded: (model: StanModel | undefined) => void
-    printCallback?: (s: string) => void
+    onWorkerCreate: (m: Worker | undefined) => void
 }
 
 type CompileStatus = 'preparing' | 'compiling' | 'compiled' | 'failed' | ''
 
-const StanFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSaveContent, editedFileContent, setEditedFileContent, readOnly, width, height, onStanModelLoaded, printCallback}) => {
+const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSaveContent, editedFileContent, setEditedFileContent, readOnly, width, height, onWorkerCreate }) => {
     const [validSyntax, setValidSyntax] = useState<boolean>(false)
     const handleAutoFormat = useCallback(() => {
         if (editedFileContent === undefined) return
-        ;(async () => {
-            const model = await runStanc('main.stan', editedFileContent, ["auto-format", "max-line-length=78"])
-            if (model.result) {
-                setEditedFileContent(model.result)
-            }
-        })()
+            ; (async () => {
+                const model = await runStanc('main.stan', editedFileContent, ["auto-format", "max-line-length=78"])
+                if (model.result) {
+                    setEditedFileContent(model.result)
+                }
+            })()
     }, [editedFileContent, setEditedFileContent])
 
     const [compileStatus, setCompileStatus] = useState<CompileStatus>('')
@@ -48,7 +46,7 @@ const StanFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSave
             setCompileMessage(msg)
         }
         const stanWasmServerUrl = localStorage.getItem('stanWasmServerUrl') || 'https://trom-stan-wasm-server.magland.org'
-        const {mainJsUrl, jobId} = await compileStanProgram(stanWasmServerUrl, fileContent, onStatus)
+        const { mainJsUrl, jobId } = await compileStanProgram(stanWasmServerUrl, fileContent, onStatus)
 
         if (!mainJsUrl) {
             setCompileStatus('failed')
@@ -62,7 +60,7 @@ const StanFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSave
         if (jobId) {
             try {
                 const key = getKeyNameForCompiledFile(stanWasmServerUrl, fileContent)
-                const value = JSON.stringify({jobId, mainJsUrl})
+                const value = JSON.stringify({ jobId, mainJsUrl })
                 localStorage.setItem(key, value)
             }
             catch (e: any) {
@@ -78,10 +76,10 @@ const StanFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSave
         if (fileContent !== theStanFileContentThasHasBeenCompiled) {
             if (compileStatus === 'compiled' || compileStatus === 'failed') {
                 setCompileStatus('')
-                onStanModelLoaded(undefined)
+                onWorkerCreate(undefined)
             }
         }
-    }, [fileContent, theStanFileContentThasHasBeenCompiled, compileStatus, onStanModelLoaded])
+    }, [fileContent, theStanFileContentThasHasBeenCompiled, compileStatus, onWorkerCreate])
 
     const [didInitialCompile, setDidInitialCompile] = useState(false)
     useEffect(() => {
@@ -100,17 +98,17 @@ const StanFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSave
     }, [fileContent, handleCompile, didInitialCompile])
 
     useEffect(() => {
+
         if (!compileMainJsUrl) return
-        let canceled = false
-        ;(async () => {
-            const js = await import(/* @vite-ignore */ compileMainJsUrl);
-            if (canceled) return
-            const model = await StanModel.load(js.default, printCallback || null);
-            if (canceled) return
-            onStanModelLoaded(model)
-        })()
-        return () => { canceled = true }
-    }, [compileMainJsUrl, onStanModelLoaded, printCallback])
+        const worker = new StanWorker();
+        onWorkerCreate(worker);
+        worker.postMessage({ purpose: "load", url: compileMainJsUrl });
+        return () => {
+            // TODO double free?
+            if (worker)
+                worker.terminate()
+        }
+    }, [compileMainJsUrl, onWorkerCreate])
 
     const toolbarItems: ToolbarItem[] = useMemo(() => {
         const ret: ToolbarItem[] = []
@@ -182,7 +180,7 @@ const StanFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSave
                     mainStanText={editedFileContent}
                     onValidityChanged={valid => setValidSyntax(valid)}
                 /> : (
-                    <div style={{padding: 20}}>Select an example from the left panel</div>
+                    <div style={{ padding: 20 }}>Select an example from the left panel</div>
                 )
             }
         </Splitter>
