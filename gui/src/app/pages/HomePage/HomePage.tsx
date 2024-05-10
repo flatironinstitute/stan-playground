@@ -5,7 +5,7 @@ import DataFileEditor from "../../FileEditor/DataFileEditor";
 import RunPanel from "../../RunPanel/RunPanel";
 import StanModel from "../../tinystan/StanModel";
 import { Hyperlink } from "@fi-sci/misc";
-import examplesStanies, { Stanie } from "./exampleStanies";
+import examplesStanies, { Stanie, StanieMetaData } from "../../exampleStanies/exampleStanies";
 
 type Props = {
     width: number
@@ -14,7 +14,7 @@ type Props = {
 
 const defaultStanContent = ''
 const defaultDataContent = ''
-const defaultMetaContent = '{}'
+const defaultMetaContent = '{"title": "Untitled"}'
 
 const initialFileContent = localStorage.getItem('main.stan') || defaultStanContent
 
@@ -190,14 +190,10 @@ type LeftPanelProps = {
     onClearBrowserData: () => void
 }
 
-type MetaData = {
-    title?: string
-}
-
 const LeftPanel: FunctionComponent<LeftPanelProps> = ({width, height, metaContent, setMetaContent, onLoadStanie, onClearBrowserData}) => {
     const metaData = useMemo(() => {
         try {
-            const x = JSON.parse(metaContent) as MetaData
+            const x = JSON.parse(metaContent) as StanieMetaData
             return {
                 title: x.title || undefined
             }
@@ -237,7 +233,7 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({width, height, metaConten
                         return (
                             <div key={i}>
                                 <Hyperlink color="lightblue" onClick={() => onLoadStanie(stanie)}>
-                                    {stanie.title}
+                                    {stanie.meta.title}
                                 </Hyperlink>
                             </div>
                         )
