@@ -132,12 +132,16 @@ const StanFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSave
                 readOnly={!isCompiling ? readOnly : true}
                 toolbarItems={toolbarItems}
             />
-            <StanCompileResultWindow
-                width={0}
-                height={0}
-                mainStanText={editedFileContent}
-                onValidityChanged={valid => setValidSyntax(valid)}
-            />
+            {
+                editedFileContent ? <StanCompileResultWindow
+                    width={0}
+                    height={0}
+                    mainStanText={editedFileContent}
+                    onValidityChanged={valid => setValidSyntax(valid)}
+                /> : (
+                    <div style={{padding: 20}}>Select an example from the left panel</div>
+                )
+            }
         </Splitter>
     )
 }
