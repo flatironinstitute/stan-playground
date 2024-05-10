@@ -10,9 +10,6 @@ RUN apt-get update && apt-get install -y \
     cmake \
     make
 
-# Clone the TinyStan repository
-RUN git clone https://github.com/WardBrian/tinystan.git --recursive --shallow-submodules --depth 1
-
 # Clone the oneTBB library and checkout the specific commit
 RUN git clone https://github.com/oneapi-src/oneTBB.git && \
     cd oneTBB && \
@@ -31,21 +28,22 @@ RUN mkdir oneTBB/build && cd oneTBB/build && \
     -DTBB_TEST=OFF \
     -DEMSCRIPTEN_WITHOUT_PTHREAD=true \
     -DCMAKE_INSTALL_PREFIX=/app/oneTBB/install/ && \
-    cmake --build . && \
+    cmake --build . -j2 && \
     cmake --install .
+
+# Clone the TinyStan repository and checkout a specific commit 5/9/2024
+RUN git clone https://github.com/WardBrian/tinystan.git --recursive --shallow-submodules && \
+cd tinystan && git checkout "1deb4e5f68dd83cb523cf83073813a9ae1507cad"
 
 # Copy the local configuration file for TinyStan
 COPY make/local /app/tinystan/make/local
 COPY make/js /app/tinystan/make/js
 
-# Build the model
+# Build a test model
 RUN cd tinystan && \
     echo 'include make/js' >> Makefile && \
     emmake make test_models/bernoulli/bernoulli.js -j2 && \
     emstrip test_models/bernoulli/bernoulli.wasm
-
-# FROM scratch
-# COPY --from=builder /app/tinystan/test_models/bernoulli/bernoulli.js /app/tinystan/test_models/bernoulli/bernoulli.wasm /
 
 RUN pip install fastapi
 RUN pip install uvicorn
