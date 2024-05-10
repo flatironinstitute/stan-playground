@@ -75,7 +75,7 @@ const HomePage: FunctionComponent<Props> = ({width, height}) => {
 
     const handleLoadStanie = useCallback((stanie: Stanie) => {
         saveFileContent(stanie.stan)
-        saveDataFileContent(JSON.stringify(stanie.data, null, 2))
+        saveDataFileContent(stringifyData(stanie.data))
         setMetaContent(JSON.stringify(stanie.meta, null, 2))
     }, [saveFileContent, saveDataFileContent, setMetaContent])
 
@@ -249,6 +249,14 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({width, height, metaConten
             </div>
         </div>
     )
+}
+
+const stringifyData = (data: { [key: string]: any }) => {
+    const replacer = (_key: string, value: any) => Array.isArray(value) ? JSON.stringify(value) : value;
+
+    return JSON.stringify(data, replacer, 2)
+        .replace(/"\[/g, '[')
+        .replace(/\]"/g, ']')
 }
 
 export default HomePage
