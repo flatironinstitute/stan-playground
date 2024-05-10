@@ -10,7 +10,7 @@ type Props = {
     height: number
 }
 
-const initialFileContent = localStorage.getItem('main.stan3') || `
+const initialFileContent = localStorage.getItem('main.stan') || `
 data {
   int<lower=0> N;
   vector[N] x;
@@ -52,6 +52,24 @@ const HomePage: FunctionComponent<Props> = ({width, height}) => {
     useEffect(() => {
         localStorage.setItem('data.json', dataFileContent)
     }, [dataFileContent])
+
+    useEffect(() => {
+        // if the user reloads the page, then we want
+        // to save the current state of the editor in local storage
+        // because this may have been overwritten in a different
+        // tab, and the user would expect to see the same content
+        // upon reload
+        const handleBeforeUnload = () => {
+            localStorage.setItem('main.stan', fileContent);
+            localStorage.setItem('data.json', dataFileContent);
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [fileContent, dataFileContent]);
 
     const [stanModel, setStanModel] = useState<StanModel | undefined>(undefined)
 
