@@ -18,7 +18,7 @@ type Props = {
     readOnly: boolean
     width: number
     height: number
-    onStanModelLoaded: (model: StanModel) => void
+    onStanModelLoaded: (model: StanModel | undefined) => void
 }
 
 type CompileStatus = 'preparing' | 'compiling' | 'compiled' | 'failed' | ''
@@ -77,9 +77,10 @@ const StanFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSave
         if (fileContent !== theStanFileContentThasHasBeenCompiled) {
             if (compileStatus === 'compiled' || compileStatus === 'failed') {
                 setCompileStatus('')
+                onStanModelLoaded(undefined)
             }
         }
-    }, [fileContent, theStanFileContentThasHasBeenCompiled, compileStatus])
+    }, [fileContent, theStanFileContentThasHasBeenCompiled, compileStatus, onStanModelLoaded])
 
     const [didInitialCompile, setDidInitialCompile] = useState(false)
     useEffect(() => {
