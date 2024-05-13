@@ -5,7 +5,6 @@ import StanCompileResultWindow from "./StanCompileResultWindow";
 import TextEditor, { ToolbarItem } from "./TextEditor";
 import runStanc from "./runStanc";
 import compileStanProgram from '../compileStanProgram/compileStanProgram';
-import StanWorker from '../tinystan/worker?worker';
 
 type Props = {
     fileName: string
@@ -17,12 +16,12 @@ type Props = {
     readOnly: boolean
     width: number
     height: number
-    onWorkerCreate: (m: Worker | undefined) => void
+    setCompiledUrl: (s: string) => void
 }
 
 type CompileStatus = 'preparing' | 'compiling' | 'compiled' | 'failed' | ''
 
-const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSaveContent, editedFileContent, setEditedFileContent, readOnly, width, height, onWorkerCreate }) => {
+const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSaveContent, editedFileContent, setEditedFileContent, readOnly, width, height, setCompiledUrl }) => {
     const [validSyntax, setValidSyntax] = useState<boolean>(false)
     const handleAutoFormat = useCallback(() => {
         if (editedFileContent === undefined) return
@@ -37,7 +36,6 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
     const [compileStatus, setCompileStatus] = useState<CompileStatus>('')
     const [theStanFileContentThasHasBeenCompiled, setTheStanFileContentThasHasBeenCompiled] = useState<string>('')
     const [compileMessage, setCompileMessage] = useState<string>('')
-    const [compileMainJsUrl, setCompileMainJsUrl] = useState<string>('')
 
     const handleCompile = useCallback(async () => {
         setCompileStatus('compiling')
@@ -52,7 +50,7 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
             setCompileStatus('failed')
             return
         }
-        setCompileMainJsUrl(mainJsUrl)
+        setCompiledUrl(mainJsUrl)
         setCompileStatus('compiled')
         setTheStanFileContentThasHasBeenCompiled(fileContent)
 
@@ -68,7 +66,7 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
                 console.error(e)
             }
         }
-    }, [fileContent])
+    }, [fileContent, setCompiledUrl])
 
     useEffect(() => {
         // if the compiled content is not the same as the current content,
@@ -76,10 +74,10 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
         if (fileContent !== theStanFileContentThasHasBeenCompiled) {
             if (compileStatus === 'compiled' || compileStatus === 'failed') {
                 setCompileStatus('')
-                onWorkerCreate(undefined)
+                setCompiledUrl('')
             }
         }
-    }, [fileContent, theStanFileContentThasHasBeenCompiled, compileStatus, onWorkerCreate])
+    }, [fileContent, theStanFileContentThasHasBeenCompiled, compileStatus, setCompiledUrl])
 
     const [didInitialCompile, setDidInitialCompile] = useState(false)
     useEffect(() => {
@@ -96,19 +94,6 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
             setDidInitialCompile(true)
         }
     }, [fileContent, handleCompile, didInitialCompile])
-
-    useEffect(() => {
-
-        if (!compileMainJsUrl) return
-        const worker = new StanWorker();
-        onWorkerCreate(worker);
-        worker.postMessage({ purpose: "load", url: compileMainJsUrl });
-        return () => {
-            // TODO double free?
-            if (worker)
-                worker.terminate()
-        }
-    }, [compileMainJsUrl, onWorkerCreate])
 
     const toolbarItems: ToolbarItem[] = useMemo(() => {
         const ret: ToolbarItem[] = []

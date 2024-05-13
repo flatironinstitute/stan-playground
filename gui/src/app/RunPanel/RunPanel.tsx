@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FunctionComponent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { setSamplerPrintHandler } from '../pages/HomePage/HomePage';
+import { FunctionComponent, useCallback, useEffect, useState } from 'react';
+import LinearProgress from '@mui/material/LinearProgress';
+import StanWorker from '../tinystan/Worker?worker';
 
 type RunPanelProps = {
     width: number;
     height: number;
-    modelWorker: Worker | undefined;
+    compiledUrl: string;
     data: any | undefined
     dataIsSaved: boolean
 };
 
-type RunStatus = '' | 'running' | 'done' | 'failed';
+type RunStatus = '' | 'waiting' | 'running' | 'done' | 'failed';
 
 type Progress = {
     chain: number;
@@ -20,65 +21,87 @@ type Progress = {
     warmup: boolean;
 }
 
-const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, modelWorker, data, dataIsSaved }) => {
-    const [runStatus, setRunStatus] = useState<RunStatus>('');
-    const [errorMessage, setErrorMessage] = useState<string>(''); // [1
+const chains = 4;
+
+const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, compiledUrl, data, dataIsSaved }) => {
+
+    const [runStatus, setRunStatus] = useState<RunStatus>('waiting');
+    const [errorMessage, setErrorMessage] = useState<string>('');
     const [samples, setSamples] = useState<number[][] | undefined>(undefined);
-    // const [stanModelOfLastRun, setStanModelOfLastRun] = useState<StanModel | undefined>(undefined);
-    const [dataOfLastRun, setDataOfLastRun] = useState<string | undefined>(undefined);
-    const progress = useRef<Progress | undefined>(undefined);
+    const [progress, setProgress] = useState<Progress | undefined>(undefined);
+
+    const [modelWorker, setModelWorker] = useState<Worker | undefined>(undefined);
+
+    // TODO: is this the best way to trigger re-loading the worker without a cycle?
+    const [t, trigger] = useState(0);
+
+    useEffect(() => {
+        if (!compiledUrl) {
+            setModelWorker(undefined);
+            return;
+        }
+        const worker = new StanWorker();
+        setModelWorker(worker);
+        worker.postMessage({ purpose: "load", url: compiledUrl });
+        return () => {
+            if (worker) {
+                console.log("Cleaning up worker");
+                worker.terminate();
+            }
+        }
+    }, [compiledUrl, t])
+
     const handleRun = useCallback(async () => {
         if (!modelWorker) return;
-        if (!data) return;
-        if (runStatus === 'running') return;
-        setSamplerPrintHandler((msg: string) => {
-            // example message: Chain [4] Iteration: 1800 / 2000 [ 90%] (Sampling)
-            console.log(msg)
-            // Example: Chain [1] Iteration: 2000 / 2000 [100%]  (Sampling)
-            if (!msg.startsWith('Chain')) return;
-            const parts = msg.split(' ');
-            const chain = parseInt(parts[1].slice(1, -1));
-            const iteration = parseInt(parts[3]);
-            const totalIterations = parseInt(parts[5]);
-            const percent = parseInt(parts[7].slice(0, -2));
-            const warmup = parts[8] === '(Warmup)';
-            progress.current = { chain, iteration, totalIterations, percent, warmup };
-            localStorage.setItem('progress', JSON.stringify(progress.current));
-        });
         setRunStatus('running');
         setErrorMessage('');
         setSamples(undefined);
-        // setStanModelOfLastRun(stanModel);
-        setDataOfLastRun(JSON.stringify(data));
-        await new Promise(resolve => setTimeout(resolve, 500)); // for effect
-        let samples: any
-        try {
-            console.log('sampling')
-            modelWorker
-                .postMessage({ purpose: "sample", sampleConfig: {data} });
+        setProgress(undefined);
+        console.log('sampling')
+        modelWorker
+            .postMessage({ purpose: "sample", sampleConfig: { data, chains } });
+    }, [modelWorker, data]);
 
+    const cancelRun = useCallback(() => {
+        setRunStatus('waiting');
+        // after calling terminate, the worker is no longer usable
+        // so we create a new one
+        trigger(t => t + 1);
+    }, [trigger]);
+
+    useEffect(() => {
+        if (!modelWorker) {
+            setRunStatus('waiting');
+            return;
         }
-        catch (err: any) {
-            console.error(err)
-            setRunStatus('failed')
-            setErrorMessage(err.message)
-            return
+        modelWorker.onmessage = (e) => {
+            const purpose = e.data.purpose;
+            if (purpose === "progress") {
+                setProgress(e.data.report);
+                return;
+            }
+            if (purpose === "modelLoaded") {
+                setRunStatus('')
+                return;
+            }
+            if (purpose === "sampleReturn") {
+                if (e.data.error) {
+                    setRunStatus('failed')
+                    setErrorMessage(e.data.error)
+                    return;
+                }
+                setRunStatus('done')
+                setSamples(e.data.draws)
+            }
         }
-        setRunStatus('done')
-        setSamples(samples)
-    }, [modelWorker, data, runStatus]);
+    }, [modelWorker]);
+
     if (!modelWorker) return (
         <div style={{ padding: 30 }}>
             Stan model not compiled
         </div>
     )
-    if (!data) {
-        return (
-            <div style={{ padding: 30 }}>
-                No data
-            </div>
-        )
-    }
+
     if (!dataIsSaved) {
         return (
             <div style={{ padding: 30 }}>
@@ -90,27 +113,35 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, modelWorker
         <div style={{ position: 'absolute', width, height, overflowY: 'auto' }}>
             <div style={{ padding: 20 }}>
                 <div>
-                    <button onClick={handleRun} disabled={runStatus === 'running'}>Run</button>
+                    <button onClick={handleRun} disabled={runStatus === 'running' || runStatus === 'waiting'}>Run</button>
+                    <button onClick={cancelRun} disabled={runStatus !== 'running'}>Cancel</button>
+                    {
+                        runStatus === 'waiting' && (
+                            <div>
+                                <h4>Loading compiled Stan model...</h4>
+                            </div>
+                        )
+                    }
                     {
                         runStatus === 'running' && (
                             <div>
                                 <h4>Sampling</h4>
                                 <SamplingProgressComponent
-                                    progressRef={progress}
+                                    report={progress}
                                 />
                             </div>
                         )
                     }
-                    {/* {
-                        runStatus === 'done' && modelAndDataAreConsistentWithLastRun && (
+                    {
+                        runStatus === 'done' && (
                             <span>&nbsp;&nbsp;done sampling</span>
                         )
                     }
                     {
-                        runStatus === 'failed' && modelAndDataAreConsistentWithLastRun && (
+                        runStatus === 'failed' && (
                             <span>&nbsp;&nbsp;failed: {errorMessage} (see browser console for more details)</span>
                         )
-                    } */}
+                    }
                 </div>
                 {runStatus === 'done' && samples && (
                     <div>
@@ -124,22 +155,18 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, modelWorker
 }
 
 type SamplingProgressComponentProps = {
-    progressRef: React.MutableRefObject<Progress | undefined>
+    report: Progress | undefined
 }
 
-const SamplingProgressComponent: FunctionComponent<SamplingProgressComponentProps> = ({ progressRef }) => {
-    const [progress, setProgress] = useState<Progress | undefined>(undefined);
-    useEffect(() => {
-        // poll
-        const interval = setInterval(() => {
-            setProgress(progressRef.current);
-        }, 100);
-        return () => clearInterval(interval);
-    }, [progressRef]);
-    if (!progress) return <span />
+const SamplingProgressComponent: FunctionComponent<SamplingProgressComponentProps> = ({ report }) => {
+    if (!report) return <span />
+    const progress = (report.iteration + ((report.chain - 1) * report.totalIterations)) / (report.totalIterations * chains) * 100;
     return (
-        <div>
-            Chain {progress.chain} Iteration: {progress.iteration} / {progress.totalIterations} [ {progress.percent}%] ({progress.warmup ? 'Warmup' : 'Sampling'})
+        <div style={{ width: "80%" }}>
+            <LinearProgress  sx={{height:10}} variant="determinate" value={progress} /> {Math.round(progress)}%
+            <div>
+                Chain {report.chain} Iteration: {report.iteration} / {report.totalIterations} ({report.warmup ? 'Warmup' : 'Sampling'})
+            </div>
         </div>
     )
 }

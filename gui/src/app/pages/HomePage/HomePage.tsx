@@ -21,15 +21,9 @@ const initialDataFileContent = localStorage.getItem('data.json') || defaultDataC
 
 const initialMetaContent = localStorage.getItem('meta.json') || defaultMetaContent
 
-let globalPrintHandler: (msg: string) => void = (msg: string) => {
-    // default print handler
-    console.log(msg)
-}
-export const setSamplerPrintHandler = (handler: (msg: string) => void) => {
-    globalPrintHandler = handler
-}
 
-const HomePage: FunctionComponent<Props> = ({width, height}) => {
+
+const HomePage: FunctionComponent<Props> = ({ width, height }) => {
     const [fileContent, saveFileContent] = useState(initialFileContent)
     const [editedFileContent, setEditedFileContent] = useState('')
     useEffect(() => {
@@ -77,7 +71,9 @@ const HomePage: FunctionComponent<Props> = ({width, height}) => {
     }, [fileContent, dataFileContent, metaContent, doNotSaveOnUnload]);
 
 
-    const [modelWorker, setModelWorker] = useState<Worker | undefined>(undefined);
+
+    const [compileMainJsUrl, setCompileMainJsUrl] = useState<string>('')
+
 
     const leftPanelWidth = width > 400 ? 200 : 0
 
@@ -98,8 +94,8 @@ const HomePage: FunctionComponent<Props> = ({width, height}) => {
     }, [])
 
     return (
-        <div style={{position: 'absolute', width, height}}>
-            <div style={{width: leftPanelWidth, height, position: 'absolute'}}>
+        <div style={{ position: 'absolute', width, height }}>
+            <div style={{ width: leftPanelWidth, height, position: 'absolute' }}>
                 <LeftPanel
                     width={leftPanelWidth}
                     height={height}
@@ -109,7 +105,7 @@ const HomePage: FunctionComponent<Props> = ({width, height}) => {
                     onClearBrowserData={handleClearBrowserData}
                 />
             </div>
-            <div style={{position: 'absolute', left: leftPanelWidth, width: width - leftPanelWidth, height}}>
+            <div style={{ position: 'absolute', left: leftPanelWidth, width: width - leftPanelWidth, height }}>
                 <Splitter
                     width={width}
                     height={height}
@@ -125,7 +121,7 @@ const HomePage: FunctionComponent<Props> = ({width, height}) => {
                         editedFileContent={editedFileContent}
                         setEditedFileContent={setEditedFileContent}
                         readOnly={false}
-                        onWorkerCreate={setModelWorker}
+                        setCompiledUrl={setCompileMainJsUrl}
                     />
                     <RightView
                         width={0}
@@ -134,7 +130,7 @@ const HomePage: FunctionComponent<Props> = ({width, height}) => {
                         saveDataFileContent={saveDataFileContent}
                         editedDataFileContent={editedDataFileContent}
                         setEditedDataFileContent={setEditedDataFileContent}
-                        modelWorker={modelWorker}
+                        compiledUrl={compileMainJsUrl}
                     />
                 </Splitter>
             </div>
@@ -149,10 +145,10 @@ type RightViewProps = {
     saveDataFileContent: (text: string) => void
     editedDataFileContent: string
     setEditedDataFileContent: (text: string) => void
-    modelWorker: Worker | undefined
+    compiledUrl: string
 }
 
-const RightView: FunctionComponent<RightViewProps> = ({width, height, dataFileContent, saveDataFileContent, editedDataFileContent, setEditedDataFileContent, modelWorker}) => {
+const RightView: FunctionComponent<RightViewProps> = ({ width, height, dataFileContent, saveDataFileContent, editedDataFileContent, setEditedDataFileContent, compiledUrl }) => {
     const parsedData = useMemo(() => {
         try {
             return JSON.parse(dataFileContent)
@@ -181,7 +177,7 @@ const RightView: FunctionComponent<RightViewProps> = ({width, height, dataFileCo
             <RunPanel
                 width={0}
                 height={0}
-                modelWorker={modelWorker}
+                compiledUrl={compiledUrl}
                 data={parsedData}
                 dataIsSaved={dataFileContent === editedDataFileContent}
             />
@@ -198,7 +194,7 @@ type LeftPanelProps = {
     onClearBrowserData: () => void
 }
 
-const LeftPanel: FunctionComponent<LeftPanelProps> = ({width, height, metaContent, setMetaContent, onLoadStanie, onClearBrowserData}) => {
+const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, metaContent, setMetaContent, onLoadStanie, onClearBrowserData }) => {
     const metaData = useMemo(() => {
         try {
             const x = JSON.parse(metaContent) as StanieMetaData
@@ -218,24 +214,24 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({width, height, metaConten
         }))
     }, [metaData, setMetaContent])
     return (
-        <div style={{width, height, backgroundColor: '#333', color: '#ccc'}}>
+        <div style={{ width, height, backgroundColor: '#333', color: '#ccc' }}>
             <div>&nbsp;</div>
-            <div style={{position: 'relative', left: 10, width: width - 20}}>
+            <div style={{ position: 'relative', left: 10, width: width - 20 }}>
                 <strong>Title:</strong>
             </div>
-            <div style={{height: 7}}>&nbsp;</div>
-            <div style={{position: 'relative', left: 10, width: width - 20}}>
+            <div style={{ height: 7 }}>&nbsp;</div>
+            <div style={{ position: 'relative', left: 10, width: width - 20 }}>
                 <input
-                    style={{width: width - 40, fontSize: 16, backgroundColor: '#444', color: '#ccc', padding: 5, border: 'none'}}
+                    style={{ width: width - 40, fontSize: 16, backgroundColor: '#444', color: '#ccc', padding: 5, border: 'none' }}
                     type="text"
                     value={metaData.title || ''}
                     onChange={(e) => updateTitle(e.target.value)}
                 />
             </div>
             <hr />
-            <div style={{position: 'relative', left: 10, width: width - 20}}>
+            <div style={{ position: 'relative', left: 10, width: width - 20 }}>
                 <strong>Examples</strong>
-                <div style={{height: 7}}>&nbsp;</div>
+                <div style={{ height: 7 }}>&nbsp;</div>
                 {
                     examplesStanies.map((stanie, i) => {
                         return (
@@ -249,8 +245,8 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({width, height, metaConten
                 }
             </div>
             <hr />
-            <div style={{position: 'relative', height: 30}} />
-            <div style={{position: 'absolute', left: 10, width: width - 20, bottom: 10}}>
+            <div style={{ position: 'relative', height: 30 }} />
+            <div style={{ position: 'absolute', left: 10, width: width - 20, bottom: 10 }}>
                 <Hyperlink color="#c66" onClick={onClearBrowserData}>
                     clear all browser data
                 </Hyperlink>
