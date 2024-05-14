@@ -18,12 +18,12 @@ interface WasmModule {
   _tinystan_model_num_free_params(model: model_ptr): number;
   _tinystan_separator_char(): number;
   // prettier-ignore
-  _tinystan_sample(model:model_ptr, num_chains:number, inits:cstr, seed:number, id:number,
-    init_radius:number, num_warmup:number, num_samples:number, metric:number, init_inv_metric:cstr,
-    adapt:number, delta:number, gamma:number, kappa:number, t0:number, init_buffer:number,
-    term_buffer:number, window:number, save_warmup:number, stepsize:number, stepsize_jitter:number,
-    max_depth:number, refresh:number, num_threads:number, out:ptr, out_size:number, metric_out:ptr,
-    err_ptr:ptr): number;
+  _tinystan_sample(model: model_ptr, num_chains: number, inits: cstr, seed: number, id: number,
+    init_radius: number, num_warmup: number, num_samples: number, metric: number, init_inv_metric: cstr,
+    adapt: number, delta: number, gamma: number, kappa: number, t0: number, init_buffer: number,
+    term_buffer: number, window: number, save_warmup: number, stepsize: number, stepsize_jitter: number,
+    max_depth: number, refresh: number, num_threads: number, out: ptr, out_size: number, metric_out: ptr,
+    err_ptr: ptr): number;
   _tinystan_get_error_message(err_ptr: error_ptr): cstr;
   _tinystan_get_error_type(err_ptr: error_ptr): number;
   _tinystan_destroy_error(err_ptr: error_ptr): void;
@@ -39,6 +39,17 @@ interface WasmModule {
 const NULL = 0 as ptr;
 const NULLSTR = 0 as cstr;
 
+
+const HMC_SAMPLER_VARIABLES = [
+  "lp__",
+  "accept_stat__",
+  "stepsize__",
+  "treedepth__",
+  "n_leapfrog__",
+  "divergent__",
+  "energy__",
+];
+
 export enum HMCMetric {
   UNIT = 0,
   DENSE = 1,
@@ -46,6 +57,11 @@ export enum HMCMetric {
 }
 
 export type PrintCallback = (s: string) => void;
+
+export type StanDraws = {
+  paramNames: string[];
+  draws: number[][];
+};
 
 export interface SamplerParams {
   data: string | object;
@@ -164,7 +180,7 @@ export default class StanModel {
   // - inits
   // - init inv metric
   // - save_metric
-  public sample(p: Partial<SamplerParams>): number[][] {
+  public sample(p: Partial<SamplerParams>): StanDraws {
     const {
       data,
       num_chains,
@@ -207,16 +223,17 @@ export default class StanModel {
 
     return this.withModel(data, seed_, model => {
       // Get the parameter names
-      const paramNames = this.m.UTF8ToString(
+      const rawParamNames = this.m.UTF8ToString(
         this.m._tinystan_model_param_names(model),
       );
-      // Get the number of parameters
-      const n_params = paramNames.split(",").length;
+      const paramNames = HMC_SAMPLER_VARIABLES.concat(rawParamNames.split(','));
+
+      const n_params = paramNames.length;
 
       // Allocate memory for the output
       const n_draws =
         num_chains * (save_warmup ? num_samples + num_warmup : num_samples);
-      const n_out = n_draws * (n_params + 7);
+      const n_out = n_draws * n_params;
       const out_ptr = this.m._malloc(n_out * Float64Array.BYTES_PER_ELEMENT);
 
       // Sample from the model
@@ -263,17 +280,17 @@ export default class StanModel {
       );
 
       // copy out parameters of interest
-      const output: number[][] = Array.from({ length: n_params }, () => []);
+      const draws: number[][] = Array.from({ length: n_params }, () => []);
       for (let i = 0; i < n_draws; i++) {
         for (let j = 0; j < n_params; j++) {
-          const elm = out_buffer[i * (n_params + 7) + 7 + j];
-          output[j][i] = elm;
+          const elm = out_buffer[i * n_params + j];
+          draws[j][i] = elm;
         }
       }
       // Clean up
       this.m._free(out_ptr);
 
-      return output;
+      return { paramNames, draws };
     });
   }
 

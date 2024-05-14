@@ -23,7 +23,9 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, compiledUrl
 
     const [runStatus, setRunStatus] = useState<RunStatus>('waiting');
     const [errorMessage, setErrorMessage] = useState<string>('');
-    const [samples, setSamples] = useState<number[][] | undefined>(undefined);
+    const [samples, setSamples] = useState<number[][]>([[]]);
+    const [paramNames, setParamNames] = useState<string[]>([]);
+
     const [progress, setProgress] = useState<Progress | undefined>(undefined);
 
     const [modelWorker, setModelWorker] = useState<Worker | undefined>(undefined);
@@ -54,7 +56,8 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, compiledUrl
         if (!modelWorker) return;
         setRunStatus('running');
         setErrorMessage('');
-        setSamples(undefined);
+        setSamples([[]]);
+        setParamNames([]);
         setProgress(undefined);
         console.log('sampling')
         modelWorker
@@ -88,6 +91,7 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, compiledUrl
                         setRunStatus('failed');
                     } else {
                         setSamples(e.data.draws);
+                        setParamNames(e.data.paramNames);
                         setRunStatus('done');
                     }
                     break;
@@ -141,11 +145,8 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, compiledUrl
                         )
                     }
                 </div>
-                {runStatus === 'done' && samples && (
-                    <div>
-                        <h3>Samples</h3>
-                        <pre>{JSON.stringify(samples, null, 2)}</pre>
-                    </div>
+                {runStatus === 'done' && (
+                    <DrawsDisplay draws={samples} paramNames={paramNames} />
                 )}
             </div>
         </div>
@@ -186,6 +187,33 @@ const LinearProgressWithLabel = (props: LinearProgressProps & { value: number })
             </Box>
         </Box>
     );
+}
+
+
+type DrawsDisplayProps = {
+    draws: number[][],
+    paramNames: string[]
+}
+
+const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({ draws, paramNames }) => {
+    const means: { [k: string]: number } = {};
+
+    for (const [i, element] of paramNames.entries()) {
+        let sum = 0;
+        for (const draw of draws[i]) {
+            sum += draw;
+        }
+        means[element] = sum / draws[i].length;
+    }
+
+    return (
+        <div>
+            <h3>Samples</h3>
+
+            <pre>Means: {JSON.stringify(means, null, 2)}</pre>
+            <pre>Draws: {JSON.stringify(draws, null, 2)}</pre>
+        </div>
+    )
 }
 
 export default RunPanel;
