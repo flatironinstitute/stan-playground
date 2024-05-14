@@ -10,7 +10,7 @@ export function highlightJsData() {
         'transformed',
         'generated'
       ];
-    
+
       const STATEMENTS = [
         'for',
         'in',
@@ -21,26 +21,30 @@ export function highlightJsData() {
         'continue',
         'return'
       ];
-    
+
       const TYPES = [
         'array',
+        'tuple',
         'complex',
         'int',
         'real',
         'vector',
+        'complex_vector',
         'ordered',
         'positive_ordered',
         'simplex',
         'unit_vector',
         'row_vector',
+        'complex_row_vector',
         'matrix',
+        'complex_matrix',
         'cholesky_factor_corr|10',
         'cholesky_factor_cov|10',
         'corr_matrix|10',
         'cov_matrix|10',
         'void'
       ];
-    
+
       // to get the functions list
       // clone the [stan-docs repo](https://github.com/stan-dev/docs)
       // then cd into it and run this bash script https://gist.github.com/joshgoebel/dcd33f82d4059a907c986049893843cf
@@ -48,10 +52,8 @@ export function highlightJsData() {
       // the output files are
       // distributions_quoted.txt
       // functions_quoted.txt
-    
+
       const FUNCTIONS = [
-        'Phi',
-        'Phi_approx',
         'abs',
         'acos',
         'acosh',
@@ -69,7 +71,6 @@ export function highlightJsData() {
         'bessel_first_kind',
         'bessel_second_kind',
         'binary_log_loss',
-        'binomial_coefficient_log',
         'block',
         'cbrt',
         'ceil',
@@ -80,37 +81,48 @@ export function highlightJsData() {
         'cols',
         'columns_dot_product',
         'columns_dot_self',
+        'complex_schur_decompose',
+        'complex_schur_decompose_t',
+        'complex_schur_decompose_u',
         'conj',
         'cos',
         'cosh',
         'cov_exp_quad',
         'crossprod',
+        'csr_extract',
         'csr_extract_u',
         'csr_extract_v',
         'csr_extract_w',
         'csr_matrix_times_vector',
         'csr_to_dense_matrix',
         'cumulative_sum',
+        'dae',
+        'dae_tol',
         'determinant',
         'diag_matrix',
+        'diagonal',
         'diag_post_multiply',
         'diag_pre_multiply',
-        'diagonal',
         'digamma',
         'dims',
         'distance',
         'dot_product',
         'dot_self',
+        'eigendecompose',
+        'eigendecompose_sym',
+        'eigenvalues',
         'eigenvalues_sym',
+        'eigenvectors',
         'eigenvectors_sym',
         'erf',
         'erfc',
         'exp',
         'exp2',
         'expm1',
-        'fabs',
         'falling_factorial',
         'fdim',
+        'fft',
+        'fft2',
         'floor',
         'fma',
         'fmax',
@@ -120,7 +132,6 @@ export function highlightJsData() {
         'gamma_q',
         'generalized_inverse',
         'get_imag',
-        'get_lp',
         'get_real',
         'head',
         'hmm_hidden_state_prob',
@@ -128,20 +139,24 @@ export function highlightJsData() {
         'hypot',
         'identity_matrix',
         'inc_beta',
-        'int_step',
         'integrate_1d',
         'integrate_ode',
         'integrate_ode_adams',
         'integrate_ode_bdf',
         'integrate_ode_rk45',
+        'int_step',
         'inv',
-        'inv_Phi',
         'inv_cloglog',
-        'inv_logit',
-        'inv_sqrt',
-        'inv_square',
+        'inv_erfc',
         'inverse',
         'inverse_spd',
+        'inv_fft',
+        'inv_fft2',
+        'inv_inc_beta',
+        'inv_logit',
+        'inv_Phi',
+        'inv_sqrt',
+        'inv_square',
         'is_inf',
         'is_nan',
         'lambert_w0',
@@ -167,12 +182,12 @@ export function highlightJsData() {
         'log_falling_factorial',
         'log_inv_logit',
         'log_inv_logit_diff',
+        'logit',
         'log_mix',
         'log_modified_bessel_first_kind',
         'log_rising_factorial',
         'log_softmax',
         'log_sum_exp',
-        'logit',
         'machine_precision',
         'map_rect',
         'matrix_exp',
@@ -187,11 +202,11 @@ export function highlightJsData() {
         'min',
         'modified_bessel_first_kind',
         'modified_bessel_second_kind',
-        'multiply_log',
         'multiply_lower_tri_self_transpose',
         'negative_infinity',
         'norm',
-        'normal_lpdf', // added by jfm
+        'norm1',
+        'norm2',
         'not_a_number',
         'num_elements',
         'ode_adams',
@@ -212,14 +227,18 @@ export function highlightJsData() {
         'ones_row_vector',
         'ones_vector',
         'owens_t',
+        'Phi',
+        'Phi_approx',
         'polar',
         'positive_infinity',
         'pow',
         'print',
         'prod',
         'proj',
+        'qr',
         'qr_Q',
         'qr_R',
+        'qr_thin',
         'qr_thin_Q',
         'qr_thin_R',
         'quad_form',
@@ -259,6 +278,7 @@ export function highlightJsData() {
         'sub_col',
         'sub_row',
         'sum',
+        'svd',
         'svd_U',
         'svd_V',
         'symmetrize_from_lower_tri',
@@ -271,6 +291,7 @@ export function highlightJsData() {
         'to_array_1d',
         'to_array_2d',
         'to_complex',
+        'to_int',
         'to_matrix',
         'to_row_vector',
         'to_vector',
@@ -285,7 +306,7 @@ export function highlightJsData() {
         'zeros_int_array',
         'zeros_row_vector'
       ];
-    
+
       const DISTRIBUTIONS = [
         'bernoulli',
         'bernoulli_logit',
@@ -314,18 +335,22 @@ export function highlightJsData() {
         'inv_chi_square',
         'inv_gamma',
         'inv_wishart',
+        'inv_wishart_cholesky',
         'lkj_corr',
         'lkj_corr_cholesky',
         'logistic',
+        'loglogistic',
         'lognormal',
         'multi_gp',
         'multi_gp_cholesky',
+        'multinomial',
+        'multinomial_logit',
         'multi_normal',
         'multi_normal_cholesky',
         'multi_normal_prec',
+        'multi_student_cholesky_t',
         'multi_student_t',
-        'multinomial',
-        'multinomial_logit',
+        'multi_student_t_cholesky',
         'neg_binomial',
         'neg_binomial_2',
         'neg_binomial_2_log',
@@ -345,14 +370,16 @@ export function highlightJsData() {
         'skew_double_exponential',
         'skew_normal',
         'std_normal',
+        'std_normal_log',
         'student_t',
         'uniform',
         'von_mises',
         'weibull',
         'wiener',
-        'wishart'
+        'wishart',
+        'wishart_cholesky'
       ];
-    
+
     //   const BLOCK_COMMENT = hljs.COMMENT(
     //     /\/\*/,
     //     /\*\//,
@@ -366,7 +393,7 @@ export function highlightJsData() {
     //       ]
     //     }
     //   );
-    
+
     //   const INCLUDE = {
     //     scope: 'meta',
     //     begin: /#include\b/,
@@ -379,7 +406,7 @@ export function highlightJsData() {
     //       hljs.C_LINE_COMMENT_MODE
     //     ]
     //   };
-    
+
       const RANGE_CONSTRAINTS = [
         "lower",
         "upper",

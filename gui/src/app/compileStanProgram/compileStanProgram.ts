@@ -55,31 +55,15 @@ const compileStanProgram = async (stanWasmServerUrl: string, stanProgram: string
         }
 
         const downloadMainJsUrl = `${stanWasmServerUrl}/job/${job_id}/download/main.js`;
-        // const downloadMainWasmUrl = `${stanWasmServerUrl}/job/${job_id}/download/main.wasm`;
 
         // download to make sure it is there
-        onStatus("downloading main.js");
+        onStatus("Checking download of main.js");
         const d = await fetch(downloadMainJsUrl);
         if (!d.ok) {
             onStatus(`failed to download main.js: ${d.statusText}`);
             return {}
         }
-        // const mainJs = await d.text();
 
-        // skip checking for the wasm because it is too big
-        // onStatus("downloading main.wasm");
-        // const e = await fetch(downloadMainWasmUrl);
-        // if (!e.ok) {
-        //     onStatus(`failed to download main.wasm: ${e.statusText}`);
-        //     return {}
-        // }
-        // const mainWasm = await e.arrayBuffer();
-
-        // console.info('=========================================== main.js ===========================================');
-        // console.info(mainJs);
-        // console.info('=========================================== main.wasm ===========================================');
-        // console.info(mainWasm);
-        // setStatusMessage("Created main.js and main.wasm files. See the browser console for more details.");
 
         onStatus("compiled");
         return {mainJsUrl: downloadMainJsUrl, jobId: job_id}
