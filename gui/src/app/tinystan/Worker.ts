@@ -66,9 +66,9 @@ onmessage = function (e) {
                 return;
             }
             try {
-                const ret = model.sample(e.data.sampleConfig);
+                const { paramNames, draws } = model.sample(e.data.sampleConfig);
                 // TODO? use an ArrayBuffer so we can transfer without serialization cost
-                postMessage({ purpose: Replies.SampleReturn, draws: ret, error: null });
+                postMessage({ purpose: Replies.SampleReturn, draws, paramNames, error: null });
             } catch (e: any) {
                 postMessage({ purpose: Replies.SampleReturn, error: e.toString() })
             }
