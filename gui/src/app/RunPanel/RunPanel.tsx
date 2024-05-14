@@ -23,8 +23,8 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, compiledUrl
 
     const [runStatus, setRunStatus] = useState<RunStatus>('waiting');
     const [errorMessage, setErrorMessage] = useState<string>('');
-    const [samples, setSamples] = useState<number[][] | undefined>(undefined);
-    const [paramNames, setParamNames] = useState<string[] | undefined>(undefined);
+    const [samples, setSamples] = useState<number[][]>([[]]);
+    const [paramNames, setParamNames] = useState<string[]>([]);
 
     const [progress, setProgress] = useState<Progress | undefined>(undefined);
 
@@ -56,7 +56,8 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, compiledUrl
         if (!modelWorker) return;
         setRunStatus('running');
         setErrorMessage('');
-        setSamples(undefined);
+        setSamples([[]]);
+        setParamNames([]);
         setProgress(undefined);
         console.log('sampling')
         modelWorker
@@ -144,7 +145,7 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, compiledUrl
                         )
                     }
                 </div>
-                {runStatus === 'done' && samples && paramNames && (
+                {runStatus === 'done' && (
                     <DrawsDisplay draws={samples} paramNames={paramNames} />
                 )}
             </div>

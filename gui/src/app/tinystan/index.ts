@@ -58,6 +58,11 @@ export enum HMCMetric {
 
 export type PrintCallback = (s: string) => void;
 
+export type StanDraws = {
+  paramNames: string[];
+  draws: number[][];
+};
+
 export interface SamplerParams {
   data: string | object;
   num_chains: number;
@@ -175,7 +180,7 @@ export default class StanModel {
   // - inits
   // - init inv metric
   // - save_metric
-  public sample(p: Partial<SamplerParams>): { paramNames: string[], draws: number[][] } {
+  public sample(p: Partial<SamplerParams>): StanDraws {
     const {
       data,
       num_chains,
