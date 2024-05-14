@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FunctionComponent, useCallback, useEffect, useState } from 'react';
-import LinearProgress from '@mui/material/LinearProgress';
+import LinearProgress, { LinearProgressProps } from '@mui/material/LinearProgress';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+
 import StanWorker from '../tinystan/Worker?worker';
+import { Progress, Replies, Requests } from '../tinystan/Worker'
 
 type RunPanelProps = {
     width: number;
@@ -12,14 +16,6 @@ type RunPanelProps = {
 };
 
 type RunStatus = '' | 'waiting' | 'running' | 'done' | 'failed';
-
-type Progress = {
-    chain: number;
-    iteration: number;
-    totalIterations: number;
-    percent: number;
-    warmup: boolean;
-}
 
 const chains = 4;
 
@@ -32,8 +28,11 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, compiledUrl
 
     const [modelWorker, setModelWorker] = useState<Worker | undefined>(undefined);
 
-    // TODO: is this the best way to trigger re-loading the worker without a cycle?
-    const [t, trigger] = useState(0);
+    // Cancellation destroys the worker, and therefore
+    // requires the same code to be run as if a new
+    // URL was provided. This state is therefore
+    // used to force the following useEffect hook to rerun.
+    const [trigger, setTrigger] = useState(false);
 
     useEffect(() => {
         if (!compiledUrl) {
@@ -42,14 +41,14 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, compiledUrl
         }
         const worker = new StanWorker();
         setModelWorker(worker);
-        worker.postMessage({ purpose: "load", url: compiledUrl });
+        worker.postMessage({ purpose: Requests.Load, url: compiledUrl });
         return () => {
             if (worker) {
                 console.log("Cleaning up worker");
                 worker.terminate();
             }
         }
-    }, [compiledUrl, t])
+    }, [compiledUrl, trigger])
 
     const handleRun = useCallback(async () => {
         if (!modelWorker) return;
@@ -59,15 +58,13 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, compiledUrl
         setProgress(undefined);
         console.log('sampling')
         modelWorker
-            .postMessage({ purpose: "sample", sampleConfig: { data, chains } });
+            .postMessage({ purpose: Requests.Sample, sampleConfig: { data, chains } });
     }, [modelWorker, data]);
 
     const cancelRun = useCallback(() => {
         setRunStatus('waiting');
-        // after calling terminate, the worker is no longer usable
-        // so we create a new one
-        trigger(t => t + 1);
-    }, [trigger]);
+        setTrigger(t => !t);
+    }, [setTrigger]);
 
     useEffect(() => {
         if (!modelWorker) {
@@ -75,23 +72,26 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, compiledUrl
             return;
         }
         modelWorker.onmessage = (e) => {
-            const purpose = e.data.purpose;
-            if (purpose === "progress") {
-                setProgress(e.data.report);
-                return;
-            }
-            if (purpose === "modelLoaded") {
-                setRunStatus('')
-                return;
-            }
-            if (purpose === "sampleReturn") {
-                if (e.data.error) {
-                    setRunStatus('failed')
-                    setErrorMessage(e.data.error)
-                    return;
+            const purpose: Replies = e.data.purpose;
+            switch (purpose) {
+                case Replies.Progress: {
+                    setProgress(e.data.report);
+                    break;
                 }
-                setRunStatus('done')
-                setSamples(e.data.draws)
+                case Replies.ModelLoaded: {
+                    setRunStatus('');
+                    break;
+                }
+                case Replies.SampleReturn: {
+                    if (e.data.error) {
+                        setErrorMessage(e.data.error);
+                        setRunStatus('failed');
+                    } else {
+                        setSamples(e.data.draws);
+                        setRunStatus('done');
+                    }
+                    break;
+                }
             }
         }
     }, [modelWorker]);
@@ -126,9 +126,7 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, compiledUrl
                         runStatus === 'running' && (
                             <div>
                                 <h4>Sampling</h4>
-                                <SamplingProgressComponent
-                                    report={progress}
-                                />
+                                <SamplingProgressComponent report={progress} />
                             </div>
                         )
                     }
@@ -162,13 +160,32 @@ const SamplingProgressComponent: FunctionComponent<SamplingProgressComponentProp
     if (!report) return <span />
     const progress = (report.iteration + ((report.chain - 1) * report.totalIterations)) / (report.totalIterations * chains) * 100;
     return (
-        <div style={{ width: "80%" }}>
-            <LinearProgress  sx={{height:10}} variant="determinate" value={progress} /> {Math.round(progress)}%
+        <>
+            <div style={{ width: "60%" }}>
+                <LinearProgressWithLabel sx={{ height: 10 }} value={progress} />
+            </div>
             <div>
                 Chain {report.chain} Iteration: {report.iteration} / {report.totalIterations} ({report.warmup ? 'Warmup' : 'Sampling'})
             </div>
-        </div>
+        </>
     )
+}
+
+
+// from https://mui.com/material-ui/react-progress/#linear-with-label
+const LinearProgressWithLabel = (props: LinearProgressProps & { value: number }) => {
+    return (
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ width: '100%', mr: 1 }}>
+                <LinearProgress variant="determinate" {...props} />
+            </Box>
+            <Box sx={{ minWidth: 35 }}>
+                <Typography variant="body2" color="text.secondary">{`${Math.round(
+                    props.value,
+                )}%`}</Typography>
+            </Box>
+        </Box>
+    );
 }
 
 export default RunPanel;
