@@ -49,6 +49,18 @@ class StanSampler {
     }
     sample(sampleConfig: SamplerParams) {
         if (!this.#worker) return
+        if (this.#status === '') {
+            console.warn('Model not loaded yet')
+            return
+        }
+        if (this.#status === 'sampling') {
+            console.warn('Already sampling')
+            return
+        }
+        if (this.#status === 'loading') {
+            console.warn('Model not loaded yet')
+            return
+        }
         this.#draws = [];
         this.#paramNames = [];
         this.#worker
@@ -63,13 +75,19 @@ class StanSampler {
         this.#onStatusChangedCallbacks.push(callback);
     }
     cancel() {
-        this.terminate();
-        this._initialize();
+        if (this.#status === 'sampling') {
+            this.#worker && this.#worker.terminate();
+            this._initialize();
+        }
+        else {
+            console.warn('Nothing to cancel')
+        }
     }
     terminate() {
         if (!this.#worker) return;
         this.#worker.terminate();
         this.#worker = undefined;
+        this.#status = '';
     }
     get draws() {
         return this.#draws;
