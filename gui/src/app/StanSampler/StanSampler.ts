@@ -63,10 +63,13 @@ class StanSampler {
         this.#onStatusChangedCallbacks.push(callback);
     }
     cancel() {
+        this.terminate();
+        this._initialize();
+    }
+    terminate() {
         if (!this.#worker) return;
         this.#worker.terminate();
         this.#worker = undefined;
-        this._initialize();
     }
     get draws() {
         return this.#draws;

@@ -105,7 +105,7 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
         const s = new StanSampler(compileMainJsUrl);
         setSampler(s);
         return () => {
-            s.cancel();
+            s.terminate();
         }
     }, [compileMainJsUrl])
 
