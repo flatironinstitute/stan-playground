@@ -9,14 +9,13 @@ const useStanSampler = (compiledMainJsUrl: string | undefined) => {
             setSampler(undefined);
             return;
         }
-        const s = new StanSampler(compiledMainJsUrl);
-        setSampler(s);
-        return () => {
-            s.terminate();
-        }
+        const { sampler, cleanup: destructor } = StanSampler.create(compiledMainJsUrl);
+        setSampler(sampler);
+        return destructor;
+
     }, [compiledMainJsUrl])
 
-    return {sampler}
+    return { sampler }
 }
 
 export const useSamplerStatus = (sampler: StanSampler | undefined) => {

@@ -12,9 +12,20 @@ class StanSampler {
     #onStatusChangedCallbacks: (() => void)[] = [];
     #draws: number[][] = [];
     #paramNames: string[] = [];
-    constructor(private compiledUrl: string) {
+
+    private constructor(private compiledUrl: string) {
         this._initialize()
     }
+
+    static create(compiledUrl: string): { sampler: StanSampler, cleanup: () => void } {
+        const sampler = new StanSampler(compiledUrl);
+        const cleanup = () => {
+            sampler.#worker && sampler.#worker.terminate();
+            sampler.#worker = undefined;
+        }
+        return { sampler, cleanup }
+    }
+
     _initialize() {
         this.#worker = new StanWorker
         this.#status = 'loading'
@@ -64,7 +75,7 @@ class StanSampler {
         this.#draws = [];
         this.#paramNames = [];
         this.#worker
-            .postMessage({ purpose: Requests.Sample, sampleConfig});
+            .postMessage({ purpose: Requests.Sample, sampleConfig });
         this.#status = 'sampling';
         this.#onStatusChangedCallbacks.forEach(cb => cb())
     }
@@ -77,17 +88,12 @@ class StanSampler {
     cancel() {
         if (this.#status === 'sampling') {
             this.#worker && this.#worker.terminate();
+            this.#status = "";
             this._initialize();
         }
         else {
             console.warn('Nothing to cancel')
         }
-    }
-    terminate() {
-        if (!this.#worker) return;
-        this.#worker.terminate();
-        this.#worker = undefined;
-        this.#status = '';
     }
     get draws() {
         return this.#draws;
