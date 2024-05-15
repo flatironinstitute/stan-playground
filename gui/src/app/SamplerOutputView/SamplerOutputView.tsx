@@ -30,7 +30,6 @@ const SamplerOutputView: FunctionComponent<SamplerOutputViewProps> = ({width, he
         return (
             () => {
                 canceled = true;
-                sampler.cancel();
             }
         )
     }, [sampler]);

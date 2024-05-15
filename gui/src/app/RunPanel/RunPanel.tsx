@@ -19,7 +19,6 @@ type RunPanelProps = {
 const numChains = 4;
 
 const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, sampler, data, dataIsSaved }) => {
-
     const [runStatus, setRunStatus] = useState<StanSamplerStatus>('');
     const [errorMessage, setErrorMessage] = useState<string>('');
 
@@ -42,7 +41,9 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, sampler, da
         return (
             () => {
                 canceled = true;
-                sampler.cancel();
+                if (sampler.status === 'sampling') {
+                    sampler.cancel();
+                }
             }
         )
     }, [sampler]);
