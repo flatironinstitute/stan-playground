@@ -3,6 +3,7 @@ import { Download } from "@mui/icons-material"
 import { FunctionComponent, useCallback, useEffect, useMemo, useState } from "react"
 import StanSampler from "../StanSampler/StanSampler"
 import TabWidget from "../TabWidget/TabWidget"
+import { useSamplerOutput } from "../StanSampler/useStanSampler"
 
 type SamplerOutputViewProps = {
     width: number
@@ -11,28 +12,8 @@ type SamplerOutputViewProps = {
 }
 
 const SamplerOutputView: FunctionComponent<SamplerOutputViewProps> = ({width, height, sampler}) => {
-    const [draws, setDraws] = useState<number[][] | undefined>();
-    const [paramNames, setParamNames] = useState<string[] | undefined>();
+    const {draws, paramNames} = useSamplerOutput(sampler)
 
-    useEffect(() => {
-        let canceled = false;
-        sampler.onStatusChanged(() => {
-            if (canceled) return;
-            if (sampler.status === 'completed') {
-                setDraws(sampler.draws);
-                setParamNames(sampler.paramNames);
-            }
-            else {
-                setDraws(undefined)
-                setParamNames(undefined)
-            }
-        })
-        return (
-            () => {
-                canceled = true;
-            }
-        )
-    }, [sampler]);
     if (!draws || !paramNames) return (
         <span />
     )

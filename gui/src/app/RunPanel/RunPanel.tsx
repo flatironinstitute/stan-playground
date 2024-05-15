@@ -2,11 +2,12 @@
 import Box from '@mui/material/Box';
 import LinearProgress, { LinearProgressProps } from '@mui/material/LinearProgress';
 import Typography from '@mui/material/Typography';
-import { FunctionComponent, useCallback, useEffect, useState } from 'react';
+import { FunctionComponent, useCallback } from 'react';
 
-import StanSampler, { StanSamplerStatus } from '../StanSampler/StanSampler';
-import { Progress } from '../tinystan/Worker';
+import StanSampler from '../StanSampler/StanSampler';
+import { useSamplerProgress, useSamplerStatus } from '../StanSampler/useStanSampler';
 import { defaultSamplerParams } from '../tinystan';
+import { Progress } from '../tinystan/Worker';
 
 type RunPanelProps = {
     width: number;
@@ -19,40 +20,11 @@ type RunPanelProps = {
 const numChains = 4;
 
 const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, sampler, data, dataIsSaved }) => {
-    const [runStatus, setRunStatus] = useState<StanSamplerStatus>('');
-    const [errorMessage, setErrorMessage] = useState<string>('');
-
-    const [progress, setProgress] = useState<Progress | undefined>(undefined);
-
-    useEffect(() => {
-        if (!sampler) return;
-        let canceled = false;
-        sampler.onStatusChanged(() => {
-            if (canceled) return;
-            setRunStatus(sampler.status);
-            if (sampler.status === 'failed') {
-                setErrorMessage(sampler.errorMessage);
-            }
-        })
-        sampler.onProgress((progress: Progress) => {
-            if (canceled) return;
-            setProgress(progress);
-        })
-        return (
-            () => {
-                canceled = true;
-                if (sampler.status === 'sampling') {
-                    sampler.cancel();
-                }
-            }
-        )
-    }, [sampler]);
+    const {status: runStatus, errorMessage} = useSamplerStatus(sampler)
+    const progress = useSamplerProgress(sampler)
 
     const handleRun = useCallback(async () => {
         if (!sampler) return;
-        setErrorMessage('');
-        setProgress(undefined);
-        console.log('sampling')
         sampler.sample({...defaultSamplerParams, data, num_chains: numChains})
     }, [sampler, data]);
 
