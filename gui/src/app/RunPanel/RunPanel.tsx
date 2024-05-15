@@ -1,153 +1,113 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FunctionComponent, useCallback, useEffect, useState } from 'react';
+import Box from '@mui/material/Box';
 import LinearProgress, { LinearProgressProps } from '@mui/material/LinearProgress';
 import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
+import { FunctionComponent, useCallback, useEffect, useState } from 'react';
 
-import StanWorker from '../tinystan/Worker?worker';
-import { Progress, Replies, Requests } from '../tinystan/Worker'
+import StanSampler, { StanSamplerStatus } from '../StanSampler/StanSampler';
+import { Progress } from '../tinystan/Worker';
 
 type RunPanelProps = {
     width: number;
     height: number;
-    compiledUrl: string;
+    sampler?: StanSampler;
     data: any | undefined
     dataIsSaved: boolean
 };
 
-type RunStatus = '' | 'waiting' | 'running' | 'done' | 'failed';
+const numChains = 4;
 
-const chains = 4;
+const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, sampler, data, dataIsSaved }) => {
 
-const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, compiledUrl, data, dataIsSaved }) => {
-
-    const [runStatus, setRunStatus] = useState<RunStatus>('waiting');
+    const [runStatus, setRunStatus] = useState<StanSamplerStatus>('');
     const [errorMessage, setErrorMessage] = useState<string>('');
-    const [samples, setSamples] = useState<number[][]>([[]]);
-    const [paramNames, setParamNames] = useState<string[]>([]);
 
     const [progress, setProgress] = useState<Progress | undefined>(undefined);
 
-    const [modelWorker, setModelWorker] = useState<Worker | undefined>(undefined);
-
-    // Cancellation destroys the worker, and therefore
-    // requires the same code to be run as if a new
-    // URL was provided. This state is therefore
-    // used to force the following useEffect hook to rerun.
-    const [trigger, setTrigger] = useState(false);
-
     useEffect(() => {
-        if (!compiledUrl) {
-            setModelWorker(undefined);
-            return;
-        }
-        const worker = new StanWorker();
-        setModelWorker(worker);
-        worker.postMessage({ purpose: Requests.Load, url: compiledUrl });
-        return () => {
-            if (worker) {
-                console.log("Cleaning up worker");
-                worker.terminate();
+        if (!sampler) return;
+        let canceled = false;
+        sampler.onStatusChanged(() => {
+            if (canceled) return;
+            setRunStatus(sampler.status);
+            if (sampler.status === 'failed') {
+                setErrorMessage(sampler.errorMessage);
             }
-        }
-    }, [compiledUrl, trigger])
+        })
+        sampler.onProgress((progress: Progress) => {
+            if (canceled) return;
+            setProgress(progress);
+        })
+        return (
+            () => {
+                canceled = true;
+                sampler.cancel();
+            }
+        )
+    }, [sampler]);
 
     const handleRun = useCallback(async () => {
-        if (!modelWorker) return;
-        setRunStatus('running');
+        if (!sampler) return;
         setErrorMessage('');
-        setSamples([[]]);
-        setParamNames([]);
         setProgress(undefined);
         console.log('sampling')
-        modelWorker
-            .postMessage({ purpose: Requests.Sample, sampleConfig: { data, chains } });
-    }, [modelWorker, data]);
+        sampler.sample({data, numChains})
+    }, [sampler, data]);
 
     const cancelRun = useCallback(() => {
-        setRunStatus('waiting');
-        setTrigger(t => !t);
-    }, [setTrigger]);
+        if (!sampler) return;
+        sampler.cancel()
+    }, [sampler]);
 
-    useEffect(() => {
-        if (!modelWorker) {
-            setRunStatus('waiting');
-            return;
-        }
-        modelWorker.onmessage = (e) => {
-            const purpose: Replies = e.data.purpose;
-            switch (purpose) {
-                case Replies.Progress: {
-                    setProgress(e.data.report);
-                    break;
-                }
-                case Replies.ModelLoaded: {
-                    setRunStatus('');
-                    break;
-                }
-                case Replies.SampleReturn: {
-                    if (e.data.error) {
-                        setErrorMessage(e.data.error);
-                        setRunStatus('failed');
-                    } else {
-                        setSamples(e.data.draws);
-                        setParamNames(e.data.paramNames);
-                        setRunStatus('done');
-                    }
-                    break;
-                }
-            }
-        }
-    }, [modelWorker]);
-
-    if (!modelWorker) return (
-        <div style={{ padding: 30 }}>
+    if (!sampler) return (
+        <div style={{ padding: 5 }}>
             Stan model not compiled
         </div>
     )
 
     if (!dataIsSaved) {
         return (
-            <div style={{ padding: 30 }}>
+            <div style={{ padding: 5 }}>
                 Data not saved
             </div>
         )
     }
     return (
         <div style={{ position: 'absolute', width, height, overflowY: 'auto' }}>
-            <div style={{ padding: 20 }}>
+            <div style={{ padding: 5 }}>
                 <div>
-                    <button onClick={handleRun} disabled={runStatus === 'running' || runStatus === 'waiting'}>Run</button>
-                    <button onClick={cancelRun} disabled={runStatus !== 'running'}>Cancel</button>
+                    <button onClick={handleRun} disabled={runStatus === 'sampling' || runStatus === 'loading'}>Run</button>
+                    <button onClick={cancelRun} disabled={runStatus !== 'sampling'}>Cancel</button>
                     {
-                        runStatus === 'waiting' && (
+                        runStatus === 'loading' && (
                             <div>
-                                <h4>Loading compiled Stan model...</h4>
+                                Loading compiled Stan model...
                             </div>
                         )
                     }
                     {
-                        runStatus === 'running' && (
+                        runStatus === 'sampling' && (
                             <div>
-                                <h4>Sampling</h4>
+                                Sampling
                                 <SamplingProgressComponent report={progress} />
                             </div>
                         )
                     }
                     {
-                        runStatus === 'done' && (
-                            <span>&nbsp;&nbsp;done sampling</span>
+                        runStatus === 'completed' && (
+                            <div>
+                                done sampling
+                            </div>
                         )
                     }
                     {
                         runStatus === 'failed' && (
-                            <span>&nbsp;&nbsp;failed: {errorMessage} (see browser console for more details)</span>
+                            <div>
+                                failed: {errorMessage} (see browser console for more details)
+                            </div>
                         )
                     }
                 </div>
-                {runStatus === 'done' && (
-                    <DrawsDisplay draws={samples} paramNames={paramNames} />
-                )}
             </div>
         </div>
     )
@@ -159,7 +119,7 @@ type SamplingProgressComponentProps = {
 
 const SamplingProgressComponent: FunctionComponent<SamplingProgressComponentProps> = ({ report }) => {
     if (!report) return <span />
-    const progress = (report.iteration + ((report.chain - 1) * report.totalIterations)) / (report.totalIterations * chains) * 100;
+    const progress = (report.iteration + ((report.chain - 1) * report.totalIterations)) / (report.totalIterations * numChains) * 100;
     return (
         <>
             <div style={{ width: "60%" }}>
@@ -187,33 +147,6 @@ const LinearProgressWithLabel = (props: LinearProgressProps & { value: number })
             </Box>
         </Box>
     );
-}
-
-
-type DrawsDisplayProps = {
-    draws: number[][],
-    paramNames: string[]
-}
-
-const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({ draws, paramNames }) => {
-    const means: { [k: string]: number } = {};
-
-    for (const [i, element] of paramNames.entries()) {
-        let sum = 0;
-        for (const draw of draws[i]) {
-            sum += draw;
-        }
-        means[element] = sum / draws[i].length;
-    }
-
-    return (
-        <div>
-            <h3>Samples</h3>
-
-            <pre>Means: {JSON.stringify(means, null, 2)}</pre>
-            <pre>Draws: {JSON.stringify(draws, null, 2)}</pre>
-        </div>
-    )
 }
 
 export default RunPanel;

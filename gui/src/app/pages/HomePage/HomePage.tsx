@@ -5,6 +5,8 @@ import DataFileEditor from "../../FileEditor/DataFileEditor";
 import RunPanel from "../../RunPanel/RunPanel";
 import { Hyperlink } from "@fi-sci/misc";
 import examplesStanies, { Stanie, StanieMetaData } from "../../exampleStanies/exampleStanies";
+import StanSampler from "../../StanSampler/StanSampler";
+import SamplerOutputView from "../../SamplerOutputView/SamplerOutputView";
 
 type Props = {
     width: number
@@ -93,6 +95,20 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
         window.location.reload()
     }, [])
 
+    const [sampler, setSampler] = useState<StanSampler | undefined>(undefined);
+
+    useEffect(() => {
+        if (!compileMainJsUrl) {
+            setSampler(undefined);
+            return;
+        }
+        const s = new StanSampler(compileMainJsUrl);
+        setSampler(s);
+        return () => {
+            s.cancel();
+        }
+    }, [compileMainJsUrl])
+
     return (
         <div style={{ position: 'absolute', width, height }}>
             <div style={{ width: leftPanelWidth, height, position: 'absolute' }}>
@@ -107,10 +123,10 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
             </div>
             <div style={{ position: 'absolute', left: leftPanelWidth, width: width - leftPanelWidth, height }}>
                 <Splitter
-                    width={width}
+                    width={width - leftPanelWidth}
                     height={height}
                     direction="horizontal"
-                    initialPosition={width / 2}
+                    initialPosition={Math.min(800, (width - leftPanelWidth) / 2)}
                 >
                     <StanFileEditor
                         width={0}
@@ -130,7 +146,7 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
                         saveDataFileContent={saveDataFileContent}
                         editedDataFileContent={editedDataFileContent}
                         setEditedDataFileContent={setEditedDataFileContent}
-                        compiledUrl={compileMainJsUrl}
+                        sampler={sampler}
                     />
                 </Splitter>
             </div>
@@ -145,24 +161,16 @@ type RightViewProps = {
     saveDataFileContent: (text: string) => void
     editedDataFileContent: string
     setEditedDataFileContent: (text: string) => void
-    compiledUrl: string
+    sampler?: StanSampler
 }
 
-const RightView: FunctionComponent<RightViewProps> = ({ width, height, dataFileContent, saveDataFileContent, editedDataFileContent, setEditedDataFileContent, compiledUrl }) => {
-    const parsedData = useMemo(() => {
-        try {
-            return JSON.parse(dataFileContent)
-        }
-        catch (e) {
-            return undefined
-        }
-    }, [dataFileContent])
+const RightView: FunctionComponent<RightViewProps> = ({ width, height, dataFileContent, saveDataFileContent, editedDataFileContent, setEditedDataFileContent, sampler }) => {
     return (
         <Splitter
             direction="vertical"
             width={width}
             height={height}
-            initialPosition={height / 2}
+            initialPosition={height / 3}
         >
             <DataFileEditor
                 width={0}
@@ -174,14 +182,56 @@ const RightView: FunctionComponent<RightViewProps> = ({ width, height, dataFileC
                 setEditedFileContent={setEditedDataFileContent}
                 readOnly={false}
             />
-            <RunPanel
+            <LowerRightView
                 width={0}
                 height={0}
-                compiledUrl={compiledUrl}
-                data={parsedData}
+                sampler={sampler}
+                dataFileContent={dataFileContent}
                 dataIsSaved={dataFileContent === editedDataFileContent}
             />
         </Splitter>
+    )
+}
+
+type LowerRightViewProps = {
+    width: number
+    height: number
+    sampler?: StanSampler
+    dataFileContent: string
+    dataIsSaved: boolean
+}
+
+const LowerRightView: FunctionComponent<LowerRightViewProps> = ({ width, height, sampler, dataFileContent, dataIsSaved }) => {
+    const parsedData = useMemo(() => {
+        try {
+            return JSON.parse(dataFileContent)
+        }
+        catch (e) {
+            return undefined
+        }
+    }, [dataFileContent])
+    const runPanelHeight = 80
+
+    return (
+        <div style={{position: 'absolute', width, height}}>
+            <div style={{position: 'absolute', width, height: runPanelHeight}}>
+                <RunPanel
+                    width={width}
+                    height={runPanelHeight}
+                    sampler={sampler}
+                    data={parsedData}
+                    dataIsSaved={dataIsSaved}
+                />
+            </div>
+            <div style={{position: 'absolute', width, top: runPanelHeight, height: height - runPanelHeight}}>
+                {sampler && <SamplerOutputView
+                    width={width}
+                    height={height-runPanelHeight}
+                    sampler={sampler}
+                />
+                }
+            </div>
+        </div>
     )
 }
 

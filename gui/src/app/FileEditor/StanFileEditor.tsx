@@ -138,11 +138,13 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
 
     const isCompiling = compileStatus === 'compiling'
 
+    const compileResultsHeight = Math.min(300, height / 3)
+
     return (
         <Splitter
             width={width}
             height={height}
-            initialPosition={height * 2 / 3}
+            initialPosition={height  - compileResultsHeight}
             direction="vertical"
         >
             <TextEditor

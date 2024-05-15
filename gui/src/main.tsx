@@ -4,8 +4,8 @@ import * as ReactDOM from 'react-dom/client';
 import App from './app/App';
 import './localStyles.css';
 import './index.css';
-import './nwb-table.css';
-import './nwb-table-2.css';
+import './draws-table.css';
+import './draws-table-2.css';
 import './scientific-table.css';
 import './table1.css'
 
