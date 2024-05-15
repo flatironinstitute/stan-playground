@@ -12,7 +12,7 @@ type Props = {
     // none
 }
 
-export const applicationBarHeight = 45
+export const applicationBarHeight = 35
 
 const logoUrl = `/stan-playground-logo.png`
 
@@ -36,8 +36,8 @@ const ApplicationBar: FunctionComponent<Props> = () => {
 
     return (
         <span>
-            <AppBar position="static" style={{height: applicationBarHeight - 10, color: 'black', background: barColor}}>
-                <Toolbar style={{minHeight: applicationBarHeight - 10}}>
+            <AppBar position="static" style={{height: applicationBarHeight, color: 'black', background: barColor}}>
+                <Toolbar style={{minHeight: applicationBarHeight}}>
                     <img src={logoUrl} alt="logo" height={27} style={{paddingBottom: 1, cursor: 'pointer'}} onClick={onHome} />
                     <div onClick={onHome} style={{cursor: 'pointer', color: titleColor}}>&nbsp;&nbsp;&nbsp;Stan Playground</div>
                     <span style={{marginLeft: 'auto'}} />
