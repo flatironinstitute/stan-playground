@@ -97,7 +97,16 @@ const SamplingProgressComponent: FunctionComponent<SamplingProgressComponentProp
     return (
         <>
             <div style={{ width: "60%" }}>
-                <LinearProgressWithLabel sx={{ height: 10 }} value={progress} />
+                <LinearProgressWithLabel
+                    sx={{
+                        height: 10,
+                        // https://stackoverflow.com/a/73009519
+                        "& .MuiLinearProgress-bar": {
+                            transition: 'none'
+                        }
+                    }}
+                    value={progress}
+                />
             </div>
             <div>
                 Chain {report.chain} Iteration: {report.iteration} / {report.totalIterations} ({report.warmup ? 'Warmup' : 'Sampling'})
