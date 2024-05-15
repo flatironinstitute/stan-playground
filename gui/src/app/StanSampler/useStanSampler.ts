@@ -9,7 +9,7 @@ const useStanSampler = (compiledMainJsUrl: string | undefined) => {
             setSampler(undefined);
             return;
         }
-        const { sampler, cleanup: destructor } = StanSampler.create(compiledMainJsUrl);
+        const { sampler, cleanup: destructor } = StanSampler.__unsafe_create(compiledMainJsUrl);
         setSampler(sampler);
         return destructor;
 
@@ -43,6 +43,7 @@ export const useSamplerStatus = (sampler: StanSampler | undefined) => {
 export const useSamplerProgress = (sampler: StanSampler | undefined) => {
     const [progress, setProgress] = useState<Progress | undefined>(undefined);
     useEffect(() => {
+        setProgress(undefined);
         if (!sampler) return;
         let canceled = false;
         const cb = (progress: Progress) => {

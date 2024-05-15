@@ -17,7 +17,7 @@ class StanSampler {
         this._initialize()
     }
 
-    static create(compiledUrl: string): { sampler: StanSampler, cleanup: () => void } {
+    static __unsafe_create(compiledUrl: string): { sampler: StanSampler, cleanup: () => void } {
         const sampler = new StanSampler(compiledUrl);
         const cleanup = () => {
             sampler.#worker && sampler.#worker.terminate();
