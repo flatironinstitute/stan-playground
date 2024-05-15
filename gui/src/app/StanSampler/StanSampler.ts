@@ -1,3 +1,4 @@
+import { SamplerParams } from '../tinystan';
 import { Progress, Replies, Requests } from '../tinystan/Worker';
 import StanWorker from '../tinystan/Worker?worker';
 
@@ -46,13 +47,12 @@ class StanSampler {
         }
         this.#worker.postMessage({ purpose: Requests.Load, url: this.compiledUrl });
     }
-    sample(a: {data: any, numChains: number}) {
+    sample(sampleConfig: SamplerParams) {
         if (!this.#worker) return
-        const { data, numChains } = a;
         this.#draws = [];
         this.#paramNames = [];
         this.#worker
-            .postMessage({ purpose: Requests.Sample, sampleConfig: { data, chains: numChains } });
+            .postMessage({ purpose: Requests.Sample, sampleConfig});
         this.#status = 'sampling';
         this.#onStatusChangedCallbacks.forEach(cb => cb())
     }
