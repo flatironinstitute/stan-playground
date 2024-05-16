@@ -81,7 +81,6 @@ class StanSampler {
             num_samples: samplingOpts.num_samples,
             init_radius: samplingOpts.init_radius
         }
-
         if (!this.#worker) return
         if (this.#status === '') {
             console.warn('Model not loaded yet')
