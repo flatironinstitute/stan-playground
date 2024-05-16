@@ -61,9 +61,7 @@ export type StanDraws = {
   draws: number[][];
 };
 
-export type StanVariableInputs = {
-  [k: string]: unknown;
-};
+export type StanVariableInputs = Record<string, unknown>;
 
 export interface SamplerParams {
   data: string | StanVariableInputs;
