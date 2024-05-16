@@ -6,13 +6,15 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Header
 from fastapi import Body
+from fastapi.responses import PlainTextResponse
+from pydantic import BaseModel
 import os
 import subprocess
 
 
 cwd = os.getcwd()
-BLOBS_BASE_DIR = os.environ.get("BLOBS_BASE_DIR", f"{cwd}/blobs")
-JOBS_BASE_DIR = os.environ.get("JOBS_BASE_DIR", f"{cwd}/jobs")
+BLOBS_DIR = os.environ.get("BLOBS_DIR", f"{cwd}/blobs")
+JOBS_DIR = os.environ.get("JOBS_DIR", f"{cwd}/jobs")
 
 app = FastAPI()
 
@@ -21,6 +23,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:3001",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
         "https://stan-playground.vercel.app"
     ],
     allow_credentials=True,
@@ -192,12 +196,16 @@ async def run_job(job_id: str):
     return {"job_id": job_id, "status": "completed"}
 
 
+class UploadBlobRequest(BaseModel):
+    text: str
+
 @app.post("/blob/stan")
-async def put_blob_stan(data: bytes = Body(...)):
+async def put_blob_stan(request: UploadBlobRequest):
+    text = request.text
     # todo: check whether this looks like a reasonable stan program
-    if len(data) > 1024 * 1024:
+    if len(text) > 1024 * 1024:
         raise HTTPException(status_code=400, detail="Blob too large for stan program")
-    return _store_blob('stan', data)
+    return _store_blob('stan', text)
 
 
 @app.get("/blob/stan/{sha1}")
@@ -206,11 +214,12 @@ async def get_blob_stan(sha1: str):
 
 
 @app.post("/blob/data.json")
-async def put_blob_data_json(data: bytes = Body(...)):
+async def put_blob_data_json(request: UploadBlobRequest):
+    text = request.text
     # todo: check whether this looks like a reasonable data.json
-    if len(data) > 1024 * 1024 * 30:
+    if len(text) > 1024 * 1024 * 30:
         raise HTTPException(status_code=400, detail="Blob too large for data.json")
-    return _store_blob('data.json', data)
+    return _store_blob('data.json', text)
 
 
 @app.get("/blob/data.json/{sha1}")
@@ -219,11 +228,12 @@ async def get_blob_data_json(sha1: str):
 
 
 @app.post("/blob/opts.json")
-async def put_blob_opts_json(data: bytes = Body(...)):
+async def put_blob_opts_json(request: UploadBlobRequest):
+    text = request.text
     # todo: check whether this looks like a reasonable opts.json
-    if len(data) > 1024 * 100:
+    if len(text) > 1024 * 100:
         raise HTTPException(status_code=400, detail="Blob too large for opts.json")
-    return _store_blob('opts.json', data)
+    return _store_blob('opts.json', text)
 
 
 @app.get("/blob/opts.json/{sha1}")
@@ -231,24 +241,24 @@ async def get_blob_opts_json(sha1: str):
     return _get_blob('opts.json', sha1)
 
 
-def _store_blob(kind: str, data: bytes):
-    sha1 = hashlib.sha1(data).hexdigest()
-    blob_dir = f"{BLOBS_BASE_DIR}/{kind}/sha1/{sha1[:2]}/{sha1[2:4]}/{sha1[4:6]}"
+def _store_blob(kind: str, text: str):
+    sha1 = hashlib.sha1(text.encode()).hexdigest()
+    blob_dir = f"{BLOBS_DIR}/{kind}/sha1/{sha1[:2]}/{sha1[2:4]}/{sha1[4:6]}"
     os.makedirs(blob_dir, exist_ok=True)
-    blob_path = f"{blob_dir}/{sha1[6:]}"
-    with open(blob_path, "wb") as f:
-        f.write(data)
+    blob_path = f"{blob_dir}/{sha1}"
+    with open(blob_path, "w") as f:
+        f.write(text)
     return {"sha1": sha1}
 
 
 def _get_blob(kind: str, sha1: str):
-    blob_dir = f"{BLOBS_BASE_DIR}/{kind}/{sha1[:2]}/{sha1[2:4]}/{sha1[4:6]}"
-    blob_path = f"{blob_dir}/{sha1[6:]}"
+    blob_dir = f"{BLOBS_DIR}/{kind}/sha1/{sha1[:2]}/{sha1[2:4]}/{sha1[4:6]}"
+    blob_path = f"{blob_dir}/{sha1}"
     if not os.path.isfile(blob_path):
         raise HTTPException(status_code=404, detail="Blob not found")
-    with open(blob_path, "rb") as f:
-        data = f.read()
-    return data
+    with open(blob_path, "r") as f:
+        text = f.read()
+    return PlainTextResponse(content=text)
 
 
 def _compute_stan_program_hash(fname: str):
@@ -279,7 +289,7 @@ def _is_valid_job_id(job_id: str):
 
 
 def _get_job_dir(job_id: str):
-    return f"/{JOBS_BASE_DIR}/{job_id}"
+    return f"/{JOBS_DIR}/{job_id}"
 
 
 def _create_run_sh_text(*, job_dir: str, model_dir: str, tinystan_dir: str):

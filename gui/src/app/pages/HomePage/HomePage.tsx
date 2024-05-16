@@ -9,6 +9,17 @@ import useStanSampler, { useSamplerStatus } from "../../StanSampler/useStanSampl
 import examplesStanies, { Stanie, StanieMetaData } from "../../exampleStanies/exampleStanies";
 import SamplingOptsPanel from "../../SamplingOptsPanel/SamplingOptsPanel";
 import { SamplingOpts, defaultSamplingOpts } from "../../StanSampler/StanSampler";
+import {storeBlob, fetchBlob} from "./storeBlob";
+
+const queryParams = new URLSearchParams(window.location.search)
+const q = {
+    stan: queryParams.get('stan'),
+    data: queryParams.get('data'),
+    sopts: queryParams.get('sopts'),
+    title: queryParams.get('title')
+}
+
+const doLoadFromQuery = q.stan && q.data && q.sopts && q.title
 
 type Props = {
     width: number
@@ -20,23 +31,27 @@ const defaultDataContent = ''
 const defaultMetaContent = '{"title": "Untitled"}'
 const defaultSamplingOptsContent = JSON.stringify(defaultSamplingOpts, null, 2)
 
-const initialFileContent = localStorage.getItem('main.stan') || defaultStanContent
+let initialStanFileContent = localStorage.getItem('main.stan') || defaultStanContent
+let initialDataFileContent = localStorage.getItem('data.json') || defaultDataContent
+let initialMetaContent = localStorage.getItem('meta.json') || defaultMetaContent
+let initialSamplingOptsContent = localStorage.getItem('samplingOpts.json') || defaultSamplingOptsContent
 
-const initialDataFileContent = localStorage.getItem('data.json') || defaultDataContent
-
-const initialMetaContent = localStorage.getItem('meta.json') || defaultMetaContent
-
-const initialSamplingOptsContent = localStorage.getItem('samplingOpts.json') || defaultSamplingOptsContent
+if (doLoadFromQuery) {
+    initialStanFileContent = ''
+    initialDataFileContent = '{}'
+    initialMetaContent = '{}'
+    initialSamplingOptsContent = '{}'
+}
 
 const HomePage: FunctionComponent<Props> = ({ width, height }) => {
-    const [fileContent, saveFileContent] = useState(initialFileContent)
-    const [editedFileContent, setEditedFileContent] = useState('')
+    const [stanFileContent, saveStanFileContent] = useState(initialStanFileContent)
+    const [editedStanFileContent, setEditedStanFileContent] = useState('')
     useEffect(() => {
-        setEditedFileContent(fileContent)
-    }, [fileContent])
+        setEditedStanFileContent(stanFileContent)
+    }, [stanFileContent])
     useEffect(() => {
-        localStorage.setItem('main.stan', fileContent)
-    }, [fileContent])
+        localStorage.setItem('main.stan', stanFileContent)
+    }, [stanFileContent])
 
     const [dataFileContent, saveDataFileContent] = useState(initialDataFileContent)
     const [editedDataFileContent, setEditedDataFileContent] = useState('')
@@ -64,6 +79,25 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
         localStorage.setItem('meta.json', metaContent)
     }, [metaContent])
 
+    useEffect(() => {
+        if (!doLoadFromQuery) return
+        ; (async () => {
+            try {
+                const stan = await fetchBlob('stan', q.stan || '')
+                const data = await fetchBlob('data.json', q.data || '')
+                const sopts = await fetchBlob('opts.json', q.sopts || '')
+                saveStanFileContent(stan)
+                saveDataFileContent(data)
+                setSamplingOptsContent(sopts)
+                setMetaContent(JSON.stringify({ title: q.title || '' }, null, 2))
+            }
+            catch (err) {
+                console.error(err)
+                alert('Problem loading from query.')
+            }
+        })()
+    }, [])
+
     const doNotSaveOnUnload = useRef<boolean>(false)
     useEffect(() => {
         // if the user reloads the page, then we want
@@ -75,7 +109,7 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
             if (doNotSaveOnUnload.current) {
                 return
             }
-            localStorage.setItem('main.stan', fileContent);
+            localStorage.setItem('main.stan', stanFileContent);
             localStorage.setItem('data.json', dataFileContent);
             localStorage.setItem('meta.json', metaContent);
         };
@@ -85,17 +119,17 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
         return () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-    }, [fileContent, dataFileContent, metaContent, doNotSaveOnUnload]);
+    }, [stanFileContent, dataFileContent, metaContent, doNotSaveOnUnload]);
 
     const [compiledMainJsUrl, setCompiledMainJsUrl] = useState<string>('')
 
     const leftPanelWidth = width > 400 ? 200 : 0
 
     const handleLoadStanie = useCallback((stanie: Stanie) => {
-        saveFileContent(stanie.stan)
+        saveStanFileContent(stanie.stan)
         saveDataFileContent(stringifyData(stanie.data))
         setMetaContent(JSON.stringify(stanie.meta, null, 2))
-    }, [saveFileContent, saveDataFileContent, setMetaContent])
+    }, [saveStanFileContent, saveDataFileContent, setMetaContent])
 
     const handleClearBrowserData = useCallback(() => {
         const confirmed = window.confirm('Are you sure you want to clear all browser data?')
@@ -107,6 +141,16 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
         window.location.reload()
     }, [])
 
+    const generateShareableUrl = useMemo(() => (async () => {
+        const stanSha1 = await storeBlob('stan', stanFileContent)
+        const dataSha1 = await storeBlob('data.json', dataFileContent)
+        const samplingOptsSha1 = await storeBlob('opts.json', samplingOptsContent)
+        const title = JSON.parse(metaContent).title || 'Untitled'
+        const a = window.location.href.split('?')[0]
+        const url = `${a}?stan=${stanSha1}&data=${dataSha1}&sopts=${samplingOptsSha1}&title=${title}`
+        return url
+    }), [stanFileContent, dataFileContent, samplingOptsContent, metaContent])
+
     return (
         <div style={{ position: 'absolute', width, height }}>
             <div style={{ width: leftPanelWidth, height, position: 'absolute' }}>
@@ -117,6 +161,7 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
                     setMetaContent={setMetaContent}
                     onLoadStanie={handleLoadStanie}
                     onClearBrowserData={handleClearBrowserData}
+                    generateShareableUrl={generateShareableUrl}
                 />
             </div>
             <div style={{ position: 'absolute', left: leftPanelWidth, width: width - leftPanelWidth, height }}>
@@ -130,10 +175,10 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
                         width={0}
                         height={0}
                         fileName="main.stan"
-                        fileContent={fileContent}
-                        onSaveContent={saveFileContent}
-                        editedFileContent={editedFileContent}
-                        setEditedFileContent={setEditedFileContent}
+                        fileContent={stanFileContent}
+                        onSaveContent={saveStanFileContent}
+                        editedFileContent={editedStanFileContent}
+                        setEditedFileContent={setEditedStanFileContent}
                         readOnly={false}
                         setCompiledUrl={setCompiledMainJsUrl}
                     />
@@ -259,10 +304,10 @@ type LeftPanelProps = {
     setMetaContent: (text: string) => void
     onLoadStanie: (stanie: Stanie) => void
     onClearBrowserData: () => void
-    onShare: () => void
+    generateShareableUrl: () => Promise<string>
 }
 
-const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, metaContent, setMetaContent, onLoadStanie, onClearBrowserData, onShare }) => {
+const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, metaContent, setMetaContent, onLoadStanie, onClearBrowserData, generateShareableUrl }) => {
     const metaData = useMemo(() => {
         try {
             const x = JSON.parse(metaContent) as StanieMetaData
@@ -281,6 +326,18 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, metaConte
             title
         }))
     }, [metaData, setMetaContent])
+
+    const [shareableUrl, setShareableUrl] = useState<string | undefined>(undefined)
+    const handleShare = useCallback(async () => {
+        try {
+            const url = await generateShareableUrl()
+            setShareableUrl(url)
+        }
+        catch (err) {
+            console.error(err)
+            alert('Problem generating shareable URL.')
+        }
+    }, [generateShareableUrl])
 
     return (
         <div style={{ width, height, backgroundColor: '#333', color: '#ccc' }}>
@@ -315,8 +372,15 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, metaConte
             </div>
             <hr />
             <div style={{ position: 'relative', left: 10, width: width - 20 }}>
-                <Hyperlink onClick={onShare} color="lightblue">Share</Hyperlink>
+                <Hyperlink onClick={handleShare} color="lightblue">Share</Hyperlink>
             </div>
+            {
+                shareableUrl && (
+                    <div style={{ position: 'relative', left: 10, width: width - 20 }}>
+                        <CopyableTextField text={shareableUrl} />
+                    </div>
+                )
+            }
             <hr />
             <div style={{ position: 'relative', height: 30 }} />
             <div style={{ position: 'absolute', left: 10, width: width - 20, bottom: 10 }}>
@@ -334,6 +398,40 @@ const stringifyData = (data: { [key: string]: any }) => {
     return JSON.stringify(data, replacer, 2)
         .replace(/"\[/g, '[')
         .replace(/\]"/g, ']')
+}
+
+type CopyableTextFieldProps = {
+    text: string
+}
+
+const CopyableTextField: FunctionComponent<CopyableTextFieldProps> = ({ text }) => {
+    const ref = useRef<HTMLTextAreaElement>(null)
+    const [copied, setCopied] = useState(false)
+    const handleCopy = useCallback(() => {
+        if (!ref.current) return
+        ref.current.select()
+        document.execCommand('copy')
+        setCopied(true)
+        setTimeout(() => {
+            setCopied(false)
+        }, 2000)
+    }, [ref])
+
+    return (
+        <div>
+            <textarea
+                ref={ref}
+                style={{ width: '100%', height: 35, backgroundColor: '#444', color: '#ccc', padding: 5, border: 'none' }}
+                value={text}
+                readOnly
+            />
+            <div style={{ textAlign: 'right', fontSize: 12 }}>
+                <Hyperlink onClick={handleCopy} color="lightblue">
+                    {copied ? 'Copied!' : 'Copy'}
+                </Hyperlink>
+            </div>
+        </div>
+    )
 }
 
 export default HomePage
