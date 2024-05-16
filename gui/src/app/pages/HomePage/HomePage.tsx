@@ -227,9 +227,10 @@ type LeftPanelProps = {
     setMetaContent: (text: string) => void
     onLoadStanie: (stanie: Stanie) => void
     onClearBrowserData: () => void
+    onShare: () => void
 }
 
-const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, metaContent, setMetaContent, onLoadStanie, onClearBrowserData }) => {
+const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, metaContent, setMetaContent, onLoadStanie, onClearBrowserData, onShare }) => {
     const metaData = useMemo(() => {
         try {
             const x = JSON.parse(metaContent) as StanieMetaData
@@ -248,6 +249,7 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, metaConte
             title
         }))
     }, [metaData, setMetaContent])
+
     return (
         <div style={{ width, height, backgroundColor: '#333', color: '#ccc' }}>
             <div>&nbsp;</div>
@@ -278,6 +280,10 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, metaConte
                         )
                     })
                 }
+            </div>
+            <hr />
+            <div style={{ position: 'relative', left: 10, width: width - 20 }}>
+                <Hyperlink onClick={onShare} color="lightblue">Share</Hyperlink>
             </div>
             <hr />
             <div style={{ position: 'relative', height: 30 }} />
