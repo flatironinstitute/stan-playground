@@ -58,7 +58,7 @@ class StanSampler {
         }
         this.#worker.postMessage({ purpose: Requests.Load, url: this.compiledUrl });
     }
-    sample(sampleConfig: SamplerParams) {
+    sample(sampleConfig: Partial<SamplerParams>) {
         if (!this.#worker) return
         if (this.#status === '') {
             console.warn('Model not loaded yet')
