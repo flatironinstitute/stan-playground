@@ -1,4 +1,4 @@
-.nwb-table-2 {
+.draws-table-2 {
     border-collapse: separate;
     border-spacing: 2px 0px;
     font-size: 0.75em;
@@ -7,7 +7,7 @@
     margin: 0px 0;
 }
 
-.nwb-table-2 td {
+.draws-table-2 td {
     white-space: nowrap;
     text-overflow: ellipsis;
     min-width: 100px;
@@ -16,35 +16,35 @@
     padding: 30px;
 }
 
-.nwb-table-2 thead tr {
+.draws-table-2 thead tr {
     background-color: #009879;
     color: #ffffff;
     text-align: left;
 }
 
-.nwb-table-2 th,
-.nwb-table-2 td {
+.draws-table-2 th,
+.draws-table-2 td {
     padding: 2px 2px;
 }
 
-.nwb-table-2 tbody tr {
+.draws-table-2 tbody tr {
     border-bottom: thin solid #dddddd;
 }
 
-.nwb-table-2 tbody tr:nth-of-type(even) {
+.draws-table-2 tbody tr:nth-of-type(even) {
     background-color: #c5fad0;
 }
 
-.nwb-table-2 tbody tr:last-of-type {
+.draws-table-2 tbody tr:last-of-type {
     border-bottom: 2px solid #009879;
 }
 
-.nwb-table-2 tbody tr:hover {
+.draws-table-2 tbody tr:hover {
     background-color: #ededed;
     transition: background-color 0.3s ease;
 }
 
-.nwb-table-2 thead tr {
+.draws-table-2 thead tr {
     position: sticky;
     top: 0;
 }

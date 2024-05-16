@@ -88,7 +88,7 @@ export interface SamplerParams {
   num_threads: number;
 }
 
-const defaultSamplerParams: SamplerParams = {
+export const defaultSamplerParams: SamplerParams = {
   data: "",
   num_chains: 4,
   seed: null,
