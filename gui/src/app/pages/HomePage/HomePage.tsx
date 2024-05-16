@@ -217,7 +217,7 @@ const LowerRightView: FunctionComponent<LowerRightViewProps> = ({ width, height,
         }
     }, [dataFileContent])
     const samplingOptsPanelHeight = 125
-    const samplingOptsPanelWidth = width / 2
+    const samplingOptsPanelWidth = Math.min(150, width / 2)
 
     const {sampler} = useStanSampler(compiledMainJsUrl)
     const {status: samplerStatus} = useSamplerStatus(sampler)

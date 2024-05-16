@@ -102,6 +102,7 @@ const IntEdit: FunctionComponent<InitEditProps> = ({ value, onChange, min, max, 
             min={min}
             max={max}
             readOnly={readOnly}
+            style={{ width: "4em" }}
         />
     )
 }
@@ -123,6 +124,7 @@ const FloatEdit: FunctionComponent<FloatEditProps> = ({ value, onChange, min, ma
             min={min}
             max={max}
             readOnly={readOnly}
+            style={{ width: "4em" }}
         />
     )
 }
