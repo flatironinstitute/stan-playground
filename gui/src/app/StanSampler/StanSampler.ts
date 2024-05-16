@@ -142,7 +142,7 @@ const calculateReasonableRefreshRate = (samplingOpts: SamplingOpts) => {
 
     const nearestMultipleOfTen = Math.round(onePercent / 10) * 10;
 
-    return Math.max(1, nearestMultipleOfTen);
+    return Math.max(10, nearestMultipleOfTen);
 }
 
 export default StanSampler
