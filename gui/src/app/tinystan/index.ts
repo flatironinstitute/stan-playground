@@ -162,7 +162,7 @@ export default class StanModel {
     throw new Error(err_msg);
   }
 
-  private encodeInits(inits: string | object | string[] | object[]): cstr {
+  private encodeInits(inits: string | StanVariableInputs | string[] | StanVariableInputs[]): cstr {
     if (Array.isArray(inits)) {
       return this.encodeString(
         inits.map(i => string_safe_jsonify(i)).join(this.sep),
@@ -173,7 +173,7 @@ export default class StanModel {
   }
 
   private withModel<T>(
-    data: string | object,
+    data: string | StanVariableInputs,
     seed: number,
     f: (model: model_ptr) => T,
   ): T {
