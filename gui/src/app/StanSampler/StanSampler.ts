@@ -1,4 +1,4 @@
-import { SamplerParams, defaultSamplerParams } from '../tinystan';
+import { SamplerParams } from '../tinystan';
 import { Progress, Replies, Requests } from '../tinystan/Worker';
 import StanWorker from '../tinystan/Worker?worker';
 
@@ -72,9 +72,8 @@ class StanSampler {
         }
         this.#worker.postMessage({ purpose: Requests.Load, url: this.compiledUrl });
     }
-    sample(data: string | object, samplingOpts: SamplingOpts) {
-        const sampleConfig: SamplerParams = {
-            ...defaultSamplerParams,
+    sample(data: any, samplingOpts: SamplingOpts) {
+        const sampleConfig: Partial<SamplerParams> = {
             data,
             num_chains: samplingOpts.num_chains,
             num_warmup: samplingOpts.num_warmup,
