@@ -90,6 +90,8 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
                 saveDataFileContent(data)
                 setSamplingOptsContent(sopts)
                 setMetaContent(JSON.stringify({ title: q.title || '' }, null, 2))
+                // after we have done this, let's remove they query part of the url
+                window.history.replaceState({}, document.title, window.location.pathname)
             }
             catch (err) {
                 console.error(err)
@@ -145,7 +147,9 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
         const stanSha1 = await storeBlob('stan', stanFileContent)
         const dataSha1 = await storeBlob('data.json', dataFileContent)
         const samplingOptsSha1 = await storeBlob('opts.json', samplingOptsContent)
-        const title = JSON.parse(metaContent).title || 'Untitled'
+        let title = JSON.parse(metaContent).title || 'Untitled'
+        // need to url encode title
+        title = encodeURIComponent(title)
         const a = window.location.href.split('?')[0]
         const url = `${a}?stan=${stanSha1}&data=${dataSha1}&sopts=${samplingOptsSha1}&title=${title}`
         return url
@@ -330,6 +334,7 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, metaConte
     const [shareableUrl, setShareableUrl] = useState<string | undefined>(undefined)
     const handleShare = useCallback(async () => {
         try {
+            setShareableUrl(undefined)
             const url = await generateShareableUrl()
             setShareableUrl(url)
         }
