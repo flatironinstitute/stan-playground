@@ -172,6 +172,18 @@ export default class StanModel {
     }
   }
 
+  /**
+   * withModel serves as something akin to a context manager in
+   * Python. It accepts the arguments needed to construct a model
+   * (data and seed) and a callback.
+   *
+   * The callback takes in the model and a deferredFree function.
+   * The memory for the allocated model and any pointers which are "registered"
+   * by calling deferredFree will be cleaned up when the callback completes,
+   * regardless of if this is a normal return or an exception.
+   *
+   * The result of the callback is then returned or re-thrown.
+   */
   private withModel<T>(
     data: string | StanVariableInputs,
     seed: number,
