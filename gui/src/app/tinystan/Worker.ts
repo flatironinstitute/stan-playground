@@ -23,6 +23,12 @@ const parseProgress = (msg: string): Progress => {
     // Examples (note different spacing):
     // Chain [1] Iteration: 2000 / 2000 [100%]  (Sampling)
     // Chain [2] Iteration:  800 / 2000 [ 40%]  (Warmup)
+
+    // But if there is only one chain, then
+    // the "Chain [x]" part is omitted.
+    if (msg.startsWith('Iteration:')) {
+        msg = 'Chain [1] ' + msg;
+    }
     const parts = msg.split(/\s+/);
     const chain = parseInt(parts[1].slice(1, -1));
     const iteration = parseInt(parts[3]);
@@ -33,7 +39,7 @@ const parseProgress = (msg: string): Progress => {
 }
 
 const progressPrintCallback = (msg: string) => {
-    if (!msg.startsWith('Chain')) {
+    if ((!msg.startsWith('Chain')) && (!msg.startsWith('Iteration:'))) {
         console.log(msg);
         return;
     }
