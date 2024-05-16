@@ -19,7 +19,7 @@ interface WasmModule {
   _tinystan_separator_char(): number;
   // prettier-ignore
   _tinystan_sample(model: model_ptr, num_chains: number, inits: cstr, seed: number, id: number,
-    init_radius: number, num_warmup: number, num_samples: number, metric: number, init_inv_metric: cstr,
+    init_radius: number, num_warmup: number, num_samples: number, metric: number, init_inv_metric: ptr,
     adapt: number, delta: number, gamma: number, kappa: number, t0: number, init_buffer: number,
     term_buffer: number, window: number, save_warmup: number, stepsize: number, stepsize_jitter: number,
     max_depth: number, refresh: number, num_threads: number, out: ptr, out_size: number, metric_out: ptr,
@@ -37,8 +37,6 @@ interface WasmModule {
 }
 
 const NULL = 0 as ptr;
-const NULLSTR = 0 as cstr;
-
 
 const HMC_SAMPLER_VARIABLES = [
   "lp__",
@@ -66,12 +64,15 @@ export type StanDraws = {
 export interface SamplerParams {
   data: string | object;
   num_chains: number;
+  inits: string | object | string[] | object[];
   seed: number | null;
   id: number;
   init_radius: number;
   num_warmup: number;
   num_samples: number;
   metric: HMCMetric;
+  save_metric: boolean,
+  init_inv_metric: number[] | number[][] | null;
   adapt: boolean;
   delta: number;
   gamma: number;
@@ -88,15 +89,18 @@ export interface SamplerParams {
   num_threads: number;
 }
 
-export const defaultSamplerParams: SamplerParams = {
+const defaultSamplerParams: SamplerParams = {
   data: "",
   num_chains: 4,
+  inits: "",
   seed: null,
   id: 1,
   init_radius: 2.0,
   num_warmup: 1000,
   num_samples: 1000,
   metric: HMCMetric.DIAGONAL,
+  save_metric: false,
+  init_inv_metric: null, // currently unused
   adapt: true,
   delta: 0.8,
   gamma: 0.05,
@@ -116,10 +120,13 @@ export const defaultSamplerParams: SamplerParams = {
 export default class StanModel {
   private m: WasmModule;
   private printCallback: PrintCallback | null;
+  // used to send multiple JSON values in one string
+  private sep: string;
 
   private constructor(m: WasmModule, pc: PrintCallback | null) {
     this.m = m;
     this.printCallback = pc;
+    this.sep = String.fromCharCode(m._tinystan_separator_char());
   }
 
   public static async load(
@@ -151,17 +158,21 @@ export default class StanModel {
     throw new Error(err_msg);
   }
 
+  private encodeInits(inits: string | object | string[] | object[]): cstr {
+    if (Array.isArray(inits)) {
+      return this.encodeString(inits.map((i) => jsonify(i)).join(this.sep));
+    } else {
+      return this.encodeString(jsonify(inits));
+    }
+  }
+
   private withModel<T>(
     data: string | object,
     seed: number,
     f: (model: model_ptr) => T,
   ): T {
+    const data_ptr = this.encodeString(jsonify(data));
     const err_ptr = this.m._malloc(4);
-    if (typeof data === "object") {
-      data = JSON.stringify(data);
-    }
-
-    const data_ptr = this.encodeString(data);
     const model = this.m._tinystan_create_model(data_ptr, seed, err_ptr);
     this.m._free(data_ptr);
 
@@ -176,20 +187,18 @@ export default class StanModel {
     }
   }
 
-  // Supports most of the TinyStan API except for
-  // - inits
-  // - init inv metric
-  // - save_metric
   public sample(p: Partial<SamplerParams>): StanDraws {
     const {
       data,
       num_chains,
+      inits,
       seed,
       id,
       init_radius,
       num_warmup,
       num_samples,
       metric,
+      save_metric,
       adapt,
       delta,
       gamma,
@@ -230,6 +239,22 @@ export default class StanModel {
 
       const n_params = paramNames.length;
 
+      const free_params = this.m._tinystan_model_num_free_params(model);
+      if (free_params === 0) {
+        throw new Error("No parameters to sample");
+      }
+
+      // TODO: allow init_inv_metric to be specified
+      const init_inv_metric_ptr = NULL;
+
+      let metric_out = NULL;
+      if (save_metric) {
+        if (metric === HMCMetric.DENSE)
+          metric_out = this.m._malloc(free_params * free_params * Float64Array.BYTES_PER_ELEMENT);
+        else
+          metric_out = this.m._malloc(free_params * Float64Array.BYTES_PER_ELEMENT);
+      }
+
       // Allocate memory for the output
       const n_draws =
         num_chains * (save_warmup ? num_samples + num_warmup : num_samples);
@@ -241,14 +266,14 @@ export default class StanModel {
       const result = this.m._tinystan_sample(
         model,
         num_chains,
-        NULLSTR, // inits
+        this.encodeInits(inits),
         seed_ || 0,
         id,
         init_radius,
         num_warmup,
         num_samples,
         metric.valueOf(),
-        NULLSTR, // init inv metric
+        init_inv_metric_ptr,
         adapt ? 1 : 0,
         delta,
         gamma,
@@ -265,7 +290,7 @@ export default class StanModel {
         num_threads,
         out_ptr,
         n_out,
-        NULL,
+        metric_out,
         err_ptr,
       );
 
@@ -280,17 +305,35 @@ export default class StanModel {
       );
 
       // copy out parameters of interest
-      const draws: number[][] = Array.from({ length: n_params }, () => []);
-      for (let i = 0; i < n_draws; i++) {
-        for (let j = 0; j < n_params; j++) {
-          const elm = out_buffer[i * n_params + j];
-          draws[j][i] = elm;
-        }
-      }
+      const draws: number[][] = Array.from({ length: n_params }, (_, i) =>
+        Array.from({ length: n_draws }, (_, j) => out_buffer[i + n_params * j])
+      );
+
       // Clean up
       this.m._free(out_ptr);
 
-      return { paramNames, draws };
+      let metric_array: number[] | number[][] | null = null;
+
+      if (save_metric) {
+        if (metric === HMCMetric.DENSE) {
+          const metric_buffer = this.m.HEAPF64.subarray(
+            metric_out / Float64Array.BYTES_PER_ELEMENT,
+            metric_out / Float64Array.BYTES_PER_ELEMENT + free_params * free_params,
+          );
+          metric_array = Array.from({ length: free_params }, (_, i) =>
+            Array.from({ length: free_params }, (_, j) => metric_buffer[i * free_params + j])
+          );
+        } else {
+          const metric_buffer = this.m.HEAPF64.subarray(
+            metric_out / Float64Array.BYTES_PER_ELEMENT,
+            metric_out / Float64Array.BYTES_PER_ELEMENT + free_params,
+          );
+          metric_array = Array.from({ length: free_params }, (_, i) => metric_buffer[i]);
+        }
+      }
+      this.m._free(metric_out);
+
+      return { paramNames, draws, metric: metric_array };
     });
   }
 
@@ -309,5 +352,14 @@ export default class StanModel {
     this.m._free(minor);
     this.m._free(patch);
     return version;
+  }
+}
+
+
+const jsonify = (obj: string | object): string => {
+  if (typeof obj === "string") {
+    return obj;
+  } else {
+    return JSON.stringify(obj);
   }
 }
