@@ -4,9 +4,8 @@ import LinearProgress, { LinearProgressProps } from '@mui/material/LinearProgres
 import Typography from '@mui/material/Typography';
 import { FunctionComponent, useCallback } from 'react';
 
-import StanSampler from '../StanSampler/StanSampler';
+import StanSampler, { SamplingOpts } from '../StanSampler/StanSampler';
 import { useSamplerProgress, useSamplerStatus } from '../StanSampler/useStanSampler';
-import { defaultSamplerParams } from '../tinystan';
 import { Progress } from '../tinystan/Worker';
 
 type RunPanelProps = {
@@ -15,18 +14,17 @@ type RunPanelProps = {
     sampler?: StanSampler;
     data: any | undefined
     dataIsSaved: boolean
+    samplingOpts: SamplingOpts
 };
 
-const numChains = 4;
-
-const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, sampler, data, dataIsSaved }) => {
+const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, sampler, data, dataIsSaved, samplingOpts }) => {
     const {status: runStatus, errorMessage} = useSamplerStatus(sampler)
     const progress = useSamplerProgress(sampler)
 
     const handleRun = useCallback(async () => {
         if (!sampler) return;
-        sampler.sample({...defaultSamplerParams, data, num_chains: numChains})
-    }, [sampler, data]);
+        sampler.sample(data, samplingOpts)
+    }, [sampler, data, samplingOpts]);
 
     const cancelRun = useCallback(() => {
         if (!sampler) return;
@@ -50,8 +48,9 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, sampler, da
         <div style={{ position: 'absolute', width, height, overflowY: 'auto' }}>
             <div style={{ padding: 5 }}>
                 <div>
-                    <button onClick={handleRun} disabled={runStatus === 'sampling' || runStatus === 'loading'}>Run</button>
-                    <button onClick={cancelRun} disabled={runStatus !== 'sampling'}>Cancel</button>
+                    <button onClick={handleRun} disabled={runStatus === 'sampling' || runStatus === 'loading'}>run sampling</button>&nbsp;
+                    {runStatus === 'sampling' && <button onClick={cancelRun} disabled={runStatus !== 'sampling'}>cancel</button>}
+                    <hr />
                     {
                         runStatus === 'loading' && (
                             <div>
@@ -63,7 +62,10 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, sampler, da
                         runStatus === 'sampling' && (
                             <div>
                                 Sampling
-                                <SamplingProgressComponent report={progress} />
+                                <SamplingProgressComponent
+                                    report={progress}
+                                    numChains={samplingOpts.num_chains}
+                                />
                             </div>
                         )
                     }
@@ -89,14 +91,15 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, sampler, da
 
 type SamplingProgressComponentProps = {
     report: Progress | undefined
+    numChains: number
 }
 
-const SamplingProgressComponent: FunctionComponent<SamplingProgressComponentProps> = ({ report }) => {
+const SamplingProgressComponent: FunctionComponent<SamplingProgressComponentProps> = ({ report, numChains }) => {
     if (!report) return <span />
     const progress = (report.iteration + ((report.chain - 1) * report.totalIterations)) / (report.totalIterations * numChains) * 100;
     return (
         <>
-            <div style={{ width: "60%" }}>
+            <div style={{ width: "45%" }}>
                 <LinearProgressWithLabel
                     sx={{
                         height: 10,

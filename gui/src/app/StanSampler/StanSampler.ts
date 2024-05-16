@@ -1,8 +1,22 @@
-import { SamplerParams } from '../tinystan';
+import { SamplerParams, defaultSamplerParams } from '../tinystan';
 import { Progress, Replies, Requests } from '../tinystan/Worker';
 import StanWorker from '../tinystan/Worker?worker';
 
 export type StanSamplerStatus = '' | 'loading' | 'loaded' | 'sampling' | 'completed' | 'failed';
+
+export type SamplingOpts = {
+    num_chains: number
+    num_warmup: number
+    num_samples: number
+    init_radius: number
+}
+
+export const defaultSamplingOpts: SamplingOpts = {
+    num_chains: 4,
+    num_warmup: 1000,
+    num_samples: 1000,
+    init_radius: 2.0
+}
 
 class StanSampler {
     #worker: Worker | undefined;
@@ -58,7 +72,16 @@ class StanSampler {
         }
         this.#worker.postMessage({ purpose: Requests.Load, url: this.compiledUrl });
     }
-    sample(sampleConfig: SamplerParams) {
+    sample(data: string | object, samplingOpts: SamplingOpts) {
+        const sampleConfig: SamplerParams = {
+            ...defaultSamplerParams,
+            data,
+            num_chains: samplingOpts.num_chains,
+            num_warmup: samplingOpts.num_warmup,
+            num_samples: samplingOpts.num_samples,
+            init_radius: samplingOpts.init_radius
+        }
+
         if (!this.#worker) return
         if (this.#status === '') {
             console.warn('Model not loaded yet')

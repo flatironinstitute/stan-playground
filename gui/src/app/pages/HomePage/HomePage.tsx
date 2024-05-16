@@ -5,8 +5,10 @@ import DataFileEditor from "../../FileEditor/DataFileEditor";
 import StanFileEditor from "../../FileEditor/StanFileEditor";
 import RunPanel from "../../RunPanel/RunPanel";
 import SamplerOutputView from "../../SamplerOutputView/SamplerOutputView";
-import useStanSampler from "../../StanSampler/useStanSampler";
+import useStanSampler, { useSamplerStatus } from "../../StanSampler/useStanSampler";
 import examplesStanies, { Stanie, StanieMetaData } from "../../exampleStanies/exampleStanies";
+import SamplingOptsPanel from "../../SamplingOptsPanel/SamplingOptsPanel";
+import { SamplingOpts, defaultSamplingOpts } from "../../StanSampler/StanSampler";
 
 type Props = {
     width: number
@@ -16,6 +18,7 @@ type Props = {
 const defaultStanContent = ''
 const defaultDataContent = ''
 const defaultMetaContent = '{"title": "Untitled"}'
+const defaultSamplingOptsContent = JSON.stringify(defaultSamplingOpts, null, 2)
 
 const initialFileContent = localStorage.getItem('main.stan') || defaultStanContent
 
@@ -23,7 +26,7 @@ const initialDataFileContent = localStorage.getItem('data.json') || defaultDataC
 
 const initialMetaContent = localStorage.getItem('meta.json') || defaultMetaContent
 
-
+const initialSamplingOptsContent = localStorage.getItem('samplingOpts.json') || defaultSamplingOptsContent
 
 const HomePage: FunctionComponent<Props> = ({ width, height }) => {
     const [fileContent, saveFileContent] = useState(initialFileContent)
@@ -43,6 +46,18 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
     useEffect(() => {
         localStorage.setItem('data.json', dataFileContent)
     }, [dataFileContent])
+
+    const [samplingOptsContent, setSamplingOptsContent] = useState(initialSamplingOptsContent)
+    useEffect(() => {
+        localStorage.setItem('samplingOpts.json', samplingOptsContent)
+    }, [samplingOptsContent])
+    const samplingOpts = useMemo(() => (
+        {...defaultSamplingOpts, ...JSON.parse(samplingOptsContent)}
+    ), [samplingOptsContent])
+
+    const setSamplingOpts = useCallback((opts: SamplingOpts) => {
+        setSamplingOptsContent(JSON.stringify(opts, null, 2))
+    }, [setSamplingOptsContent])
 
     const [metaContent, setMetaContent] = useState(initialMetaContent)
     useEffect(() => {
@@ -130,6 +145,8 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
                         editedDataFileContent={editedDataFileContent}
                         setEditedDataFileContent={setEditedDataFileContent}
                         compiledMainJsUrl={compiledMainJsUrl}
+                        samplingOpts={samplingOpts}
+                        setSamplingOpts={setSamplingOpts}
                     />
                 </Splitter>
             </div>
@@ -145,9 +162,11 @@ type RightViewProps = {
     editedDataFileContent: string
     setEditedDataFileContent: (text: string) => void
     compiledMainJsUrl?: string
+    samplingOpts: SamplingOpts
+    setSamplingOpts: (opts: SamplingOpts) => void
 }
 
-const RightView: FunctionComponent<RightViewProps> = ({ width, height, dataFileContent, saveDataFileContent, editedDataFileContent, setEditedDataFileContent, compiledMainJsUrl }) => {
+const RightView: FunctionComponent<RightViewProps> = ({ width, height, dataFileContent, saveDataFileContent, editedDataFileContent, setEditedDataFileContent, compiledMainJsUrl, samplingOpts, setSamplingOpts }) => {
     return (
         <Splitter
             direction="vertical"
@@ -171,6 +190,8 @@ const RightView: FunctionComponent<RightViewProps> = ({ width, height, dataFileC
                 compiledMainJsUrl={compiledMainJsUrl}
                 dataFileContent={dataFileContent}
                 dataIsSaved={dataFileContent === editedDataFileContent}
+                samplingOpts={samplingOpts}
+                setSamplingOpts={setSamplingOpts}
             />
         </Splitter>
     )
@@ -182,9 +203,11 @@ type LowerRightViewProps = {
     compiledMainJsUrl?: string
     dataFileContent: string
     dataIsSaved: boolean
+    samplingOpts: SamplingOpts
+    setSamplingOpts: (opts: SamplingOpts) => void
 }
 
-const LowerRightView: FunctionComponent<LowerRightViewProps> = ({ width, height, compiledMainJsUrl, dataFileContent, dataIsSaved }) => {
+const LowerRightView: FunctionComponent<LowerRightViewProps> = ({ width, height, compiledMainJsUrl, dataFileContent, dataIsSaved, samplingOpts, setSamplingOpts }) => {
     const parsedData = useMemo(() => {
         try {
             return JSON.parse(dataFileContent)
@@ -193,25 +216,34 @@ const LowerRightView: FunctionComponent<LowerRightViewProps> = ({ width, height,
             return undefined
         }
     }, [dataFileContent])
-    const runPanelHeight = 80
+    const samplingOptsPanelHeight = 125
+    const samplingOptsPanelWidth = width / 2
 
     const {sampler} = useStanSampler(compiledMainJsUrl)
-
+    const {status: samplerStatus} = useSamplerStatus(sampler)
+    const isSampling = samplerStatus === 'sampling'
     return (
         <div style={{position: 'absolute', width, height}}>
-            <div style={{position: 'absolute', width, height: runPanelHeight}}>
+            <div style={{position: 'absolute', width: samplingOptsPanelWidth, height: samplingOptsPanelHeight}}>
+                <SamplingOptsPanel
+                    samplingOpts={samplingOpts}
+                    setSamplingOpts={!isSampling ? setSamplingOpts: undefined}
+                />
+            </div>
+            <div style={{position: 'absolute', left: samplingOptsPanelWidth, width: width - samplingOptsPanelWidth, top: 0, height: samplingOptsPanelHeight}}>
                 <RunPanel
                     width={width}
-                    height={runPanelHeight}
+                    height={samplingOptsPanelHeight}
                     sampler={sampler}
                     data={parsedData}
                     dataIsSaved={dataIsSaved}
+                    samplingOpts={samplingOpts}
                 />
             </div>
-            <div style={{position: 'absolute', width, top: runPanelHeight, height: height - runPanelHeight}}>
+            <div style={{position: 'absolute', width, top: samplingOptsPanelHeight, height: height - samplingOptsPanelHeight}}>
                 {sampler && <SamplerOutputView
                     width={width}
-                    height={height-runPanelHeight}
+                    height={height - samplingOptsPanelHeight}
                     sampler={sampler}
                 />
                 }
