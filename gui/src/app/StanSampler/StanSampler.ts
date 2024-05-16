@@ -9,13 +9,15 @@ export type SamplingOpts = {
     num_warmup: number
     num_samples: number
     init_radius: number
+    seed: number | undefined
 }
 
 export const defaultSamplingOpts: SamplingOpts = {
     num_chains: 4,
     num_warmup: 1000,
     num_samples: 1000,
-    init_radius: 2.0
+    init_radius: 2.0,
+    seed: undefined
 }
 
 class StanSampler {
@@ -78,7 +80,8 @@ class StanSampler {
             num_chains: samplingOpts.num_chains,
             num_warmup: samplingOpts.num_warmup,
             num_samples: samplingOpts.num_samples,
-            init_radius: samplingOpts.init_radius
+            init_radius: samplingOpts.init_radius,
+            seed: samplingOpts.seed !== undefined ? samplingOpts.seed : null
         }
         if (!this.#worker) return
         if (this.#status === '') {

@@ -76,6 +76,17 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({ sampling
                             />
                         </td>
                     </tr>
+                    <tr>
+                        <td>seed</td>
+                        <td>
+                            <IntOrUndefinedEdit
+                                value={samplingOpts.seed}
+                                onChange={(value) => setSamplingOpts && setSamplingOpts({ ...samplingOpts, seed: value })}
+                                min={0}
+                                readOnly={readOnly}
+                            />
+                        </td>
+                    </tr>
                 </tbody>
             </table>
             <div>
@@ -123,6 +134,29 @@ const FloatEdit: FunctionComponent<FloatEditProps> = ({ value, onChange, min, ma
             onChange={(e) => onChange(parseFloat(e.target.value))}
             min={min}
             max={max}
+            readOnly={readOnly}
+            style={{ width: "4em" }}
+        />
+    )
+}
+
+type IntOrUndefinedEditProps = {
+    value: number | undefined;
+    onChange: (value: number | undefined) => void;
+    min: number;
+    readOnly: boolean;
+}
+
+const IntOrUndefinedEdit: FunctionComponent<IntOrUndefinedEditProps> = ({ value, onChange, min, readOnly }) => {
+    return (
+        <input
+            type="number"
+            value={value === undefined ? "" : value}
+            onChange={(e) => {
+                const value = parseInt(e.target.value);
+                onChange(isNaN(value) ? undefined : value)
+            }}
+            min={min}
             readOnly={readOnly}
             style={{ width: "4em" }}
         />
