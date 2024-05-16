@@ -331,8 +331,10 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, metaConte
         }))
     }, [metaData, setMetaContent])
 
+    const [isPreparingShareableUrl, setIsPreparingShareableUrl] = useState(false)
     const [shareableUrl, setShareableUrl] = useState<string | undefined>(undefined)
     const handleShare = useCallback(async () => {
+        setIsPreparingShareableUrl(true)
         try {
             setShareableUrl(undefined)
             const url = await generateShareableUrl()
@@ -341,6 +343,9 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, metaConte
         catch (err) {
             console.error(err)
             alert('Problem generating shareable URL.')
+        }
+        finally {
+            setIsPreparingShareableUrl(false)
         }
     }, [generateShareableUrl])
 
@@ -379,6 +384,13 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, metaConte
             <div style={{ position: 'relative', left: 10, width: width - 20 }}>
                 <Hyperlink onClick={handleShare} color="lightblue">Share</Hyperlink>
             </div>
+            {
+                isPreparingShareableUrl && (
+                    <div style={{ position: 'relative', left: 10, width: width - 20 }}>
+                        Preparing shareable URL...
+                    </div>
+                )
+            }
             {
                 shareableUrl && (
                     <div style={{ position: 'relative', left: 10, width: width - 20 }}>
@@ -421,6 +433,10 @@ const CopyableTextField: FunctionComponent<CopyableTextFieldProps> = ({ text }) 
             setCopied(false)
         }, 2000)
     }, [ref])
+
+    useEffect(() => {
+        handleCopy()
+    }, [handleCopy])
 
     return (
         <div>
