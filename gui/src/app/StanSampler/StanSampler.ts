@@ -75,13 +75,15 @@ class StanSampler {
         this.#worker.postMessage({ purpose: Requests.Load, url: this.compiledUrl });
     }
     sample(data: any, samplingOpts: SamplingOpts) {
+        const refresh = calculateReasonableRefreshRate(samplingOpts);
         const sampleConfig: Partial<SamplerParams> = {
             data,
             num_chains: samplingOpts.num_chains,
             num_warmup: samplingOpts.num_warmup,
             num_samples: samplingOpts.num_samples,
             init_radius: samplingOpts.init_radius,
-            seed: samplingOpts.seed !== undefined ? samplingOpts.seed : null
+            seed: samplingOpts.seed !== undefined ? samplingOpts.seed : null,
+            refresh
         }
         if (!this.#worker) return
         if (this.#status === '') {
@@ -131,6 +133,16 @@ class StanSampler {
     get errorMessage() {
         return this.#errorMessage;
     }
+}
+
+const calculateReasonableRefreshRate = (samplingOpts: SamplingOpts) => {
+    const totalSamples = (samplingOpts.num_samples + samplingOpts.num_warmup) * samplingOpts.num_chains;
+
+    const onePercent = Math.floor(totalSamples / 100);
+
+    const nearestMultipleOfTen = Math.round(onePercent / 10) * 10;
+
+    return Math.max(1, nearestMultipleOfTen);
 }
 
 export default StanSampler
