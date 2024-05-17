@@ -26,7 +26,7 @@ const ApplicationBar: FunctionComponent<Props> = () => {
     // light greenish background color for app bar
     // const barColor = '#e0ffe0'
 
-    const barColor = '#656565'
+    const barColor = '#333'
 
     // const bannerColor = '#00a000'
     const titleColor = 'white'
@@ -36,7 +36,7 @@ const ApplicationBar: FunctionComponent<Props> = () => {
 
     return (
         <span>
-            <AppBar position="static" style={{height: applicationBarHeight, color: 'black', background: barColor}}>
+            <AppBar position="static" style={{height: applicationBarHeight, color: '#aaa', background: barColor}}>
                 <Toolbar style={{minHeight: applicationBarHeight}}>
                     <img src={logoUrl} alt="logo" height={27} style={{paddingBottom: 1, cursor: 'pointer'}} onClick={onHome} />
                     <div onClick={onHome} style={{cursor: 'pointer', color: titleColor}}>&nbsp;&nbsp;&nbsp;Stan Playground</div>
@@ -45,7 +45,10 @@ const ApplicationBar: FunctionComponent<Props> = () => {
                     <span>
                         <SmallIconButton
                             icon={<QuestionMark />}
-                            onClick={() => setRoute({page: 'about'})}
+                            onClick={() => {
+                                const url = 'https://github.com/flatironinstitute/stan-playground'
+                                window.open(url, '_blank')
+                            }}
                             title={`About Stan Playground`}
                         />
                     </span>
