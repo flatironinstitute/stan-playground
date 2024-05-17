@@ -114,7 +114,7 @@ const SummaryView: FunctionComponent<SummaryViewProps> = ({ draws, paramNames, d
     const {means} = useMemo(() => {
         const means: { [k: string]: number }[] = [];
         for (let ic = 0; ic < uniqueChainIds.length; ic++) {
-            const drawsForChain = draws.map((draw, i) => draw.filter((_, j) => drawChainIds[j] === uniqueChainIds[ic]));
+            const drawsForChain = draws.map((draw) => draw.filter((_, j) => drawChainIds[j] === uniqueChainIds[ic]));
             const meansForChain: { [k: string]: number } = {};
             for (const [i, element] of paramNames.entries()) {
                 let sum = 0;
