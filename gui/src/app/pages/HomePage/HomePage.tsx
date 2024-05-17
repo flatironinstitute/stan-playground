@@ -495,7 +495,7 @@ type SharedUrlHistoryViewProps = {
     sharedUrlHistory: SharedUrlHistory
 }
 
-const SharedUrlHistoryView: FunctionComponent<SharedUrlHistoryViewProps> = ({ width, sharedUrlHistory }) => {
+const SharedUrlHistoryView: FunctionComponent<SharedUrlHistoryViewProps> = ({ sharedUrlHistory }) => {
     return (
         <div>
             <strong>Recent</strong>
