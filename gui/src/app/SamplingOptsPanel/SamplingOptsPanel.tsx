@@ -34,56 +34,61 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({ sampling
                     <tr>
                         <td># chains</td>
                         <td>
-                            <IntEdit
+                            <NumberEdit
                                 value={num_chains}
-                                onChange={(value) => setSamplingOpts && setSamplingOpts({ ...samplingOpts, num_chains: value })}
+                                onChange={(value) => setSamplingOpts && setSamplingOpts({ ...samplingOpts, num_chains: value as number })}
                                 min={1}
                                 max={8}
                                 readOnly={readOnly}
+                                type="int"
                             />
                         </td>
                     </tr>
                     <tr>
                         <td># warmup</td>
                         <td>
-                            <IntEdit
+                            <NumberEdit
                                 value={samplingOpts.num_warmup}
-                                onChange={(value) => setSamplingOpts && setSamplingOpts({ ...samplingOpts, num_warmup: value })}
+                                onChange={(value) => setSamplingOpts && setSamplingOpts({ ...samplingOpts, num_warmup: value as number })}
                                 min={0}
                                 readOnly={readOnly}
+                                type="int"
                             />
                         </td>
                     </tr>
                     <tr>
                         <td># samples</td>
                         <td>
-                            <IntEdit
+                            <NumberEdit
                                 value={samplingOpts.num_samples}
-                                onChange={(value) => setSamplingOpts && setSamplingOpts({ ...samplingOpts, num_samples: value })}
+                                onChange={(value) => setSamplingOpts && setSamplingOpts({ ...samplingOpts, num_samples: value as number })}
                                 min={1}
                                 readOnly={readOnly}
+                                type="int"
                             />
                         </td>
                     </tr>
                     <tr>
                         <td>init radius</td>
                         <td>
-                            <FloatEdit
+                            <NumberEdit
                                 value={samplingOpts.init_radius}
-                                onChange={(value) => setSamplingOpts && setSamplingOpts({ ...samplingOpts, init_radius: value })}
+                                onChange={(value) => setSamplingOpts && setSamplingOpts({ ...samplingOpts, init_radius: value as number })}
                                 min={0}
                                 readOnly={readOnly}
+                                type="float"
                             />
                         </td>
                     </tr>
                     <tr>
                         <td>seed</td>
                         <td>
-                            <IntOrUndefinedEdit
+                            <NumberEdit
                                 value={samplingOpts.seed}
                                 onChange={(value) => setSamplingOpts && setSamplingOpts({ ...samplingOpts, seed: value })}
                                 min={0}
                                 readOnly={readOnly}
+                                type="int"
                             />
                         </td>
                     </tr>
@@ -96,67 +101,42 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({ sampling
     )
 }
 
-type InitEditProps = {
-    value: number;
-    onChange: (value: number) => void;
-    min: number;
-    max?: number;
-    readOnly: boolean;
-}
-
-const IntEdit: FunctionComponent<InitEditProps> = ({ value, onChange, min, max, readOnly }) => {
-    return (
-        <input
-            type="number"
-            value={value}
-            onChange={(e) => onChange(parseInt(e.target.value))}
-            min={min}
-            max={max}
-            readOnly={readOnly}
-            style={{ width: "4em" }}
-        />
-    )
-}
-
-type FloatEditProps = {
-    value: number;
-    onChange: (value: number) => void;
-    min: number;
-    max?: number;
-    readOnly: boolean;
-}
-
-const FloatEdit: FunctionComponent<FloatEditProps> = ({ value, onChange, min, max, readOnly }) => {
-    return (
-        <input
-            type="number"
-            value={value}
-            onChange={(e) => onChange(parseFloat(e.target.value))}
-            min={min}
-            max={max}
-            readOnly={readOnly}
-            style={{ width: "4em" }}
-        />
-    )
-}
-
-type IntOrUndefinedEditProps = {
+type NumberEditProps = {
     value: number | undefined;
     onChange: (value: number | undefined) => void;
     min: number;
+    max?: number;
     readOnly: boolean;
+    type: 'int' | 'float' | 'intOrUndefined';
 }
 
-const IntOrUndefinedEdit: FunctionComponent<IntOrUndefinedEditProps> = ({ value, onChange, min, readOnly }) => {
+const NumberEdit: FunctionComponent<NumberEditProps> = ({ value, onChange, min, max, readOnly, type }) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let newValue: number | undefined;
+        switch (type) {
+            case 'int':
+                newValue = parseInt(e.target.value);
+                break;
+            case 'float':
+                newValue = parseFloat(e.target.value);
+                break;
+            case 'intOrUndefined':
+                newValue = parseInt(e.target.value);
+                if (isNaN(newValue)) {
+                    newValue = undefined;
+                }
+                break;
+        }
+        onChange(newValue);
+    };
+
     return (
         <input
             type="number"
             value={value === undefined ? "" : value}
-            onChange={(e) => {
-                const value = parseInt(e.target.value);
-                onChange(isNaN(value) ? undefined : value)
-            }}
+            onChange={handleChange}
             min={min}
+            max={max}
             readOnly={readOnly}
             style={{ width: "4em" }}
         />
