@@ -4,6 +4,22 @@ import StanWorker from '../tinystan/Worker?worker';
 
 export type StanSamplerStatus = '' | 'loading' | 'loaded' | 'sampling' | 'completed' | 'failed';
 
+export type SamplingOpts = {
+    num_chains: number
+    num_warmup: number
+    num_samples: number
+    init_radius: number
+    seed: number | undefined
+}
+
+export const defaultSamplingOpts: SamplingOpts = {
+    num_chains: 4,
+    num_warmup: 1000,
+    num_samples: 1000,
+    init_radius: 2.0,
+    seed: undefined
+}
+
 class StanSampler {
     #worker: Worker | undefined;
     #status: StanSamplerStatus = '';
@@ -58,7 +74,17 @@ class StanSampler {
         }
         this.#worker.postMessage({ purpose: Requests.Load, url: this.compiledUrl });
     }
-    sample(sampleConfig: Partial<SamplerParams>) {
+    sample(data: any, samplingOpts: SamplingOpts) {
+        const refresh = calculateReasonableRefreshRate(samplingOpts);
+        const sampleConfig: Partial<SamplerParams> = {
+            data,
+            num_chains: samplingOpts.num_chains,
+            num_warmup: samplingOpts.num_warmup,
+            num_samples: samplingOpts.num_samples,
+            init_radius: samplingOpts.init_radius,
+            seed: samplingOpts.seed !== undefined ? samplingOpts.seed : null,
+            refresh
+        }
         if (!this.#worker) return
         if (this.#status === '') {
             console.warn('Model not loaded yet')
@@ -107,6 +133,16 @@ class StanSampler {
     get errorMessage() {
         return this.#errorMessage;
     }
+}
+
+const calculateReasonableRefreshRate = (samplingOpts: SamplingOpts) => {
+    const totalSamples = (samplingOpts.num_samples + samplingOpts.num_warmup) * samplingOpts.num_chains;
+
+    const onePercent = Math.floor(totalSamples / 100);
+
+    const nearestMultipleOfTen = Math.round(onePercent / 10) * 10;
+
+    return Math.max(10, nearestMultipleOfTen);
 }
 
 export default StanSampler
