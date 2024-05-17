@@ -42,7 +42,7 @@ COPY make/js /app/tinystan/make/js
 # Build a test model
 RUN cd tinystan && \
     echo 'include make/js' >> Makefile && \
-    emmake make test_models/bernoulli/bernoulli.js -j2 && \
+    emmake make test_models/bernoulli/bernoulli.js -j4 && \
     emstrip test_models/bernoulli/bernoulli.wasm
 
 RUN pip install fastapi
