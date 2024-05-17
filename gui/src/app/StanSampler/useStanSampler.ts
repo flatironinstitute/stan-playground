@@ -61,6 +61,7 @@ export const useSamplerProgress = (sampler: StanSampler | undefined) => {
 export const useSamplerOutput = (sampler: StanSampler | undefined) => {
     const [draws, setDraws] = useState<number[][] | undefined>();
     const [paramNames, setParamNames] = useState<string[] | undefined>();
+    const [numChains, setNumChains] = useState<number | undefined>();
 
     useEffect(() => {
         let canceled = false;
@@ -74,10 +75,12 @@ export const useSamplerOutput = (sampler: StanSampler | undefined) => {
             if (sampler.status === 'completed') {
                 setDraws(sampler.draws);
                 setParamNames(sampler.paramNames);
+                setNumChains(sampler.numChains);
             }
             else {
                 setDraws(undefined)
                 setParamNames(undefined)
+                setNumChains(undefined)
             }
         })
         return (
@@ -87,7 +90,7 @@ export const useSamplerOutput = (sampler: StanSampler | undefined) => {
         )
     }, [sampler]);
 
-    return { draws, paramNames }
+    return { draws, paramNames, numChains }
 }
 
 export default useStanSampler;

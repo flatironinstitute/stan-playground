@@ -28,6 +28,7 @@ class StanSampler {
     #onStatusChangedCallbacks: (() => void)[] = [];
     #draws: number[][] = [];
     #paramNames: string[] = [];
+    #numChains: number = 0;
 
     private constructor(private compiledUrl: string) {
         this._initialize()
@@ -98,6 +99,11 @@ class StanSampler {
             console.warn('Model not loaded yet')
             return
         }
+        if (sampleConfig.num_chains === undefined) {
+            console.warn('Number of chains not specified')
+            return
+        }
+        this.#numChains = sampleConfig.num_chains;
         this.#draws = [];
         this.#paramNames = [];
         this.#worker
@@ -126,6 +132,9 @@ class StanSampler {
     }
     get paramNames() {
         return this.#paramNames;
+    }
+    get numChains() {
+        return this.#numChains;
     }
     get status() {
         return this.#status;

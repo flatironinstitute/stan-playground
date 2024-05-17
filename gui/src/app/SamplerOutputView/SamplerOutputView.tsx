@@ -4,6 +4,7 @@ import { FunctionComponent, useCallback, useMemo, useState } from "react"
 import StanSampler from "../StanSampler/StanSampler"
 import { useSamplerOutput } from "../StanSampler/useStanSampler"
 import TabWidget from "../TabWidget/TabWidget"
+import PlotsView from "./PlotsView"
 
 type SamplerOutputViewProps = {
     width: number
@@ -12,9 +13,9 @@ type SamplerOutputViewProps = {
 }
 
 const SamplerOutputView: FunctionComponent<SamplerOutputViewProps> = ({width, height, sampler}) => {
-    const {draws, paramNames} = useSamplerOutput(sampler)
+    const {draws, paramNames, numChains} = useSamplerOutput(sampler)
 
-    if (!draws || !paramNames) return (
+    if (!draws || !paramNames || !numChains) return (
         <span />
     )
     return (
@@ -23,6 +24,7 @@ const SamplerOutputView: FunctionComponent<SamplerOutputViewProps> = ({width, he
             height={height}
             draws={draws}
             paramNames={paramNames}
+            numChains={numChains}
         />
     )
 }
@@ -31,6 +33,7 @@ type DrawsDisplayProps = {
     width: number,
     height: number,
     draws: number[][],
+    numChains: number,
     paramNames: string[]
 }
 
@@ -46,22 +49,27 @@ const tabs = [
         label: 'Draws',
         title: 'Draws view',
         closeable: false
+    },
+    {
+        id: 'plots',
+        label: 'Plots',
+        title: 'Plots view',
+        closeable: false
     }
 ]
 
-const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({ width, height, draws, paramNames }) => {
+const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({ width, height, draws, paramNames, numChains }) => {
 
     const [currentTabId, setCurrentTabId] = useState('summary');
 
-    const means: { [k: string]: number } = {};
+    const drawChainIds = useMemo(() => {
+        return [...new Array(draws[0].length).keys()].map(i => 1 + Math.floor(i / draws[0].length * numChains));
+    }, [draws, numChains]);
 
-    for (const [i, element] of paramNames.entries()) {
-        let sum = 0;
-        for (const draw of draws[i]) {
-            sum += draw;
-        }
-        means[element] = sum / draws[i].length;
-    }
+    const drawNumbers: number[] = useMemo(() => {
+        const numDrawsPerChain = Math.floor(draws[0].length / numChains);
+        return [...new Array(draws[0].length).keys()].map(i => 1 + (i % numDrawsPerChain));
+    }, [draws, numChains]);
 
     return (
         <TabWidget
@@ -74,12 +82,22 @@ const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({ width, height, dra
             <SummaryView
                 draws={draws}
                 paramNames={paramNames}
+                drawChainIds={drawChainIds}
             />
             <DrawsView
                 width={0}
                 height={0}
                 draws={draws}
                 paramNames={paramNames}
+                drawChainIds={drawChainIds}
+                drawNumbers={drawNumbers}
+            />
+            <PlotsView
+                width={0}
+                height={0}
+                draws={draws}
+                paramNames={paramNames}
+                drawChainIds={drawChainIds}
             />
         </TabWidget>
     )
@@ -88,36 +106,53 @@ const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({ width, height, dra
 type SummaryViewProps = {
     draws: number[][],
     paramNames: string[]
+    drawChainIds: number[]
 }
 
-const SummaryView: FunctionComponent<SummaryViewProps> = ({ draws, paramNames }) => {
+const SummaryView: FunctionComponent<SummaryViewProps> = ({ draws, paramNames, drawChainIds }) => {
+    const uniqueChainIds = useMemo(() => (Array.from(new Set(drawChainIds)).sort()), [drawChainIds]);
     const {means} = useMemo(() => {
-        const means: { [k: string]: number } = {};
-        for (const [i, element] of paramNames.entries()) {
-            let sum = 0;
-            for (const draw of draws[i]) {
-                sum += draw;
+        const means: { [k: string]: number }[] = [];
+        for (let ic = 0; ic < uniqueChainIds.length; ic++) {
+            const drawsForChain = draws.map((draw, i) => draw.filter((_, j) => drawChainIds[j] === uniqueChainIds[ic]));
+            const meansForChain: { [k: string]: number } = {};
+            for (const [i, element] of paramNames.entries()) {
+                let sum = 0;
+                for (const draw of drawsForChain[i]) {
+                    sum += draw;
+                }
+                meansForChain[element] = sum / drawsForChain.length;
             }
-            means[element] = sum / draws[i].length;
+            means.push(meansForChain);
         }
         return {means};
-    }, [draws, paramNames]);
+    }, [draws, paramNames, drawChainIds, uniqueChainIds]);
 
     return (
         <table className="scientific-table">
             <thead>
                 <tr>
                     <th>Parameter</th>
-                    <th>Mean</th>
+                    {
+                        uniqueChainIds.map((chainId, i) => (
+                            <th key={i}>Chain {chainId}</th>
+                        ))
+                    }
                 </tr>
             </thead>
             <tbody>
-                {Object.entries(means).map(([name, mean]) => (
-                    <tr key={name}>
-                        <td>{name}</td>
-                        <td>{mean}</td>
-                    </tr>
-                ))}
+                {
+                    paramNames.map((paramName, i) => (
+                        <tr key={i}>
+                            <td>{paramName}</td>
+                            {
+                                uniqueChainIds.map((_, j) => (
+                                    <td key={j}>{means[j][paramName].toPrecision(4)}</td>
+                                ))
+                            }
+                        </tr>
+                    ))
+                }
             </tbody>
         </table>
     )
@@ -128,18 +163,20 @@ type DrawsViewProps = {
     height: number
     draws: number[][],
     paramNames: string[]
+    drawChainIds: number[]
+    drawNumbers: number[]
 }
 
-const DrawsView: FunctionComponent<DrawsViewProps> = ({ width, height, draws, paramNames }) => {
+const DrawsView: FunctionComponent<DrawsViewProps> = ({ width, height, draws, paramNames, drawChainIds, drawNumbers }) => {
     const [abbreviatedToNumRows, setAbbreviatedToNumRows] = useState<number | undefined>(300);
     const draws2 = useMemo(() => {
         if (abbreviatedToNumRows === undefined) return draws;
         return draws.map(draw => draw.slice(0, abbreviatedToNumRows));
     }, [draws, abbreviatedToNumRows]);
     const handleExportToCsv = useCallback(() => {
-        const csvText = prepareCsvText(draws, paramNames);
+        const csvText = prepareCsvText(draws, paramNames, drawChainIds, drawNumbers);
         downloadTextFile(csvText, 'draws.csv');
-    }, [draws, paramNames]);
+    }, [draws, paramNames, drawChainIds, drawNumbers]);
     return (
         <div style={{position: 'absolute', width, height, overflow: 'auto'}}>
             <SmallIconButton
@@ -150,6 +187,8 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({ width, height, draws, pa
             <table className="draws-table">
                 <thead>
                     <tr>
+                        <th key="chain">Chain</th>
+                        <th key="draw">Draw</th>
                         {
                             paramNames.map((name, i) => (
                                 <th key={i}>{name}</th>
@@ -161,6 +200,8 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({ width, height, draws, pa
                     {
                         draws2[0].map((_, i) => (
                             <tr key={i}>
+                                <td>{drawChainIds[i]}</td>
+                                <td>{drawNumbers[i]}</td>
                                 {
                                     draws.map((draw, j) => (
                                         <td key={j}>{draw[i]}</td>
@@ -184,11 +225,11 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({ width, height, draws, pa
     )
 }
 
-const prepareCsvText = (draws: number[][], paramNames: string[]) => {
+const prepareCsvText = (draws: number[][], paramNames: string[], drawChainIds: number[], drawNumbers: number[]) => {
     const lines = draws[0].map((_, i) => {
-        return paramNames.map((_, j) => draws[j][i]).join(',')
+        return [`${drawChainIds[i]}`, `${drawNumbers[i]}`, ...paramNames.map((_, j) => draws[j][i])].join(',')
     })
-    return [paramNames.join(','), ...lines].join('\n')
+    return [['Chain', 'Draw', ...paramNames].join(','), ...lines].join('\n')
 }
 
 const downloadTextFile = (text: string, filename: string) => {
