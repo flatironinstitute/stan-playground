@@ -29,7 +29,7 @@ type Props = {
 const defaultStanContent = ''
 const defaultDataContent = ''
 const defaultMetaContent = '{"title": "Untitled"}'
-const defaultSamplingOptsContent = JSON.stringify(defaultSamplingOpts, null, 2)
+const defaultSamplingOptsContent = JSON.stringify(defaultSamplingOpts)
 
 let initialStanFileContent = localStorage.getItem('main.stan') || defaultStanContent
 let initialDataFileContent = localStorage.getItem('data.json') || defaultDataContent
