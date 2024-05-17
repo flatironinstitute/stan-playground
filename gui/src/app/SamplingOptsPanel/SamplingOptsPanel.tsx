@@ -23,7 +23,7 @@ type SamplingOptsPanelProps = {
 
 const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({ samplingOpts, setSamplingOpts }) => {
     const num_chains = samplingOpts.num_chains;
-    const readOnly = !setSamplingOpts;
+    const readOnly = setSamplingOpts === undefined;
     const handleReset = useCallback(() => {
         setSamplingOpts && setSamplingOpts(defaultSamplingOpts)
     }, [setSamplingOpts])
@@ -31,7 +31,7 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({ sampling
         <div>
             <table>
                 <tbody>
-                    <tr>
+                    <tr title="Number of sampling chains">
                         <td># chains</td>
                         <td>
                             <NumberEdit
@@ -44,7 +44,7 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({ sampling
                             />
                         </td>
                     </tr>
-                    <tr>
+                    <tr title="Number of warmup draws per chain">
                         <td># warmup</td>
                         <td>
                             <NumberEdit
@@ -56,7 +56,7 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({ sampling
                             />
                         </td>
                     </tr>
-                    <tr>
+                    <tr title="Number of regular draws per chain">
                         <td># samples</td>
                         <td>
                             <NumberEdit
@@ -68,7 +68,7 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({ sampling
                             />
                         </td>
                     </tr>
-                    <tr>
+                    <tr title="Radius of the hypercube from which initial values for the model parameters are drawn (I think)">
                         <td>init radius</td>
                         <td>
                             <NumberEdit
@@ -80,7 +80,7 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({ sampling
                             />
                         </td>
                     </tr>
-                    <tr>
+                    <tr title="Random seed for the sampler. Leave blank for a random seed">
                         <td>seed</td>
                         <td>
                             <NumberEdit
