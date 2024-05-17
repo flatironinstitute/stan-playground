@@ -58,7 +58,7 @@ class StanSampler {
                     this.#onStatusChangedCallbacks.forEach(cb => cb())
                     break;
                 }
-                case Replies.SampleReturn: {
+                case Replies.StanReturn: {
                     if (e.data.error) {
                         this.#errorMessage = e.data.error;
                         this.#status = 'failed';

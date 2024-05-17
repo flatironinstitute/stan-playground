@@ -3,11 +3,12 @@ import StanModel from ".";
 export enum Requests {
     Load = "load",
     Sample = "sample",
+    Pathfinder = "pathfinder",
 }
 
 export enum Replies {
     ModelLoaded = "modelLoaded",
-    SampleReturn = "sampleReturn",
+    StanReturn = "stanReturn",
     Progress = "progress",
 }
 
@@ -68,15 +69,29 @@ onmessage = function (e) {
         }
         case Requests.Sample: {
             if (!model) {
-                postMessage({ purpose: Replies.SampleReturn, error: "Model not loaded yet!" })
+                postMessage({ purpose: Replies.StanReturn, error: "Model not loaded yet!" })
                 return;
             }
             try {
                 const { paramNames, draws } = model.sample(e.data.sampleConfig);
                 // TODO? use an ArrayBuffer so we can transfer without serialization cost
-                postMessage({ purpose: Replies.SampleReturn, draws, paramNames, error: null });
+                postMessage({ purpose: Replies.StanReturn, draws, paramNames, error: null });
             } catch (e: any) {
-                postMessage({ purpose: Replies.SampleReturn, error: e.toString() })
+                postMessage({ purpose: Replies.StanReturn, error: e.toString() })
+            }
+            break;
+        }
+        case Requests.Pathfinder: {
+            if (!model) {
+                postMessage({ purpose: Replies.StanReturn, error: "Model not loaded yet!" })
+                return;
+            }
+            try {
+                const { draws, paramNames } = model.pathfinder(e.data.pathfinderConfig);
+                // TODO? use an ArrayBuffer so we can transfer without serialization cost
+                postMessage({ purpose: Replies.StanReturn, draws, paramNames, error: null });
+            } catch (e: any) {
+                postMessage({ purpose: Replies.StanReturn, error: e.toString() })
             }
             break;
         }
