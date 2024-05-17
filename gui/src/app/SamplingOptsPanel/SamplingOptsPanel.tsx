@@ -1,6 +1,7 @@
 import { FunctionComponent, useCallback } from "react";
 import { SamplingOpts, defaultSamplingOpts } from "../StanSampler/StanSampler";
 import { Hyperlink } from "@fi-sci/misc";
+import { Grid } from "@mui/material";
 
 type SamplingOptsPanelProps = {
     samplingOpts: SamplingOpts;
@@ -21,6 +22,9 @@ type SamplingOptsPanelProps = {
 //  Seed. Any uint32.
 
 
+const sp1 = 0.5;
+const sp2 = 1;
+
 const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({ samplingOpts, setSamplingOpts }) => {
     const num_chains = samplingOpts.num_chains;
     const readOnly = setSamplingOpts === undefined;
@@ -29,71 +33,80 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({ sampling
     }, [setSamplingOpts])
     return (
         <div>
-            <table>
-                <tbody>
-                    <tr title="Number of sampling chains">
-                        <td># chains</td>
-                        <td>
-                            <NumberEdit
-                                value={num_chains}
-                                onChange={(value) => setSamplingOpts && setSamplingOpts({ ...samplingOpts, num_chains: value as number })}
-                                min={1}
-                                max={8}
-                                readOnly={readOnly}
-                                type="int"
-                            />
-                        </td>
-                    </tr>
-                    <tr title="Number of warmup draws per chain">
-                        <td># warmup</td>
-                        <td>
-                            <NumberEdit
-                                value={samplingOpts.num_warmup}
-                                onChange={(value) => setSamplingOpts && setSamplingOpts({ ...samplingOpts, num_warmup: value as number })}
-                                min={0}
-                                readOnly={readOnly}
-                                type="int"
-                            />
-                        </td>
-                    </tr>
-                    <tr title="Number of regular draws per chain">
-                        <td># samples</td>
-                        <td>
-                            <NumberEdit
-                                value={samplingOpts.num_samples}
-                                onChange={(value) => setSamplingOpts && setSamplingOpts({ ...samplingOpts, num_samples: value as number })}
-                                min={1}
-                                readOnly={readOnly}
-                                type="int"
-                            />
-                        </td>
-                    </tr>
-                    <tr title="Radius of the hypercube from which initial values for the model parameters are drawn (I think)">
-                        <td>init radius</td>
-                        <td>
-                            <NumberEdit
-                                value={samplingOpts.init_radius}
-                                onChange={(value) => setSamplingOpts && setSamplingOpts({ ...samplingOpts, init_radius: value as number })}
-                                min={0}
-                                readOnly={readOnly}
-                                type="float"
-                            />
-                        </td>
-                    </tr>
-                    <tr title="Random seed for the sampler. Leave blank for a random seed">
-                        <td>seed</td>
-                        <td>
-                            <NumberEdit
-                                value={samplingOpts.seed}
-                                onChange={(value) => setSamplingOpts && setSamplingOpts({ ...samplingOpts, seed: value })}
-                                min={0}
-                                readOnly={readOnly}
-                                type="int"
-                            />
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <Grid container spacing={sp1}>
+                <Grid container item xs={12} spacing={sp2} title="Number of sampling chains">
+                    <Grid item xs={6}>
+                        # chains
+                    </Grid>
+                    <Grid item xs={6}>
+                        <NumberEdit
+                            value={num_chains}
+                            onChange={(value) => setSamplingOpts && setSamplingOpts({ ...samplingOpts, num_chains: value as number })}
+                            min={1}
+                            max={8}
+                            readOnly={readOnly}
+                            type="int"
+                        />
+                    </Grid>
+                </Grid>
+                <Grid container item xs={12} spacing={sp2} title="Number of warmup draws per chain">
+                    <Grid item xs={6}>
+                        # warmup
+                    </Grid>
+                    <Grid item xs={6}>
+                        <NumberEdit
+                            value={samplingOpts.num_warmup}
+                            onChange={(value) => setSamplingOpts && setSamplingOpts({ ...samplingOpts, num_warmup: value as number })}
+                            min={0}
+                            readOnly={readOnly}
+                            type="int"
+                        />
+                    </Grid>
+                </Grid>
+                <Grid container item xs={12} spacing={sp2} title="Number of regular draws per chain">
+                    <Grid item xs={6}>
+                        # samples
+                    </Grid>
+                    <Grid item xs={6}>
+                        <NumberEdit
+                            value={samplingOpts.num_samples}
+                            onChange={(value) => setSamplingOpts && setSamplingOpts({ ...samplingOpts, num_samples: value as number })}
+                            min={1}
+                            readOnly={readOnly}
+                            type="int"
+                        />
+                    </Grid>
+                </Grid>
+                <Grid container item xs={12} spacing={sp2} title="Radius of the hypercube from which initial values for the model parameters are drawn">
+                    <Grid item xs={6}>
+                        init radius
+                    </Grid>
+                    <Grid item xs={6}>
+                        <NumberEdit
+                            value={samplingOpts.init_radius}
+                            onChange={(value) => setSamplingOpts && setSamplingOpts({ ...samplingOpts, init_radius: value as number })}
+                            min={0}
+                            readOnly={readOnly}
+                            type="float"
+                        />
+                    </Grid>
+                </Grid>
+                <Grid container item xs={12} spacing={sp2} title="Random seed for the sampler. Leave blank (not 0) for a random seed.">
+                    <Grid item xs={6}>
+                        seed
+                    </Grid>
+                    <Grid item xs={6}>
+                        <NumberEdit
+                            value={samplingOpts.seed}
+                            onChange={(value) => setSamplingOpts && setSamplingOpts({ ...samplingOpts, seed: value })}
+                            min={0}
+                            readOnly={readOnly}
+                            type="int"
+                        />
+                    </Grid>
+                </Grid>
+            </Grid>
+            <div style={{position: 'relative', height: 5}} />
             <div>
                 <Hyperlink onClick={handleReset} color="gray">reset</Hyperlink>
             </div>
