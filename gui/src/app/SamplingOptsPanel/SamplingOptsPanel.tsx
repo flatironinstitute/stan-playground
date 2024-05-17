@@ -77,7 +77,7 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({ sampling
                         />
                     </Grid>
                 </Grid>
-                <Grid container item xs={12} spacing={sp2} title="Radius of the hypercube from which initial values for the model parameters are drawn (I think)">
+                <Grid container item xs={12} spacing={sp2} title="Radius of the hypercube from which initial values for the model parameters are drawn">
                     <Grid item xs={6}>
                         init radius
                     </Grid>
