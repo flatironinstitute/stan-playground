@@ -1,6 +1,6 @@
 import { Hyperlink } from "@fi-sci/misc";
 import { Splitter } from "@fi-sci/splitter";
-import { FunctionComponent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FunctionComponent, useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import DataFileEditor from "../../FileEditor/DataFileEditor";
 import StanFileEditor from "../../FileEditor/StanFileEditor";
 import RunPanel from "../../RunPanel/RunPanel";
@@ -10,6 +10,7 @@ import examplesStanies, { Stanie, StanieMetaData } from "../../exampleStanies/ex
 import SamplingOptsPanel from "../../SamplingOptsPanel/SamplingOptsPanel";
 import { SamplingOpts, defaultSamplingOpts } from "../../StanSampler/StanSampler";
 import {storeBlob, fetchBlob} from "./storeBlob";
+import { SharedUrlHistory, SharedUrlHistoryReducer } from "./sharedUrlHistory";
 
 const queryParams = new URLSearchParams(window.location.search)
 const q = {
@@ -42,6 +43,16 @@ if (doLoadFromQuery) {
     initialMetaContent = '{}'
     initialSamplingOptsContent = '{}'
 }
+
+const safeJsonParse = (s: string | null) => {
+    try {
+        return JSON.parse(s || '')
+    }
+    catch (e) {
+        return null
+    }
+}
+const initialSharedUrlHistory = safeJsonParse(localStorage.getItem('sharedUrlHistory')) || []
 
 const HomePage: FunctionComponent<Props> = ({ width, height }) => {
     const [stanFileContent, saveStanFileContent] = useState(initialStanFileContent)
@@ -81,6 +92,7 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
 
     useEffect(() => {
         if (!doLoadFromQuery) return
+        const urlToSaveToHistory = window.location.href
         ; (async () => {
             try {
                 const stan = await fetchBlob('stan', q.stan || '')
@@ -92,6 +104,9 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
                 setMetaContent(JSON.stringify({ title: q.title || '' }, null, 2))
                 // after we have done this, let's remove they query part of the url
                 window.history.replaceState({}, document.title, window.location.pathname)
+                // and save this to the shared url history
+                const title = q.title || 'Untitled'
+                sharedUrlHistoryDispatch({type: 'add', url: urlToSaveToHistory, title})
             }
             catch (err) {
                 console.error(err)
@@ -143,17 +158,23 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
         window.location.reload()
     }, [])
 
-    const generateShareableUrl = useMemo(() => (async () => {
+    const [sharedUrlHistory, sharedUrlHistoryDispatch] = useReducer(SharedUrlHistoryReducer, initialSharedUrlHistory)
+    useEffect(() => {
+        localStorage.setItem('sharedUrlHistory', JSON.stringify(sharedUrlHistory))
+    }, [sharedUrlHistory])
+
+    const generateShareableUrl = useMemo(() => (async (o: {title: string}) => {
         const stanSha1 = await storeBlob('stan', stanFileContent)
         const dataSha1 = await storeBlob('data.json', dataFileContent)
         const samplingOptsSha1 = await storeBlob('opts.json', samplingOptsContent)
-        let title = JSON.parse(metaContent).title || 'Untitled'
+        const {title} = o
         // need to url encode title
-        title = encodeURIComponent(title)
+        const titleEncoded = encodeURIComponent(title)
         const a = window.location.href.split('?')[0]
-        const url = `${a}?stan=${stanSha1}&data=${dataSha1}&sopts=${samplingOptsSha1}&title=${title}`
+        const url = `${a}?stan=${stanSha1}&data=${dataSha1}&sopts=${samplingOptsSha1}&title=${titleEncoded}`
+        sharedUrlHistoryDispatch({type: 'add', url, title})
         return url
-    }), [stanFileContent, dataFileContent, samplingOptsContent, metaContent])
+    }), [stanFileContent, dataFileContent, samplingOptsContent])
 
     return (
         <div style={{ position: 'absolute', width, height }}>
@@ -166,6 +187,7 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
                     onLoadStanie={handleLoadStanie}
                     onClearBrowserData={handleClearBrowserData}
                     generateShareableUrl={generateShareableUrl}
+                    sharedUrlHistory={sharedUrlHistory}
                 />
             </div>
             <div style={{ position: 'absolute', left: leftPanelWidth, width: width - leftPanelWidth, height }}>
@@ -308,10 +330,11 @@ type LeftPanelProps = {
     setMetaContent: (text: string) => void
     onLoadStanie: (stanie: Stanie) => void
     onClearBrowserData: () => void
-    generateShareableUrl: () => Promise<string>
+    generateShareableUrl: (o: {title: string}) => Promise<string>
+    sharedUrlHistory: SharedUrlHistory
 }
 
-const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, metaContent, setMetaContent, onLoadStanie, onClearBrowserData, generateShareableUrl }) => {
+const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, metaContent, setMetaContent, onLoadStanie, onClearBrowserData, generateShareableUrl, sharedUrlHistory }) => {
     const metaData = useMemo(() => {
         try {
             const x = JSON.parse(metaContent) as StanieMetaData
@@ -334,10 +357,16 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, metaConte
     const [isPreparingShareableUrl, setIsPreparingShareableUrl] = useState(false)
     const [shareableUrl, setShareableUrl] = useState<string | undefined>(undefined)
     const handleShare = useCallback(async () => {
+        const title = metaData.title || 'Untitled'
+        const newTitle = window.prompt('Enter a title for the shared analysis:', title)
+        if (!newTitle) return
+        updateTitle(newTitle)
         setIsPreparingShareableUrl(true)
         try {
             setShareableUrl(undefined)
-            const url = await generateShareableUrl()
+            // need to pass the newTitle because the updateTitle has not taken effect
+            // for this version of the generateShareableUrl function
+            const url = await generateShareableUrl({title: newTitle})
             setShareableUrl(url)
         }
         catch (err) {
@@ -347,7 +376,7 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, metaConte
         finally {
             setIsPreparingShareableUrl(false)
         }
-    }, [generateShareableUrl])
+    }, [generateShareableUrl, metaData.title, updateTitle])
 
     return (
         <div style={{ width, height, backgroundColor: '#333', color: '#ccc' }}>
@@ -399,7 +428,13 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, metaConte
                 )
             }
             <hr />
-            <div style={{ position: 'relative', height: 30 }} />
+            <div style={{ position: 'relative', left: 10, width: width - 20, height: 200, overflowY: 'auto' }}>
+                <SharedUrlHistoryView
+                    width={width - 20}
+                    sharedUrlHistory={sharedUrlHistory}
+                />
+            </div>
+            <hr />
             <div style={{ position: 'absolute', left: 10, width: width - 20, bottom: 10 }}>
                 <Hyperlink color="#c66" onClick={onClearBrowserData}>
                     clear all browser data
@@ -451,6 +486,31 @@ const CopyableTextField: FunctionComponent<CopyableTextFieldProps> = ({ text }) 
                     {copied ? 'Copied!' : 'Copy'}
                 </Hyperlink>
             </div>
+        </div>
+    )
+}
+
+type SharedUrlHistoryViewProps = {
+    width: number
+    sharedUrlHistory: SharedUrlHistory
+}
+
+const SharedUrlHistoryView: FunctionComponent<SharedUrlHistoryViewProps> = ({ width, sharedUrlHistory }) => {
+    return (
+        <div>
+            <strong>Recent</strong>
+            <div style={{ height: 7 }}>&nbsp;</div>
+            {
+                sharedUrlHistory.map((x, i) => {
+                    return (
+                        <div key={i}>
+                            <Hyperlink color="lightblue" href={x.url}>
+                                {x.title}
+                            </Hyperlink>
+                        </div>
+                    )
+                })
+            }
         </div>
     )
 }
