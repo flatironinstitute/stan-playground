@@ -80,7 +80,7 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({ sampling
                             />
                         </td>
                     </tr>
-                    <tr title="Random seed for the sampler. Leave blank for a random seed">
+                    <tr title="Random seed for the sampler. Leave blank (not 0) for a random seed">
                         <td>seed</td>
                         <td>
                             <NumberEdit
