@@ -44,7 +44,7 @@ type SequenceHistProps = {
     drawChainIds: number[]
 }
 
-const SequenceHist: FunctionComponent<SequenceHistProps> = ({ width, height, variableName, draws, columnIndex, drawChainIds }) => {
+const SequenceHist: FunctionComponent<SequenceHistProps> = ({ width, height, variableName, draws, columnIndex }) => {
     return (
         <SequenceHistogramWidget
             histData={draws[columnIndex]}

@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prefer-const */
-/* 
+/*
  * Free FFT and convolution (TypeScript)
- * 
+ *
  * Copyright (c) 2022 Project Nayuki. (MIT License)
  * https://www.nayuki.io/page/free-small-fft-in-multiple-languages
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
  * the Software without restriction, including without limitation the rights to
@@ -25,7 +25,7 @@
  */
 
 
-/* 
+/*
  * Computes the discrete Fourier transform (DFT) of the given complex vector, storing the result back into the vector.
  * The vector can have any length. This is a wrapper function.
  */
@@ -42,7 +42,7 @@ export function transform(real: Array<number>|Float64Array, imag: Array<number>|
 }
 
 
-/* 
+/*
  * Computes the inverse discrete Fourier transform (IDFT) of the given complex vector, storing the result back into the vector.
  * The vector can have any length. This is a wrapper function. This transform does not perform scaling, so the inverse is not a true inverse.
  */
@@ -51,7 +51,7 @@ export function inverseTransform(real: Array<number>|Float64Array, imag: Array<n
 }
 
 
-/* 
+/*
  * Computes the discrete Fourier transform (DFT) of the given complex vector, storing the result back into the vector.
  * The vector's length must be a power of 2. Uses the Cooley-Tukey decimation-in-time radix-2 algorithm.
  */
@@ -69,7 +69,7 @@ function transformRadix2(real: Array<number>|Float64Array, imag: Array<number>|F
 	}
 	if (levels == -1)
 		throw new RangeError("Length is not a power of 2");
-	
+
 	// Trigonometric tables
 	let cosTable = new Array<number>(n / 2);
 	let sinTable = new Array<number>(n / 2);
@@ -77,7 +77,7 @@ function transformRadix2(real: Array<number>|Float64Array, imag: Array<number>|F
 		cosTable[i] = Math.cos(2 * Math.PI * i / n);
 		sinTable[i] = Math.sin(2 * Math.PI * i / n);
 	}
-	
+
 	// Bit-reversed addressing permutation
 	for (let i = 0; i < n; i++) {
 		const j: number = reverseBits(i, levels);
@@ -90,7 +90,7 @@ function transformRadix2(real: Array<number>|Float64Array, imag: Array<number>|F
 			imag[j] = temp;
 		}
 	}
-	
+
 	// Cooley-Tukey decimation-in-time radix-2 FFT
 	for (let size = 2; size <= n; size *= 2) {
 		const halfsize: number = size / 2;
@@ -107,7 +107,7 @@ function transformRadix2(real: Array<number>|Float64Array, imag: Array<number>|F
 			}
 		}
 	}
-	
+
 	// Returns the integer whose value is the reverse of the lowest 'width' bits of the integer 'val'.
 	function reverseBits(val: number, width: number): number {
 		let result: number = 0;
@@ -120,7 +120,7 @@ function transformRadix2(real: Array<number>|Float64Array, imag: Array<number>|F
 }
 
 
-/* 
+/*
  * Computes the discrete Fourier transform (DFT) of the given complex vector, storing the result back into the vector.
  * The vector can have any length. This requires the convolution function, which in turn requires the radix-2 FFT function.
  * Uses Bluestein's chirp z-transform algorithm.
@@ -133,7 +133,7 @@ function transformBluestein(real: Array<number>|Float64Array, imag: Array<number
 	let m: number = 1;
 	while (m < n * 2 + 1)
 		m *= 2;
-	
+
 	// Trigonometric tables
 	let cosTable = new Array<number>(n);
 	let sinTable = new Array<number>(n);
@@ -142,7 +142,7 @@ function transformBluestein(real: Array<number>|Float64Array, imag: Array<number
 		cosTable[i] = Math.cos(Math.PI * j / n);
 		sinTable[i] = Math.sin(Math.PI * j / n);
 	}
-	
+
 	// Temporary vectors and preprocessing
 	let areal: Array<number> = newArrayOfZeros(m);
 	let aimag: Array<number> = newArrayOfZeros(m);
@@ -158,12 +158,12 @@ function transformBluestein(real: Array<number>|Float64Array, imag: Array<number
 		breal[i] = breal[m - i] = cosTable[i];
 		bimag[i] = bimag[m - i] = sinTable[i];
 	}
-	
+
 	// Convolution
 	let creal = new Array<number>(m);
 	let cimag = new Array<number>(m);
 	convolveComplex(areal, aimag, breal, bimag, creal, cimag);
-	
+
 	// Postprocessing
 	for (let i = 0; i < n; i++) {
 		real[i] =  creal[i] * cosTable[i] + cimag[i] * sinTable[i];
@@ -172,44 +172,44 @@ function transformBluestein(real: Array<number>|Float64Array, imag: Array<number
 }
 
 
-/* 
+/*
  * Computes the circular convolution of the given real vectors. Each vector's length must be the same.
  */
-function convolveReal(xvec: Array<number>|Float64Array, yvec: Array<number>|Float64Array, outvec: Array<number>|Float64Array): void {
-	const n: number = xvec.length;
-	if (n != yvec.length || n != outvec.length)
-		throw new RangeError("Mismatched lengths");
-	convolveComplex(xvec, newArrayOfZeros(n), yvec, newArrayOfZeros(n), outvec, newArrayOfZeros(n));
-}
+// function convolveReal(xvec: Array<number>|Float64Array, yvec: Array<number>|Float64Array, outvec: Array<number>|Float64Array): void {
+// 	const n: number = xvec.length;
+// 	if (n != yvec.length || n != outvec.length)
+// 		throw new RangeError("Mismatched lengths");
+// 	convolveComplex(xvec, newArrayOfZeros(n), yvec, newArrayOfZeros(n), outvec, newArrayOfZeros(n));
+// }
 
 
-/* 
+/*
  * Computes the circular convolution of the given complex vectors. Each vector's length must be the same.
  */
 function convolveComplex(
 		xreal: Array<number>|Float64Array, ximag: Array<number>|Float64Array,
 		yreal: Array<number>|Float64Array, yimag: Array<number>|Float64Array,
 		outreal: Array<number>|Float64Array, outimag: Array<number>|Float64Array): void {
-	
+
 	const n: number = xreal.length;
 	if (n != ximag.length || n != yreal.length || n != yimag.length
 			|| n != outreal.length || n != outimag.length)
 		throw new RangeError("Mismatched lengths");
-	
+
 	xreal = xreal.slice();
 	ximag = ximag.slice();
 	yreal = yreal.slice();
 	yimag = yimag.slice();
 	transform(xreal, ximag);
 	transform(yreal, yimag);
-	
+
 	for (let i = 0; i < n; i++) {
 		const temp: number = xreal[i] * yreal[i] - ximag[i] * yimag[i];
 		ximag[i] = ximag[i] * yreal[i] + xreal[i] * yimag[i];
 		xreal[i] = temp;
 	}
 	inverseTransform(xreal, ximag);
-	
+
 	for (let i = 0; i < n; i++) {  // Scaling (because this FFT implementation omits it)
 		outreal[i] = xreal[i] / n;
 		outimag[i] = ximag[i] / n;
