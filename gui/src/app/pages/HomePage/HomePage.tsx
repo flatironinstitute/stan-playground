@@ -466,12 +466,8 @@ const CopyableTextField: FunctionComponent<CopyableTextFieldProps> = ({ text }) 
         setCopied(true)
         setTimeout(() => {
             setCopied(false)
-        }, 2000)
+        }, 8000)
     }, [ref])
-
-    useEffect(() => {
-        handleCopy()
-    }, [handleCopy])
 
     return (
         <div>
