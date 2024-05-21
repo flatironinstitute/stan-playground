@@ -3,7 +3,7 @@ import SequencePlotWidget from "./SequencePlotWidget";
 import { chainColorForIndex } from "./chainColorList";
 import ReactVisibilitySensor from "react-visibility-sensor";
 
-type PlotsViewProps = {
+type TracePlotsViewProps = {
     width: number,
     height: number,
     draws: number[][],
@@ -11,7 +11,7 @@ type PlotsViewProps = {
     drawChainIds: number[]
 }
 
-const PlotsView: FunctionComponent<PlotsViewProps> = ({ width, height, draws, paramNames, drawChainIds }) => {
+const TracePlotsView: FunctionComponent<TracePlotsViewProps> = ({ width, height, draws, paramNames, drawChainIds }) => {
     const plotHeight = Math.max(150, Math.min(400, height / 2));
     return (
         <div style={{position: 'absolute', width, height, overflowY: 'auto'}}>
@@ -114,4 +114,4 @@ const ExpandComponent: FunctionComponent<ExpandComponentProps> = ({ width, expan
     )
 }
 
-export default PlotsView;
+export default TracePlotsView;

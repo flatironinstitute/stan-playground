@@ -27,8 +27,10 @@ class StanSampler {
     #onProgressCallbacks: ((progress: Progress) => void)[] = [];
     #onStatusChangedCallbacks: (() => void)[] = [];
     #draws: number[][] = [];
+    #computeTimeSec: number | undefined = undefined;
     #paramNames: string[] = [];
     #numChains: number = 0;
+    #samplingStartTimeSec: number = 0;
 
     private constructor(private compiledUrl: string) {
         this._initialize()
@@ -66,6 +68,7 @@ class StanSampler {
                     } else {
                         this.#draws = e.data.draws;
                         this.#paramNames = e.data.paramNames;
+                        this.#computeTimeSec = Date.now() / 1000 - this.#samplingStartTimeSec;
                         this.#status = 'completed';
                         this.#onStatusChangedCallbacks.forEach(cb => cb())
                     }
@@ -108,6 +111,7 @@ class StanSampler {
         this.#paramNames = [];
         this.#worker
             .postMessage({ purpose: Requests.Sample, sampleConfig });
+        this.#samplingStartTimeSec = Date.now() / 1000;
         this.#status = 'sampling';
         this.#onStatusChangedCallbacks.forEach(cb => cb())
     }
@@ -141,6 +145,9 @@ class StanSampler {
     }
     get errorMessage() {
         return this.#errorMessage;
+    }
+    get computeTimeSec() {
+        return this.#computeTimeSec;
     }
 }
 

@@ -62,12 +62,15 @@ export const useSamplerOutput = (sampler: StanSampler | undefined) => {
     const [draws, setDraws] = useState<number[][] | undefined>();
     const [paramNames, setParamNames] = useState<string[] | undefined>();
     const [numChains, setNumChains] = useState<number | undefined>();
+    const [computeTimeSec, setComputeTimeSec] = useState<number | undefined>();
 
     useEffect(() => {
         let canceled = false;
         if (!sampler) {
             setDraws(undefined);
             setParamNames(undefined);
+            setNumChains(undefined);
+            setComputeTimeSec(undefined);
             return;
         }
         sampler.onStatusChanged(() => {
@@ -76,11 +79,13 @@ export const useSamplerOutput = (sampler: StanSampler | undefined) => {
                 setDraws(sampler.draws);
                 setParamNames(sampler.paramNames);
                 setNumChains(sampler.numChains);
+                setComputeTimeSec(sampler.computeTimeSec);
             }
             else {
                 setDraws(undefined)
                 setParamNames(undefined)
                 setNumChains(undefined)
+                setComputeTimeSec(undefined)
             }
         })
         return (
@@ -90,7 +95,7 @@ export const useSamplerOutput = (sampler: StanSampler | undefined) => {
         )
     }, [sampler]);
 
-    return { draws, paramNames, numChains }
+    return { draws, paramNames, numChains, computeTimeSec }
 }
 
 export default useStanSampler;

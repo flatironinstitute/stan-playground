@@ -4,7 +4,9 @@ import { FunctionComponent, useCallback, useMemo, useState } from "react"
 import StanSampler from "../StanSampler/StanSampler"
 import { useSamplerOutput } from "../StanSampler/useStanSampler"
 import TabWidget from "../TabWidget/TabWidget"
-import PlotsView from "./PlotsView"
+import TracePlotsView from "./TracePlotsView"
+import SummaryView from "./SummaryView"
+import HistsView from "./HistsView"
 
 type SamplerOutputViewProps = {
     width: number
@@ -13,7 +15,7 @@ type SamplerOutputViewProps = {
 }
 
 const SamplerOutputView: FunctionComponent<SamplerOutputViewProps> = ({width, height, sampler}) => {
-    const {draws, paramNames, numChains} = useSamplerOutput(sampler)
+    const {draws, paramNames, numChains, computeTimeSec} = useSamplerOutput(sampler)
 
     if (!draws || !paramNames || !numChains) return (
         <span />
@@ -25,6 +27,7 @@ const SamplerOutputView: FunctionComponent<SamplerOutputViewProps> = ({width, he
             draws={draws}
             paramNames={paramNames}
             numChains={numChains}
+            computeTimeSec={computeTimeSec}
         />
     )
 }
@@ -35,6 +38,7 @@ type DrawsDisplayProps = {
     draws: number[][],
     numChains: number,
     paramNames: string[]
+    computeTimeSec: number | undefined
 }
 
 const tabs = [
@@ -51,14 +55,20 @@ const tabs = [
         closeable: false
     },
     {
-        id: 'plots',
-        label: 'Plots',
-        title: 'Plots view',
+        id: 'hists',
+        label: 'Histograms',
+        title: 'Histograms view',
+        closeable: false
+    },
+    {
+        id: 'traceplots',
+        label: 'Trace Plots',
+        title: 'Trace Plots view',
         closeable: false
     }
 ]
 
-const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({ width, height, draws, paramNames, numChains }) => {
+const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({ width, height, draws, paramNames, numChains, computeTimeSec }) => {
 
     const [currentTabId, setCurrentTabId] = useState('summary');
 
@@ -80,9 +90,12 @@ const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({ width, height, dra
             setCurrentTabId={setCurrentTabId}
         >
             <SummaryView
+                width={0}
+                height={0}
                 draws={draws}
                 paramNames={paramNames}
                 drawChainIds={drawChainIds}
+                computeTimeSec={computeTimeSec}
             />
             <DrawsView
                 width={0}
@@ -92,7 +105,14 @@ const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({ width, height, dra
                 drawChainIds={drawChainIds}
                 drawNumbers={drawNumbers}
             />
-            <PlotsView
+            <HistsView
+                width={0}
+                height={0}
+                draws={draws}
+                paramNames={paramNames}
+                drawChainIds={drawChainIds}
+            />
+            <TracePlotsView
                 width={0}
                 height={0}
                 draws={draws}
@@ -100,61 +120,6 @@ const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({ width, height, dra
                 drawChainIds={drawChainIds}
             />
         </TabWidget>
-    )
-}
-
-type SummaryViewProps = {
-    draws: number[][],
-    paramNames: string[]
-    drawChainIds: number[]
-}
-
-const SummaryView: FunctionComponent<SummaryViewProps> = ({ draws, paramNames, drawChainIds }) => {
-    const uniqueChainIds = useMemo(() => (Array.from(new Set(drawChainIds)).sort()), [drawChainIds]);
-    const {means} = useMemo(() => {
-        const means: { [k: string]: number }[] = [];
-        for (let ic = 0; ic < uniqueChainIds.length; ic++) {
-            const drawsForChain = draws.map((draw) => draw.filter((_, j) => drawChainIds[j] === uniqueChainIds[ic]));
-            const meansForChain: { [k: string]: number } = {};
-            for (const [i, element] of paramNames.entries()) {
-                let sum = 0;
-                for (const draw of drawsForChain[i]) {
-                    sum += draw;
-                }
-                meansForChain[element] = sum / drawsForChain.length;
-            }
-            means.push(meansForChain);
-        }
-        return {means};
-    }, [draws, paramNames, drawChainIds, uniqueChainIds]);
-
-    return (
-        <table className="scientific-table">
-            <thead>
-                <tr>
-                    <th>Parameter</th>
-                    {
-                        uniqueChainIds.map((chainId, i) => (
-                            <th key={i}>Chain {chainId}</th>
-                        ))
-                    }
-                </tr>
-            </thead>
-            <tbody>
-                {
-                    paramNames.map((paramName, i) => (
-                        <tr key={i}>
-                            <td>{paramName}</td>
-                            {
-                                uniqueChainIds.map((_, j) => (
-                                    <td key={j}>{means[j][paramName].toPrecision(4)}</td>
-                                ))
-                            }
-                        </tr>
-                    ))
-                }
-            </tbody>
-        </table>
     )
 }
 
