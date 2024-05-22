@@ -227,6 +227,21 @@ async def get_blob_data_json(sha1: str):
     return _get_blob('data.json', sha1)
 
 
+@app.post("/blob/data.py")
+async def put_blob_data_py(request: UploadBlobRequest):
+    text = request.text
+    # todo: check whether this looks like a reasonable data.py
+    if len(text) > 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Blob too large for data.py")
+    return _store_blob('data.py', text)
+
+
+@app.get("/blob/data.py/{sha1}")
+async def get_blob_data_py(sha1: str):
+    return _get_blob('data.py', sha1)
+
+
+
 @app.post("/blob/opts.json")
 async def put_blob_opts_json(request: UploadBlobRequest):
     text = request.text

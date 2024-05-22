@@ -14,7 +14,7 @@ type Props = {
     height: number
 }
 
-const DataFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSaveContent, editedFileContent, setEditedFileContent, readOnly, width, height}) => {
+const DataJsonFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSaveContent, editedFileContent, setEditedFileContent, readOnly, width, height}) => {
     const toolbarItems: ToolbarItem[] = useMemo(() => {
         const ret: ToolbarItem[] = []
         return ret
@@ -36,4 +36,4 @@ const DataFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSave
     )
 }
 
-export default DataFileEditor
+export default DataJsonFileEditor

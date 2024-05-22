@@ -6,6 +6,7 @@ export type StanieMetaData = {
 export type Stanie = {
     stan: string
     data: { [key: string]: any }
+    dataPy: string
     meta: StanieMetaData
 }
 
@@ -62,6 +63,7 @@ const linearRegressionMeta = {
 examplesStanies.push({
     stan: linearRegressionStan,
     data: linearRegressionData,
+    dataPy: '',
     meta: linearRegressionMeta
 })
 
@@ -135,6 +137,7 @@ const SIRMeta = {
 examplesStanies.push({
     stan: SIRStan,
     data: SIRData,
+    dataPy: '',
     meta: SIRMeta
 })
 

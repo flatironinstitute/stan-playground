@@ -1,7 +1,7 @@
 import { Hyperlink } from "@fi-sci/misc";
 import { Splitter } from "@fi-sci/splitter";
 import { FunctionComponent, useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
-import DataFileEditor from "../../FileEditor/DataFileEditor";
+import DataJsonFileEditor from "../../FileEditor/DataJsonFileEditor";
 import StanFileEditor from "../../FileEditor/StanFileEditor";
 import RunPanel from "../../RunPanel/RunPanel";
 import SamplerOutputView from "../../SamplerOutputView/SamplerOutputView";
@@ -11,11 +11,14 @@ import SamplingOptsPanel from "../../SamplingOptsPanel/SamplingOptsPanel";
 import { SamplingOpts, defaultSamplingOpts } from "../../StanSampler/StanSampler";
 import {storeBlob, fetchBlob} from "./storeBlob";
 import { SharedUrlHistory, SharedUrlHistoryReducer } from "./sharedUrlHistory";
+import TabWidget from "../../TabWidget/TabWidget";
+import DataPyFileEditor from "../../FileEditor/DataPyFileEditor";
 
 const queryParams = new URLSearchParams(window.location.search)
 const q = {
     stan: queryParams.get('stan'),
     data: queryParams.get('data'),
+    dataPy: queryParams.get('dataPy'),
     sopts: queryParams.get('sopts'),
     title: queryParams.get('title')
 }
@@ -28,18 +31,21 @@ type Props = {
 }
 
 const defaultStanContent = ''
-const defaultDataContent = ''
+const defaultDataJsonContent = ''
+const defaultDataPyContent = ''
 const defaultMetaContent = '{"title": "Untitled"}'
 const defaultSamplingOptsContent = JSON.stringify(defaultSamplingOpts)
 
 let initialStanFileContent = localStorage.getItem('main.stan') || defaultStanContent
-let initialDataFileContent = localStorage.getItem('data.json') || defaultDataContent
+let initialDataJsonFileContent = localStorage.getItem('data.json') || defaultDataJsonContent
+let initialDataPyFileContent = localStorage.getItem('data.py') || defaultDataPyContent
 let initialMetaContent = localStorage.getItem('meta.json') || defaultMetaContent
 let initialSamplingOptsContent = localStorage.getItem('samplingOpts.json') || defaultSamplingOptsContent
 
 if (doLoadFromQuery) {
     initialStanFileContent = ''
-    initialDataFileContent = '{}'
+    initialDataJsonFileContent = '{}'
+    initialDataPyFileContent = ''
     initialMetaContent = '{}'
     initialSamplingOptsContent = '{}'
 }
@@ -64,14 +70,19 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
         localStorage.setItem('main.stan', stanFileContent)
     }, [stanFileContent])
 
-    const [dataFileContent, saveDataFileContent] = useState(initialDataFileContent)
-    const [editedDataFileContent, setEditedDataFileContent] = useState('')
+    const [dataJsonFileContent, saveDataJsonFileContent] = useState(initialDataJsonFileContent)
+    const [editedDataJsonFileContent, setEditedDataJsonFileContent] = useState('')
     useEffect(() => {
-        setEditedDataFileContent(dataFileContent)
-    }, [dataFileContent])
+        setEditedDataJsonFileContent(dataJsonFileContent)
+    }, [dataJsonFileContent])
     useEffect(() => {
-        localStorage.setItem('data.json', dataFileContent)
-    }, [dataFileContent])
+        localStorage.setItem('data.json', dataJsonFileContent)
+    }, [dataJsonFileContent])
+
+    const [dataPyFileContent, saveDataPyFileContent] = useState(initialDataPyFileContent)
+    useEffect(() => {
+        localStorage.setItem('data.py', dataPyFileContent)
+    }, [dataPyFileContent])
 
     const [samplingOptsContent, setSamplingOptsContent] = useState(initialSamplingOptsContent)
     useEffect(() => {
@@ -96,10 +107,12 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
         ; (async () => {
             try {
                 const stan = await fetchBlob('stan', q.stan || '')
-                const data = await fetchBlob('data.json', q.data || '')
+                const dataJson = await fetchBlob('data.json', q.data || '')
+                const dataPy = q.dataPy ? await fetchBlob('data.py', q.dataPy || '') : undefined
                 const sopts = await fetchBlob('opts.json', q.sopts || '')
                 saveStanFileContent(stan)
-                saveDataFileContent(data)
+                saveDataJsonFileContent(dataJson)
+                saveDataPyFileContent(dataPy || '')
                 setSamplingOptsContent(sopts)
                 setMetaContent(JSON.stringify({ title: q.title || '' }, null, 2))
                 // after we have done this, let's remove they query part of the url
@@ -127,7 +140,8 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
                 return
             }
             localStorage.setItem('main.stan', stanFileContent);
-            localStorage.setItem('data.json', dataFileContent);
+            localStorage.setItem('data.json', dataJsonFileContent);
+            localStorage.setItem('data.py', dataPyFileContent);
             localStorage.setItem('meta.json', metaContent);
         };
 
@@ -136,7 +150,7 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
         return () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-    }, [stanFileContent, dataFileContent, metaContent, doNotSaveOnUnload]);
+    }, [stanFileContent, dataJsonFileContent, dataPyFileContent, metaContent, doNotSaveOnUnload]);
 
     const [compiledMainJsUrl, setCompiledMainJsUrl] = useState<string>('')
 
@@ -144,9 +158,10 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
 
     const handleLoadStanie = useCallback((stanie: Stanie) => {
         saveStanFileContent(stanie.stan)
-        saveDataFileContent(stringifyData(stanie.data))
+        saveDataJsonFileContent(stringifyData(stanie.data))
+        saveDataPyFileContent(stanie.dataPy)
         setMetaContent(JSON.stringify(stanie.meta, null, 2))
-    }, [saveStanFileContent, saveDataFileContent, setMetaContent])
+    }, [saveStanFileContent, saveDataJsonFileContent, setMetaContent])
 
     const handleClearBrowserData = useCallback(() => {
         const confirmed = window.confirm('Are you sure you want to clear all browser data?')
@@ -165,16 +180,20 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
 
     const generateShareableUrl = useMemo(() => (async (o: {title: string}) => {
         const stanSha1 = await storeBlob('stan', stanFileContent)
-        const dataSha1 = await storeBlob('data.json', dataFileContent)
+        const dataSha1 = await storeBlob('data.json', dataJsonFileContent)
+        const dataPySha1 = dataPyFileContent ? await storeBlob('data.py', dataPyFileContent) : ''
         const samplingOptsSha1 = await storeBlob('opts.json', samplingOptsContent)
         const {title} = o
         // need to url encode title
         const titleEncoded = encodeURIComponent(title)
         const a = window.location.href.split('?')[0]
         const url = `${a}?stan=${stanSha1}&data=${dataSha1}&sopts=${samplingOptsSha1}&title=${titleEncoded}`
+        if (dataPySha1) {
+            return `${url}&dataPy=${dataPySha1}`
+        }
         sharedUrlHistoryDispatch({type: 'add', url, title})
         return url
-    }), [stanFileContent, dataFileContent, samplingOptsContent])
+    }), [stanFileContent, dataJsonFileContent, dataPyFileContent, samplingOptsContent])
 
     return (
         <div style={{ position: 'absolute', width, height }}>
@@ -211,10 +230,12 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
                     <RightView
                         width={0}
                         height={0}
-                        dataFileContent={dataFileContent}
-                        saveDataFileContent={saveDataFileContent}
-                        editedDataFileContent={editedDataFileContent}
-                        setEditedDataFileContent={setEditedDataFileContent}
+                        dataJsonFileContent={dataJsonFileContent}
+                        saveDataJsonFileContent={saveDataJsonFileContent}
+                        editedDataJsonFileContent={editedDataJsonFileContent}
+                        setEditedDataJsonFileContent={setEditedDataJsonFileContent}
+                        dataPyFileContent={dataPyFileContent}
+                        saveDataPyFileContent={saveDataPyFileContent}
                         compiledMainJsUrl={compiledMainJsUrl}
                         samplingOpts={samplingOpts}
                         setSamplingOpts={setSamplingOpts}
@@ -228,16 +249,39 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
 type RightViewProps = {
     width: number
     height: number
-    dataFileContent: string
-    saveDataFileContent: (text: string) => void
-    editedDataFileContent: string
-    setEditedDataFileContent: (text: string) => void
+    dataJsonFileContent: string
+    saveDataJsonFileContent: (text: string) => void
+    editedDataJsonFileContent: string
+    setEditedDataJsonFileContent: (text: string) => void
+    dataPyFileContent: string
+    saveDataPyFileContent: (text: string) => void
     compiledMainJsUrl?: string
     samplingOpts: SamplingOpts
     setSamplingOpts: (opts: SamplingOpts) => void
 }
 
-const RightView: FunctionComponent<RightViewProps> = ({ width, height, dataFileContent, saveDataFileContent, editedDataFileContent, setEditedDataFileContent, compiledMainJsUrl, samplingOpts, setSamplingOpts }) => {
+const dataTabs = [
+    {
+        id: 'data.json',
+        label: 'data.json',
+        closeable: false
+    },
+    {
+        id: 'data.py',
+        label: 'data.py',
+        closeable: false
+    }
+]
+
+const RightView: FunctionComponent<RightViewProps> = ({ width, height, dataJsonFileContent, saveDataJsonFileContent, editedDataJsonFileContent, setEditedDataJsonFileContent, dataPyFileContent, saveDataPyFileContent, compiledMainJsUrl, samplingOpts, setSamplingOpts }) => {
+    const [currentDataTabId, setCurrentDataTabId] = useState<'data.json' | 'data.py'>('data.json')
+    const [editedDataPyFileContent, setEditedDataPyFileContent] = useState(dataPyFileContent)
+    useEffect(() => {
+        setEditedDataPyFileContent(dataPyFileContent)
+    }, [dataPyFileContent])
+    const handleSetData = useCallback((data: any) => {
+        saveDataJsonFileContent(stringifyData(data))
+    }, [saveDataJsonFileContent])
     return (
         <Splitter
             direction="vertical"
@@ -245,22 +289,41 @@ const RightView: FunctionComponent<RightViewProps> = ({ width, height, dataFileC
             height={height}
             initialPosition={height / 3}
         >
-            <DataFileEditor
+            <TabWidget
+                tabs={dataTabs}
                 width={0}
                 height={0}
-                fileName="data.json"
-                fileContent={dataFileContent}
-                onSaveContent={saveDataFileContent}
-                editedFileContent={editedDataFileContent}
-                setEditedFileContent={setEditedDataFileContent}
-                readOnly={false}
-            />
+                currentTabId={currentDataTabId}
+                setCurrentTabId={id => setCurrentDataTabId(id as 'data.json' | 'data.py')}
+            >
+                <DataJsonFileEditor
+                    width={0}
+                    height={0}
+                    fileName="data.json"
+                    fileContent={dataJsonFileContent}
+                    onSaveContent={saveDataJsonFileContent}
+                    editedFileContent={editedDataJsonFileContent}
+                    setEditedFileContent={setEditedDataJsonFileContent}
+                    readOnly={false}
+                />
+                <DataPyFileEditor
+                    width={0}
+                    height={0}
+                    fileName="data.py"
+                    fileContent={dataPyFileContent}
+                    onSaveContent={saveDataPyFileContent}
+                    editedFileContent={editedDataPyFileContent}
+                    setEditedFileContent={setEditedDataPyFileContent}
+                    setData={handleSetData}
+                    readOnly={false}
+                />
+            </TabWidget>
             <LowerRightView
                 width={0}
                 height={0}
                 compiledMainJsUrl={compiledMainJsUrl}
-                dataFileContent={dataFileContent}
-                dataIsSaved={dataFileContent === editedDataFileContent}
+                dataJsonFileContent={dataJsonFileContent}
+                dataIsSaved={dataJsonFileContent === editedDataJsonFileContent}
                 samplingOpts={samplingOpts}
                 setSamplingOpts={setSamplingOpts}
             />
@@ -272,21 +335,21 @@ type LowerRightViewProps = {
     width: number
     height: number
     compiledMainJsUrl?: string
-    dataFileContent: string
+    dataJsonFileContent: string
     dataIsSaved: boolean
     samplingOpts: SamplingOpts
     setSamplingOpts: (opts: SamplingOpts) => void
 }
 
-const LowerRightView: FunctionComponent<LowerRightViewProps> = ({ width, height, compiledMainJsUrl, dataFileContent, dataIsSaved, samplingOpts, setSamplingOpts }) => {
+const LowerRightView: FunctionComponent<LowerRightViewProps> = ({ width, height, compiledMainJsUrl, dataJsonFileContent, dataIsSaved, samplingOpts, setSamplingOpts }) => {
     const parsedData = useMemo(() => {
         try {
-            return JSON.parse(dataFileContent)
+            return JSON.parse(dataJsonFileContent)
         }
         catch (e) {
             return undefined
         }
-    }, [dataFileContent])
+    }, [dataJsonFileContent])
     const samplingOptsPanelHeight = 160
     const samplingOptsPanelWidth = Math.min(180, width / 2)
 
