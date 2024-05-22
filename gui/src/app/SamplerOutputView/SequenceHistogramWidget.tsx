@@ -16,7 +16,8 @@ const SequenceHistogramWidget: FunctionComponent<Props> = ({ histData, title, wi
 			x: histData,
 			type: 'histogram',
 			nbinsx: Math.ceil(1.5 * Math.sqrt(histData.length)),
-			marker: {color: '#505060'}
+			marker: {color: '#505060'},
+			histnorm: 'probability'
 		} as any // had to do it this way because ts was not recognizing nbinsx
 	), [histData])
 	return (
