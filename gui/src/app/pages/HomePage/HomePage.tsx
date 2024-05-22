@@ -187,9 +187,9 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
         // need to url encode title
         const titleEncoded = encodeURIComponent(title)
         const a = window.location.href.split('?')[0]
-        const url = `${a}?stan=${stanSha1}&data=${dataSha1}&sopts=${samplingOptsSha1}&title=${titleEncoded}`
+        let url = `${a}?stan=${stanSha1}&data=${dataSha1}&sopts=${samplingOptsSha1}&title=${titleEncoded}`
         if (dataPySha1) {
-            return `${url}&dataPy=${dataPySha1}`
+            url = `${url}&dataPy=${dataPySha1}`
         }
         sharedUrlHistoryDispatch({type: 'add', url, title})
         return url
