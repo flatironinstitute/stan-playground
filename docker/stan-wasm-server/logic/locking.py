@@ -1,10 +1,8 @@
 import os
-from random import seed, choices
-from string import ascii_letters
+import time
 
 def get_nonce():
-    seed(os.getpid())
-    return str.join('', choices(ascii_letters, k=20))
+    return str(os.getpid()) + str(time.time())
 
 
 def _get_compilation_lockfile_name(model_dir: str):
@@ -18,8 +16,7 @@ def acquire_compilation_lock(model_dir: str, nonce: str):
             file.write(nonce)
         with open(lock_name, 'r') as file:
             contents = file.read()
-            assert contents == nonce
-            return True
+            return contents == nonce
     except:
         return False
 

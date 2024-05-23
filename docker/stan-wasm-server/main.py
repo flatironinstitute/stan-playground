@@ -7,7 +7,7 @@ from fastapi import Body
 import os
 
 from logic.definitions import CompilationStatus
-from logic.compilationJobMgmt import (
+from logic.compilation_job_mgmt import (
     create_compilation_job,
     get_compilation_job_dir,
     read_compilation_job_status,

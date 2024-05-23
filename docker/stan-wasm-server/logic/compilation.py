@@ -2,6 +2,7 @@ import tempfile
 import subprocess
 import os
 from hashlib import sha1
+from shutil import copy2
 
 from .definitions import CompilationStatus
 from .locking import get_nonce, acquire_compilation_lock, release_compilation_lock
@@ -35,7 +36,7 @@ def copy_compilation_outputs(*, model_dir: str, job_dir: str):
             raise FileNotFoundError(f"File {src} does not exist.")
         todos.append((src, dest))
     for (src, dest) in todos:
-        os.system(f"cp {src} {dest}")
+        copy2(src, dest)
 
 
 def try_compile_stan_program(*, job_dir: str, model_dir: str, tinystan_dir: str, preserve_on_fail = False) -> tuple[CompilationStatus, str]:

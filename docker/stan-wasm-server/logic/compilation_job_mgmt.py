@@ -4,7 +4,7 @@ import os
 from fastapi import HTTPException
 from .definitions import CompilationStatus
 
-from .fileValidation.compilationFiles import download_filename_is_valid, write_stan_code_file
+from .file_validation.compilation_files import download_filename_is_valid, write_stan_code_file
 
 ### QUERY: It'd be nice to avoid taking a dependency on HTTPException here,
 # but the best I can think of to do it is to define a bunch of our own exceptions,
@@ -95,11 +95,12 @@ def write_compilation_logfile(job_id: str, msg: str):
 
 
 def upload_stan_code_file(job_id: str, filename: str, data: bytes):
+    # filename is currently intentionally unused
     status = read_compilation_job_status(job_id)
     if status != CompilationStatus.INITIATED.value:
         raise HTTPException(status_code=409, detail=f"Cannot upload files to job with status {status}")
     job_dir = get_compilation_job_dir(job_id)
-    (success, msg) = write_stan_code_file(job_dir, filename, data)
+    (success, msg) = write_stan_code_file(job_dir, data)
     if (not success):
         raise HTTPException(status_code=400, detail=msg)
     return True

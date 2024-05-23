@@ -1,10 +1,11 @@
 import os
 
-def _passcode_is_valid(passcode: str):
-    SWS_PASSCODE = os.environ.get("SWS_PASSCODE", "")
-    if not SWS_PASSCODE:
-        raise ValueError("SWS_PASSCODE environment variable not set")
+SWS_PASSCODE = os.environ.get("SWS_PASSCODE", "")
+if not SWS_PASSCODE:
+    raise ValueError("SWS_PASSCODE environment variable not set")
 
+
+def _passcode_is_valid(passcode: str):
     return passcode == SWS_PASSCODE
 
 
