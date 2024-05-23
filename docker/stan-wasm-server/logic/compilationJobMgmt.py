@@ -64,6 +64,10 @@ def validate_compilation_job_runnable_status(job_id: str):
         )
 
 
+def _get_compilation_job_status_file(job_dir: str):
+    return os.path.join(job_dir, "status.txt")
+
+
 def write_compilation_job_status(job_id: str, status: CompilationStatus):
     job_dir = get_compilation_job_dir(job_id)
     status_file = _get_compilation_job_status_file(job_dir)
@@ -78,8 +82,16 @@ def read_compilation_job_status(job_id: str):
         return sf.read()
 
 
-def _get_compilation_job_status_file(job_dir: str):
-    return os.path.join(job_dir, "status.txt")
+def _get_compilation_logfile_name(job_id: str):
+    job_dir = get_compilation_job_dir(job_id)
+    logfile_name = os.path.join(job_dir, "log.txt")
+    return logfile_name
+
+
+def write_compilation_logfile(job_id: str, msg: str):
+    log = _get_compilation_logfile_name(job_id)
+    with open(log, "a") as fp:
+        fp.write(msg)
 
 
 def upload_stan_code_file(job_id: str, filename: str, data: bytes):

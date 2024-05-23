@@ -14,13 +14,13 @@ from logic.compilationJobMgmt import (
     write_compilation_job_status,
     validate_compilation_job_runnable_status,
     upload_stan_code_file,
-    get_compiled_file_location
+    get_compiled_file_location,
+    write_compilation_logfile
 )
-from logic.locking import get_nonce, acquire_compilation_lock, release_compilation_lock
-from logic.compilation import compile_model_if_uncompiled, make_canonical_model_dir, copy_compilation_outputs
+from logic.compilation import make_canonical_model_dir, try_compile_stan_program
 from logic.authorization import check_authorization
 
-# TODO: While less significant than compilation locks, the risk of race conditions also
+#  NOTE: While less significant than compilation locks, the risk of race conditions also
 # applies to tracking status using the file system. Consider implementing a (single-threaded)
 # status tracker to track this state globally. (Can also act as a lock server.)
 
@@ -79,23 +79,11 @@ async def download_file(job_id: str, filename: str):
 async def run_job(job_id: str):
     job_dir = get_compilation_job_dir(job_id)
     validate_compilation_job_runnable_status(job_id)
-
     model_dir = make_canonical_model_dir(job_id, TINYSTAN_DIR)
-    status = CompilationStatus.FAILED
-    try:
-        nonce = get_nonce()
-        if acquire_compilation_lock(model_dir, nonce):
-            compile_model_if_uncompiled(job_dir=job_dir, model_dir=model_dir, tinystan_dir=TINYSTAN_DIR)
-            copy_compilation_outputs(model_dir=model_dir, job_dir=job_dir)
-            status = CompilationStatus.COMPLETED
-        else:
-            status = CompilationStatus.RUNNING
-    except Exception as e:
-        with open(f"{job_dir}/log.txt", "w") as log_file:
-            log_file.write(str(e))
-        status = CompilationStatus.FAILED
-    finally:
-        release_compilation_lock(model_dir, nonce)
-        write_compilation_job_status(job_id, status)
+
+    (status, err_msg) = try_compile_stan_program(job_dir=job_dir, model_dir=model_dir, tinystan_dir=TINYSTAN_DIR, preserve_on_fail=False)
+    if (err_msg != ''):
+        write_compilation_logfile(job_id, err_msg)
+    write_compilation_job_status(job_id, status)
     return {"job_id": job_id, "status": status.value}
     

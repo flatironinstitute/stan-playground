@@ -3,6 +3,9 @@ import subprocess
 import os
 from hashlib import sha1
 
+from .definitions import CompilationStatus
+from .locking import get_nonce, acquire_compilation_lock, release_compilation_lock
+
 
 COMPILATION_TIMEOUT = 60 * 5
 COMPILATION_OUTPUTS = ['main.js', 'main.wasm']
@@ -33,6 +36,21 @@ def copy_compilation_outputs(*, model_dir: str, job_dir: str):
         todos.append((src, dest))
     for (src, dest) in todos:
         os.system(f"cp {src} {dest}")
+
+
+def try_compile_stan_program(*, job_dir: str, model_dir: str, tinystan_dir: str, preserve_on_fail = False) -> tuple[CompilationStatus, str]:
+    try:
+        nonce = get_nonce()
+        if acquire_compilation_lock(model_dir, nonce):
+            compile_model_if_uncompiled(job_dir=job_dir, model_dir=model_dir, tinystan_dir=tinystan_dir, preserve_on_fail=preserve_on_fail)
+            copy_compilation_outputs(model_dir=model_dir, job_dir=job_dir)
+            return (CompilationStatus.COMPLETED, '')
+        # NOTE: Could also write job ID in lockfile and report that here
+        return (CompilationStatus.RUNNING, '')
+    except Exception as e:
+        return (CompilationStatus.FAILED, str(e))
+    finally:
+        release_compilation_lock(model_dir, nonce)
 
 
 def compile_model_if_uncompiled(*, job_dir: str, model_dir: str, tinystan_dir: str, preserve_on_fail = False):
