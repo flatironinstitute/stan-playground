@@ -13,7 +13,6 @@ COMPILATION_OUTPUTS = ['main.js', 'main.wasm']
 
 
 def _compute_stan_program_hash(program_file: Path):
-    # TODO: HANDLE FNF
     stan_program = program_file.read_text()
     # TODO: replace stan_program with a canonical form
     return sha1(stan_program.encode()).hexdigest()
@@ -46,7 +45,7 @@ def try_compile_stan_program(*, job_dir: Path, model_dir: Path, tinystan_dir: st
             compile_model_if_uncompiled(job_dir=job_dir, model_dir=model_dir, tinystan_dir=tinystan_dir, preserve_on_fail=preserve_on_fail)
             copy_compilation_outputs(model_dir=model_dir, job_dir=job_dir)
             return (CompilationStatus.COMPLETED, '')
-        # NOTE: Could also write job ID in lockfile and report that here
+        # NOTE: Could also include job ID in lockfile and report that here
         return (CompilationStatus.RUNNING, '')
     except Exception as e:
         return (CompilationStatus.FAILED, str(e))

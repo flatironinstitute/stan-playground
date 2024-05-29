@@ -1,17 +1,11 @@
 from uuid import uuid4
 from string import hexdigits
-from fastapi import HTTPException
 from pathlib import Path
 
 from .definitions import CompilationStatus
 from .file_validation.compilation_files import download_filename_is_valid, write_stan_code_file
 
-### QUERY: It'd be nice to avoid taking a dependency on HTTPException here,
-# but the best I can think of to do it is to define a bunch of our own exceptions,
-# which would then have to be caught at the routing-functions level, which is
-# not a useful encapsulation & will prompt a lot of boilerplate code.
-# Thoughts?
-
+from .exceptions import StanPlaygroundBadStatusException, StanPlaygroundJobNotFoundException, StanPlaygroundInvalidJobException, StanPlaygroundInvalidFileException
 
 def create_compilation_job():
     job_id = _create_compilation_job_id()
@@ -35,21 +29,19 @@ def get_compilation_job_dir(job_id: str, *, create_if_missing: bool = False):
         job_dir.mkdir(exist_ok=True)
     else:
         if not job_dir.is_dir():
-            raise HTTPException(status_code=404, detail="Job not found")
+            raise StanPlaygroundJobNotFoundException(job_id)
     return job_dir
 
 
 def _validate_compilation_job_id(job_id: str):
     if not _is_valid_compilation_job_id(job_id):
-        raise HTTPException(status_code=400, detail=f"Invalid job ID {job_id}")
-
+        raise StanPlaygroundInvalidJobException(job_id)
 
 
 def get_compiled_file_path(job_id: str, filename: str):
     job_dir = get_compilation_job_dir(job_id)
     if not download_filename_is_valid(filename):
-        # TODO: Error handling
-        return False
+        raise StanPlaygroundInvalidFileException(f"Invalid file name {filename}")
     file_path = Path(job_dir, filename)
     if not file_path.is_file():
         return False        # TODO Specific error
@@ -59,9 +51,7 @@ def get_compiled_file_path(job_id: str, filename: str):
 def validate_compilation_job_runnable_status(job_id: str):
     status = read_compilation_job_status(job_id)
     if status != CompilationStatus.INITIATED.value:
-        raise HTTPException(
-            status_code=409, detail=f"Cannot run a job with status {status}"
-        )
+        raise StanPlaygroundBadStatusException(f"Cannot run job {job_id} with status {status}")
 
 
 def _get_compilation_job_status_file(job_dir: Path):
@@ -96,9 +86,9 @@ def upload_stan_code_file(job_id: str, filename: str, data: bytes):
     # filename is currently intentionally unused
     status = read_compilation_job_status(job_id)
     if status != CompilationStatus.INITIATED.value:
-        raise HTTPException(status_code=409, detail=f"Cannot upload files to job with status {status}")
+        raise StanPlaygroundBadStatusException(f"Cannot upload files to job {job_id} with status {status}")
     job_dir = get_compilation_job_dir(job_id)
     (success, msg) = write_stan_code_file(job_dir, data)
     if (not success):
-        raise HTTPException(status_code=400, detail=msg)
+        raise StanPlaygroundInvalidFileException(f"Cannot upload files to job {job_id}: {msg}")
     return True

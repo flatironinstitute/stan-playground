@@ -1,8 +1,7 @@
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import Header
-from fastapi import Body
+from fastapi import Header, Body, Request
 
 import os
 
@@ -19,6 +18,12 @@ from logic.compilation_job_mgmt import (
 )
 from logic.compilation import make_canonical_model_dir, try_compile_stan_program
 from logic.authorization import check_authorization
+from logic.exceptions import (
+    StanPlaygroundJobNotFoundException,
+    StanPlaygroundInvalidJobException,
+    StanPlaygroundBadStatusException,
+    StanPlaygroundInvalidFileException
+)
 
 #  NOTE: While less significant than compilation locks, the risk of race conditions also
 # applies to tracking status using the file system. Consider implementing a (single-threaded)
@@ -39,7 +44,49 @@ if not TINYSTAN_DIR:
     raise ValueError("TINYSTAN_DIR environment variable not set")
 
 
-# probe
+##### Custom exception handlers
+
+@app.exception_handler(StanPlaygroundInvalidJobException)
+async def invalid_job_handler(request: Request, exc: StanPlaygroundInvalidJobException):
+    return JSONResponse(
+        status_code=400,
+        content={
+            "message": f"Invalid job ID {str(exc)}"
+        }
+    )
+
+
+@app.exception_handler(StanPlaygroundJobNotFoundException)
+async def job_not_found_handler(request: Request, exc: StanPlaygroundJobNotFoundException):
+    return JSONResponse(
+        status_code=404,
+        content={
+            "message": f"Job {str(exc)} not found."
+        }
+    )
+
+
+@app.exception_handler(StanPlaygroundBadStatusException)
+async def bad_status_handler(request: Request, exc: StanPlaygroundBadStatusException):
+    return JSONResponse(
+        status_code=409,
+        content={
+            "message": str(exc)
+        }
+    )
+
+
+@app.exception_handler(StanPlaygroundInvalidFileException)
+async def bad_file_handler(request: Request, exc: StanPlaygroundInvalidFileException):
+    return JSONResponse(
+        status_code=400,
+        content={
+            "message": str(exc)
+        }
+    )
+
+##### Routing
+
 @app.get("/probe")
 async def probe():
     return {"status": "ok"}
