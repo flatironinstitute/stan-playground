@@ -15,8 +15,6 @@ COMPILATION_OUTPUTS = ['main.js', 'main.wasm']
 def _compute_stan_program_hash(program_file: Path):
     # TODO: HANDLE FNF
     stan_program = program_file.read_text()
-    with open(program_file, "r") as f:
-        stan_program = f.read()
     # TODO: replace stan_program with a canonical form
     return sha1(stan_program.encode()).hexdigest()
 
