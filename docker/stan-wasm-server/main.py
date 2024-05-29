@@ -14,7 +14,7 @@ from logic.compilation_job_mgmt import (
     write_compilation_job_status,
     validate_compilation_job_runnable_status,
     upload_stan_code_file,
-    get_compiled_file_location,
+    get_compiled_file_path,
     write_compilation_logfile
 )
 from logic.compilation import make_canonical_model_dir, try_compile_stan_program
@@ -69,7 +69,7 @@ async def upload_stan_source_file(job_id: str, filename: str, data: bytes = Body
 
 @app.get("/job/{job_id}/download/{filename}")
 async def download_file(job_id: str, filename: str):
-    file_location = get_compiled_file_location(job_id, filename)
+    file_location = get_compiled_file_path(job_id, filename)
     if (file_location == False):
         raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(file_location)

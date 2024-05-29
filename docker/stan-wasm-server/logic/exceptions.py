@@ -1,5 +1,5 @@
 class StanPlaygroundCompilationException(Exception):
-    """Raise if compilation outputs are not found."""
+    """Raise if compilation failed."""
 
 class StanPlaygroundInvalidJobException(Exception):
     """Raise if an invalid job ID is requested."""
