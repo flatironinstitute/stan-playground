@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Header, Body, Request
@@ -20,6 +20,7 @@ from logic.compilation_job_mgmt import (
 from logic.compilation import make_canonical_model_dir, try_compile_stan_program
 from logic.authorization import check_authorization
 from logic.exceptions import (
+    StanPlaygroundAuthenticationException,
     StanPlaygroundJobNotFoundException,
     StanPlaygroundInvalidJobException,
     StanPlaygroundBadStatusException,
@@ -46,6 +47,15 @@ if not TINYSTAN_DIR:
 
 
 ##### Custom exception handlers
+
+@app.exception_handler(StanPlaygroundAuthenticationException)
+async def authentication_handler(request: Request, exc: StanPlaygroundAuthenticationException):
+    return JSONResponse(
+        status_code=401,
+        content={
+            "message": str(exc)
+        }
+    )
 
 @app.exception_handler(StanPlaygroundInvalidJobException)
 async def invalid_job_handler(request: Request, exc: StanPlaygroundInvalidJobException):
@@ -95,9 +105,7 @@ async def probe():
 
 @app.post("/job/initiate")
 async def initiate_job(authorization: str = Header(None)):
-    (success, reason) = check_authorization(authorization)
-    if not success:
-        raise HTTPException(status_code=401, detail=reason)
+    check_authorization(authorization)
     job_id = create_compilation_job()
     return {"job_id": job_id, "status": CompilationStatus.INITIATED}
 
@@ -117,10 +125,7 @@ async def upload_stan_source_file(job_id: str, filename: str, data: bytes = Body
 
 @app.get("/job/{job_id}/download/{filename}")
 async def download_file(job_id: str, filename: str):
-    file_location = get_compiled_file_path(job_id, filename)
-    if (file_location == False):
-        raise HTTPException(status_code=404, detail="File not found")
-    return FileResponse(file_location)
+    return FileResponse(get_compiled_file_path(job_id, filename))
 
 
 @app.post("/job/{job_id}/run")

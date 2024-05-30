@@ -61,7 +61,7 @@ def get_compiled_file_path(job_id: str, filename: str):
         raise StanPlaygroundInvalidFileException(f"Invalid file name {filename}")
     file_path = job_dir / filename
     if not file_path.is_file():
-        return False        # TODO Specific error
+        raise FileNotFoundError(str(file_path))
     return file_path
 
 

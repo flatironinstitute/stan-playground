@@ -1,3 +1,6 @@
+class StanPlaygroundAuthenticationException(Exception):
+    """Raise if authentication failed."""
+
 class StanPlaygroundCompilationException(Exception):
     """Raise if compilation failed for non-timeout (including unknown) reasons."""
 

@@ -16,7 +16,7 @@ COMPILATION_OUTPUTS = ['main.js', 'main.wasm']
 
 def _compute_stan_program_hash(program_file: Path):
     stan_program = program_file.read_text()
-    # TODO: replace stan_program with a canonical form
+    # TODO: replace stan_program with a canonical form?
     return sha1(stan_program.encode()).hexdigest()
 
 
