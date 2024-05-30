@@ -7,7 +7,7 @@ def get_nonce():
 
 
 def _get_compilation_lockfile_name(model_dir: Path):
-    p = Path(model_dir, "running.txt")
+    p = model_dir / "running.txt"
     return p
 
 
@@ -28,7 +28,7 @@ def release_compilation_lock(model_dir: Path, nonce: str):
         contents = lockfile.read_text()
         if contents == nonce:
             lockfile.unlink(missing_ok=True)
-    except FileExistsError:
+    except FileNotFoundError:
         return
 
 

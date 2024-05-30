@@ -9,6 +9,7 @@ from logic.definitions import CompilationStatus
 from logic.compilation_job_mgmt import (
     create_compilation_job,
     get_compilation_job_dir,
+    get_job_source_file,
     read_compilation_job_status,
     write_compilation_job_status,
     validate_compilation_job_runnable_status,
@@ -110,8 +111,8 @@ async def job_status(job_id: str):
 @app.post("/job/{job_id}/upload/{filename}")
 async def upload_stan_source_file(job_id: str, filename: str, data: bytes = Body(...)):
     # QUERY: Should this endpoint also validate authorization?
-    success = upload_stan_code_file(job_id, filename, data)
-    return {"success": success}
+    upload_stan_code_file(job_id, filename, data)
+    return {"success": True}
 
 
 @app.get("/job/{job_id}/download/{filename}")
@@ -126,7 +127,8 @@ async def download_file(job_id: str, filename: str):
 async def run_job(job_id: str):
     job_dir = get_compilation_job_dir(job_id)
     validate_compilation_job_runnable_status(job_id)
-    model_dir = make_canonical_model_dir(job_id, TINYSTAN_DIR)
+    src_file = get_job_source_file(job_id)
+    model_dir = make_canonical_model_dir(src_file)
 
     (status, err_msg) = try_compile_stan_program(job_dir=job_dir, model_dir=model_dir, tinystan_dir=TINYSTAN_DIR, preserve_on_fail=False)
     if (err_msg != ''):

@@ -1,5 +1,8 @@
 class StanPlaygroundCompilationException(Exception):
-    """Raise if compilation failed."""
+    """Raise if compilation failed for non-timeout (including unknown) reasons."""
+
+class StanPlaygroundCompilationTimeoutException(Exception):
+    """Raise if compilation failed due to timeout specifically."""
 
 class StanPlaygroundInvalidJobException(Exception):
     """Raise if an invalid job ID is requested."""
