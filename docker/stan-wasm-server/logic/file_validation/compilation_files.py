@@ -2,12 +2,13 @@ from pathlib import Path
 
 from ..exceptions import StanPlaygroundInvalidFileException
 
+COMPILATION_OUTPUTS = ['main.js', 'main.wasm']
+
 # 10 MB limit for Stan source files
 MAX_STAN_SRC_FILESIZE = 1024 * 1024 * 10
-VALID_STAN_COMPILATION_OUTPUTS_FILENAMES = ['main.js', 'main.wasm']
 
 def download_filename_is_valid(filename: str):
-    return filename in VALID_STAN_COMPILATION_OUTPUTS_FILENAMES
+    return filename in COMPILATION_OUTPUTS
 
 
 def _stan_src_file_is_within_size_limit(data: bytes):

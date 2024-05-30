@@ -1,16 +1,15 @@
 import asyncio
 from hashlib import sha1
-from shutil import copy2, rmtree
+from shutil import copy2
 from pathlib import Path
 
-from .definitions import CompilationStatus
-from .locking import get_nonce, acquire_compilation_lock, release_compilation_lock
+from .locking import compilation_output_lock, wait_until_free
 from .exceptions import StanPlaygroundCompilationException, StanPlaygroundCompilationTimeoutException
-
+from .compilation_job_mgmt import get_job_source_file, get_compilation_job_dir
+from .file_validation.compilation_files import COMPILATION_OUTPUTS
 
 COMPILED_MODELS_BASE_PATH = Path('/compiled_models')
 COMPILATION_TIMEOUT = 60 * 5
-COMPILATION_OUTPUTS = ['main.js', 'main.wasm']
 
 
 def _compute_stan_program_hash(program_file: Path):
@@ -38,60 +37,46 @@ def copy_compilation_outputs(*, model_dir: Path, job_dir: Path):
     for (src, dest) in todos:
         copy2(src, dest)
 
+async def compile_and_cache(*, job_id: str, model_dir: Path, tinystan_dir: Path):
+    if all((model_dir / x).exists() for x in COMPILATION_OUTPUTS):
+        wait_until_free(model_dir)
+        return
 
-# TODO: This will change substantially if we compile in the job directory directly.
-async def try_compile_stan_program(*, job_dir: Path, model_dir: Path, tinystan_dir: Path, preserve_on_fail = False) -> tuple[CompilationStatus, str]:
+    await compile_stan_program(job_id=job_id, tinystan_dir=tinystan_dir)
+
+    job_dir = get_compilation_job_dir(job_id)
+
+    with compilation_output_lock(model_dir) as exclusive:
+        if exclusive:
+            for file in COMPILATION_OUTPUTS:
+                copy2(job_dir / file, model_dir / file)
+        else:
+            wait_until_free(model_dir)
+
+
+
+async def compile_stan_program(*, job_id: str, tinystan_dir: Path, ):
     """Attempts to compile the submitted stan program (if uncompiled) and copy the compiled outputs to the job directory.
 
     Args:
         job_dir: Job directory for the incoming job
-        model_dir: Canonical model directory for the submitted code.
         tinystan_dir: Location of the tinystan installation (with compilation tools)
-        preserve_on_fail: May be set to True for debugging purposes, in the event of problematic models. Defaults to False.
 
-    Returns:
-        A Tuple of the compilation status and the error message, if any.
     """
-    try:
-        nonce = get_nonce()
-        if acquire_compilation_lock(model_dir, nonce):
-            await compile_model_if_uncompiled(job_dir=job_dir, model_dir=model_dir, tinystan_dir=tinystan_dir, preserve_on_fail=preserve_on_fail)
-            copy_compilation_outputs(model_dir=model_dir, job_dir=job_dir)
-            return (CompilationStatus.COMPLETED, '')
-        # NOTE: Could also include job ID in lockfile and report that here
-        return (CompilationStatus.RUNNING, '')
-    except Exception as e:
-        return (CompilationStatus.FAILED, str(e))
-    finally:
-        release_compilation_lock(model_dir, nonce)
-
-
-async def compile_model_if_uncompiled(*, job_dir: Path, model_dir: Path, tinystan_dir: Path, preserve_on_fail = False):
     # Invariant: if compilation output files exist, we should never re-create them, because they either
     # represent the successful compilation of a semantically identical source file
     # or they're leftovers from a prior failed run that intentionally preserved them.
     # So step 1 is check if compilation outputs exist and return if they do.
     # NOTE: preserve_on_fail is implemented to support a debug build, if there are particular model failures
     # that need to be investigated. At present it should always be False.
-    if all((model_dir / x).exists() for x in COMPILATION_OUTPUTS):
-        return
 
     try:
-        job_main = (job_dir / "main.stan").absolute()
-        model_main = (model_dir / "main.stan").absolute()
-        copy2(job_main, model_main)
-        cmd = f"emmake make {model_main.with_suffix('.js')} && emstrip {model_main.with_suffix('.wasm')}"
+        job_main = get_job_source_file(job_id)
+        cmd = f"emmake make {job_main.with_suffix('.js')} && emstrip {job_main.with_suffix('.wasm')}"
         process = await asyncio.create_subprocess_shell(cmd, cwd=tinystan_dir)
-        await asyncio.wait_for( process.communicate(), timeout=COMPILATION_TIMEOUT)
+        await asyncio.wait_for(process.wait(), timeout=COMPILATION_TIMEOUT)
     except (asyncio.TimeoutError, TimeoutError):
-        _clear_directory_if_not_preserved(model_dir, preserve_on_fail)
         raise StanPlaygroundCompilationTimeoutException()
 
     if process.returncode != 0:
-        _clear_directory_if_not_preserved(model_dir, preserve_on_fail)
         raise StanPlaygroundCompilationException(f'Failed to compile model: exit code {process.returncode}')
-
-
-def _clear_directory_if_not_preserved(model_dir: Path, preserve_on_fail: bool):
-    if not preserve_on_fail:
-        rmtree(model_dir)
