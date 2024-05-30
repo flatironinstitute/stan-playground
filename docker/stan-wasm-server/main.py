@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Header, Body, Request
 
 import os
+from pathlib import Path
 
 from logic.definitions import CompilationStatus
 from logic.compilation_job_mgmt import (
@@ -41,9 +42,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-TINYSTAN_DIR = os.environ.get("TINYSTAN_DIR", "")
-if not TINYSTAN_DIR:
+tinystan_env_var = os.environ.get("TINYSTAN_DIR")
+if tinystan_env_var is None:
     raise ValueError("TINYSTAN_DIR environment variable not set")
+
+TINYSTAN_DIR = Path(tinystan_env_var).absolute()
+if not (
+    (TINYSTAN_DIR / 'Makefile').is_file()
+    and (TINYSTAN_DIR / 'stan').is_dir()
+):
+    raise RuntimeError(f"Proposed TINYSTAN_DIR {TINYSTAN_DIR} does not appear to contain a working tinystan.")
 
 
 ##### Custom exception handlers
@@ -135,7 +143,7 @@ async def run_job(job_id: str):
     src_file = get_job_source_file(job_id)
     model_dir = make_canonical_model_dir(src_file)
 
-    (status, err_msg) = try_compile_stan_program(job_dir=job_dir, model_dir=model_dir, tinystan_dir=TINYSTAN_DIR, preserve_on_fail=False)
+    (status, err_msg) = await try_compile_stan_program(job_dir=job_dir, model_dir=model_dir, tinystan_dir=TINYSTAN_DIR, preserve_on_fail=False)
     if (err_msg != ''):
         write_compilation_logfile(job_id, err_msg)
     write_compilation_job_status(job_id, status)

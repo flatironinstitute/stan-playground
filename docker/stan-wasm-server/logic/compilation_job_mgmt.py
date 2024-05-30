@@ -34,7 +34,7 @@ def get_compilation_job_dir(job_id: str, *, create_if_missing: bool = False):
     _validate_compilation_job_id(job_id)
     job_dir = BASE_JOB_DIR / job_id
     if create_if_missing:
-        job_dir.mkdir(exist_ok=True)
+        job_dir.mkdir(parents=True)
     else:
         if not job_dir.is_dir():
             raise StanPlaygroundJobNotFoundException(job_id)

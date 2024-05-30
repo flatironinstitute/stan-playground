@@ -1,4 +1,5 @@
 import os
+from .exceptions import StanPlaygroundAuthenticationException
 
 SWS_PASSCODE = os.environ.get("SWS_PASSCODE", "")
 if not SWS_PASSCODE:
@@ -11,11 +12,9 @@ def _passcode_is_valid(passcode: str):
 
 def check_authorization(authorization: str):
     if not authorization:
-        return (False, "Passcode not provided")
+        raise StanPlaygroundAuthenticationException("Passcode not provided")
     if not authorization.startswith("Bearer "):
-        return (False, "Invalid authorization header")
+        raise StanPlaygroundAuthenticationException("Invalid authorization header")
     passcode = authorization.split(" ")[1]
     if not _passcode_is_valid(passcode):
-        return (False, "Invalid passcode")
-    
-    return (True, "")
+        raise StanPlaygroundAuthenticationException("Invalid passcode")
