@@ -27,7 +27,10 @@ class StanSampler {
     #onProgressCallbacks: ((progress: Progress) => void)[] = [];
     #onStatusChangedCallbacks: (() => void)[] = [];
     #draws: number[][] = [];
+    #computeTimeSec: number | undefined = undefined;
     #paramNames: string[] = [];
+    #numChains: number = 0;
+    #samplingStartTimeSec: number = 0;
 
     private constructor(private compiledUrl: string) {
         this._initialize()
@@ -65,6 +68,7 @@ class StanSampler {
                     } else {
                         this.#draws = e.data.draws;
                         this.#paramNames = e.data.paramNames;
+                        this.#computeTimeSec = Date.now() / 1000 - this.#samplingStartTimeSec;
                         this.#status = 'completed';
                         this.#onStatusChangedCallbacks.forEach(cb => cb())
                     }
@@ -98,10 +102,16 @@ class StanSampler {
             console.warn('Model not loaded yet')
             return
         }
+        if (sampleConfig.num_chains === undefined) {
+            console.warn('Number of chains not specified')
+            return
+        }
+        this.#numChains = sampleConfig.num_chains;
         this.#draws = [];
         this.#paramNames = [];
         this.#worker
             .postMessage({ purpose: Requests.Sample, sampleConfig });
+        this.#samplingStartTimeSec = Date.now() / 1000;
         this.#status = 'sampling';
         this.#onStatusChangedCallbacks.forEach(cb => cb())
     }
@@ -127,11 +137,17 @@ class StanSampler {
     get paramNames() {
         return this.#paramNames;
     }
+    get numChains() {
+        return this.#numChains;
+    }
     get status() {
         return this.#status;
     }
     get errorMessage() {
         return this.#errorMessage;
+    }
+    get computeTimeSec() {
+        return this.#computeTimeSec;
     }
 }
 
