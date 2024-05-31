@@ -307,7 +307,7 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, fiddleUri
       </div> */}
 
     return (
-        <div style={{ width, height, overflowY: 'auto' }}>
+        <div style={{ position: 'absolute', left: 8, width: width - 16, height, overflowY: 'auto' }}>
             {loadingStatusSection}
             {<hr />}
 
