@@ -25,18 +25,6 @@ def make_canonical_model_dir(src_file: Path):
     return model_dir.absolute()
 
 
-# TODO: Remove this and run directly from the canonical model directory
-def copy_compilation_outputs(*, model_dir: Path, job_dir: Path):
-    todos = []
-    for f in COMPILATION_OUTPUTS:
-        src = model_dir / f
-        dest = job_dir / f
-        if not src.exists():
-            raise FileNotFoundError(f"File {src} does not exist.")
-        todos.append((src, dest))
-    for (src, dest) in todos:
-        copy2(src, dest)
-
 async def compile_and_cache(*, job_id: str, model_dir: Path, tinystan_dir: Path):
 
     # if there's a cache hit, make sure any copying is already complete,
@@ -56,7 +44,8 @@ async def compile_and_cache(*, job_id: str, model_dir: Path, tinystan_dir: Path)
             for file in COMPILATION_OUTPUTS:
                 copy2(job_dir / file, model_dir / file)
         # otherwise, just wait for the other thread's version to be
-        # copied. We wasted some time, but that's ultimately okay
+        # copied. We do not need to copy, because their version will
+        # be equivalent; we wasted some time, but that's ultimately okay
         else:
             wait_until_free(model_dir)
 
