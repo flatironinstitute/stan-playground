@@ -38,38 +38,38 @@ def copy_compilation_outputs(*, model_dir: Path, job_dir: Path):
         copy2(src, dest)
 
 async def compile_and_cache(*, job_id: str, model_dir: Path, tinystan_dir: Path):
+
+    # if there's a cache hit, make sure any copying is already complete,
+    # then return
     if all((model_dir / x).exists() for x in COMPILATION_OUTPUTS):
         wait_until_free(model_dir)
         return
 
+    # otherwise, compile in our job-specific folder
     await compile_stan_program(job_id=job_id, tinystan_dir=tinystan_dir)
 
-    job_dir = get_compilation_job_dir(job_id)
-
+    # then, try to copy into the cache
     with compilation_output_lock(model_dir) as exclusive:
+        # if we succeed in getting the lock, do the copy
         if exclusive:
+            job_dir = get_compilation_job_dir(job_id)
             for file in COMPILATION_OUTPUTS:
                 copy2(job_dir / file, model_dir / file)
+        # otherwise, just wait for the other thread's version to be
+        # copied. We wasted some time, but that's ultimately okay
         else:
             wait_until_free(model_dir)
 
 
 
 async def compile_stan_program(*, job_id: str, tinystan_dir: Path, ):
-    """Attempts to compile the submitted stan program (if uncompiled) and copy the compiled outputs to the job directory.
+    """
+    Compiles the Stan program in the job directory
 
     Args:
         job_dir: Job directory for the incoming job
         tinystan_dir: Location of the tinystan installation (with compilation tools)
-
     """
-    # Invariant: if compilation output files exist, we should never re-create them, because they either
-    # represent the successful compilation of a semantically identical source file
-    # or they're leftovers from a prior failed run that intentionally preserved them.
-    # So step 1 is check if compilation outputs exist and return if they do.
-    # NOTE: preserve_on_fail is implemented to support a debug build, if there are particular model failures
-    # that need to be investigated. At present it should always be False.
-
     try:
         job_main = get_job_source_file(job_id)
         cmd = f"emmake make {job_main.with_suffix('.js')} && emstrip {job_main.with_suffix('.wasm')}"

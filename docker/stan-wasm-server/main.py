@@ -14,7 +14,16 @@ from logic.compilation_job_mgmt import (
 )
 from logic.compilation import COMPILATION_OUTPUTS, make_canonical_model_dir, compile_and_cache
 from logic.authorization import check_authorization
-from logic import exceptions
+
+from logic.exceptions import (
+    StanPlaygroundAuthenticationException,
+    StanPlaygroundInvalidJobException,
+    StanPlaygroundJobNotFoundException,
+    StanPlaygroundAlreadyUploaded,
+    StanPlaygroundInvalidFileException,
+    StanPlaygroundCompilationException,
+    StanPlaygroundCompilationTimeoutException,
+    )
 
 app = FastAPI()
 
@@ -39,17 +48,31 @@ if not (
 
 
 ##### Custom exception handlers
-for exc in exceptions.ALL_EXCEPTIONS:
-    exc.register_handler(app)
+def register_exn_handler(cls, http_code):
+    @app.exception_handler(cls)
+    async def _(_request: Request, exc: Exception):
+        return JSONResponse(
+            status_code=int(http_code),
+            content={
+                "message": str(exc)
+            }
+        )
 
-@app.exception_handler(FileNotFoundError)
-async def file_not_found_handler(request: Request, exc: FileNotFoundError):
-    return JSONResponse(
-        status_code=404,
-        content={
-            "message": f"File not found: {exc}"
-        }
-    )
+
+exceptions_codes = [
+    (StanPlaygroundAuthenticationException, 401),
+    (StanPlaygroundInvalidJobException, 400),
+    (StanPlaygroundJobNotFoundException, 404),
+    (StanPlaygroundAlreadyUploaded, 409),
+    (StanPlaygroundInvalidFileException, 400),
+    (StanPlaygroundCompilationException, 422),
+    # note: may be tempting to make 408, but this triggers a retry in the client
+    (StanPlaygroundCompilationTimeoutException, 400),
+    (FileNotFoundError, 404),
+]
+
+for e in exceptions_codes:
+    register_exn_handler(*e)
 
 
 ##### Routing
@@ -76,14 +99,14 @@ async def upload_stan_source_file(job_id: str, filename: str, data: bytes = Body
 @app.get("/job/{job_id}/download/{filename}")
 async def download_file(job_id: str, filename: str):
     if filename not in COMPILATION_OUTPUTS:
-        raise exceptions.StanPlaygroundInvalidFileException(f"Invalid file name {filename}")
+        raise StanPlaygroundInvalidFileException(f"Invalid file name {filename}")
 
     src_file = get_job_source_file(job_id)
     model_dir = make_canonical_model_dir(src_file)
 
     file_path = model_dir / filename
     if not file_path.is_file():
-        raise FileNotFoundError(str(file_path))
+        raise FileNotFoundError(f'File not found: {file_path}')
     return FileResponse(file_path)
 
 
