@@ -9,28 +9,21 @@ from pathlib import Path
 from logic.definitions import CompilationStatus
 from logic.compilation_job_mgmt import (
     create_compilation_job,
-    get_compilation_job_dir,
     get_job_source_file,
-    read_compilation_job_status,
-    write_compilation_job_status,
-    validate_compilation_job_runnable_status,
     upload_stan_code_file,
-    get_compiled_file_path,
-    write_compilation_logfile
 )
-from logic.compilation import make_canonical_model_dir, try_compile_stan_program
+from logic.compilation import COMPILATION_OUTPUTS, make_canonical_model_dir, compile_and_cache
 from logic.authorization import check_authorization
+
 from logic.exceptions import (
     StanPlaygroundAuthenticationException,
-    StanPlaygroundJobNotFoundException,
     StanPlaygroundInvalidJobException,
-    StanPlaygroundBadStatusException,
-    StanPlaygroundInvalidFileException
-)
-
-#  NOTE: While less significant than compilation locks, the risk of race conditions also
-# applies to tracking status using the file system. Consider implementing a (single-threaded)
-# status tracker to track this state globally. (Can also act as a lock server.)
+    StanPlaygroundJobNotFoundException,
+    StanPlaygroundAlreadyUploaded,
+    StanPlaygroundInvalidFileException,
+    StanPlaygroundCompilationException,
+    StanPlaygroundCompilationTimeoutException,
+    )
 
 app = FastAPI()
 
@@ -55,54 +48,32 @@ if not (
 
 
 ##### Custom exception handlers
-
-@app.exception_handler(StanPlaygroundAuthenticationException)
-async def authentication_handler(request: Request, exc: StanPlaygroundAuthenticationException):
-    return JSONResponse(
-        status_code=401,
-        content={
-            "message": str(exc)
-        }
-    )
-
-@app.exception_handler(StanPlaygroundInvalidJobException)
-async def invalid_job_handler(request: Request, exc: StanPlaygroundInvalidJobException):
-    return JSONResponse(
-        status_code=400,
-        content={
-            "message": f"Invalid job ID {str(exc)}"
-        }
-    )
+def register_exn_handler(cls, http_code):
+    @app.exception_handler(cls)
+    async def _(_request: Request, exc: Exception):
+        return JSONResponse(
+            status_code=int(http_code),
+            content={
+                "message": str(exc)
+            }
+        )
 
 
-@app.exception_handler(StanPlaygroundJobNotFoundException)
-async def job_not_found_handler(request: Request, exc: StanPlaygroundJobNotFoundException):
-    return JSONResponse(
-        status_code=404,
-        content={
-            "message": f"Job {str(exc)} not found."
-        }
-    )
+exceptions_codes = [
+    (StanPlaygroundAuthenticationException, 401),
+    (StanPlaygroundInvalidJobException, 400),
+    (StanPlaygroundJobNotFoundException, 404),
+    (StanPlaygroundAlreadyUploaded, 409),
+    (StanPlaygroundInvalidFileException, 400),
+    (StanPlaygroundCompilationException, 422),
+    # note: may be tempting to make 408, but this triggers a retry in the client
+    (StanPlaygroundCompilationTimeoutException, 400),
+    (FileNotFoundError, 404),
+]
 
+for e in exceptions_codes:
+    register_exn_handler(*e)
 
-@app.exception_handler(StanPlaygroundBadStatusException)
-async def bad_status_handler(request: Request, exc: StanPlaygroundBadStatusException):
-    return JSONResponse(
-        status_code=409,
-        content={
-            "message": str(exc)
-        }
-    )
-
-
-@app.exception_handler(StanPlaygroundInvalidFileException)
-async def bad_file_handler(request: Request, exc: StanPlaygroundInvalidFileException):
-    return JSONResponse(
-        status_code=400,
-        content={
-            "message": str(exc)
-        }
-    )
 
 ##### Routing
 
@@ -118,12 +89,6 @@ async def initiate_job(authorization: str = Header(None)):
     return {"job_id": job_id, "status": CompilationStatus.INITIATED}
 
 
-@app.get("/job/{job_id}/status")
-async def job_status(job_id: str):
-    status = read_compilation_job_status(job_id)
-    return {"job_id": job_id, "status": status}
-
-
 @app.post("/job/{job_id}/upload/{filename}")
 async def upload_stan_source_file(job_id: str, filename: str, data: bytes = Body(...)):
     # QUERY: Should this endpoint also validate authorization?
@@ -133,19 +98,23 @@ async def upload_stan_source_file(job_id: str, filename: str, data: bytes = Body
 
 @app.get("/job/{job_id}/download/{filename}")
 async def download_file(job_id: str, filename: str):
-    return FileResponse(get_compiled_file_path(job_id, filename))
+    if filename not in COMPILATION_OUTPUTS:
+        raise StanPlaygroundInvalidFileException(f"Invalid file name {filename}")
+
+    src_file = get_job_source_file(job_id)
+    model_dir = make_canonical_model_dir(src_file)
+
+    file_path = model_dir / filename
+    if not file_path.is_file():
+        raise FileNotFoundError(f'File not found: {file_path}')
+    return FileResponse(file_path)
 
 
 @app.post("/job/{job_id}/run")
 async def run_job(job_id: str):
-    job_dir = get_compilation_job_dir(job_id)
-    validate_compilation_job_runnable_status(job_id)
     src_file = get_job_source_file(job_id)
     model_dir = make_canonical_model_dir(src_file)
 
-    (status, err_msg) = await try_compile_stan_program(job_dir=job_dir, model_dir=model_dir, tinystan_dir=TINYSTAN_DIR, preserve_on_fail=False)
-    if (err_msg != ''):
-        write_compilation_logfile(job_id, err_msg)
-    write_compilation_job_status(job_id, status)
-    return {"job_id": job_id, "status": status.value}
-    
+    await compile_and_cache(job_id=job_id, model_dir=model_dir, tinystan_dir=TINYSTAN_DIR)
+
+    return {"job_id": job_id, "status": CompilationStatus.COMPLETED}
