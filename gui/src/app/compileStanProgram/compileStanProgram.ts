@@ -46,7 +46,7 @@ const compileStanProgram = async (stanWasmServerUrl: string, stanProgram: string
         });
         if (!c.ok) {
             let j = await c.json();
-            onStatus(`failed to run job: ${j.message ?? c.statusText}`);
+            onStatus(`failed to run job: ${j?.message ?? c.statusText}`);
             return {}
         }
         const respC = await c.json();
