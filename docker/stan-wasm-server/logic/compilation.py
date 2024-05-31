@@ -6,7 +6,7 @@ from pathlib import Path
 from .locking import compilation_output_lock, wait_until_free
 from .exceptions import StanPlaygroundCompilationException, StanPlaygroundCompilationTimeoutException
 from .compilation_job_mgmt import get_job_source_file, get_compilation_job_dir
-from .file_validation.compilation_files import COMPILATION_OUTPUTS
+from .file_validation.compilation_files import COMPILATION_OUTPUTS, compilation_files_exist
 
 COMPILED_MODELS_BASE_PATH = Path('/compiled_models')
 COMPILATION_TIMEOUT = 60 * 5
@@ -25,11 +25,26 @@ def make_canonical_model_dir(src_file: Path):
     return model_dir.absolute()
 
 
-async def compile_and_cache(*, job_id: str, model_dir: Path, tinystan_dir: Path):
+def copy_compiled_files_to_cache(job_id: str, model_dir: Path):
+    job_dir = get_compilation_job_dir(job_id)
+    for file in COMPILATION_OUTPUTS:
+        source = job_dir / file
+        if not source.exists():
+            raise FileNotFoundError(f"Missing compilation output {file}")
 
-    # if there's a cache hit, make sure any copying is already complete,
-    # then return
-    if all((model_dir / x).exists() for x in COMPILATION_OUTPUTS):
+        dest = model_dir / file
+        if dest.exists():
+            # Note: the only way this can happen is if we have a bug in our
+            # own code, there is no way for the user to trigger this
+            raise FileExistsError(f"Destination {dest} already exists")
+
+        copy2(job_dir / file, model_dir / file)
+
+
+async def compile_and_cache(*, job_id: str, model_dir: Path, tinystan_dir: Path):
+    if compilation_files_exist(model_dir):
+        # if there's a cache hit, make sure any copying is already complete,
+        # then return without compiling
         wait_until_free(model_dir)
         return
 
@@ -38,14 +53,17 @@ async def compile_and_cache(*, job_id: str, model_dir: Path, tinystan_dir: Path)
 
     # then, try to copy into the cache
     with compilation_output_lock(model_dir) as exclusive:
-        # if we succeed in getting the lock, do the copy
+        # if we succeed in getting the lock, it means
+        # EITHER we were the first to compile the model (and need to copy),
+        # OR a compilation finished and released its lock while
+        # we were compiling (and we don't need to copy).
         if exclusive:
-            job_dir = get_compilation_job_dir(job_id)
-            for file in COMPILATION_OUTPUTS:
-                copy2(job_dir / file, model_dir / file)
-        # otherwise, just wait for the other thread's version to be
-        # copied. We do not need to copy, because their version will
-        # be equivalent; we wasted some time, but that's ultimately okay
+            if not compilation_files_exist(model_dir):
+                copy_compiled_files_to_cache(job_id, model_dir)
+        # if we failed in getting the lock, it means
+        # another thread is currently copying, and we wait for them.
+        # We do not need to copy, because their version will be
+        # equivalent; we wasted some time, but that's ultimately okay
         else:
             wait_until_free(model_dir)
 

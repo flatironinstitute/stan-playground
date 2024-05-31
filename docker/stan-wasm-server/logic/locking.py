@@ -1,6 +1,7 @@
 import time
 from pathlib import Path
 from contextlib import contextmanager
+from typing import Generator
 
 
 def _get_compilation_lockfile_name(model_dir: Path):
@@ -15,22 +16,22 @@ def wait_until_free(model_dir: Path):
 
 
 @contextmanager
-def compilation_output_lock(model_dir: Path):
+def compilation_output_lock(model_dir: Path) -> Generator[bool, None, None]:
+    """
+    Context manager for the lock on the model directory.
+    Yields True if the lock was acquired, False otherwise.
+    """
     lockfile = _get_compilation_lockfile_name(model_dir)
-
-    acquired = False
     try:
         with lockfile.open(mode='x') as file:
             file.write("locked")
-
-        acquired = True
-    except:
-        acquired = False
-
-    try:
-        yield acquired
-    finally:
-        if acquired:
-            lockfile.unlink(missing_ok=True)
+    except FileExistsError:
+        yield False
+    else:
+        # we have the lock, so we need to clean it up
+        try:
+            yield True
+        finally:
+            lockfile.unlink()
 
 
