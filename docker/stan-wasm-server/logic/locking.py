@@ -1,9 +1,7 @@
-from os import getpid
 import time
 from pathlib import Path
-
-def get_nonce():
-    return str(getpid()) + str(time.time())
+from contextlib import contextmanager
+from typing import Generator
 
 
 def _get_compilation_lockfile_name(model_dir: Path):
@@ -11,27 +9,29 @@ def _get_compilation_lockfile_name(model_dir: Path):
     return p
 
 
-def acquire_compilation_lock(model_dir: Path, nonce: str):
+def wait_until_free(model_dir: Path):
+    lockfile = _get_compilation_lockfile_name(model_dir)
+    while lockfile.is_file():
+        time.sleep(0.5)
+
+
+@contextmanager
+def compilation_output_lock(model_dir: Path) -> Generator[bool, None, None]:
+    """
+    Context manager for the lock on the model directory.
+    Yields True if the lock was acquired, False otherwise.
+    """
     lockfile = _get_compilation_lockfile_name(model_dir)
     try:
         with lockfile.open(mode='x') as file:
-            file.write(nonce)
-        contents = lockfile.read_text()
-        return contents == nonce
-    except:
-        return False
+            file.write("locked")
+    except FileExistsError:
+        yield False
+    else:
+        # we have the lock, so we need to clean it up
+        try:
+            yield True
+        finally:
+            lockfile.unlink()
 
 
-def release_compilation_lock(model_dir: Path, nonce: str):
-    lockfile = _get_compilation_lockfile_name(model_dir)
-    try:
-        contents = lockfile.read_text()
-        if contents == nonce:
-            lockfile.unlink(missing_ok=True)
-    except FileNotFoundError:
-        return
-
-
-def compilation_lock_exists(model_dir: Path):
-    lockfile = _get_compilation_lockfile_name(model_dir)
-    return lockfile.exists()
