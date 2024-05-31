@@ -174,7 +174,7 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
             <div className="jpfiddle-left-panel" style={{ position: 'absolute', left: 0, top: topBarHeight + 2, width: leftPanelWidth, height: height - topBarHeight - 2, overflow: 'auto' }}>
                 <LeftPanel
                     width={leftPanelWidth}
-                    height={height}
+                    height={height - topBarHeight - 2}
                     fiddleUri={fiddleUri}
                     fiddleId={fiddleId}
                     cloudFiddle={cloudFiddle}
