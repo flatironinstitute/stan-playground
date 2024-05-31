@@ -2,3 +2,22 @@ body {
   margin: 0;
   font-family: 'Arial', sans-serif;
 }
+
+.jpfiddle-top-bar {
+  background: #555;
+  color: white;
+  padding-top: 2px;
+  padding-left: 10px;
+  font-size: 16px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.jpfiddle-left-panel {
+  background-image: repeating-linear-gradient(
+    45deg,
+    #f0f0f0 1px,
+    #e0e0e0 6px
+  );
+  padding: 6px;
+  font-size: 12px;
+}

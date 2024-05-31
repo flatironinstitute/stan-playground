@@ -1,14 +1,18 @@
-import { Hyperlink } from "@fi-sci/misc";
 import { Splitter } from "@fi-sci/splitter";
-import { FunctionComponent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FunctionComponent, useCallback, useEffect, useMemo, useState } from "react";
 import DataFileEditor from "../../FileEditor/DataFileEditor";
 import StanFileEditor from "../../FileEditor/StanFileEditor";
+import { useJpfiddle } from "../../FromJpfiddle/JpfiddleContext/JpfiddleContext";
+import SetupJpfiddle from "../../FromJpfiddle/JpfiddleContext/SetupJpfiddle";
 import RunPanel from "../../RunPanel/RunPanel";
 import SamplerOutputView from "../../SamplerOutputView/SamplerOutputView";
-import useStanSampler, { useSamplerStatus } from "../../StanSampler/useStanSampler";
-import examplesStanies, { Stanie, StanieMetaData } from "../../exampleStanies/exampleStanies";
 import SamplingOptsPanel from "../../SamplingOptsPanel/SamplingOptsPanel";
 import { SamplingOpts, defaultSamplingOpts } from "../../StanSampler/StanSampler";
+import useStanSampler, { useSamplerStatus } from "../../StanSampler/useStanSampler";
+import useRoute from "../../useRoute";
+import LeftPanel from "../../FromJpfiddle/LeftPanel";
+import TopBar from "./TopBar";
+import ReferenceFileSystemClient from "../../FromJpfiddle/ReferenceFileSystemClient";
 
 type Props = {
     width: number
@@ -17,112 +21,181 @@ type Props = {
 
 const defaultStanContent = ''
 const defaultDataContent = ''
-const defaultMetaContent = '{"title": "Untitled"}'
 const defaultSamplingOptsContent = JSON.stringify(defaultSamplingOpts)
 
-const initialFileContent = localStorage.getItem('main.stan') || defaultStanContent
-
-const initialDataFileContent = localStorage.getItem('data.json') || defaultDataContent
-
-const initialMetaContent = localStorage.getItem('meta.json') || defaultMetaContent
-
-const initialSamplingOptsContent = localStorage.getItem('samplingOpts.json') || defaultSamplingOptsContent
+const examples: { title: string, uri: string }[] = [
+    {
+        title: 'Linear regression',
+        uri: 'https://gist.github.com/magland/da3d4143276827609ec9317bb3db8b04'
+    },
+    {
+        title: 'Disease transmission',
+        uri: 'https://gist.github.com/magland/d5bc7d37561539dca14256061c829cc9'
+    }
+]
 
 const HomePage: FunctionComponent<Props> = ({ width, height }) => {
-    const [fileContent, saveFileContent] = useState(initialFileContent)
-    const [editedFileContent, setEditedFileContent] = useState('')
-    useEffect(() => {
-        setEditedFileContent(fileContent)
-    }, [fileContent])
-    useEffect(() => {
-        localStorage.setItem('main.stan', fileContent)
-    }, [fileContent])
+    const { route } = useRoute()
+    if (route.page !== 'home') {
+        throw Error('Unexpected route')
+    }
+    return (
+        <SetupJpfiddle
+            key={route.fiddleUri || ''} // force complete re-render when fiddleUri changes
+            fiddleUri={route.fiddleUri || ''}
+            apiBaseUrl="https://jpfiddle.vercel.app"
+            useLocalStorageForLocalFiles={true}
+        >
+            <HomePageChild width={width} height={height} />
+        </SetupJpfiddle>
+    )
+}
 
-    const [dataFileContent, saveDataFileContent] = useState(initialDataFileContent)
+const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
+    const { route, setRoute } = useRoute()
+    if (route.page !== 'home') {
+        throw Error('Unexpected route')
+    }
+    const { fiddleUri, fiddleId, cloudFiddle, localFiles, initialLocalFiles, setLocalFiles, changeLocalFile, saveToCloud, saveAsGist, updateGist, saveAsGistMessage, resetFromCloud } = useJpfiddle()
+    const stanFileContent = useMemo(() => (
+        (localFiles || {})['main.stan'] || defaultStanContent
+    ), [localFiles])
+
+    const saveStanFileContent = useCallback((text: string) => {
+        changeLocalFile('main.stan', text)
+    }, [changeLocalFile])
+
+    const [editedStanFileContent, setEditedStanFileContent] = useState('')
+    useEffect(() => {
+        setEditedStanFileContent(stanFileContent)
+    }, [stanFileContent])
+
+    const dataFileContent = useMemo(() => (
+        (localFiles || {})['data.json'] || defaultDataContent
+    ), [localFiles])
+    const saveDataFileContent = useCallback((text: string) => {
+        changeLocalFile('data.json', text)
+    }, [changeLocalFile])
     const [editedDataFileContent, setEditedDataFileContent] = useState('')
     useEffect(() => {
         setEditedDataFileContent(dataFileContent)
     }, [dataFileContent])
-    useEffect(() => {
-        localStorage.setItem('data.json', dataFileContent)
-    }, [dataFileContent])
 
-    const [samplingOptsContent, setSamplingOptsContent] = useState(initialSamplingOptsContent)
-    useEffect(() => {
-        localStorage.setItem('samplingOpts.json', samplingOptsContent)
-    }, [samplingOptsContent])
+    const samplingOptsContent = useMemo(() => (
+        (localFiles || {})['samplingOpts.json'] || defaultSamplingOptsContent
+    ), [localFiles])
+    const setSamplingOptsContent = useCallback((text: string) => {
+        changeLocalFile('samplingOpts.json', text)
+    }, [changeLocalFile])
     const samplingOpts = useMemo(() => (
-        {...defaultSamplingOpts, ...JSON.parse(samplingOptsContent)}
+        { ...defaultSamplingOpts, ...JSON.parse(samplingOptsContent) }
     ), [samplingOptsContent])
-
     const setSamplingOpts = useCallback((opts: SamplingOpts) => {
         setSamplingOptsContent(JSON.stringify(opts, null, 2))
     }, [setSamplingOptsContent])
 
-    const [metaContent, setMetaContent] = useState(initialMetaContent)
-    useEffect(() => {
-        localStorage.setItem('meta.json', metaContent)
-    }, [metaContent])
-
-    const doNotSaveOnUnload = useRef<boolean>(false)
-    useEffect(() => {
-        // if the user reloads the page, then we want
-        // to save the current state of the editor in local storage
-        // because this may have been overwritten in a different
-        // tab, and the user would expect to see the same content
-        // upon reload
-        const handleBeforeUnload = () => {
-            if (doNotSaveOnUnload.current) {
-                return
-            }
-            localStorage.setItem('main.stan', fileContent);
-            localStorage.setItem('data.json', dataFileContent);
-            localStorage.setItem('meta.json', metaContent);
-        };
-
-        window.addEventListener('beforeunload', handleBeforeUnload);
-
-        return () => {
-            window.removeEventListener('beforeunload', handleBeforeUnload);
-        };
-    }, [fileContent, dataFileContent, metaContent, doNotSaveOnUnload]);
-
     const [compiledMainJsUrl, setCompiledMainJsUrl] = useState<string>('')
 
-    const leftPanelWidth = width > 400 ? 200 : 0
+    const leftPanelWidth = Math.max(250, Math.min(340, width * 0.2))
+    const topBarHeight = 25
 
-    const handleLoadStanie = useCallback((stanie: Stanie) => {
-        saveFileContent(stanie.stan)
-        saveDataFileContent(stringifyData(stanie.data))
-        setMetaContent(JSON.stringify(stanie.meta, null, 2))
-    }, [saveFileContent, saveDataFileContent, setMetaContent])
+    useEffect(() => {
+        let canceled = false
+            ; (async () => {
+                if (!initialLocalFiles) {
+                    // use the cloud fiddle
+                    if (!cloudFiddle) return
+                    const cloudFiddleClient = new ReferenceFileSystemClient({
+                        version: 0,
+                        refs: cloudFiddle.refs
+                    })
+                    const ff: { [fileName: string]: string } = {}
+                    for (const fname in cloudFiddle.refs) {
+                        const buf = await cloudFiddleClient.readBinary(fname, {})
+                        if (canceled) return
+                        const content = new TextDecoder().decode(buf)
+                        ff[fname] = content
+                    }
+                    setLocalFiles(ff)
+                }
+                else {
+                    // use the initial files
+                    const ff: { [fileName: string]: string } = {}
+                    for (const a of initialLocalFiles) {
+                        ff[a.path] = a.content
+                    }
+                    setLocalFiles(ff)
+                }
+            })()
+        return () => { canceled = true }
+    }, [initialLocalFiles, cloudFiddle, setLocalFiles])
 
-    const handleClearBrowserData = useCallback(() => {
-        const confirmed = window.confirm('Are you sure you want to clear all browser data?')
-        if (!confirmed) {
-            return
+    useEffect(() => {
+        // update the title in the route
+        if (!cloudFiddle) return
+        if (!cloudFiddle.jpfiddle) return
+        if (!cloudFiddle.jpfiddle.title) return
+        if (cloudFiddle.jpfiddle.title === route.title) return
+        const newRoute = { ...route, title: cloudFiddle.jpfiddle.title }
+        setRoute(newRoute, true)
+    }, [cloudFiddle, route, setRoute])
+
+    useEffect(() => {
+        // update the document title based on the route
+        if (!route.title) {
+            document.title = 'stan-playground'
         }
-        localStorage.clear()
-        doNotSaveOnUnload.current = true
-        window.location.reload()
-    }, [])
+        else {
+            document.title = route.title
+        }
+    }, [route.title])
+
+    const handleResetToCloudVersion = useCallback(async () => {
+        const newFiles: {path: string, content: string | null}[] = await resetFromCloud()
+        const ff: { [fileName: string]: string } = {}
+        for (const a of newFiles) {
+            if (a.content !== null) {
+                ff[a.path] = a.content
+            }
+        }
+        setLocalFiles(ff)
+    }, [resetFromCloud, setLocalFiles])
 
     return (
-        <div style={{ position: 'absolute', width, height }}>
-            <div style={{ width: leftPanelWidth, height, position: 'absolute' }}>
+        <div style={{ position: 'absolute', width, height, overflow: 'hidden' }}>
+            <div className="jpfiddle-top-bar" style={{ position: 'absolute', left: 0, top: 0, width, height: topBarHeight, overflow: 'hidden' }}>
+                <TopBar
+                    width={width}
+                    height={topBarHeight}
+                    cloudFiddle={cloudFiddle}
+                    fiddleUri={fiddleUri}
+                />
+            </div>
+            <div className="jpfiddle-left-panel" style={{ position: 'absolute', left: 0, top: topBarHeight + 2, width: leftPanelWidth, height: height - topBarHeight - 2, overflow: 'auto' }}>
                 <LeftPanel
                     width={leftPanelWidth}
                     height={height}
-                    metaContent={metaContent}
-                    setMetaContent={setMetaContent}
-                    onLoadStanie={handleLoadStanie}
-                    onClearBrowserData={handleClearBrowserData}
+                    fiddleUri={fiddleUri}
+                    fiddleId={fiddleId}
+                    cloudFiddle={cloudFiddle}
+                    localEditedFiles={localFiles || undefined}
+                    onSaveChangesToCloud={saveToCloud}
+                    onSaveAsGist={saveAsGist}
+                    onUpdateGist={updateGist}
+                    saveAsGistMessage={saveAsGistMessage}
+                    onResetToCloudVersion={handleResetToCloudVersion}
+                    loadFilesStatus="loaded"
+                    alternateFiddleWord="analysis"
+                    jupyterSelectionType={undefined}
+                    showNotesAboutJpfiddle={false}
+                    showJupyterSelector={false}
+                    examples={examples}
                 />
             </div>
-            <div style={{ position: 'absolute', left: leftPanelWidth, width: width - leftPanelWidth, height }}>
+            <div className="main-area" style={{ position: 'absolute', left: leftPanelWidth, top: topBarHeight + 2, width: width - leftPanelWidth, height: height - topBarHeight - 2, overflow: 'hidden' }}>
                 <Splitter
                     width={width - leftPanelWidth}
-                    height={height}
+                    height={height - topBarHeight - 2}
                     direction="horizontal"
                     initialPosition={Math.min(800, (width - leftPanelWidth) / 2)}
                 >
@@ -130,10 +203,10 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
                         width={0}
                         height={0}
                         fileName="main.stan"
-                        fileContent={fileContent}
-                        onSaveContent={saveFileContent}
-                        editedFileContent={editedFileContent}
-                        setEditedFileContent={setEditedFileContent}
+                        fileContent={stanFileContent}
+                        onSaveContent={saveStanFileContent}
+                        editedFileContent={editedStanFileContent}
+                        setEditedFileContent={setEditedStanFileContent}
                         readOnly={false}
                         setCompiledUrl={setCompiledMainJsUrl}
                     />
@@ -219,18 +292,18 @@ const LowerRightView: FunctionComponent<LowerRightViewProps> = ({ width, height,
     const samplingOptsPanelHeight = 160
     const samplingOptsPanelWidth = Math.min(180, width / 2)
 
-    const {sampler} = useStanSampler(compiledMainJsUrl)
-    const {status: samplerStatus} = useSamplerStatus(sampler)
+    const { sampler } = useStanSampler(compiledMainJsUrl)
+    const { status: samplerStatus } = useSamplerStatus(sampler)
     const isSampling = samplerStatus === 'sampling'
     return (
-        <div style={{position: 'absolute', width, height}}>
-            <div style={{position: 'absolute', width: samplingOptsPanelWidth, height: samplingOptsPanelHeight}}>
+        <div style={{ position: 'absolute', width, height }}>
+            <div style={{ position: 'absolute', width: samplingOptsPanelWidth, height: samplingOptsPanelHeight }}>
                 <SamplingOptsPanel
                     samplingOpts={samplingOpts}
-                    setSamplingOpts={!isSampling ? setSamplingOpts: undefined}
+                    setSamplingOpts={!isSampling ? setSamplingOpts : undefined}
                 />
             </div>
-            <div style={{position: 'absolute', left: samplingOptsPanelWidth, width: width - samplingOptsPanelWidth, top: 0, height: samplingOptsPanelHeight}}>
+            <div style={{ position: 'absolute', left: samplingOptsPanelWidth, width: width - samplingOptsPanelWidth, top: 0, height: samplingOptsPanelHeight }}>
                 <RunPanel
                     width={width}
                     height={samplingOptsPanelHeight}
@@ -240,7 +313,7 @@ const LowerRightView: FunctionComponent<LowerRightViewProps> = ({ width, height,
                     samplingOpts={samplingOpts}
                 />
             </div>
-            <div style={{position: 'absolute', width, top: samplingOptsPanelHeight, height: height - samplingOptsPanelHeight}}>
+            <div style={{ position: 'absolute', width, top: samplingOptsPanelHeight, height: height - samplingOptsPanelHeight }}>
                 {sampler && <SamplerOutputView
                     width={width}
                     height={height - samplingOptsPanelHeight}
@@ -250,84 +323,6 @@ const LowerRightView: FunctionComponent<LowerRightViewProps> = ({ width, height,
             </div>
         </div>
     )
-}
-
-type LeftPanelProps = {
-    width: number
-    height: number
-    metaContent: string
-    setMetaContent: (text: string) => void
-    onLoadStanie: (stanie: Stanie) => void
-    onClearBrowserData: () => void
-}
-
-const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, metaContent, setMetaContent, onLoadStanie, onClearBrowserData }) => {
-    const metaData = useMemo(() => {
-        try {
-            const x = JSON.parse(metaContent) as StanieMetaData
-            return {
-                title: x.title || undefined
-            }
-        }
-        catch (e) {
-            return {}
-        }
-    }, [metaContent])
-
-    const updateTitle = useCallback((title: string) => {
-        setMetaContent(JSON.stringify({
-            ...metaData,
-            title
-        }))
-    }, [metaData, setMetaContent])
-    return (
-        <div style={{ width, height, backgroundColor: '#333', color: '#ccc' }}>
-            <div>&nbsp;</div>
-            <div style={{ position: 'relative', left: 10, width: width - 20 }}>
-                <strong>Title:</strong>
-            </div>
-            <div style={{ height: 7 }}>&nbsp;</div>
-            <div style={{ position: 'relative', left: 10, width: width - 20 }}>
-                <input
-                    style={{ width: width - 40, fontSize: 16, backgroundColor: '#444', color: '#ccc', padding: 5, border: 'none' }}
-                    type="text"
-                    value={metaData.title || ''}
-                    onChange={(e) => updateTitle(e.target.value)}
-                />
-            </div>
-            <hr />
-            <div style={{ position: 'relative', left: 10, width: width - 20 }}>
-                <strong>Examples</strong>
-                <div style={{ height: 7 }}>&nbsp;</div>
-                {
-                    examplesStanies.map((stanie, i) => {
-                        return (
-                            <div key={i}>
-                                <Hyperlink color="lightblue" onClick={() => onLoadStanie(stanie)}>
-                                    {stanie.meta.title}
-                                </Hyperlink>
-                            </div>
-                        )
-                    })
-                }
-            </div>
-            <hr />
-            <div style={{ position: 'relative', height: 30 }} />
-            <div style={{ position: 'absolute', left: 10, width: width - 20, bottom: 10 }}>
-                <Hyperlink color="#c66" onClick={onClearBrowserData}>
-                    clear all browser data
-                </Hyperlink>
-            </div>
-        </div>
-    )
-}
-
-const stringifyData = (data: { [key: string]: any }) => {
-    const replacer = (_key: string, value: any) => Array.isArray(value) ? JSON.stringify(value) : value;
-
-    return JSON.stringify(data, replacer, 2)
-        .replace(/"\[/g, '[')
-        .replace(/\]"/g, ']')
 }
 
 export default HomePage
