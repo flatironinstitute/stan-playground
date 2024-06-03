@@ -1,20 +1,19 @@
-from fastapi import FastAPI
+from typing import Annotated
+
+from fastapi import Depends, FastAPI
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Header, Body, Request
 
-import os
-from pathlib import Path
-
 from logic.definitions import CompilationStatus
 from logic.compilation_job_mgmt import (
     create_compilation_job,
+    get_compilation_job_dir,
     get_job_source_file,
     upload_stan_code_file,
 )
 from logic.compilation import COMPILATION_OUTPUTS, make_canonical_model_dir, compile_and_cache
 from logic.authorization import check_authorization
-
 from logic.exceptions import (
     StanPlaygroundAuthenticationException,
     StanPlaygroundInvalidJobException,
@@ -25,6 +24,9 @@ from logic.exceptions import (
     StanPlaygroundCompilationTimeoutException,
     )
 
+from config import StanWasmServerSettings, get_settings
+DependsOnSettings = Annotated[StanWasmServerSettings, Depends(get_settings)]
+
 app = FastAPI()
 
 app.add_middleware(
@@ -34,17 +36,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-tinystan_env_var = os.environ.get("TINYSTAN_DIR")
-if tinystan_env_var is None:
-    raise ValueError("TINYSTAN_DIR environment variable not set")
-
-TINYSTAN_DIR = Path(tinystan_env_var).absolute()
-if not (
-    (TINYSTAN_DIR / 'Makefile').is_file()
-    and (TINYSTAN_DIR / 'stan').is_dir()
-):
-    raise RuntimeError(f"Proposed TINYSTAN_DIR {TINYSTAN_DIR} does not appear to contain a working tinystan.")
 
 
 ##### Custom exception handlers
@@ -83,26 +74,29 @@ async def probe():
 
 
 @app.post("/job/initiate")
-async def initiate_job(authorization: str = Header(None)):
-    check_authorization(authorization)
-    job_id = create_compilation_job()
+async def initiate_job(settings: DependsOnSettings, authorization: str = Header(None)):
+    check_authorization(authorization, settings.passcode)
+    job_id = create_compilation_job(base_dir=settings.job_dir)
     return {"job_id": job_id, "status": CompilationStatus.INITIATED}
 
 
 @app.post("/job/{job_id}/upload/{filename}")
-async def upload_stan_source_file(job_id: str, filename: str, data: bytes = Body(...)):
+async def upload_stan_source_file(job_id: str, filename: str, settings: DependsOnSettings, data: bytes = Body(...)):
     # QUERY: Should this endpoint also validate authorization?
-    upload_stan_code_file(job_id, filename, data)
+    # note: filename is intentionally ignored, always main.stan
+    job_dir = get_compilation_job_dir(job_id, base_dir=settings.job_dir)
+    upload_stan_code_file(job_dir, data)
     return {"success": True}
 
 
 @app.get("/job/{job_id}/download/{filename}")
-async def download_file(job_id: str, filename: str):
+async def download_file(job_id: str, filename: str, settings: DependsOnSettings):
     if filename not in COMPILATION_OUTPUTS:
         raise StanPlaygroundInvalidFileException(f"Invalid file name {filename}")
 
-    src_file = get_job_source_file(job_id)
-    model_dir = make_canonical_model_dir(src_file)
+    job_dir = get_compilation_job_dir(job_id, base_dir=settings.job_dir)
+    src_file = get_job_source_file(job_dir)
+    model_dir = make_canonical_model_dir(src_file=src_file, built_model_dir=settings.built_model_dir)
 
     file_path = model_dir / filename
     if not file_path.is_file():
@@ -111,10 +105,11 @@ async def download_file(job_id: str, filename: str):
 
 
 @app.post("/job/{job_id}/run")
-async def run_job(job_id: str):
-    src_file = get_job_source_file(job_id)
-    model_dir = make_canonical_model_dir(src_file)
+async def run_job(job_id: str, settings: DependsOnSettings):
+    job_dir = get_compilation_job_dir(job_id, base_dir=settings.job_dir)
+    src_file = get_job_source_file(job_dir)
+    model_dir = make_canonical_model_dir(src_file=src_file, built_model_dir=settings.built_model_dir)
 
-    await compile_and_cache(job_id=job_id, model_dir=model_dir, tinystan_dir=TINYSTAN_DIR)
+    await compile_and_cache(job_dir=job_dir, model_dir=model_dir, tinystan_dir=settings.tinystan, timeout=settings.compilation_timeout)
 
     return {"job_id": job_id, "status": CompilationStatus.COMPLETED}
