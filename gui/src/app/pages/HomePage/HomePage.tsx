@@ -9,27 +9,88 @@ import useStanSampler, { useSamplerStatus } from "../../StanSampler/useStanSampl
 import examplesStanies, { Stanie, StanieMetaData } from "../../exampleStanies/exampleStanies";
 import SamplingOptsPanel from "../../SamplingOptsPanel/SamplingOptsPanel";
 import { SamplingOpts, defaultSamplingOpts } from "../../StanSampler/StanSampler";
+import { useSearchParams } from "react-router-dom";
 
 type Props = {
     width: number
     height: number
 }
 
-const defaultStanContent = ''
-const defaultDataContent = ''
+
+const tryFetch = async (url: string) => {
+    console.log('Fetching content from', url);
+    try {
+        const req = await fetch(url);
+        if (!req.ok) {
+            console.error('Failed to fetch from url', url, req.status, req.statusText);
+            return undefined;
+        }
+        return await req.text();
+    } catch (err) {
+        console.error('Failed to fetch from url', url, err);
+        return undefined;
+    }
+}
+
+const populateFromURLOrLocalStorage = (url: string | null, localStorageKey: string, setter: (s: string) => void, onError: (s: string) => void) => {
+    return () => {
+        if (url) {
+            tryFetch(url).then((text) => {
+                if (text) {
+                    setter(text);
+                } else {
+                    onError(url);
+                }
+            })
+        } else {
+            const storedContent = localStorage.getItem(localStorageKey);
+            if (storedContent) {
+                setter(storedContent);
+            }
+        }
+    };
+}
 const defaultMetaContent = '{"title": "Untitled"}'
 const defaultSamplingOptsContent = JSON.stringify(defaultSamplingOpts)
-
-const initialFileContent = localStorage.getItem('main.stan') || defaultStanContent
-
-const initialDataFileContent = localStorage.getItem('data.json') || defaultDataContent
-
 const initialMetaContent = localStorage.getItem('meta.json') || defaultMetaContent
-
 const initialSamplingOptsContent = localStorage.getItem('samplingOpts.json') || defaultSamplingOptsContent
 
+type RemoteProject = {
+    stanURL: string | null
+    dataURL: string | null
+    samplingOptsURL: string | null
+    title: string | null
+}
+
 const HomePage: FunctionComponent<Props> = ({ width, height }) => {
-    const [fileContent, saveFileContent] = useState(initialFileContent)
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [projectParts, setProjectParts] = useState<RemoteProject>({
+        stanURL: null,
+        dataURL: null,
+        samplingOptsURL: null,
+        title: null
+    });
+    useEffect(() => {
+        if (searchParams.size === 0) return;
+        const remoteProject: RemoteProject = {
+            stanURL: searchParams.get('stanURL'),
+            dataURL: searchParams.get('dataURL'),
+            samplingOptsURL: searchParams.get('samplingOptsURL'),
+            title: searchParams.get('t')
+        }
+        setProjectParts(remoteProject);
+        // clear search params after reading them
+        setSearchParams(new URLSearchParams());
+    }, [searchParams, setSearchParams]);
+
+
+    const [fileContent, saveFileContent] = useState('');
+    useEffect( // eslint-disable-line react-hooks/exhaustive-deps
+        populateFromURLOrLocalStorage(projectParts.stanURL, 'main.stan', saveFileContent, (url) => {
+            saveFileContent(`// failed to load stan file from\n// ${url}`);
+        })
+        , [projectParts]);
+
     const [editedFileContent, setEditedFileContent] = useState('')
     useEffect(() => {
         setEditedFileContent(fileContent)
@@ -38,7 +99,13 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
         localStorage.setItem('main.stan', fileContent)
     }, [fileContent])
 
-    const [dataFileContent, saveDataFileContent] = useState(initialDataFileContent)
+    const [dataFileContent, saveDataFileContent] = useState('');
+    useEffect( // eslint-disable-line react-hooks/exhaustive-deps
+        populateFromURLOrLocalStorage(projectParts.dataURL, 'data.json', saveDataFileContent, (url) => {
+            saveDataFileContent(`// failed to load data file from\n// ${url}`);
+        }), [projectParts]);
+
+
     const [editedDataFileContent, setEditedDataFileContent] = useState('')
     useEffect(() => {
         setEditedDataFileContent(dataFileContent)
@@ -47,19 +114,33 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
         localStorage.setItem('data.json', dataFileContent)
     }, [dataFileContent])
 
-    const [samplingOptsContent, setSamplingOptsContent] = useState(initialSamplingOptsContent)
+    const [samplingOptsContent, setSamplingOptsContent] = useState(initialSamplingOptsContent);
+    useEffect( // eslint-disable-line react-hooks/exhaustive-deps
+        populateFromURLOrLocalStorage(projectParts.samplingOptsURL, 'samplingOpts.json', setSamplingOptsContent, (_url) => {
+            // TODO indicate error to user
+        }
+        ), [projectParts]);
+
+
     useEffect(() => {
         localStorage.setItem('samplingOpts.json', samplingOptsContent)
     }, [samplingOptsContent])
     const samplingOpts = useMemo(() => (
-        {...defaultSamplingOpts, ...JSON.parse(samplingOptsContent)}
+        { ...defaultSamplingOpts, ...JSON.parse(samplingOptsContent) }
     ), [samplingOptsContent])
 
     const setSamplingOpts = useCallback((opts: SamplingOpts) => {
         setSamplingOptsContent(JSON.stringify(opts, null, 2))
     }, [setSamplingOptsContent])
 
-    const [metaContent, setMetaContent] = useState(initialMetaContent)
+    const [metaContent, setMetaContent] = useState(initialMetaContent);
+    useEffect(() => {
+        const { title } = projectParts;
+        if (title) {
+            setMetaContent(JSON.stringify({ "title": title }));
+        }
+    }, [projectParts]);
+
     useEffect(() => {
         localStorage.setItem('meta.json', metaContent)
     }, [metaContent])
@@ -219,18 +300,18 @@ const LowerRightView: FunctionComponent<LowerRightViewProps> = ({ width, height,
     const samplingOptsPanelHeight = 160
     const samplingOptsPanelWidth = Math.min(180, width / 2)
 
-    const {sampler} = useStanSampler(compiledMainJsUrl)
-    const {status: samplerStatus} = useSamplerStatus(sampler)
+    const { sampler } = useStanSampler(compiledMainJsUrl)
+    const { status: samplerStatus } = useSamplerStatus(sampler)
     const isSampling = samplerStatus === 'sampling'
     return (
-        <div style={{position: 'absolute', width, height}}>
-            <div style={{position: 'absolute', width: samplingOptsPanelWidth, height: samplingOptsPanelHeight}}>
+        <div style={{ position: 'absolute', width, height }}>
+            <div style={{ position: 'absolute', width: samplingOptsPanelWidth, height: samplingOptsPanelHeight }}>
                 <SamplingOptsPanel
                     samplingOpts={samplingOpts}
-                    setSamplingOpts={!isSampling ? setSamplingOpts: undefined}
+                    setSamplingOpts={!isSampling ? setSamplingOpts : undefined}
                 />
             </div>
-            <div style={{position: 'absolute', left: samplingOptsPanelWidth, width: width - samplingOptsPanelWidth, top: 0, height: samplingOptsPanelHeight}}>
+            <div style={{ position: 'absolute', left: samplingOptsPanelWidth, width: width - samplingOptsPanelWidth, top: 0, height: samplingOptsPanelHeight }}>
                 <RunPanel
                     width={width}
                     height={samplingOptsPanelHeight}
@@ -240,7 +321,7 @@ const LowerRightView: FunctionComponent<LowerRightViewProps> = ({ width, height,
                     samplingOpts={samplingOpts}
                 />
             </div>
-            <div style={{position: 'absolute', width, top: samplingOptsPanelHeight, height: height - samplingOptsPanelHeight}}>
+            <div style={{ position: 'absolute', width, top: samplingOptsPanelHeight, height: height - samplingOptsPanelHeight }}>
                 {sampler && <SamplerOutputView
                     width={width}
                     height={height - samplingOptsPanelHeight}
