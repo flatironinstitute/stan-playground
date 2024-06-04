@@ -42,7 +42,7 @@ RUN git clone https://github.com/WardBrian/tinystan.git && \
     git submodule update --init --recursive
 
 # Copy the local configuration file for TinyStan
-COPY make/local /app/tinystan/make/local
+COPY local.mk /app/tinystan/make/local
 
 # Build a test model
 RUN cd tinystan && \
