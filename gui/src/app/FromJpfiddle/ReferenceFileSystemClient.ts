@@ -2,7 +2,7 @@
 export type ReferenceFileSystemObject = {
   version: any
   refs: {[key: string]: (
-    string | [string, number, number]
+    string | [string] | [string, number, number]
   )}
   templates?: {[key: string]: string}
 }
@@ -94,10 +94,15 @@ export class ReferenceFileSystemClient {
         }
       }
       else if ((typeof ref === 'object') && (Array.isArray(ref))) {
-        if (ref.length !== 3) throw Error(`Invalid ref for ${path}`);
+        if ((ref.length !== 1) && (ref.length !== 3)) throw Error(`Invalid ref for ${path}`);
         const refUrl = this._applyTemplates(ref[0]);
-        let start = ref[1];
-        let numBytes = ref[2];
+        let start = ref[1] || 0;
+        let numBytes: number | undefined = ref[2];
+        if (numBytes === undefined) {
+          if (start !== 0) {
+            throw Error('If start is specified, numBytes must also be specified');
+          }
+        }
         if (o.startByte !== undefined) {
           start += o.startByte;
           numBytes = o.endByte! - o.startByte;
@@ -107,9 +112,9 @@ export class ReferenceFileSystemClient {
           url0 += `?cacheBust=${Date.now()}`;
         }
         const r = await fetch(url0, {
-          headers: {
+          headers: numBytes !== undefined ?{
             Range: `bytes=${start}-${start + numBytes - 1}`
-          }
+          } : undefined
         });
         if (!r.ok) throw Error('Failed to fetch ' + refUrl);
         buf = await r.arrayBuffer();

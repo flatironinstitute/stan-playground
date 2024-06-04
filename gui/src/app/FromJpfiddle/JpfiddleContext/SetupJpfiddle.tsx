@@ -9,19 +9,20 @@ type SetupJpfiddleProps = {
     fiddleUri: string
     apiBaseUrl: string
     useLocalStorageForLocalFiles: boolean
+    titleFromUrl?: string
 }
 
-const SetupJpfiddle: FunctionComponent<PropsWithChildren<SetupJpfiddleProps>> = ({ fiddleUri, apiBaseUrl, useLocalStorageForLocalFiles, children }) => {
+const SetupJpfiddle: FunctionComponent<PropsWithChildren<SetupJpfiddleProps>> = ({ fiddleUri, titleFromUrl, apiBaseUrl, useLocalStorageForLocalFiles, children }) => {
     const [cloudFiddle, setCloudFiddle] = useState<Fiddle | undefined>(undefined)
     useEffect(() => {
         let canceled = false
             ; (async () => {
-                const f = await loadCloudFiddle(fiddleUri)
+                const f = await loadCloudFiddle(fiddleUri, titleFromUrl)
                 if (canceled) return
                 setCloudFiddle(f)
             })()
         return () => { canceled = true }
-    }, [fiddleUri])
+    }, [fiddleUri, titleFromUrl])
     const [localFiles, localFilesDispatch] = useReducer(localFilesReducer, undefined)
 
     const setLocalFiles = useCallback((files: LocalFiles) => {
@@ -288,7 +289,7 @@ const SetupJpfiddle: FunctionComponent<PropsWithChildren<SetupJpfiddleProps>> = 
     )
 }
 
-const loadCloudFiddle = async (fiddleUri: string): Promise<Fiddle> => {
+const loadCloudFiddle = async (fiddleUri: string, titleFromUrl?: string): Promise<Fiddle> => {
     if (!fiddleUri) {
         return {
             jpfiddle: {
@@ -307,6 +308,20 @@ const loadCloudFiddle = async (fiddleUri: string): Promise<Fiddle> => {
         const fiddle = await response.json()
         if (!isFiddle(fiddle)) throw Error(`Invalid fiddle format for ${fiddleUri}`)
         return fiddle
+    }
+    else if (fiddleUri.startsWith('{')) {
+        // special internal fiddleUri that is a json string
+        const fiddleObject = JSON.parse(fiddleUri)
+        const refs: { [key: string]: string | [string] | [string, number, number] } = {}
+        for (const k in fiddleObject) {
+            refs[k] = [fiddleObject[k]]
+        }
+        return {
+            jpfiddle: {
+                title: titleFromUrl || 'Untitled'
+            },
+            refs
+        }
     }
     else {
         throw Error(`Invalid fiddle uri: ${fiddleUri}`)

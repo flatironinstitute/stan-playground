@@ -45,6 +45,7 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
             fiddleUri={route.fiddleUri || ''}
             apiBaseUrl="https://jpfiddle.vercel.app"
             useLocalStorageForLocalFiles={true}
+            titleFromUrl={route.title}
         >
             <HomePageChild width={width} height={height} />
         </SetupJpfiddle>
@@ -99,16 +100,39 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
     const leftPanelWidth = Math.max(250, Math.min(340, width * 0.2))
     const topBarHeight = 25
 
+    const cloudFiddleClient = useMemo(() => {
+        if (!cloudFiddle) return undefined
+        return new ReferenceFileSystemClient({
+            version: 0,
+            refs: cloudFiddle.refs
+        })
+    }, [cloudFiddle])
+    const [cloudFiles, setCloudFiles] = useState<{ [fileName: string]: string } | undefined>(undefined)
+    useEffect(() => {
+        // set the cloud files
+        let canceled = false
+            ; (async () => {
+                if (!cloudFiddle) return
+                if (!cloudFiddleClient) return
+                const ff: { [fileName: string]: string } = {}
+                for (const fname in cloudFiddle.refs) {
+                    const buf = await cloudFiddleClient.readBinary(fname, {})
+                    if (canceled) return
+                    const content = new TextDecoder().decode(buf)
+                    ff[fname] = content
+                }
+                setCloudFiles(ff)
+            })()
+        return () => { canceled = true }
+    }, [cloudFiddle, cloudFiddleClient])
+
     useEffect(() => {
         let canceled = false
             ; (async () => {
                 if (!initialLocalFiles) {
                     // use the cloud fiddle
                     if (!cloudFiddle) return
-                    const cloudFiddleClient = new ReferenceFileSystemClient({
-                        version: 0,
-                        refs: cloudFiddle.refs
-                    })
+                    if (!cloudFiddleClient) return
                     const ff: { [fileName: string]: string } = {}
                     for (const fname in cloudFiddle.refs) {
                         const buf = await cloudFiddleClient.readBinary(fname, {})
@@ -128,7 +152,7 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
                 }
             })()
         return () => { canceled = true }
-    }, [initialLocalFiles, cloudFiddle, setLocalFiles])
+    }, [initialLocalFiles, cloudFiddle, cloudFiddleClient, setLocalFiles])
 
     useEffect(() => {
         // update the title in the route
@@ -178,6 +202,7 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
                     fiddleUri={fiddleUri}
                     fiddleId={fiddleId}
                     cloudFiddle={cloudFiddle}
+                    cloudFiles={cloudFiles}
                     localEditedFiles={localFiles || undefined}
                     onSaveChangesToCloud={saveToCloud}
                     onSaveAsGist={saveAsGist}

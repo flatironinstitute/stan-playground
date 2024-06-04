@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
+import { JSONStringifyDeterministic } from "./FromJpfiddle/LeftPanel"
 
 export type Route = {
     page: 'home'
@@ -22,18 +23,36 @@ const useRoute = () => {
             }
         }
         else {
+            const fiddleUri = getFiddleUriFromQuery(query)
             return {
                 page: 'home',
-                fiddleUri: (query.f || '') as string,
+                fiddleUri,
                 title: decodeURIComponent((query.t || '') as string)
             }
         }
-    }, [p, query.f, query.t])
+    }, [p, query])
 
     const setRoute = useCallback((r: Route, replaceHistory?: boolean) => {
-        let newQuery = {...query}
+        let newQuery: {[key: string]: string | string[]} = {...query}
         if (r.page === 'home') {
-            newQuery = {p: '/', f: r.fiddleUri || '', t: encodeURIComponent(r.title || '')}
+            newQuery = {
+                p: '/',
+                t: encodeURIComponent(r.title || '')
+            }
+            if (r.fiddleUri?.startsWith('{')) {
+                // special internal fiddleUri that is a json string
+                const fiddleUriObject = JSON.parse(r.fiddleUri)
+                newQuery = {
+                    ...newQuery,
+                    ...fiddleUriObject
+                }
+            }
+            else {
+                newQuery = {
+                    ...newQuery,
+                    f: r.fiddleUri || ''
+                }
+            }
         }
         else if (r.page === 'about') {
             newQuery = {p: '/about'}
@@ -91,6 +110,27 @@ const queryToQueryString = (query: { [key: string]: string | string[] }) => {
         }
     }
     return '?' + a.join('&')
+}
+
+const getFiddleUriFromQuery = (query: { [key: string]: string | string[] }) => {
+    if (query.f) {
+        return query.f as string
+    }
+    else if (query['main.stan']) {
+        // special internal fiddleUri that is a json string
+        const ret: { [key: string]: string } = {}
+        ret['main.stan'] = query['main.stan'] as string
+        if (query['data.json']) {
+            ret['data.json'] = query['data.json'] as string
+        }
+        if (query['opts.json']) {
+            ret['opts.json'] = query['opts.json'] as string
+        }
+        if (query['main.py']) {
+            ret['main.py'] = query['main.py'] as string
+        }
+        return JSONStringifyDeterministic(ret)
+    }
 }
 
 export default useRoute

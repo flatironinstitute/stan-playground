@@ -11,6 +11,7 @@ type LeftPanelProps = {
     fiddleUri: string
     fiddleId: string
     cloudFiddle: Fiddle | undefined
+    cloudFiles?: {[key: string]: string}
     localEditedFiles?: {[key: string]: string}
     onSaveChangesToCloud: () => void
     onSaveAsGist: () => void
@@ -25,7 +26,7 @@ type LeftPanelProps = {
     examples?: {title: string, uri: string}[]
 }
 
-const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, fiddleUri, fiddleId, cloudFiddle, localEditedFiles, onSaveChangesToCloud, onSaveAsGist, onUpdateGist, saveAsGistMessage, onResetToCloudVersion, loadFilesStatus, alternateFiddleWord, jupyterSelectionType, showNotesAboutJpfiddle, showJupyterSelector, examples }) => {
+const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, fiddleUri, fiddleId, cloudFiddle, cloudFiles, localEditedFiles, onSaveChangesToCloud, onSaveAsGist, onUpdateGist, saveAsGistMessage, onResetToCloudVersion, loadFilesStatus, alternateFiddleWord, jupyterSelectionType, showNotesAboutJpfiddle, showJupyterSelector, examples }) => {
     const {route, setRoute} = useRoute()
     const addedFilePaths: string[] = useMemo(() => {
         if (!localEditedFiles) return []
@@ -54,17 +55,18 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, fiddleUri
     const modifiedFilePaths: string[] = useMemo(() => {
         if (!cloudFiddle) return []
         if (!localEditedFiles) return []
+        if (!cloudFiles) return []
 
         const modified: string[] = []
         for (const pp in localEditedFiles) {
             if (cloudFiddle.refs[pp]) {
-                if (!refsAreEqual(cloudFiddle.refs[pp], localEditedFiles[pp])) {
+                if (cloudFiles[pp] !== localEditedFiles[pp]) {
                     modified.push(pp)
                 }
             }
         }
         return modified
-    }, [localEditedFiles, cloudFiddle])
+    }, [localEditedFiles, cloudFiles, cloudFiddle])
 
     const hasChanges = useMemo(() => {
         return addedFilePaths.length > 0 || removedFilePaths.length > 0 || modifiedFilePaths.length > 0

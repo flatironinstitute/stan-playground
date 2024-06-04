@@ -11,7 +11,7 @@ export type Fiddle = {
         timestamp?: number
     }
     refs: {
-        [key: string]: string | [string, number, number]
+        [key: string]: string | [string] | [string, number, number]
     }
 }
 
@@ -123,7 +123,22 @@ export const useJpfiddle = () => {
     const { cloudFiddle, localFiles, initialLocalFiles, fiddleUri, setLocalFiles, changeLocalFile, deleteLocalFile, renameLocalFile, saveToCloud, saveAsGist, updateGist, resetFromCloud, saveAsGistMessage } = useContext(JpfiddleContext)
     const fiddleId = useMemo(() => {
         if (!fiddleUri) return 'unsaved'
+        if (fiddleUri.startsWith('{')) {
+            // internal fiddleUri that is a json string
+            // return a hash of the json string
+            return 'internal-' + hash(fiddleUri)
+        }
         return (fiddleUri.split('/').slice(-1)[0] || '').split('.')[0] || 'unknown'
     }, [fiddleUri])
     return { cloudFiddle, localFiles, initialLocalFiles, fiddleUri, fiddleId, setLocalFiles, changeLocalFile, deleteLocalFile, renameLocalFile, saveToCloud, saveAsGist, updateGist, resetFromCloud, saveAsGistMessage }
+}
+
+const hash = (s: string) => {
+    let hash = 0, i, chr
+    for (i = 0; i < s.length; i++) {
+        chr = s.charCodeAt(i)
+        hash = ((hash << 5) - hash) + chr
+        hash |= 0
+    }
+    return hash
 }
