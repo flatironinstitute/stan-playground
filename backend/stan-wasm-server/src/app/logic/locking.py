@@ -4,12 +4,12 @@ from pathlib import Path
 from typing import Generator
 
 
-def _get_compilation_lockfile_name(model_dir: Path):
+def _get_compilation_lockfile_name(model_dir: Path) -> Path:
     p = model_dir / "running.txt"
     return p
 
 
-async def wait_until_free(model_dir: Path):
+async def wait_until_free(model_dir: Path) -> None:
     lockfile = _get_compilation_lockfile_name(model_dir)
     while lockfile.is_file():
         await asyncio.sleep(1)

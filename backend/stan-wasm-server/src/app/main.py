@@ -1,15 +1,11 @@
-from typing import Annotated
+from typing import Annotated, Any, TypeVar
 
 from config import StanWasmServerSettings, get_settings
 from fastapi import Body, Depends, FastAPI, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from logic.authorization import check_authorization
-from logic.compilation import (
-    COMPILATION_OUTPUTS,
-    compile_and_cache,
-    make_canonical_model_dir,
-)
+from logic.compilation import compile_and_cache, make_canonical_model_dir
 from logic.compilation_job_mgmt import (
     create_compilation_job,
     get_compilation_job_dir,
@@ -26,6 +22,7 @@ from logic.exceptions import (
     StanPlaygroundInvalidJobException,
     StanPlaygroundJobNotFoundException,
 )
+from logic.file_validation.compilation_files import COMPILATION_OUTPUTS
 
 DependsOnSettings = Annotated[StanWasmServerSettings, Depends(get_settings)]
 
@@ -41,9 +38,12 @@ app.add_middleware(
 
 
 ##### Custom exception handlers
-def register_exn_handler(cls, http_code):
+Exn = TypeVar("Exn", bound=Exception)
+
+
+def register_exn_handler(cls: type[Exn], http_code: int) -> None:
     @app.exception_handler(cls)
-    async def _(_request: Request, exc: Exception):
+    async def _(_request: Request, exc: Exception) -> JSONResponse:
         return JSONResponse(status_code=int(http_code), content={"message": str(exc)})
 
 
@@ -65,14 +65,18 @@ for e in exceptions_codes:
 
 ##### Routing
 
+DictResponse = dict[str, Any]
+
 
 @app.get("/probe")
-async def probe():
+async def probe() -> DictResponse:
     return {"status": "ok"}
 
 
 @app.post("/job/initiate")
-async def initiate_job(settings: DependsOnSettings, authorization: str = Header(None)):
+async def initiate_job(
+    settings: DependsOnSettings, authorization: str = Header(None)
+) -> DictResponse:
     check_authorization(authorization, settings.passcode)
     job_id = create_compilation_job(base_dir=settings.job_dir)
     return {"job_id": job_id, "status": CompilationStatus.INITIATED}
@@ -81,7 +85,7 @@ async def initiate_job(settings: DependsOnSettings, authorization: str = Header(
 @app.post("/job/{job_id}/upload/{filename}")
 async def upload_stan_source_file(
     job_id: str, filename: str, settings: DependsOnSettings, data: bytes = Body(...)
-):
+) -> DictResponse:
     # QUERY: Should this endpoint also validate authorization?
     # note: filename is intentionally ignored, always main.stan
     job_dir = get_compilation_job_dir(job_id, base_dir=settings.job_dir)
@@ -90,7 +94,9 @@ async def upload_stan_source_file(
 
 
 @app.get("/job/{job_id}/download/{filename}")
-async def download_file(job_id: str, filename: str, settings: DependsOnSettings):
+async def download_file(
+    job_id: str, filename: str, settings: DependsOnSettings
+) -> FileResponse:
     if filename not in COMPILATION_OUTPUTS:
         raise StanPlaygroundInvalidFileException(f"Invalid file name {filename}")
 
@@ -107,7 +113,7 @@ async def download_file(job_id: str, filename: str, settings: DependsOnSettings)
 
 
 @app.post("/job/{job_id}/run")
-async def run_job(job_id: str, settings: DependsOnSettings):
+async def run_job(job_id: str, settings: DependsOnSettings) -> DictResponse:
     job_dir = get_compilation_job_dir(job_id, base_dir=settings.job_dir)
     src_file = get_job_source_file(job_dir)
     model_dir = make_canonical_model_dir(

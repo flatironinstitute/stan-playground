@@ -5,14 +5,14 @@ class StanPlaygroundAuthenticationException(Exception):
 class StanPlaygroundInvalidJobException(Exception):
     """Raise if an invalid job ID is requested."""
 
-    def __init__(self, job_id):
+    def __init__(self, job_id: str) -> None:
         super().__init__(f"Invalid job ID {job_id}")
 
 
 class StanPlaygroundJobNotFoundException(Exception):
     """Raise if a job ID is valid but the job directory does not exist."""
 
-    def __init__(self, job_id):
+    def __init__(self, job_id: str) -> None:
         super().__init__(f"Job ID {job_id} not found")
 
 
@@ -31,5 +31,5 @@ class StanPlaygroundCompilationException(Exception):
 class StanPlaygroundCompilationTimeoutException(Exception):
     """Raise if compilation failed due to timeout specifically."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Model compilation took too long to complete")

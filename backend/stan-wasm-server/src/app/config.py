@@ -35,4 +35,4 @@ class StanWasmServerSettings(BaseSettings):
 
 @lru_cache
 def get_settings() -> StanWasmServerSettings:
-    return StanWasmServerSettings()
+    return StanWasmServerSettings()  # type: ignore # see https://github.com/pydantic/pydantic/issues/3753

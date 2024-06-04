@@ -3,7 +3,7 @@ from pydantic import SecretStr
 from .exceptions import StanPlaygroundAuthenticationException
 
 
-def check_authorization(authorization: str, passcode: SecretStr):
+def check_authorization(authorization: str, passcode: SecretStr) -> None:
     if not authorization:
         raise StanPlaygroundAuthenticationException("Passcode not provided")
     if not authorization.startswith("Bearer "):
