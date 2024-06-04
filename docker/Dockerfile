@@ -31,6 +31,10 @@ RUN mkdir oneTBB/build && cd oneTBB/build && \
     cmake --build . -j$(nproc) && \
     cmake --install .
 
+# Install Python dependencies
+RUN pip install fastapi[all]
+RUN pip install uvicorn
+
 # Clone the TinyStan repository and checkout a specific commit
 RUN git clone https://github.com/WardBrian/tinystan.git && \
     cd tinystan && \
@@ -45,8 +49,6 @@ RUN cd tinystan && \
     emmake make test_models/bernoulli/bernoulli.js -j$(nproc) && \
     emstrip test_models/bernoulli/bernoulli.wasm
 
-RUN pip install fastapi
-RUN pip install uvicorn
 COPY stan-wasm-server /stan-wasm-server
 WORKDIR /stan-wasm-server
 

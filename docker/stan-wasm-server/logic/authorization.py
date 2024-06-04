@@ -1,20 +1,13 @@
-import os
+from pydantic import SecretStr
+
 from .exceptions import StanPlaygroundAuthenticationException
 
-SWS_PASSCODE = os.environ.get("SWS_PASSCODE", "")
-if not SWS_PASSCODE:
-    raise ValueError("SWS_PASSCODE environment variable not set")
 
-
-def _passcode_is_valid(passcode: str):
-    return passcode == SWS_PASSCODE
-
-
-def check_authorization(authorization: str):
+def check_authorization(authorization: str, passcode: SecretStr):
     if not authorization:
         raise StanPlaygroundAuthenticationException("Passcode not provided")
     if not authorization.startswith("Bearer "):
         raise StanPlaygroundAuthenticationException("Invalid authorization header")
-    passcode = authorization.split(" ")[1]
-    if not _passcode_is_valid(passcode):
+    user_passcode = authorization.split(" ")[1]
+    if not user_passcode == passcode.get_secret_value():
         raise StanPlaygroundAuthenticationException("Invalid passcode")

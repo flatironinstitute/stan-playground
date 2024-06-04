@@ -1,6 +1,6 @@
-import time
-from pathlib import Path
+import asyncio
 from contextlib import contextmanager
+from pathlib import Path
 from typing import Generator
 
 
@@ -9,10 +9,10 @@ def _get_compilation_lockfile_name(model_dir: Path):
     return p
 
 
-def wait_until_free(model_dir: Path):
+async def wait_until_free(model_dir: Path):
     lockfile = _get_compilation_lockfile_name(model_dir)
     while lockfile.is_file():
-        time.sleep(0.5)
+        await asyncio.sleep(1)
 
 
 @contextmanager
