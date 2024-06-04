@@ -1,8 +1,14 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import (AliasChoices, DirectoryPath, Field, PositiveInt,
-                      SecretStr, field_validator)
+from pydantic import (
+    AliasChoices,
+    DirectoryPath,
+    Field,
+    PositiveInt,
+    SecretStr,
+    field_validator,
+)
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 

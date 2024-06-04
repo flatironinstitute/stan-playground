@@ -2,10 +2,12 @@ from pathlib import Path
 from string import hexdigits
 from uuid import uuid4
 
-from .exceptions import (StanPlaygroundAlreadyUploaded,
-                         StanPlaygroundInvalidFileException,
-                         StanPlaygroundInvalidJobException,
-                         StanPlaygroundJobNotFoundException)
+from .exceptions import (
+    StanPlaygroundAlreadyUploaded,
+    StanPlaygroundInvalidFileException,
+    StanPlaygroundInvalidJobException,
+    StanPlaygroundJobNotFoundException,
+)
 from .file_validation.compilation_files import write_stan_code_file
 
 
@@ -28,7 +30,9 @@ def _validate_compilation_job_id(job_id: str):
         raise StanPlaygroundInvalidJobException(job_id)
 
 
-def get_compilation_job_dir(job_id: str, base_dir: Path, *, create_if_missing: bool = False):
+def get_compilation_job_dir(
+    job_id: str, base_dir: Path, *, create_if_missing: bool = False
+):
     _validate_compilation_job_id(job_id)
     job_dir = base_dir / job_id
     if create_if_missing:
@@ -45,7 +49,9 @@ def get_job_source_file(job_dir: Path, for_writing: bool = False):
     if not for_writing and not srcfile.exists():
         raise StanPlaygroundInvalidFileException("Not found")
     elif for_writing and srcfile.exists():
-        raise StanPlaygroundAlreadyUploaded(f"Cannot upload files to job {job_dir.stem}, already uploaded!")
+        raise StanPlaygroundAlreadyUploaded(
+            f"Cannot upload files to job {job_dir.stem}, already uploaded!"
+        )
     return srcfile
 
 

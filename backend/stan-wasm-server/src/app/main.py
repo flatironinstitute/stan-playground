@@ -1,30 +1,32 @@
 from typing import Annotated
 
-from fastapi import Depends, FastAPI
-from fastapi.responses import FileResponse, JSONResponse
+from config import StanWasmServerSettings, get_settings
+from fastapi import Body, Depends, FastAPI, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import Header, Body, Request
-
-from logic.definitions import CompilationStatus
+from fastapi.responses import FileResponse, JSONResponse
+from logic.authorization import check_authorization
+from logic.compilation import (
+    COMPILATION_OUTPUTS,
+    compile_and_cache,
+    make_canonical_model_dir,
+)
 from logic.compilation_job_mgmt import (
     create_compilation_job,
     get_compilation_job_dir,
     get_job_source_file,
     upload_stan_code_file,
 )
-from logic.compilation import COMPILATION_OUTPUTS, make_canonical_model_dir, compile_and_cache
-from logic.authorization import check_authorization
+from logic.definitions import CompilationStatus
 from logic.exceptions import (
-    StanPlaygroundAuthenticationException,
-    StanPlaygroundInvalidJobException,
-    StanPlaygroundJobNotFoundException,
     StanPlaygroundAlreadyUploaded,
-    StanPlaygroundInvalidFileException,
+    StanPlaygroundAuthenticationException,
     StanPlaygroundCompilationException,
     StanPlaygroundCompilationTimeoutException,
-    )
+    StanPlaygroundInvalidFileException,
+    StanPlaygroundInvalidJobException,
+    StanPlaygroundJobNotFoundException,
+)
 
-from config import StanWasmServerSettings, get_settings
 DependsOnSettings = Annotated[StanWasmServerSettings, Depends(get_settings)]
 
 app = FastAPI()
@@ -42,12 +44,7 @@ app.add_middleware(
 def register_exn_handler(cls, http_code):
     @app.exception_handler(cls)
     async def _(_request: Request, exc: Exception):
-        return JSONResponse(
-            status_code=int(http_code),
-            content={
-                "message": str(exc)
-            }
-        )
+        return JSONResponse(status_code=int(http_code), content={"message": str(exc)})
 
 
 exceptions_codes = [
@@ -68,6 +65,7 @@ for e in exceptions_codes:
 
 ##### Routing
 
+
 @app.get("/probe")
 async def probe():
     return {"status": "ok"}
@@ -81,7 +79,9 @@ async def initiate_job(settings: DependsOnSettings, authorization: str = Header(
 
 
 @app.post("/job/{job_id}/upload/{filename}")
-async def upload_stan_source_file(job_id: str, filename: str, settings: DependsOnSettings, data: bytes = Body(...)):
+async def upload_stan_source_file(
+    job_id: str, filename: str, settings: DependsOnSettings, data: bytes = Body(...)
+):
     # QUERY: Should this endpoint also validate authorization?
     # note: filename is intentionally ignored, always main.stan
     job_dir = get_compilation_job_dir(job_id, base_dir=settings.job_dir)
@@ -96,11 +96,13 @@ async def download_file(job_id: str, filename: str, settings: DependsOnSettings)
 
     job_dir = get_compilation_job_dir(job_id, base_dir=settings.job_dir)
     src_file = get_job_source_file(job_dir)
-    model_dir = make_canonical_model_dir(src_file=src_file, built_model_dir=settings.built_model_dir)
+    model_dir = make_canonical_model_dir(
+        src_file=src_file, built_model_dir=settings.built_model_dir
+    )
 
     file_path = model_dir / filename
     if not file_path.is_file():
-        raise FileNotFoundError(f'File not found: {file_path}')
+        raise FileNotFoundError(f"File not found: {file_path}")
     return FileResponse(file_path)
 
 
@@ -108,8 +110,15 @@ async def download_file(job_id: str, filename: str, settings: DependsOnSettings)
 async def run_job(job_id: str, settings: DependsOnSettings):
     job_dir = get_compilation_job_dir(job_id, base_dir=settings.job_dir)
     src_file = get_job_source_file(job_dir)
-    model_dir = make_canonical_model_dir(src_file=src_file, built_model_dir=settings.built_model_dir)
+    model_dir = make_canonical_model_dir(
+        src_file=src_file, built_model_dir=settings.built_model_dir
+    )
 
-    await compile_and_cache(job_dir=job_dir, model_dir=model_dir, tinystan_dir=settings.tinystan, timeout=settings.compilation_timeout)
+    await compile_and_cache(
+        job_dir=job_dir,
+        model_dir=model_dir,
+        tinystan_dir=settings.tinystan,
+        timeout=settings.compilation_timeout,
+    )
 
     return {"job_id": job_id, "status": CompilationStatus.COMPLETED}
