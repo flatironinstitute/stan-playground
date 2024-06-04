@@ -78,6 +78,10 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
             samplingOptsURL: searchParams.get('samplingOptsURL'),
             title: searchParams.get('t')
         }
+
+        // by setting this here we get a nice history entry in the browser
+        document.title = "Stan Playground" + (remoteProject.title ? ` - ${remoteProject.title}` : '');
+
         setProjectParts(remoteProject);
         // clear search params after reading them
         setSearchParams(new URLSearchParams());
@@ -143,6 +147,8 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
 
     useEffect(() => {
         localStorage.setItem('meta.json', metaContent)
+        const title = JSON.parse(metaContent).title;
+        document.title = "Stan Playground" + (title ? ` - ${title}` : '');
     }, [metaContent])
 
     const doNotSaveOnUnload = useRef<boolean>(false)
