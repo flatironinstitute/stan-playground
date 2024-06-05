@@ -54,14 +54,14 @@ const defaultSamplingOptsContent = JSON.stringify(defaultSamplingOpts)
 const initialMetaContent = localStorage.getItem('meta.json') || defaultMetaContent
 const initialSamplingOptsContent = localStorage.getItem('samplingOpts.json') || defaultSamplingOptsContent
 
-type RemoteProject = {
+type QueryOptions = {
     stanURL: string | null
     dataURL: string | null
     samplingOptsURL: string | null
     title: string | null
 }
 
-const defaultRemoteProject: RemoteProject = {
+const defaultQueries: QueryOptions = {
     stanURL: null,
     dataURL: null,
     samplingOptsURL: null,
@@ -70,11 +70,9 @@ const defaultRemoteProject: RemoteProject = {
 
 const HomePage: FunctionComponent<Props> = ({ width, height }) => {
     const [searchParams, setSearchParams] = useSearchParams();
-    const [projectParts, setProjectParts] = useState(defaultRemoteProject);
+    const [projectParts, setProjectParts] = useState(defaultQueries);
     useEffect(() => {
-
         if (searchParams.size === 0) return;
-
 
         const getProjectParts = async () => {
             const projectJSONURL = searchParams.get('project');
@@ -85,12 +83,11 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
                 const text = await tryFetch(projectJSONURL);
                 if (text) {
                     const projectObj = JSON.parse(text);
-                    return { ...defaultRemoteProject, ...projectObj };
+                    return { ...defaultQueries, ...projectObj };
                 } else {
                     alert('Failed to load project from ' + projectJSONURL);
                     return null;
                 }
-
             } else {
                 return {
                     stanURL: searchParams.get('stanURL'),
@@ -101,11 +98,11 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
             }
         }
 
-        getProjectParts().then((remoteProject) => {
-            if (remoteProject) {
+        getProjectParts().then((parts) => {
+            if (parts) {
                 // by setting this here we get a nice history entry in the browser
-                document.title = "Stan Playground" + (remoteProject.title ? ` - ${remoteProject.title}` : '');
-                setProjectParts(remoteProject);
+                document.title = "Stan Playground" + (parts.title ? ` - ${parts.title}` : '');
+                setProjectParts(parts);
                 // clear search params after reading them
                 setSearchParams(new URLSearchParams());
             }
