@@ -12,7 +12,6 @@ from logic.compilation_job_mgmt import (
     get_job_source_file,
     upload_stan_code_file,
 )
-from logic.definitions import CompilationStatus
 from logic.exceptions import (
     StanPlaygroundAlreadyUploaded,
     StanPlaygroundAuthenticationException,
@@ -79,7 +78,7 @@ async def initiate_job(
 ) -> DictResponse:
     check_authorization(authorization, settings.passcode)
     job_id = create_compilation_job(base_dir=settings.job_dir)
-    return {"job_id": job_id, "status": CompilationStatus.INITIATED}
+    return {"job_id": job_id}
 
 
 @app.post("/job/{job_id}/upload/{filename}")
@@ -127,4 +126,4 @@ async def run_job(job_id: str, settings: DependsOnSettings) -> DictResponse:
         timeout=settings.compilation_timeout,
     )
 
-    return {"job_id": job_id, "status": CompilationStatus.COMPLETED}
+    return {"success": True}
