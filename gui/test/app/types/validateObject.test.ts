@@ -8,7 +8,7 @@ describe("validateObject isString", () => {
   ]
 
   expected.map((o): void => {
-    test(`isString returns expected value for ${typeof(o.value)}`, () => {
+    test.concurrent(`isString returns expected value for ${typeof(o.value)}`, () => {
         expect(isString(o.value)).toEqual(o.result);
     })
   })
