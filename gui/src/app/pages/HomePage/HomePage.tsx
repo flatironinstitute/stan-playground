@@ -33,23 +33,22 @@ const tryFetch = async (url: string) => {
 }
 
 const populateFromURLOrLocalStorage = (url: string | null, localStorageKey: string, setter: (s: string) => void, onError: (s: string) => void) => {
-    return () => {
-        if (url) {
-            tryFetch(url).then((text) => {
-                if (text) {
-                    setter(text);
-                } else {
-                    onError(url);
-                }
-            })
-        } else {
-            const storedContent = localStorage.getItem(localStorageKey);
-            if (storedContent) {
-                setter(storedContent);
+    if (url) {
+        tryFetch(url).then((text) => {
+            if (text) {
+                setter(text);
+            } else {
+                onError(url);
             }
+        })
+    } else {
+        const storedContent = localStorage.getItem(localStorageKey);
+        if (storedContent) {
+            setter(storedContent);
         }
-    };
+    }
 }
+
 const defaultMetaContent = '{"title": "Untitled"}'
 const defaultSamplingOptsContent = JSON.stringify(defaultSamplingOpts)
 const initialMetaContent = localStorage.getItem('meta.json') || defaultMetaContent
@@ -62,34 +61,58 @@ type RemoteProject = {
     title: string | null
 }
 
+const defaultRemoteProject: RemoteProject = {
+    stanURL: null,
+    dataURL: null,
+    samplingOptsURL: null,
+    title: null
+}
+
 const HomePage: FunctionComponent<Props> = ({ width, height }) => {
     const [searchParams, setSearchParams] = useSearchParams();
-    const [projectParts, setProjectParts] = useState<RemoteProject>({
-        stanURL: null,
-        dataURL: null,
-        samplingOptsURL: null,
-        title: null
-    });
+    const [projectParts, setProjectParts] = useState(defaultRemoteProject);
     useEffect(() => {
+
         if (searchParams.size === 0) return;
-        const remoteProject: RemoteProject = {
-            stanURL: searchParams.get('stanURL'),
-            dataURL: searchParams.get('dataURL'),
-            samplingOptsURL: searchParams.get('samplingOptsURL'),
-            title: searchParams.get('t')
+
+        const projectJSONURL = searchParams.get('project');
+
+        const getProjectParts = async () => {
+            if (projectJSONURL) {
+                const text = await tryFetch(projectJSONURL);
+                if (text) {
+                    const projectObj = JSON.parse(text);
+                    return { ...defaultRemoteProject, ...projectObj };
+                } else {
+                    alert('Failed to load project from ' + projectJSONURL);
+                    return null;
+                }
+
+            } else {
+                return {
+                    stanURL: searchParams.get('stanURL'),
+                    dataURL: searchParams.get('dataURL'),
+                    samplingOptsURL: searchParams.get('samplingOptsURL'),
+                    title: searchParams.get('t')
+                }
+            }
         }
 
-        // by setting this here we get a nice history entry in the browser
-        document.title = "Stan Playground" + (remoteProject.title ? ` - ${remoteProject.title}` : '');
+        getProjectParts().then((remoteProject) => {
+            if (remoteProject) {
+                // by setting this here we get a nice history entry in the browser
+                document.title = "Stan Playground" + (remoteProject.title ? ` - ${remoteProject.title}` : '');
+                setProjectParts(remoteProject);
+                // clear search params after reading them
+                setSearchParams(new URLSearchParams());
+            }
+        });
 
-        setProjectParts(remoteProject);
-        // clear search params after reading them
-        setSearchParams(new URLSearchParams());
     }, [searchParams, setSearchParams]);
 
 
     const [fileContent, saveFileContent] = useState('');
-    useEffect( // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() =>
         populateFromURLOrLocalStorage(projectParts.stanURL, 'main.stan', saveFileContent, (url) => {
             saveFileContent(`// failed to load stan file from\n// ${url}`);
         })
@@ -104,7 +127,7 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
     }, [fileContent])
 
     const [dataFileContent, saveDataFileContent] = useState('');
-    useEffect( // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() =>
         populateFromURLOrLocalStorage(projectParts.dataURL, 'data.json', saveDataFileContent, (url) => {
             saveDataFileContent(`// failed to load data file from\n// ${url}`);
         }), [projectParts]);
@@ -119,7 +142,7 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
     }, [dataFileContent])
 
     const [samplingOptsContent, setSamplingOptsContent] = useState(initialSamplingOptsContent);
-    useEffect( // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() =>
         populateFromURLOrLocalStorage(projectParts.samplingOptsURL, 'samplingOpts.json', setSamplingOptsContent, (_url) => {
             // TODO indicate error to user
         }
