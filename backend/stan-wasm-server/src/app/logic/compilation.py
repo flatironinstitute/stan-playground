@@ -4,14 +4,18 @@ from pathlib import Path
 from shutil import copy2
 
 from .compilation_job_mgmt import get_job_source_file
-from .exceptions import (StanPlaygroundCompilationException,
-                         StanPlaygroundCompilationTimeoutException)
-from .file_validation.compilation_files import (COMPILATION_OUTPUTS,
-                                                compilation_files_exist)
+from .exceptions import (
+    StanPlaygroundCompilationException,
+    StanPlaygroundCompilationTimeoutException,
+)
+from .file_validation.compilation_files import (
+    COMPILATION_OUTPUTS,
+    compilation_files_exist,
+)
 from .locking import compilation_output_lock, wait_until_free
 
 
-def _compute_stan_program_hash(program_file: Path):
+def _compute_stan_program_hash(program_file: Path) -> str:
     stan_program = program_file.read_text()
     # MAYBE: replace stan_program with a canonical form?
     return sha1(stan_program.encode()).hexdigest()
@@ -24,7 +28,7 @@ def make_canonical_model_dir(src_file: Path, built_model_dir: Path) -> Path:
     return model_dir.absolute()
 
 
-def copy_compiled_files_to_cache(job_dir: Path, model_dir: Path):
+def copy_compiled_files_to_cache(job_dir: Path, model_dir: Path) -> None:
     for file in COMPILATION_OUTPUTS:
         source = job_dir / file
         if not source.exists():
@@ -39,7 +43,9 @@ def copy_compiled_files_to_cache(job_dir: Path, model_dir: Path):
         copy2(job_dir / file, model_dir / file)
 
 
-async def compile_and_cache(*, job_dir: Path, model_dir: Path, tinystan_dir: Path, timeout: int):
+async def compile_and_cache(
+    *, job_dir: Path, model_dir: Path, tinystan_dir: Path, timeout: int
+) -> None:
     if compilation_files_exist(model_dir):
         # if there's a cache hit, make sure any copying is already complete,
         # then return without compiling
@@ -47,7 +53,9 @@ async def compile_and_cache(*, job_dir: Path, model_dir: Path, tinystan_dir: Pat
         return
 
     # otherwise, compile in our job-specific folder
-    await compile_stan_program(job_dir=job_dir, tinystan_dir=tinystan_dir, timeout=timeout)
+    await compile_stan_program(
+        job_dir=job_dir, tinystan_dir=tinystan_dir, timeout=timeout
+    )
 
     # then, try to copy into the cache
     with compilation_output_lock(model_dir) as exclusive:
@@ -66,8 +74,9 @@ async def compile_and_cache(*, job_dir: Path, model_dir: Path, tinystan_dir: Pat
             await wait_until_free(model_dir)
 
 
-
-async def compile_stan_program(*, job_dir: Path, tinystan_dir: Path, timeout: int):
+async def compile_stan_program(
+    *, job_dir: Path, tinystan_dir: Path, timeout: int
+) -> None:
     """
     Compiles the Stan program in the job directory
 
@@ -85,4 +94,6 @@ async def compile_stan_program(*, job_dir: Path, tinystan_dir: Path, timeout: in
         raise StanPlaygroundCompilationTimeoutException()
 
     if process.returncode != 0:
-        raise StanPlaygroundCompilationException(f'Failed to compile model: exit code {process.returncode}')
+        raise StanPlaygroundCompilationException(
+            f"Failed to compile model: exit code {process.returncode}"
+        )

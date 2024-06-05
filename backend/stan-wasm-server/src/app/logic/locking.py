@@ -4,12 +4,12 @@ from pathlib import Path
 from typing import Generator
 
 
-def _get_compilation_lockfile_name(model_dir: Path):
+def _get_compilation_lockfile_name(model_dir: Path) -> Path:
     p = model_dir / "running.txt"
     return p
 
 
-async def wait_until_free(model_dir: Path):
+async def wait_until_free(model_dir: Path) -> None:
     lockfile = _get_compilation_lockfile_name(model_dir)
     while lockfile.is_file():
         await asyncio.sleep(1)
@@ -23,7 +23,7 @@ def compilation_output_lock(model_dir: Path) -> Generator[bool, None, None]:
     """
     lockfile = _get_compilation_lockfile_name(model_dir)
     try:
-        with lockfile.open(mode='x') as file:
+        with lockfile.open(mode="x") as file:
             file.write("locked")
     except FileExistsError:
         yield False
@@ -33,5 +33,3 @@ def compilation_output_lock(model_dir: Path) -> Generator[bool, None, None]:
             yield True
         finally:
             lockfile.unlink()
-
-
