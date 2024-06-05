@@ -75,10 +75,13 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
 
         if (searchParams.size === 0) return;
 
-        const projectJSONURL = searchParams.get('project');
 
         const getProjectParts = async () => {
+            const projectJSONURL = searchParams.get('project');
             if (projectJSONURL) {
+                if (searchParams.has('stanURL') || searchParams.has('dataURL') || searchParams.has('samplingOptsURL') || searchParams.has('t')) {
+                    console.warn('Ignoring individual query components because project URL is set');
+                }
                 const text = await tryFetch(projectJSONURL);
                 if (text) {
                     const projectObj = JSON.parse(text);
