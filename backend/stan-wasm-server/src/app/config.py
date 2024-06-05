@@ -1,3 +1,4 @@
+import logging
 from functools import lru_cache
 from pathlib import Path
 
@@ -22,6 +23,15 @@ class StanWasmServerSettings(BaseSettings):
     tinystan: DirectoryPath = Field(
         validation_alias=AliasChoices("tinystan", "tinystan_dir")
     )
+    log_level: str = "INFO"
+
+    @field_validator("log_level")
+    @classmethod
+    def log_level_is_valid(cls, v: str) -> int:
+        v = v.upper()
+        if v not in ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"):
+            raise ValueError(f"Invalid log level: {v}")
+        return getattr(logging, v)  # type: ignore
 
     @field_validator("tinystan")
     @classmethod

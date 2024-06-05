@@ -53,5 +53,6 @@ COPY stan-wasm-server /stan-wasm-server
 WORKDIR /stan-wasm-server
 
 ENV SWS_PASSCODE=1234
+ENV SWS_LOG_LEVEL=debug
 ENV TINYSTAN_DIR=/app/tinystan
 CMD ["bash", "run.sh"]

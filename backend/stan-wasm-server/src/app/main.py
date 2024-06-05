@@ -1,4 +1,5 @@
-from typing import Annotated, Any, TypeVar
+from contextlib import asynccontextmanager
+from typing import Annotated, Any, AsyncIterator, TypeVar
 
 from config import StanWasmServerSettings, get_settings
 from fastapi import Body, Depends, FastAPI, Header, Request
@@ -25,7 +26,28 @@ from logic.file_validation.compilation_files import COMPILATION_OUTPUTS
 
 DependsOnSettings = Annotated[StanWasmServerSettings, Depends(get_settings)]
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    setup_logger()
+    yield
+
+
+def setup_logger() -> None:
+    import logging
+
+    import uvicorn
+
+    level = get_settings().log_level
+    logger = logging.getLogger()
+    out = logging.StreamHandler()
+    out.setLevel(level)
+    out.setFormatter(uvicorn.logging.DefaultFormatter("%(levelprefix)s %(message)s"))
+    logger.addHandler(out)
+    logger.setLevel(level)
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
