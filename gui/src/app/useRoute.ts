@@ -32,7 +32,7 @@ const useRoute = () => {
         else {
             return {
                 page: 'home',
-                sourceDataUri: p,
+                sourceDataUri: getSourceDataUriFromQuery(query),
                 title: (query.t || '') as string
             }
         }
@@ -41,7 +41,8 @@ const useRoute = () => {
     const setRoute = useCallback((r: Route, replaceHistory?: boolean) => {
         let newQuery = {...query}
         if (r.page === 'home') {
-            newQuery = {p: '/', t: r.title}
+            const q = getQueryFromSourceDataUri(r.sourceDataUri)
+            newQuery = {p: '/', t: r.title, ...q}
         }
         else if (r.page === 'about') {
             newQuery = {p: '/about'}
@@ -99,6 +100,35 @@ const queryToQueryString = (query: { [key: string]: string | string[] }) => {
         }
     }
     return '?' + a.join('&')
+}
+
+const getSourceDataUriFromQuery = (query: { [key: string]: string | string[] }) => {
+    const stan = query['main.stan'] || ''
+    const data = query['data.json'] || ''
+    const samplingOpts = query['sampling_opts.json'] || ''
+    return `main.stan=${stan}&data.json=${data}&sampling_opts.json=${samplingOpts}`
+}
+
+export const getQueryFromSourceDataUri = (sourceDataUri: string): {
+    'main.stan'?: string
+    'data.json'?: string
+    'sampling_opts.json'?: string
+} => {
+    const q: { [key: string]: string } = {}
+    const parts = sourceDataUri.split('&')
+    const names = ['main.stan', 'data.json', 'sampling_opts.json']
+    for (const part of parts) {
+        const [key, value] = part.split('=')
+        if (names.includes(key)) {
+            q[key] = value
+        }
+    }
+    for (const k in q) {
+        if (!q[k]) {
+            delete q[k]
+        }
+    }
+    return q
 }
 
 export default useRoute
