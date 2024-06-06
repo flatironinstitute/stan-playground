@@ -1,8 +1,7 @@
 import { describe, expect, test } from 'vitest';
-import { exportedForTesting } from '../../../src/app/tinystan';
+import { string_safe_jsonify } from '../../../src/app/tinystan/util';
 
 describe("tinystan string_safe_jsonify", () => {
-    const { string_safe_jsonify } = exportedForTesting
     test("string_safe_jsonify does not modify string objects", () => {
         const mystr = "I am a string";
         // toBe: insist on referential equality
@@ -14,6 +13,15 @@ describe("tinystan string_safe_jsonify", () => {
         // toEqual: property equivalence. You probably want to use this one.
         expect(myobj).toEqual(roundTripped);
     })
+    test("repeated string_safe_jsonify calls are idempotent", () => {
+        const myobj = { a: "I'm a string", b: 15 };
+        const stringified = string_safe_jsonify(myobj);
+        const stringifiedTwice = string_safe_jsonify(stringified);
+        expect(stringified).toEqual(stringifiedTwice);
+
+        const roundTripped = JSON.parse(stringified);
+        expect(roundTripped).toEqual(myobj);
+    });
     // testing an exception
     test("string_safe_jsonify returns non-parseable object on string input", () => {
         const notValidJson = "I am a string, do not ask too much of me";
