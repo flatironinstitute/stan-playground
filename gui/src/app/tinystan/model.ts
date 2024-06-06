@@ -97,7 +97,7 @@ export default class StanModel {
     const model = this.m._tinystan_create_model(data_ptr, seed, err_ptr);
     this.m._free(data_ptr);
 
-    if (model == 0) {
+    if (model === 0) {
       this.handleError(err_ptr);
     }
     this.m._free(err_ptr);
@@ -151,7 +151,7 @@ export default class StanModel {
       throw new Error("num_samples must be at least 1");
     }
 
-    const seed_ = seed !== null ? seed : Math.floor(Math.random() * (2 ^ 32));
+    const seed_ = seed ?? Math.floor(Math.random() * (2 ^ 32));
 
     return this.withModel(data, seed_, (model, deferredFree) => {
       // Get the parameter names
