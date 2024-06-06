@@ -16,14 +16,6 @@ const useRoute = () => {
     const query = useMemo(() => (parseSearchString(search)), [search])
     const p = query.p || '/'
     const route: Route = useMemo(() => {
-        if (typeof p !== 'string') {
-            console.warn('Unexpected type for p', typeof p)
-            return {
-                page: 'home',
-                sourceDataUri: '',
-                title: ''
-            }
-        }
         if (p === '/about') {
             return {
                 page: 'about'
@@ -33,7 +25,7 @@ const useRoute = () => {
             return {
                 page: 'home',
                 sourceDataUri: getSourceDataUriFromQuery(query),
-                title: (query.t || '') as string
+                title: decodeURIComponent((query.t || '') as string)
             }
         }
     }, [p, query])
