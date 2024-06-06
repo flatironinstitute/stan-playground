@@ -2,6 +2,7 @@ import { FunctionComponent, PropsWithChildren, useEffect, useMemo, useReducer } 
 import { SPAnalysisContext } from "./SPAnalysisContext"
 import useRoute, { getQueryFromSourceDataUri } from "../useRoute"
 import { defaultSamplingOpts } from "../StanSampler/StanSampler"
+import loadFilesFromGist from "./loadFilesFromGist"
 
 type SetupSPAnalysisProps = {
     sourceDataUri: string
@@ -37,7 +38,7 @@ const analysisFilesReducer = (state: AnalysisFiles, action: AnalysisFilesAction)
 }
 
 const SetupSPAnalysis: FunctionComponent<PropsWithChildren<SetupSPAnalysisProps>> = ({ children }) => {
-    const {route} = useRoute()
+    const {route, setRoute} = useRoute()
     if (route.page !== 'home') {
         throw Error('Unexpected route')
     }
@@ -74,9 +75,31 @@ const SetupSPAnalysis: FunctionComponent<PropsWithChildren<SetupSPAnalysisProps>
         }
     }, [analysisFiles, route.title])
     useEffect(() => {
+        // initialize content based on sourceDataUri
         (async () => {
             const q = getQueryFromSourceDataUri(route.sourceDataUri)
-            if ((q["data.json"]) || (q["main.stan"]) || (q["sampling_opts.json"])) {
+            if (q.f) {
+                if (q.f.startsWith('https://gist.github.com')) {
+                    const {files, description} = await loadFilesFromGist(q.f)
+                    for (const key in files) {
+                        dispatchAnalysisFiles({
+                            type: 'set',
+                            key,
+                            value: files[key]
+                        })
+                    }
+                    if (description) {
+                        setRoute({
+                            ...route,
+                            title: description
+                        })
+                    }
+                }
+                else {
+                    console.warn('Unexpected sourceDataUri', q.f)
+                }
+            }
+            else if ((q["data.json"]) || (q["main.stan"]) || (q["sampling_opts.json"])) {
                 const dataContent = await loadFromUri(q["data.json"]) || ''
                 const stanContent = await loadFromUri(q["main.stan"]) || ''
                 const samplingOptsContent = await loadFromUri(q["sampling_opts.json"]) || ''
@@ -98,7 +121,7 @@ const SetupSPAnalysis: FunctionComponent<PropsWithChildren<SetupSPAnalysisProps>
 
             }
         })()
-    }, [route.sourceDataUri])
+    }, [route.sourceDataUri, setRoute, dispatchAnalysisFiles, route])
     return (
         <SPAnalysisContext.Provider value={value}>
             {children}

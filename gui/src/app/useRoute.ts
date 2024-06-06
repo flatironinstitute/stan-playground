@@ -103,6 +103,9 @@ const queryToQueryString = (query: { [key: string]: string | string[] }) => {
 }
 
 const getSourceDataUriFromQuery = (query: { [key: string]: string | string[] }) => {
+    if (query.f) {
+        return query.f as string
+    }
     const stan = query['main.stan'] || ''
     const data = query['data.json'] || ''
     const samplingOpts = query['sampling_opts.json'] || ''
@@ -110,10 +113,14 @@ const getSourceDataUriFromQuery = (query: { [key: string]: string | string[] }) 
 }
 
 export const getQueryFromSourceDataUri = (sourceDataUri: string): {
+    'f'?: string
     'main.stan'?: string
     'data.json'?: string
     'sampling_opts.json'?: string
 } => {
+    if ((sourceDataUri.startsWith('https://')) || (sourceDataUri.startsWith('http://'))) {
+        return {f: sourceDataUri}
+    }
     const q: { [key: string]: string } = {}
     const parts = sourceDataUri.split('&')
     const names = ['main.stan', 'data.json', 'sampling_opts.json']
