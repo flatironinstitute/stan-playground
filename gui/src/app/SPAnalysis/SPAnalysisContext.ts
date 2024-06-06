@@ -11,6 +11,8 @@ export type SPAnalysisDataModel = {
 }
 
 type SPAnalysisContextType = {
+    sourceAnalysisFiles: {[key: string]: string}
+    localAnalysisFiles: {[key: string]: string}
     localDataModel: SPAnalysisDataModel
 }
 

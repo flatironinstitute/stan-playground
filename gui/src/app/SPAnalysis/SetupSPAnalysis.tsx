@@ -1,4 +1,4 @@
-import { FunctionComponent, PropsWithChildren, useEffect, useMemo, useReducer } from "react"
+import { FunctionComponent, PropsWithChildren, useEffect, useMemo, useReducer, useState } from "react"
 import { SPAnalysisContext } from "./SPAnalysisContext"
 import useRoute, { getQueryFromSourceDataUri } from "../useRoute"
 import { defaultSamplingOpts } from "../StanSampler/StanSampler"
@@ -42,51 +42,51 @@ const SetupSPAnalysis: FunctionComponent<PropsWithChildren<SetupSPAnalysisProps>
     if (route.page !== 'home') {
         throw Error('Unexpected route')
     }
-    const [analysisFiles, dispatchAnalysisFiles] = useReducer(analysisFilesReducer, {})
+    const [sourceAnalysisFiles, setSourceAnalysisFiles] = useState<AnalysisFiles>({})
+    const [localAnalysisFiles, localAnalysisFilesDispatch] = useReducer(analysisFilesReducer, {})
     const value = useMemo(() => {
         return {
             localDataModel: {
                 title: route.title,
-                stanFileContent: analysisFiles['main.stan'] || '',
+                stanFileContent: localAnalysisFiles['main.stan'] || '',
                 setStanFileContent: (text: string) => {
-                    dispatchAnalysisFiles({
+                    localAnalysisFilesDispatch({
                         type: 'set',
                         key: 'main.stan',
                         value: text
                     })
                 },
-                dataFileContent: analysisFiles['data.json'] || '',
+                dataFileContent: localAnalysisFiles['data.json'] || '',
                 setDataFileContent: (text: string) => {
-                    dispatchAnalysisFiles({
+                    localAnalysisFilesDispatch({
                         type: 'set',
                         key: 'data.json',
                         value: text
                     })
                 },
-                samplingOptsContent: analysisFiles['sampling_opts.json'] || JSON.stringify(defaultSamplingOpts, null, 2),
+                samplingOptsContent: localAnalysisFiles['sampling_opts.json'] || JSON.stringify(defaultSamplingOpts, null, 2),
                 setSamplingOptsContent: (text: string) => {
-                    dispatchAnalysisFiles({
+                    localAnalysisFilesDispatch({
                         type: 'set',
                         key: 'sampling_opts.json',
                         value: text
                     })
                 }
-            }
+            },
+            sourceAnalysisFiles,
+            localAnalysisFiles
         }
-    }, [analysisFiles, route.title])
+    }, [localAnalysisFiles, route.title, sourceAnalysisFiles])
     useEffect(() => {
         // initialize content based on sourceDataUri
         (async () => {
             const q = getQueryFromSourceDataUri(route.sourceDataUri)
+            const analysisFiles: AnalysisFiles = {}
             if (q.f) {
                 if (q.f.startsWith('https://gist.github.com')) {
                     const {files, description} = await loadFilesFromGist(q.f)
                     for (const key in files) {
-                        dispatchAnalysisFiles({
-                            type: 'set',
-                            key,
-                            value: files[key]
-                        })
+                        analysisFiles[key] = files[key]
                     }
                     if (description) {
                         setRoute({
@@ -103,25 +103,20 @@ const SetupSPAnalysis: FunctionComponent<PropsWithChildren<SetupSPAnalysisProps>
                 const dataContent = await loadFromUri(q["data.json"]) || ''
                 const stanContent = await loadFromUri(q["main.stan"]) || ''
                 const samplingOptsContent = await loadFromUri(q["sampling_opts.json"]) || ''
-                dispatchAnalysisFiles({
+                analysisFiles['data.json'] = dataContent
+                analysisFiles['main.stan'] = stanContent
+                analysisFiles['sampling_opts.json'] = samplingOptsContent
+            }
+            setSourceAnalysisFiles(analysisFiles)
+            for (const key in analysisFiles) {
+                localAnalysisFilesDispatch({
                     type: 'set',
-                    key: 'data.json',
-                    value: dataContent
+                    key,
+                    value: analysisFiles[key]
                 })
-                dispatchAnalysisFiles({
-                    type: 'set',
-                    key: 'main.stan',
-                    value: stanContent
-                })
-                dispatchAnalysisFiles({
-                    type: 'set',
-                    key: 'sampling_opts.json',
-                    value: samplingOptsContent
-                })
-
             }
         })()
-    }, [route.sourceDataUri, setRoute, dispatchAnalysisFiles, route])
+    }, [route.sourceDataUri, setRoute, localAnalysisFilesDispatch, route])
     return (
         <SPAnalysisContext.Provider value={value}>
             {children}
