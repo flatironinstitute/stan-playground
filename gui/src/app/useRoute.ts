@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom"
 
 export type Route = {
     page: 'home'
+    sourceDataUri: string
+    title: string
 } | {
     page: 'about'
 }
@@ -17,7 +19,9 @@ const useRoute = () => {
         if (typeof p !== 'string') {
             console.warn('Unexpected type for p', typeof p)
             return {
-                page: 'home'
+                page: 'home',
+                sourceDataUri: '',
+                title: ''
             }
         }
         if (p === '/about') {
@@ -27,15 +31,17 @@ const useRoute = () => {
         }
         else {
             return {
-                page: 'home'
+                page: 'home',
+                sourceDataUri: p,
+                title: (query.t || '') as string
             }
         }
-    }, [p])
+    }, [p, query])
 
     const setRoute = useCallback((r: Route, replaceHistory?: boolean) => {
         let newQuery = {...query}
         if (r.page === 'home') {
-            newQuery = {p: '/'}
+            newQuery = {p: '/', t: r.title}
         }
         else if (r.page === 'about') {
             newQuery = {p: '/about'}

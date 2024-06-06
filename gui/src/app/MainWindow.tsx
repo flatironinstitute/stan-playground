@@ -1,6 +1,5 @@
 import { useWindowDimensions } from "@fi-sci/misc";
 import { FunctionComponent } from "react";
-import ApplicationBar, { applicationBarHeight } from "./ApplicationBar";
 import StatusBar, { statusBarHeight } from "./StatusBar";
 import HomePage from "./pages/HomePage/HomePage";
 import useRoute from "./useRoute";
@@ -12,13 +11,10 @@ type Props = {
 const MainWindow: FunctionComponent<Props> = () => {
     const {route} = useRoute()
     const {width, height} = useWindowDimensions()
-    const H = height - applicationBarHeight - statusBarHeight
+    const H = height - statusBarHeight
     return (
         <div className="MainWindow" style={{position: 'absolute', width, height, overflow: 'hidden'}}>
-            <div className="MainWindowApplicationBar" style={{position: 'absolute', width, height: applicationBarHeight, overflow: 'hidden'}}>
-                <ApplicationBar />
-            </div>
-            <div className="MainWindowContent" style={{position: 'absolute', top: applicationBarHeight, width, height: H, overflow: 'hidden'}}>
+            <div className="MainWindowContent" style={{position: 'absolute', top: 0, width, height: H, overflow: 'hidden'}}>
                 {
                     route.page === 'home' ? (
                         <HomePage width={width} height={H} />
