@@ -1,6 +1,6 @@
 import { expect, onTestFinished } from "vitest";
 import StanModel from "../../../../src/app/tinystan";
-import { soakingPrintCallback } from "../../../../src/app/tinystan/util";
+import { printCallbackSponge } from "../../../../src/app/tinystan/util";
 import { ModuleSettings, MockedModule, mockModule } from "./WasmModule";
 
 export const getMockedModel = async (p: Partial<ModuleSettings>) => {
@@ -9,7 +9,7 @@ export const getMockedModel = async (p: Partial<ModuleSettings>) => {
     expect(mockedModule).toHaveNoMemoryLeaks();
   });
 
-  const { printCallback, getStdout, clearStdout } = soakingPrintCallback();
+  const { printCallback, getStdout, clearStdout } = printCallbackSponge();
   const model = await StanModel.load(async (_) => mockedModule, printCallback);
 
   return { mockedModule, model, getStdout, clearStdout };

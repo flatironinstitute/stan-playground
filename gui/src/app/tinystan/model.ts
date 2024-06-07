@@ -1,4 +1,4 @@
-import { string_safe_jsonify } from "./util";
+import { prepareStanJSON } from "./util";
 import {
   HMC_SAMPLER_VARIABLES,
   PATHFINDER_VARIABLES,
@@ -74,10 +74,10 @@ export default class StanModel {
   ): cstr {
     if (Array.isArray(inits)) {
       return this.encodeString(
-        inits.map((i) => string_safe_jsonify(i)).join(this.sep),
+        inits.map((i) => prepareStanJSON(i)).join(this.sep),
       );
     } else {
-      return this.encodeString(string_safe_jsonify(inits));
+      return this.encodeString(prepareStanJSON(inits));
     }
   }
 
@@ -98,7 +98,7 @@ export default class StanModel {
     seed: number,
     f: (model: model_ptr, deferredFree: (p: ptr | cstr) => void) => T,
   ): T {
-    const data_ptr = this.encodeString(string_safe_jsonify(data));
+    const data_ptr = this.encodeString(prepareStanJSON(data));
     const err_ptr = this.m._malloc(PTR_SIZE);
     const model = this.m._tinystan_create_model(data_ptr, seed, err_ptr);
     this.m._free(data_ptr);

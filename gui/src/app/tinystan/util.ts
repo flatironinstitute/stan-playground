@@ -1,6 +1,9 @@
-import { PrintCallback } from "./types";
+import { PrintCallback, StanVariableInputs } from "./types";
 
-export const string_safe_jsonify = (obj: string | unknown): string => {
+// Stan expects a JSON object ("{ ... }") at the top level.
+// If the input is already a string, e.g. it came from a textarea,
+// we just return it as is.
+export const prepareStanJSON = (obj: string | StanVariableInputs): string => {
   if (typeof obj === "string") {
     return obj;
   } else {
@@ -8,7 +11,8 @@ export const string_safe_jsonify = (obj: string | unknown): string => {
   }
 };
 
-export const soakingPrintCallback = (): {
+// A printCallback that "soaks up" all the printed text.
+export const printCallbackSponge = (): {
   printCallback: PrintCallback;
   getStdout: () => string;
   clearStdout: () => void;
