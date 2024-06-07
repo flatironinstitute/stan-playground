@@ -44,7 +44,7 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
             setCompileMessage(msg)
         }
         const stanWasmServerUrl = localStorage.getItem('stanWasmServerUrl') || 'https://trom-stan-wasm-server.magland.org'
-        const { mainJsUrl, jobId } = await compileStanProgram(stanWasmServerUrl, fileContent, onStatus)
+        const { mainJsUrl } = await compileStanProgram(stanWasmServerUrl, fileContent, onStatus)
 
         if (!mainJsUrl) {
             setCompileStatus('failed')
@@ -55,16 +55,14 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
         setTheStanFileContentThasHasBeenCompiled(fileContent)
 
         // record in local storage that we compiled this particular stan file
-        if (jobId) {
-            try {
-                const key = getKeyNameForCompiledFile(stanWasmServerUrl, fileContent)
-                const value = JSON.stringify({ jobId, mainJsUrl })
-                localStorage.setItem(key, value)
-            }
-            catch (e: any) {
-                console.error('Problem recording compiled file in local storage')
-                console.error(e)
-            }
+        try {
+            const key = getKeyNameForCompiledFile(stanWasmServerUrl, fileContent)
+            const value = JSON.stringify({ mainJsUrl })
+            localStorage.setItem(key, value)
+        }
+        catch (e: any) {
+            console.error('Problem recording compiled file in local storage')
+            console.error(e)
         }
     }, [fileContent, setCompiledUrl])
 
@@ -144,7 +142,7 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
         <Splitter
             width={width}
             height={height}
-            initialPosition={height  - compileResultsHeight}
+            initialPosition={height - compileResultsHeight}
             direction="vertical"
         >
             <TextEditor
