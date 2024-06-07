@@ -1,5 +1,5 @@
 import { Splitter } from '@fi-sci/splitter';
-import { AutoFixHigh, Settings, } from "@mui/icons-material";
+import { AutoFixHigh, Cancel, Settings, } from "@mui/icons-material";
 import { FunctionComponent, useCallback, useEffect, useMemo, useState } from "react";
 import StanCompileResultWindow from "./StanCompileResultWindow";
 import TextEditor, { ToolbarItem } from "./TextEditor";
@@ -95,8 +95,23 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
         }
     }, [fileContent, handleCompile, didInitialCompile])
 
+    const showLabelsOnButtons = width > 700
+    const [syntaxWindowVisible, setSyntaxWindowVisible] = useState(false)
+
     const toolbarItems: ToolbarItem[] = useMemo(() => {
         const ret: ToolbarItem[] = []
+
+        // valid syntax
+        if (!validSyntax) {
+            ret.push({
+                type: 'button',
+                icon: <Cancel />,
+                label: showLabelsOnButtons ? 'Syntax error' : '',
+                color: 'darkred',
+                tooltip: 'Syntax error in Stan file',
+                onClick: () => { setSyntaxWindowVisible(true) }
+            })
+        }
 
         // auto format
         if (!readOnly) {
@@ -105,7 +120,7 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
                     type: 'button',
                     icon: <AutoFixHigh />,
                     tooltip: 'Auto format this stan file',
-                    label: 'auto format',
+                    label: showLabelsOnButtons ? 'auto format' : '',
                     onClick: handleAutoFormat,
                     color: 'darkblue'
                 })
@@ -134,11 +149,13 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
         }
 
         return ret
-    }, [editedFileContent, fileContent, handleAutoFormat, handleCompile, compileStatus, compileMessage, validSyntax, readOnly])
+    }, [editedFileContent, fileContent, handleAutoFormat, handleCompile, compileStatus, compileMessage, validSyntax, readOnly, showLabelsOnButtons])
 
     const isCompiling = compileStatus === 'compiling'
 
     const compileResultsHeight = Math.min(300, height / 3)
+
+    console.log('syntaxWindowVisible', syntaxWindowVisible)
 
     return (
         <Splitter
@@ -161,12 +178,17 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
                 toolbarItems={toolbarItems}
             />
             {
-                editedFileContent ? <StanCompileResultWindow
-                    width={0}
-                    height={0}
-                    mainStanText={editedFileContent}
-                    onValidityChanged={valid => setValidSyntax(valid)}
-                /> : (
+                editedFileContent ? (
+                    syntaxWindowVisible ? (
+                        <StanCompileResultWindow
+                            width={0}
+                            height={0}
+                            mainStanText={editedFileContent}
+                            onValidityChanged={valid => setValidSyntax(valid)}
+                            onClose={() => setSyntaxWindowVisible(false)}
+                        />
+                    ) : undefined
+                ) : (
                     <div style={{ padding: 20 }}>Select an example from the left panel</div>
                 )
             }

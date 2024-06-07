@@ -186,7 +186,7 @@ const ToolbarItemComponent: FunctionComponent<{item: ToolbarItem}> = ({item}) =>
         const {onClick, color, label, tooltip, icon} = item
         if (icon) {
             return (
-                <span>
+                <span style={{color}}>
                 <SmallIconButton
                     onClick={onClick}
                     icon={icon}
