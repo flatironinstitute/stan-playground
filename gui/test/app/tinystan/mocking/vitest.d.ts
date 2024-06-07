@@ -1,7 +1,7 @@
 // see https://vitest.dev/guide/extending-matchers.html
 import type { Assertion, AsymmetricMatchersContaining } from "vitest";
 
-interface CustomMatchers<R = MockedModule> {
+interface CustomMatchers<R = undefined> {
   toHaveNoMemoryLeaks: () => R;
 }
 declare module "vitest" {

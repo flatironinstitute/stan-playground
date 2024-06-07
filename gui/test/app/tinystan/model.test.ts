@@ -1,6 +1,10 @@
 import { describe, expect, test } from "vitest";
 import { getMockedModel } from "./mocking/WASMModule";
 import { HMCMetric } from "../../../src/app/tinystan/types";
+import {
+  HMC_SAMPLER_VARIABLES,
+  PATHFINDER_VARIABLES,
+} from "../../../src/app/tinystan/constants";
 
 describe("test tinystan code with a mocked WASM module", () => {
   test("version returns and doesn't leak", async () => {
@@ -115,10 +119,14 @@ describe("test tinystan code with a mocked WASM module", () => {
       const num_chains = 3;
       const num_samples = 5;
       const num_warmup = 7;
-      const N_PARAMS = 9; // 7 from HMC, a and b
+      const N_PARAMS = HMC_SAMPLER_VARIABLES.length + 2;
 
+      // Two cases:
+      // 1. save_warmup = false
+      //    - draws is num_params x (num_chains * num_samples)
+      // 2. save_warmup = true
+      //    - draws is num_params x (num_chains * (num_samples + num_warmup))
       {
-        // not saving warmup
         const { draws, paramNames } = model.sample({
           num_chains,
           num_samples,
@@ -136,13 +144,10 @@ describe("test tinystan code with a mocked WASM module", () => {
           expect(d.length).toEqual(num_chains * num_samples),
         );
 
-        // ensure we are reading out of the heap in the expected order
-        expect(draws[8][0]).toEqual(draws[7][0] + 1);
-        expect(draws[8][1]).toEqual(draws[8][0] + N_PARAMS);
+        expectColumnMajor(draws, N_PARAMS, num_chains * num_samples);
       }
 
       {
-        // save warmup
         const { draws, paramNames } = model.sample({
           num_chains,
           num_samples,
@@ -159,9 +164,11 @@ describe("test tinystan code with a mocked WASM module", () => {
           expect(d.length).toEqual(num_chains * (num_samples + num_warmup)),
         );
 
-        // ensure we are reading out of the heap in the expected order
-        expect(draws[8][0]).toEqual(draws[7][0] + 1);
-        expect(draws[8][1]).toEqual(draws[8][0] + N_PARAMS);
+        expectColumnMajor(
+          draws,
+          N_PARAMS,
+          num_chains * (num_samples + num_warmup),
+        );
       }
 
       expect(mockedModule).toHaveNoMemoryLeaks();
@@ -186,6 +193,7 @@ describe("test tinystan code with a mocked WASM module", () => {
         metric = metric as number[][];
 
         // ensure we are reading out of the heap in the expected order
+        // see comment on expectColumnMajor for overview
         expect(metric[0][1]).toEqual(metric[0][0] + 1);
         expect(metric[1][0]).toEqual(metric[0][0] + numParams);
       }
@@ -205,6 +213,7 @@ describe("test tinystan code with a mocked WASM module", () => {
         expect(metric?.[0][0].length).toEqual(numParams);
 
         // ensure we are reading out of the heap in the expected order
+        // see comment on expectColumnMajor for overview
         expect(metric[0][0][1]).toEqual(metric[0][0][0] + 1);
         expect(metric[0][1][0]).toEqual(metric[0][0][0] + numParams);
         expect(metric[1][0][0]).toEqual(
@@ -312,10 +321,18 @@ describe("test tinystan code with a mocked WASM module", () => {
       const num_paths = 3;
       const num_draws = 5;
       const num_multi_draws = 7;
-      const N_PARAMS = 4; // 2 from pathfinder, a and b
+      const N_PARAMS = PATHFINDER_VARIABLES.length + 2;
 
+      // Three cases:
+      // 1. psis_resample = true, calculate_lp = true
+      //    - draws is num_params x num_multi_draws
+      // the following two are the same, as not calculating lp
+      // implies we cannot resample
+      // 2. psis_resample = false, , calculate_lp = true
+      //    - draws is num_params x (num_draws * num_paths)
+      // 3. calculate_lp = false
+      //    - draws is num_params x (num_draws * num_paths)
       {
-        // psis_resample = true
         const { draws, paramNames } = model.pathfinder({
           num_paths,
           num_draws,
@@ -329,13 +346,10 @@ describe("test tinystan code with a mocked WASM module", () => {
         expect(draws.length).toEqual(N_PARAMS);
         draws.forEach((d) => expect(d.length).toEqual(num_multi_draws));
 
-        // ensure we are reading out of the heap in the expected order
-        expect(draws[3][0]).toEqual(draws[2][0] + 1);
-        expect(draws[3][1]).toEqual(draws[3][0] + N_PARAMS);
+        expectColumnMajor(draws, N_PARAMS, num_multi_draws);
       }
 
       {
-        // psis_resample = false
         const { draws, paramNames } = model.pathfinder({
           num_paths,
           num_draws,
@@ -350,13 +364,10 @@ describe("test tinystan code with a mocked WASM module", () => {
         expect(draws.length).toEqual(N_PARAMS);
         draws.forEach((d) => expect(d.length).toEqual(num_draws * num_paths));
 
-        // ensure we are reading out of the heap in the expected order
-        expect(draws[3][0]).toEqual(draws[2][0] + 1);
-        expect(draws[3][1]).toEqual(draws[3][0] + N_PARAMS);
+        expectColumnMajor(draws, N_PARAMS, num_draws * num_paths);
       }
 
       {
-        // psis_resample = false
         const { draws, paramNames } = model.pathfinder({
           num_paths,
           num_draws,
@@ -371,9 +382,7 @@ describe("test tinystan code with a mocked WASM module", () => {
         expect(draws.length).toEqual(N_PARAMS);
         draws.forEach((d) => expect(d.length).toEqual(num_draws * num_paths));
 
-        // ensure we are reading out of the heap in the expected order
-        expect(draws[3][0]).toEqual(draws[2][0] + 1);
-        expect(draws[3][1]).toEqual(draws[3][0] + N_PARAMS);
+        expectColumnMajor(draws, N_PARAMS, num_draws * num_paths);
       }
 
       expect(mockedModule).toHaveNoMemoryLeaks();
@@ -406,3 +415,29 @@ describe("test tinystan code with a mocked WASM module", () => {
     });
   });
 });
+
+// By construction, our mocked heap has consecutive integer
+// values.
+// In real Stan, the draws are written out row-major order,
+// but we return a parameter-wise (column-major) array.
+// So, this tests that the same draw (row) from adjacent
+// parameters was taken from adjacent memory, and that the
+// next draw was from 'cols' away in memory
+//
+// Example:
+// HEAP:
+// 1 2 3 4 5 6 7 8 9 10 11 12
+// 4x3 OUTPUT:
+// [[1 4 7 10] [2 5 8 11] [3 6 9 12]]
+function expectColumnMajor(draws: number[][], cols: number, rows: number) {
+  for (let i = 0; i < cols - 1; i++) {
+    for (let j = 0; j < rows - 1; j++) {
+      // the following parameter is the previous parameter + 1
+      expect(draws[i + 1][j]).toEqual(draws[i][j] + 1);
+
+      // the following draw for a given parameter is the previous
+      // parameter + cols
+      expect(draws[i][j + 1]).toEqual(draws[i][j] + cols);
+    }
+  }
+}

@@ -33,7 +33,7 @@ const mockModule = (p: Partial<ModuleSettings>) => {
     ...p,
   };
 
-  let malloc_base = 2;
+  let malloc_base = 1;
 
   const module = {
     // malloc returns unique number - useful for checking leaks
