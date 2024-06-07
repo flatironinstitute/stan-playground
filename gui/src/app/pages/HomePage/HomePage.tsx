@@ -121,27 +121,27 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
                     direction="horizontal"
                     initialPosition={Math.min(800, (width - leftPanelWidth) / 2)}
                 >
-                    <StanFileEditor
+                    <LeftView
                         width={0}
                         height={0}
-                        fileName="main.stan"
-                        fileContent={stanFileContent}
-                        onSaveContent={saveStanFileContent}
-                        editedFileContent={editedStanFileContent}
-                        setEditedFileContent={setEditedStanFileContent}
-                        readOnly={false}
-                        setCompiledUrl={setCompiledMainJsUrl}
+                        stanFileContent={stanFileContent}
+                        saveStanFileContent={saveStanFileContent}
+                        editedStanFileContent={editedStanFileContent}
+                        setEditedStanFileContent={setEditedStanFileContent}
+                        setCompiledMainJsUrl={setCompiledMainJsUrl}
+                        dataFileContent={dataFileContent}
+                        saveDataFileContent={saveDataFileContent}
+                        editedDataFileContent={editedDataFileContent}
+                        setEditedDataFileContent={setEditedDataFileContent}
                     />
                     <RightView
                         width={0}
                         height={0}
                         dataFileContent={dataFileContent}
-                        saveDataFileContent={saveDataFileContent}
-                        editedDataFileContent={editedDataFileContent}
-                        setEditedDataFileContent={setEditedDataFileContent}
                         compiledMainJsUrl={compiledMainJsUrl}
                         samplingOpts={samplingOpts}
                         setSamplingOpts={setSamplingOpts}
+                        dataIsSaved={dataFileContent === editedDataFileContent}
                     />
                 </Splitter>
             </div>
@@ -149,26 +149,39 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
     )
 }
 
-type RightViewProps = {
+type LeftViewProps = {
     width: number
     height: number
+    stanFileContent: string
+    saveStanFileContent: (text: string) => void
+    editedStanFileContent: string
+    setEditedStanFileContent: (text: string) => void
+    setCompiledMainJsUrl: (url: string) => void
     dataFileContent: string
     saveDataFileContent: (text: string) => void
     editedDataFileContent: string
     setEditedDataFileContent: (text: string) => void
-    compiledMainJsUrl?: string
-    samplingOpts: SamplingOpts
-    setSamplingOpts: (opts: SamplingOpts) => void
 }
 
-const RightView: FunctionComponent<RightViewProps> = ({ width, height, dataFileContent, saveDataFileContent, editedDataFileContent, setEditedDataFileContent, compiledMainJsUrl, samplingOpts, setSamplingOpts }) => {
+const LeftView: FunctionComponent<LeftViewProps> = ({ width, height, stanFileContent, saveStanFileContent, editedStanFileContent, setEditedStanFileContent, setCompiledMainJsUrl, dataFileContent, saveDataFileContent, editedDataFileContent, setEditedDataFileContent }) => {
     return (
         <Splitter
             direction="vertical"
             width={width}
             height={height}
-            initialPosition={height / 3}
+            initialPosition={2 * height / 3}
         >
+            <StanFileEditor
+                width={0}
+                height={0}
+                fileName="main.stan"
+                fileContent={stanFileContent}
+                onSaveContent={saveStanFileContent}
+                editedFileContent={editedStanFileContent}
+                setEditedFileContent={setEditedStanFileContent}
+                readOnly={false}
+                setCompiledUrl={setCompiledMainJsUrl}
+            />
             <DataFileEditor
                 width={0}
                 height={0}
@@ -179,20 +192,11 @@ const RightView: FunctionComponent<RightViewProps> = ({ width, height, dataFileC
                 setEditedFileContent={setEditedDataFileContent}
                 readOnly={false}
             />
-            <LowerRightView
-                width={0}
-                height={0}
-                compiledMainJsUrl={compiledMainJsUrl}
-                dataFileContent={dataFileContent}
-                dataIsSaved={dataFileContent === editedDataFileContent}
-                samplingOpts={samplingOpts}
-                setSamplingOpts={setSamplingOpts}
-            />
         </Splitter>
     )
 }
 
-type LowerRightViewProps = {
+type RightViewProps = {
     width: number
     height: number
     compiledMainJsUrl?: string
@@ -202,7 +206,7 @@ type LowerRightViewProps = {
     setSamplingOpts: (opts: SamplingOpts) => void
 }
 
-const LowerRightView: FunctionComponent<LowerRightViewProps> = ({ width, height, compiledMainJsUrl, dataFileContent, dataIsSaved, samplingOpts, setSamplingOpts }) => {
+const RightView: FunctionComponent<RightViewProps> = ({ width, height, compiledMainJsUrl, dataFileContent, dataIsSaved, samplingOpts, setSamplingOpts }) => {
     const parsedData = useMemo(() => {
         try {
             return JSON.parse(dataFileContent)
