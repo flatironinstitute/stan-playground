@@ -580,3 +580,8 @@ const string_safe_jsonify = (obj: string | unknown): string => {
     return JSON.stringify(obj);
   }
 };
+
+
+export const exportedForTesting = {
+    string_safe_jsonify
+}
