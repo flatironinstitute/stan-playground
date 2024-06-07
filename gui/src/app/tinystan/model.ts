@@ -54,11 +54,17 @@ export default class StanModel {
     return ptr;
   }
 
-  private handleError(err_ptr: ptr): void {
+  private handleError(rc: number | boolean, err_ptr: ptr): void {
+    if (rc == 0) {
+      this.m._free(err_ptr);
+      return;
+    }
+
     const err = this.m.getValue(err_ptr, "*") as error_ptr;
     const err_msg_ptr = this.m._tinystan_get_error_message(err);
     const err_msg = "Exception from Stan:\n" + this.m.UTF8ToString(err_msg_ptr);
     this.m._tinystan_destroy_error(err);
+    this.m._free(err_ptr);
     this.printCallback?.(err_msg);
     throw new Error(err_msg);
   }
@@ -97,10 +103,7 @@ export default class StanModel {
     const model = this.m._tinystan_create_model(data_ptr, seed, err_ptr);
     this.m._free(data_ptr);
 
-    if (model === 0) {
-      this.handleError(err_ptr);
-    }
-    this.m._free(err_ptr);
+    this.handleError(model === 0, err_ptr);
 
     const ptrs: (ptr | cstr)[] = [];
     const deferredFree = (p: ptr | cstr) => ptrs.push(p);
@@ -198,14 +201,13 @@ export default class StanModel {
       deferredFree(out_ptr);
 
       const err_ptr = this.m._malloc(PTR_SIZE);
-      deferredFree(err_ptr);
 
       // Sample from the model
       const result = this.m._tinystan_sample(
         model,
         num_chains,
         inits_ptr,
-        seed_ || 0,
+        seed_,
         id,
         init_radius,
         num_warmup,
@@ -232,9 +234,7 @@ export default class StanModel {
         err_ptr,
       );
 
-      if (result != 0) {
-        this.handleError(err_ptr);
-      }
+      this.handleError(result, err_ptr);
 
       const out_buffer = this.m.HEAPF64.subarray(
         out_ptr / Float64Array.BYTES_PER_ELEMENT,
@@ -246,7 +246,7 @@ export default class StanModel {
         Array.from({ length: n_draws }, (_, j) => out_buffer[i + n_params * j]),
       );
 
-      let metric_array: number[][] | number[][][] | null = null;
+      let metric_array: number[][] | number[][][] | undefined;
 
       if (save_metric) {
         if (metric === HMCMetric.DENSE) {
@@ -346,13 +346,12 @@ export default class StanModel {
       const out = this.m._malloc(n_out * Float64Array.BYTES_PER_ELEMENT);
       deferredFree(out);
       const err_ptr = this.m._malloc(PTR_SIZE);
-      deferredFree(err_ptr);
 
       const result = this.m._tinystan_pathfinder(
         model,
         num_paths,
         inits_ptr,
-        seed_ || 0,
+        seed_,
         id,
         init_radius,
         num_draws,
@@ -374,10 +373,7 @@ export default class StanModel {
         n_out,
         err_ptr,
       );
-
-      if (result != 0) {
-        this.handleError(err_ptr);
-      }
+      this.handleError(result, err_ptr);
 
       const out_buffer = this.m.HEAPF64.subarray(
         out / Float64Array.BYTES_PER_ELEMENT,

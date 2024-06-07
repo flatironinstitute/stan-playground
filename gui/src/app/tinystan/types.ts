@@ -11,6 +11,7 @@ export enum HMCMetric {
 export type StanDraws = {
   paramNames: string[];
   draws: number[][];
+  metric?: number[][] | number[][][];
 };
 
 export interface SamplerParams {
@@ -95,17 +96,17 @@ interface WasmModule {
   _tinystan_separator_char(): number;
   // prettier-ignore
   _tinystan_sample(model: model_ptr, num_chains: number, inits: cstr, seed: number, id: number,
-        init_radius: number, num_warmup: number, num_samples: number, metric: number, init_inv_metric: ptr,
-        adapt: number, delta: number, gamma: number, kappa: number, t0: number, init_buffer: number,
-        term_buffer: number, window: number, save_warmup: number, stepsize: number, stepsize_jitter: number,
-        max_depth: number, refresh: number, num_threads: number, out: ptr, out_size: number, metric_out: ptr,
-        err_ptr: ptr): number;
+    init_radius: number, num_warmup: number, num_samples: number, metric: number, init_inv_metric: ptr,
+    adapt: number, delta: number, gamma: number, kappa: number, t0: number, init_buffer: number,
+    term_buffer: number, window: number, save_warmup: number, stepsize: number, stepsize_jitter: number,
+    max_depth: number, refresh: number, num_threads: number, out: ptr, out_size: number, metric_out: ptr,
+    err_ptr: ptr): number;
   // prettier-ignore
   _tinystan_pathfinder(model: model_ptr, num_paths: number, inits: cstr, seed: number, id: number,
-        init_radius: number, num_draws: number, max_history_size: number, init_alpha: number, tol_obj: number,
-        tol_rel_obj: number, tol_grad: number, tol_rel_grad: number, tol_param: number, num_iterations: number,
-        num_elbo_draws: number, num_multi_draws: number, calculate_lp: number, psis_resample: number,
-        refresh: number, num_threads: number, out: ptr, out_size: number, err_ptr: ptr): number;
+    init_radius: number, num_draws: number, max_history_size: number, init_alpha: number, tol_obj: number,
+    tol_rel_obj: number, tol_grad: number, tol_rel_grad: number, tol_param: number, num_iterations: number,
+    num_elbo_draws: number, num_multi_draws: number, calculate_lp: number, psis_resample: number,
+    refresh: number, num_threads: number, out: ptr, out_size: number, err_ptr: ptr): number;
   _tinystan_get_error_message(err_ptr: error_ptr): cstr;
   _tinystan_get_error_type(err_ptr: error_ptr): number;
   _tinystan_destroy_error(err_ptr: error_ptr): void;

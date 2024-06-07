@@ -2,6 +2,7 @@ import { expect, vi } from "vitest";
 
 import type { internalTypes } from "../../../../src/app/tinystan/types";
 import StanModel from "../../../../src/app/tinystan";
+import { soakingPrintCallback } from "../../../../src/app/tinystan/util";
 type ptr = internalTypes["ptr"];
 type model_ptr = internalTypes["model_ptr"];
 type cstr = internalTypes["cstr"];
@@ -10,22 +11,24 @@ export type ModuleSettings = {
   returnCode: number;
   numParams: number;
   paramNames: string;
+  modelFails?: boolean;
 };
 
 const defaultModuleSettings: ModuleSettings = {
   returnCode: 0,
   numParams: 3,
   paramNames: "foo,bar,baz",
+  modelFails: false,
 };
 
 // 128MB heap, filled with increasing numbers
-const fakeHeap = new Float64Array(128 * 1024 * 1024);
+const fakeHeap = new Float64Array(16 * 1024 * 1024);
 for (let i = 0; i < fakeHeap.length; i++) {
   fakeHeap[i] = i;
 }
 
 const mockModule = (p: Partial<ModuleSettings>) => {
-  const { returnCode, numParams, paramNames } = {
+  const { returnCode, numParams, paramNames, modelFails } = {
     ...defaultModuleSettings,
     ...p,
   };
@@ -34,19 +37,20 @@ const mockModule = (p: Partial<ModuleSettings>) => {
 
   const module = {
     // malloc returns unique number - useful for checking leaks
+    // 8 aligned to mimic "real" double*
     _malloc: vi.fn(() => (malloc_base++ * 8) as unknown as ptr),
     _free: vi.fn(),
     _tinystan_create_model: vi.fn(
-      () => (malloc_base++ * 8) as unknown as model_ptr,
+      () => (modelFails ? 0 : malloc_base++ * 8) as unknown as model_ptr,
     ),
     _tinystan_destroy_model: vi.fn(),
     _tinystan_model_param_names: vi.fn(() => paramNames as unknown as cstr),
     _tinystan_model_num_free_params: vi.fn(() => numParams),
-    _tinystan_separator_char: vi.fn(() => 28),
+    _tinystan_separator_char: vi.fn(() => 37), // '%'
     _tinystan_sample: vi.fn(() => returnCode),
     _tinystan_pathfinder: vi.fn(() => returnCode),
     _tinystan_get_error_message: vi.fn(
-      (ptr) => `Error at address ${ptr}` as unknown as cstr,
+      (ptr) => `Error inside WASM at address ${ptr}` as unknown as cstr,
     ),
     _tinystan_get_error_type: vi.fn(),
     _tinystan_destroy_error: vi.fn(),
@@ -69,9 +73,11 @@ export type MockedModule = ReturnType<typeof mockModule>;
 
 export const getMockedModel = async (p: Partial<ModuleSettings>) => {
   const mockedModule: MockedModule = mockModule(p);
-  const model = await StanModel.load(async (_) => mockedModule, null);
+  const { printCallback, getStdout, clearStdout } = soakingPrintCallback();
 
-  return { mockedModule, model };
+  const model = await StanModel.load(async (_) => mockedModule, printCallback);
+
+  return { mockedModule, model, getStdout, clearStdout };
 };
 
 // see https://vitest.dev/guide/extending-matchers.html
@@ -106,7 +112,7 @@ expect.extend({
       (args: any) => args[0],
     );
     for (const { value } of module._tinystan_create_model.mock.results) {
-      if (!destroyedModels.includes(value)) {
+      if (value !== 0 && !destroyedModels.includes(value)) {
         return {
           pass: false,
           message: () =>
