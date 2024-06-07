@@ -2,10 +2,12 @@
 import * as ReactDOM from 'react-dom/client';
 
 import App from './app/App';
-import './draws-table-2.css';
-import './draws-table.css';
-import './index.css';
 import './localStyles.css';
+import './index.css';
+import './draws-table.css';
+import './draws-table-2.css';
+import './scientific-table.css';
+import './table1.css'
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
