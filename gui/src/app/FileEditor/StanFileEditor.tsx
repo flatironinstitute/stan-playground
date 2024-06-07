@@ -102,7 +102,7 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
         const ret: ToolbarItem[] = []
 
         // valid syntax
-        if (!validSyntax) {
+        if ((!validSyntax) && (!!editedFileContent)) {
             ret.push({
                 type: 'button',
                 icon: <Cancel />,
