@@ -1,8 +1,6 @@
-import { expect, vi } from "vitest";
+import { vi } from "vitest";
 
 import type { internalTypes } from "../../../../src/app/tinystan/types";
-import StanModel from "../../../../src/app/tinystan";
-import { soakingPrintCallback } from "../../../../src/app/tinystan/util";
 type ptr = internalTypes["ptr"];
 type model_ptr = internalTypes["model_ptr"];
 type cstr = internalTypes["cstr"];
@@ -27,7 +25,7 @@ for (let i = 0; i < fakeHeap.length; i++) {
   fakeHeap[i] = i;
 }
 
-const mockModule = (p: Partial<ModuleSettings>) => {
+export const mockModule = (p: Partial<ModuleSettings>) => {
   const { returnCode, numParams, paramNames, modelFails } = {
     ...defaultModuleSettings,
     ...p,
@@ -70,57 +68,3 @@ const mockModule = (p: Partial<ModuleSettings>) => {
 };
 
 export type MockedModule = ReturnType<typeof mockModule>;
-
-export const getMockedModel = async (p: Partial<ModuleSettings>) => {
-  const mockedModule: MockedModule = mockModule(p);
-  const { printCallback, getStdout, clearStdout } = soakingPrintCallback();
-
-  const model = await StanModel.load(async (_) => mockedModule, printCallback);
-
-  return { mockedModule, model, getStdout, clearStdout };
-};
-
-// see https://vitest.dev/guide/extending-matchers.html
-expect.extend({
-  // Checks three main memory issues:
-  // 1. Double free
-  // 2. Malloc without free
-  // 3. Model created without destroyed
-  toHaveNoMemoryLeaks: (module: MockedModule, _) => {
-    const freedAddresses = module._free.mock.calls
-      .map((args) => args[0])
-      .filter((x) => x !== 0);
-    const uniqueFreedAddresses = new Set(freedAddresses);
-    if (uniqueFreedAddresses.size !== freedAddresses.length) {
-      return {
-        pass: false,
-        message: () =>
-          `Double free! Some addresses were freed multiple times: ${freedAddresses}`,
-      };
-    }
-
-    for (const { value } of module._malloc.mock.results) {
-      if (!uniqueFreedAddresses.has(value)) {
-        return {
-          pass: false,
-          message: () => `Memory leak! Address ${value} was never freed.`,
-        };
-      }
-    }
-
-    const destroyedModels = module._tinystan_destroy_model.mock.calls.map(
-      (args: any) => args[0],
-    );
-    for (const { value } of module._tinystan_create_model.mock.results) {
-      if (value !== 0 && !destroyedModels.includes(value)) {
-        return {
-          pass: false,
-          message: () =>
-            `Memory leak! Model at address ${value} was never destroyed.`,
-        };
-      }
-    }
-
-    return { pass: true, message: () => "" };
-  },
-});

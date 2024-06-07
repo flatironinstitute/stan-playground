@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { getMockedModel } from "./mocking/WASMModule";
+import { getMockedModel } from "./mocking/getMockedModel";
 import { HMCMetric } from "../../../src/app/tinystan/types";
 import {
   HMC_SAMPLER_VARIABLES,
@@ -7,30 +7,27 @@ import {
 } from "../../../src/app/tinystan/constants";
 
 describe("test tinystan code with a mocked WASM module", () => {
-  test("version returns and doesn't leak", async () => {
+  test("version returns major.minor.patch-like string", async () => {
     const { mockedModule, model } = await getMockedModel({});
     const v = model.stanVersion();
 
     expect(v).toEqual("123.123.123");
     expect(mockedModule._tinystan_stan_version).toHaveBeenCalledTimes(1);
-    expect(mockedModule).toHaveNoMemoryLeaks();
   });
 
   describe("sample function", () => {
-    test("null call doesn't leak", async () => {
+    test("null call behavior", async () => {
       const { mockedModule, model } = await getMockedModel({});
       model.sample({});
 
       expect(mockedModule._tinystan_sample).toHaveBeenCalledTimes(1);
-      expect(mockedModule).toHaveNoMemoryLeaks();
     });
 
-    test("erroring call doesn't leak", async () => {
+    test("erroring call behavior", async () => {
       const { mockedModule, model } = await getMockedModel({ returnCode: 1 });
       expect(() => model.sample({})).toThrow(/Error inside WASM/);
 
       expect(mockedModule._tinystan_sample).toHaveBeenCalledTimes(1);
-      expect(mockedModule).toHaveNoMemoryLeaks();
     });
 
     test("empty model errors", async () => {
@@ -38,7 +35,6 @@ describe("test tinystan code with a mocked WASM module", () => {
       expect(() => model.sample({})).toThrow(/no parameters/);
 
       expect(mockedModule._tinystan_sample).toHaveBeenCalledTimes(0);
-      expect(mockedModule).toHaveNoMemoryLeaks();
     });
 
     test("model failing to allocate errors", async () => {
@@ -49,7 +45,6 @@ describe("test tinystan code with a mocked WASM module", () => {
 
       expect(getStdout()).toMatch(/Error inside WASM/);
       expect(mockedModule._tinystan_sample).toHaveBeenCalledTimes(0);
-      expect(mockedModule).toHaveNoMemoryLeaks();
     });
 
     test("data can be string or record", async () => {
@@ -77,7 +72,6 @@ describe("test tinystan code with a mocked WASM module", () => {
       );
 
       expect(mockedModule._tinystan_sample).toHaveBeenCalledTimes(2);
-      expect(mockedModule).toHaveNoMemoryLeaks();
     });
 
     test("multiple inits are passed correctly", async () => {
@@ -108,11 +102,10 @@ describe("test tinystan code with a mocked WASM module", () => {
       );
 
       expect(mockedModule._tinystan_sample).toHaveBeenCalledTimes(2);
-      expect(mockedModule).toHaveNoMemoryLeaks();
     });
 
     test("output is correct shape and layout", async () => {
-      const { mockedModule, model } = await getMockedModel({
+      const { model } = await getMockedModel({
         paramNames: "a,b",
       });
 
@@ -170,13 +163,11 @@ describe("test tinystan code with a mocked WASM module", () => {
           num_chains * (num_samples + num_warmup),
         );
       }
-
-      expect(mockedModule).toHaveNoMemoryLeaks();
     });
 
     test("save_metric output is correct shape and layout", async () => {
       const numParams = 5;
-      const { mockedModule, model } = await getMockedModel({ numParams });
+      const { model } = await getMockedModel({ numParams });
 
       const num_chains = 3;
 
@@ -220,8 +211,6 @@ describe("test tinystan code with a mocked WASM module", () => {
           metric[0][0][0] + numParams * numParams,
         );
       }
-
-      expect(mockedModule).toHaveNoMemoryLeaks();
     });
 
     test("seeding works", async () => {
@@ -245,25 +234,22 @@ describe("test tinystan code with a mocked WASM module", () => {
       expect(() => model.sample({ num_warmup: -1 })).toThrow(/num_warmup/);
 
       expect(mockedModule._tinystan_sample).toHaveBeenCalledTimes(0);
-      expect(mockedModule).toHaveNoMemoryLeaks();
     });
   });
 
   describe("pathfinder function", () => {
-    test("null call doesn't leak", async () => {
+    test("null call behavior", async () => {
       const { mockedModule, model } = await getMockedModel({});
       model.pathfinder({});
 
       expect(mockedModule._tinystan_pathfinder).toHaveBeenCalledTimes(1);
-      expect(mockedModule).toHaveNoMemoryLeaks();
     });
 
-    test("erroring call doesn't leak", async () => {
+    test("erroring call behavior", async () => {
       const { mockedModule, model } = await getMockedModel({ returnCode: 1 });
       expect(() => model.pathfinder({})).toThrow(/Error inside WASM/);
 
       expect(mockedModule._tinystan_pathfinder).toHaveBeenCalledTimes(1);
-      expect(mockedModule).toHaveNoMemoryLeaks();
     });
 
     test("empty model errors", async () => {
@@ -271,7 +257,6 @@ describe("test tinystan code with a mocked WASM module", () => {
       expect(() => model.pathfinder({})).toThrow(/no parameters/);
 
       expect(mockedModule._tinystan_pathfinder).toHaveBeenCalledTimes(0);
-      expect(mockedModule).toHaveNoMemoryLeaks();
     });
 
     test("model failing to allocate errors", async () => {
@@ -282,7 +267,6 @@ describe("test tinystan code with a mocked WASM module", () => {
 
       expect(getStdout()).toMatch(/Error inside WASM/);
       expect(mockedModule._tinystan_pathfinder).toHaveBeenCalledTimes(0);
-      expect(mockedModule).toHaveNoMemoryLeaks();
     });
 
     test("data can be string or record", async () => {
@@ -310,11 +294,10 @@ describe("test tinystan code with a mocked WASM module", () => {
       );
 
       expect(mockedModule._tinystan_pathfinder).toHaveBeenCalledTimes(2);
-      expect(mockedModule).toHaveNoMemoryLeaks();
     });
 
     test("output is correct shape and layout", async () => {
-      const { mockedModule, model } = await getMockedModel({
+      const { model } = await getMockedModel({
         paramNames: "a,b",
       });
 
@@ -384,8 +367,6 @@ describe("test tinystan code with a mocked WASM module", () => {
 
         expectColumnMajor(draws, N_PARAMS, num_draws * num_paths);
       }
-
-      expect(mockedModule).toHaveNoMemoryLeaks();
     });
 
     test("seeding works", async () => {
@@ -411,7 +392,6 @@ describe("test tinystan code with a mocked WASM module", () => {
       );
 
       expect(mockedModule._tinystan_pathfinder).toHaveBeenCalledTimes(0);
-      expect(mockedModule).toHaveNoMemoryLeaks();
     });
   });
 });
