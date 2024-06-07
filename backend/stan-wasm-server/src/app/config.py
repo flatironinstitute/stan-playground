@@ -1,9 +1,11 @@
 import logging
 from functools import lru_cache
 from pathlib import Path
+from typing import Annotated, Literal
 
 from pydantic import (
     AliasChoices,
+    BeforeValidator,
     DirectoryPath,
     Field,
     PositiveInt,
@@ -11,6 +13,10 @@ from pydantic import (
     field_validator,
 )
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+LogLevelStr = Annotated[
+    Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], BeforeValidator(str.upper)
+]
 
 
 class StanWasmServerSettings(BaseSettings):
@@ -23,15 +29,7 @@ class StanWasmServerSettings(BaseSettings):
     tinystan: DirectoryPath = Field(
         validation_alias=AliasChoices("tinystan", "tinystan_dir")
     )
-    log_level: str = "INFO"
-
-    @field_validator("log_level")
-    @classmethod
-    def log_level_is_valid(cls, v: str) -> int:
-        v = v.upper()
-        if v not in ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"):
-            raise ValueError(f"Invalid log level: {v}")
-        return getattr(logging, v)  # type: ignore
+    log_level_str: LogLevelStr = Field(default="INFO", validation_alias="sws_log_level")
 
     @field_validator("tinystan")
     @classmethod
@@ -41,6 +39,10 @@ class StanWasmServerSettings(BaseSettings):
                 f"Tinystan path '{v}' does not appear to contain a working installation."
             )
         return v.absolute()
+
+    @property
+    def log_level(self) -> int:
+        return getattr(logging, self.log_level_str, logging.INFO)
 
 
 @lru_cache
