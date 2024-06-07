@@ -1,5 +1,7 @@
 import { FunctionComponent, useMemo } from "react"
+import { ess } from "./advanced/ess"
 import { computeMean, computePercentile, computeStdDev } from "./util"
+import rhat from "./advanced/rhat"
 
 type SummaryViewProps = {
     width: number
@@ -16,11 +18,11 @@ const columns = [
         label: 'Mean',
         title: 'Mean value of the parameter'
     },
-    /*future: {
+    {
         key: 'mcse',
         label: 'MCSE',
         title: 'Monte Carlo Standard Error: Standard deviation of the parameter divided by the square root of the effective sample size'
-    },*/
+    },
     {
         key: 'stdDev',
         label: 'StdDev',
@@ -41,21 +43,21 @@ const columns = [
         label: '95%',
         title: '95th percentile of the parameter'
     },
-    /*future: {
+    {
         key: 'nEff',
         label: 'N_Eff',
         title: 'Effective sample size: A crude measure of the effective sample size (uses ess_imse)'
-    },*/
-    /*future: {
+    },
+    {
         key: 'nEff/s',
         label: 'N_Eff/s',
         title: 'Effective sample size per second of compute time'
-    },*/
-    /*future: {
+    },
+    {
         key: 'rHat',
         label: 'R_hat',
         title: 'Potential scale reduction factor on split chains (at convergence, R_hat=1)'
-    }*/
+    }
 ]
 
 type TableRow = {
@@ -63,24 +65,22 @@ type TableRow = {
     values: number[]
 }
 
-const SummaryView: FunctionComponent<SummaryViewProps> = ({ width, height, draws, paramNames }) => {
-    // will be used in the future:
-    // const uniqueChainIds = useMemo(() => (Array.from(new Set(drawChainIds)).sort()), [drawChainIds]);
-    // note: computeTimeSec will be used in the future
+const SummaryView: FunctionComponent<SummaryViewProps> = ({ width, height, draws, paramNames, drawChainIds, computeTimeSec }) => {
+    const uniqueChainIds = useMemo(() => (Array.from(new Set(drawChainIds)).sort()), [drawChainIds]);
 
     const rows = useMemo(() => {
         const rows: TableRow[] = [];
         for (const pname of paramNames) {
             const pDraws = draws[paramNames.indexOf(pname)];
             const pDrawsSorted = [...pDraws].sort((a, b) => a - b);
+            const ess = computeEss(pDraws, drawChainIds);
             const stdDev = computeStdDev(pDraws);
             const values = columns.map((column) => {
                 if (column.key === 'mean') {
                     return computeMean(pDraws);
                 }
                 else if (column.key === 'mcse') {
-                    // placeholder for mcse
-                    throw new Error('Not implemented');
+                    return stdDev / Math.sqrt(ess);
                 }
                 else if (column.key === 'stdDev') {
                     return stdDev;
@@ -95,16 +95,16 @@ const SummaryView: FunctionComponent<SummaryViewProps> = ({ width, height, draws
                     return computePercentile(pDrawsSorted, 0.95);
                 }
                 else if (column.key === 'nEff') {
-                    // placeholder for nEff
-                    throw new Error('Not implemented');
+                    return ess;
                 }
                 else if (column.key === 'nEff/s') {
-                    // placeholder for nEff/s
-                    throw new Error('Not implemented');
+                    return computeTimeSec ? ess / computeTimeSec : NaN;
                 }
                 else if (column.key === 'rHat') {
-                    // placeholder for rHat
-                    throw new Error('Not implemented');
+                    const counts = computeChainCounts(drawChainIds, uniqueChainIds);
+                    const means = computeChainMeans(pDraws, drawChainIds, uniqueChainIds);
+                    const stdevs = computeChainStdDevs(pDraws, drawChainIds, uniqueChainIds);
+                    return rhat({ counts, means, stdevs });
                 }
                 else {
                     return NaN;
@@ -116,7 +116,7 @@ const SummaryView: FunctionComponent<SummaryViewProps> = ({ width, height, draws
             })
         }
         return rows;
-    }, [paramNames, draws]);
+    }, [paramNames, draws, drawChainIds, uniqueChainIds, computeTimeSec]);
 
     return (
         <div style={{position: 'absolute', width, height, overflowY: 'auto'}}>
@@ -155,6 +155,37 @@ const SummaryView: FunctionComponent<SummaryViewProps> = ({ width, height, draws
             </ul>
         </div>
     )
+}
+
+const computeEss = (x: number[], chainIds: number[]) => {
+    const uniqueChainIds = Array.from(new Set(chainIds)).sort();
+    let sumEss = 0;
+    for (const chainId of uniqueChainIds) {
+        const chainX = x.filter((_, i) => chainIds[i] === chainId);
+        const {essValue} = ess(chainX);
+        sumEss += essValue;
+    }
+    return sumEss;
+}
+
+const computeChainCounts = (chainIds: number[], uniqueChainIds: number[]) => {
+    return uniqueChainIds.map((chainId) => {
+        return chainIds.filter((id) => id === chainId).length;
+    });
+}
+
+const computeChainMeans = (x: number[], chainIds: number[], uniqueChainIds: number[]) => {
+    return uniqueChainIds.map((chainId) => {
+        const chainX = x.filter((_, i) => chainIds[i] === chainId);
+        return computeMean(chainX);
+    });
+}
+
+const computeChainStdDevs = (x: number[], chainIds: number[], uniqueChainIds: number[]) => {
+    return uniqueChainIds.map((chainId) => {
+        const chainX = x.filter((_, i) => chainIds[i] === chainId);
+        return computeStdDev(chainX);
+    });
 }
 
 // Example of Stan output...
