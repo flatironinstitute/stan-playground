@@ -163,6 +163,7 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
             height={height}
             initialPosition={height  - compileResultsHeight}
             direction="vertical"
+            hideSecondChild={!(!editedFileContent || syntaxWindowVisible)}
         >
             <TextEditor
                 width={0}
@@ -179,15 +180,13 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
             />
             {
                 editedFileContent ? (
-                    syntaxWindowVisible ? (
-                        <StanCompileResultWindow
-                            width={0}
-                            height={0}
-                            mainStanText={editedFileContent}
-                            onValidityChanged={valid => setValidSyntax(valid)}
-                            onClose={() => setSyntaxWindowVisible(false)}
-                        />
-                    ) : undefined
+                    <StanCompileResultWindow
+                        width={0}
+                        height={0}
+                        mainStanText={editedFileContent}
+                        onValidityChanged={valid => setValidSyntax(valid)}
+                        onClose={() => setSyntaxWindowVisible(false)}
+                    />
                 ) : (
                     <div style={{ padding: 20 }}>Select an example from the left panel</div>
                 )
