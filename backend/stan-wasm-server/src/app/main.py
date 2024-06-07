@@ -1,4 +1,5 @@
-from typing import Annotated, Any, TypeVar
+from contextlib import asynccontextmanager
+from typing import Annotated, Any, AsyncIterator, TypeVar
 
 from config import StanWasmServerSettings, get_settings
 from fastapi import Body, Depends, FastAPI, Header, Request
@@ -12,7 +13,6 @@ from logic.compilation_job_mgmt import (
     get_job_source_file,
     upload_stan_code_file,
 )
-from logic.definitions import CompilationStatus
 from logic.exceptions import (
     StanPlaygroundAlreadyUploaded,
     StanPlaygroundAuthenticationException,
@@ -26,7 +26,28 @@ from logic.file_validation.compilation_files import COMPILATION_OUTPUTS
 
 DependsOnSettings = Annotated[StanWasmServerSettings, Depends(get_settings)]
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    setup_logger()
+    yield
+
+
+def setup_logger() -> None:
+    import logging
+
+    import uvicorn
+
+    level = get_settings().log_level
+    logger = logging.getLogger()
+    out = logging.StreamHandler()
+    out.setLevel(level)
+    out.setFormatter(uvicorn.logging.DefaultFormatter("%(levelprefix)s %(message)s"))
+    logger.addHandler(out)
+    logger.setLevel(level)
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -79,7 +100,7 @@ async def initiate_job(
 ) -> DictResponse:
     check_authorization(authorization, settings.passcode)
     job_id = create_compilation_job(base_dir=settings.job_dir)
-    return {"job_id": job_id, "status": CompilationStatus.INITIATED}
+    return {"job_id": job_id}
 
 
 @app.post("/job/{job_id}/upload/{filename}")
@@ -127,4 +148,4 @@ async def run_job(job_id: str, settings: DependsOnSettings) -> DictResponse:
         timeout=settings.compilation_timeout,
     )
 
-    return {"job_id": job_id, "status": CompilationStatus.COMPLETED}
+    return {"success": True}
