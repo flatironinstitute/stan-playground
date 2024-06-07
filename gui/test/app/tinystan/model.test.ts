@@ -31,7 +31,9 @@ describe("test tinystan code with a mocked WASM module", () => {
     });
 
     test("empty model errors", async () => {
-      const { mockedModule, model } = await getMockedModel({ numParams: 0 });
+      const { mockedModule, model } = await getMockedModel({
+        numFreeParams: 0,
+      });
       expect(() => model.sample({})).toThrow(/no parameters/);
 
       expect(mockedModule._tinystan_sample).toHaveBeenCalledTimes(0);
@@ -167,7 +169,7 @@ describe("test tinystan code with a mocked WASM module", () => {
 
     test("save_metric output is correct shape and layout", async () => {
       const numParams = 5;
-      const { model } = await getMockedModel({ numParams });
+      const { model } = await getMockedModel({ numFreeParams: numParams });
 
       const num_chains = 3;
 
@@ -253,7 +255,9 @@ describe("test tinystan code with a mocked WASM module", () => {
     });
 
     test("empty model errors", async () => {
-      const { mockedModule, model } = await getMockedModel({ numParams: 0 });
+      const { mockedModule, model } = await getMockedModel({
+        numFreeParams: 0,
+      });
       expect(() => model.pathfinder({})).toThrow(/no parameters/);
 
       expect(mockedModule._tinystan_pathfinder).toHaveBeenCalledTimes(0);
