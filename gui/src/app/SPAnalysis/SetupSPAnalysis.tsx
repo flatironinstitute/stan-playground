@@ -40,7 +40,8 @@ const SetupSPAnalysis: FunctionComponent<PropsWithChildren<SetupSPAnalysisProps>
     const value = useMemo(() => {
         return {
             localDataModel: {
-                title: 'SPAnalysis',
+                // title is hard-coded for now because we don't yet have a mechanism for it to be changed
+                title: 'Untitled',
                 stanFileContent: kvStore['main.stan'] || '',
                 setStanFileContent: (text: string) => {
                     kvStoreDispatch({
