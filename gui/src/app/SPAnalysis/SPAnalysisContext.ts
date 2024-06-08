@@ -9,6 +9,8 @@ export type SPAnalysisDataModel = {
     setDataFileContent: (text: string) => void
     samplingOptsContent: string
     setSamplingOptsContent: (text: string) => void
+
+    clearAll: () => void
 }
 
 type SPAnalysisContextType = {

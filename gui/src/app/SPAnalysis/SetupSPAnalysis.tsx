@@ -1,4 +1,4 @@
-import { FunctionComponent, PropsWithChildren, useMemo, useReducer } from "react"
+import { FunctionComponent, PropsWithChildren, useEffect, useMemo, useReducer, useRef } from "react"
 import { SPAnalysisContext } from "./SPAnalysisContext"
 
 type SetupSPAnalysisProps = {
@@ -37,6 +37,41 @@ const kvStoreReducer = (state: KVStore, action: KVStoreAction): KVStore => {
 
 const SetupSPAnalysis: FunctionComponent<PropsWithChildren<SetupSPAnalysisProps>> = ({ children }) => {
     const [kvStore, kvStoreDispatch] = useReducer(kvStoreReducer, {})
+
+    ////////////////////////////////////////////////////////////////////////////////////////
+    // For convenience, we save the state to local storage so it is available on
+    // reload of the page But this will be revised in the future to use a more
+    // sophisticated storage mechanism.
+    useEffect(() => {
+        // as user reloads the page or closes the tab,
+        // we save the state to local storage
+        const handleBeforeUnload = () => {
+            localStorage.setItem('stan-playground-saved-state', JSON.stringify(kvStore))
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [kvStore]);
+    useEffect(() => {
+        // load the saved state on first load
+        const savedState = localStorage.getItem('stan-playground-saved-state')
+        if (!savedState) return
+        const parsedState = JSON.parse(savedState)
+        for (const key in parsedState) {
+            if (['main.stan', 'data.json', 'sampling_opts.json'].includes(key)) {
+                kvStoreDispatch({
+                    type: 'set',
+                    key,
+                    value: parsedState[key]
+                })
+            }
+        }
+    }, [])
+    ////////////////////////////////////////////////////////////////////////////////////////
+
     const value = useMemo(() => {
         return {
             localDataModel: {
@@ -65,6 +100,14 @@ const SetupSPAnalysis: FunctionComponent<PropsWithChildren<SetupSPAnalysisProps>
                         key: 'sampling_opts.json',
                         value: text
                     })
+                },
+                clearAll: () => {
+                    for (const key of ['main.stan', 'data.json', 'sampling_opts.json']) {
+                        kvStoreDispatch({
+                            type: 'delete',
+                            key
+                        })
+                    }
                 }
             }
         }
