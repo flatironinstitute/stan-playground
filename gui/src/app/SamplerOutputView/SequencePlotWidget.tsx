@@ -1,4 +1,5 @@
-import React, { FunctionComponent, Suspense, useMemo } from "react";
+import { FunctionComponent, useMemo } from "react";
+import LazyPlotlyPlot from "../components/LazyPlotlyPlot";
 
 export type PlotSequence = {
 	label: string
@@ -13,8 +14,6 @@ type Props = {
 	width: number
 	height: number
 }
-
-const Plot = React.lazy(() => (import('react-plotly.js')))
 
 const SequencePlotWidget: FunctionComponent<Props> = ({ plotSequences, variableName, highlightDrawRange, width, height }) => {
 	const shapes = useMemo(() => (
@@ -47,12 +46,10 @@ const SequencePlotWidget: FunctionComponent<Props> = ({ plotSequences, variableN
 	}), [width, height, variableName, shapes])
 	return (
 		<div style={{ position: 'relative', width, height }}>
-			<Suspense fallback={<div>Loading plotly</div>}>
-				<Plot
-					data={data}
-					layout={layout}
-				/>
-			</Suspense>
+			<LazyPlotlyPlot
+				data={data}
+				layout={layout}
+			/>
 		</div>
 	)
 }

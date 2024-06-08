@@ -1,4 +1,5 @@
-import React, { FunctionComponent, Suspense, useMemo } from "react";
+import { FunctionComponent, useMemo } from "react";
+import LazyPlotlyPlot from "../components/LazyPlotlyPlot";
 
 type Props = {
 	histData: number[]
@@ -7,8 +8,6 @@ type Props = {
 	width: number
 	height: number
 }
-
-const Plot = React.lazy(() => (import('react-plotly.js')))
 
 const SequenceHistogramWidget: FunctionComponent<Props> = ({ histData, title, width, height, variableName }) => {
 	const data = useMemo(() => (
@@ -22,19 +21,17 @@ const SequenceHistogramWidget: FunctionComponent<Props> = ({ histData, title, wi
 	), [histData])
 	return (
 		<div style={{ position: 'relative', width, height }}>
-			<Suspense fallback={<div>Loading plotly</div>}>
-				<Plot
-					data={[data]}
-					layout={{
-						width: width,
-						height,
-						title: {text: title, font: {size: 12}},
-						xaxis: {title: variableName},
-						yaxis: {title: 'Count'},
-						margin: {r: 0}
-					}}
-				/>
-			</Suspense>
+			<LazyPlotlyPlot
+				data={[data]}
+				layout={{
+					width: width,
+					height,
+					title: {text: title, font: {size: 12}},
+					xaxis: {title: variableName},
+					yaxis: {title: 'Count'},
+					margin: {r: 0}
+				}}
+			/>
 		</div>
 	)
 }
