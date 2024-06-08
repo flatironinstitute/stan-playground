@@ -16,14 +16,6 @@ const useRoute = () => {
     const query = useMemo(() => (parseSearchString(search)), [search])
     const p = query.p || '/'
     const route: Route = useMemo(() => {
-        if (typeof p !== 'string') {
-            console.warn('Unexpected type for p', typeof p)
-            return {
-                page: 'home',
-                sourceDataUri: '',
-                title: ''
-            }
-        }
         if (p === '/about') {
             return {
                 page: 'about'
@@ -32,8 +24,8 @@ const useRoute = () => {
         else {
             return {
                 page: 'home',
-                sourceDataUri: p,
-                title: (query.t || '') as string
+                sourceDataUri: getSourceDataUriFromQuery(query),
+                title: decodeURIComponent((query.t || '') as string)
             }
         }
     }, [p, query])
@@ -41,7 +33,8 @@ const useRoute = () => {
     const setRoute = useCallback((r: Route, replaceHistory?: boolean) => {
         let newQuery = {...query}
         if (r.page === 'home') {
-            newQuery = {p: '/', t: r.title}
+            const q = getQueryFromSourceDataUri(r.sourceDataUri)
+            newQuery = {p: '/', t: r.title, ...q}
         }
         else if (r.page === 'about') {
             newQuery = {p: '/about'}
@@ -99,6 +92,42 @@ const queryToQueryString = (query: { [key: string]: string | string[] }) => {
         }
     }
     return '?' + a.join('&')
+}
+
+const getSourceDataUriFromQuery = (query: { [key: string]: string | string[] }) => {
+    if (query.f) {
+        return query.f as string
+    }
+    const stan = query['main.stan'] || ''
+    const data = query['data.json'] || ''
+    const samplingOpts = query['sampling_opts.json'] || ''
+    return `main.stan=${stan}&data.json=${data}&sampling_opts.json=${samplingOpts}`
+}
+
+export const getQueryFromSourceDataUri = (sourceDataUri: string): {
+    'f'?: string
+    'main.stan'?: string
+    'data.json'?: string
+    'sampling_opts.json'?: string
+} => {
+    if ((sourceDataUri.startsWith('https://')) || (sourceDataUri.startsWith('http://'))) {
+        return {f: sourceDataUri}
+    }
+    const q: { [key: string]: string } = {}
+    const parts = sourceDataUri.split('&')
+    const names = ['main.stan', 'data.json', 'sampling_opts.json']
+    for (const part of parts) {
+        const [key, value] = part.split('=')
+        if (names.includes(key)) {
+            q[key] = value
+        }
+    }
+    for (const k in q) {
+        if (!q[k]) {
+            delete q[k]
+        }
+    }
+    return q
 }
 
 export default useRoute
