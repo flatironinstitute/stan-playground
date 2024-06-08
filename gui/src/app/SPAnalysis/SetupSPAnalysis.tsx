@@ -2,14 +2,15 @@ import { FunctionComponent, PropsWithChildren, useMemo, useReducer } from "react
 import { SPAnalysisContext } from "./SPAnalysisContext"
 
 type SetupSPAnalysisProps = {
+    // will be used in future when we allow query parameters to be passed to the app
     sourceDataUri: string
 }
 
-type AnalysisFiles = {
+type KVStore = {
     [key: string]: string
 }
 
-type AnalysisFilesAction = {
+type KVStoreAction = {
     type: 'set'
     key: string
     value: string
@@ -18,7 +19,7 @@ type AnalysisFilesAction = {
     key: string
 }
 
-const analysisFilesReducer = (state: AnalysisFiles, action: AnalysisFilesAction): AnalysisFiles => {
+const kvStoreReducer = (state: KVStore, action: KVStoreAction): KVStore => {
     switch (action.type) {
         case 'set': {
             return {
@@ -35,30 +36,30 @@ const analysisFilesReducer = (state: AnalysisFiles, action: AnalysisFilesAction)
 }
 
 const SetupSPAnalysis: FunctionComponent<PropsWithChildren<SetupSPAnalysisProps>> = ({ children }) => {
-    const [analysisFiles, dispatchAnalysisFiles] = useReducer(analysisFilesReducer, {})
+    const [kvStore, kvStoreDispatch] = useReducer(kvStoreReducer, {})
     const value = useMemo(() => {
         return {
             localDataModel: {
                 title: 'SPAnalysis',
-                stanFileContent: analysisFiles['main.stan'] || '',
+                stanFileContent: kvStore['main.stan'] || '',
                 setStanFileContent: (text: string) => {
-                    dispatchAnalysisFiles({
+                    kvStoreDispatch({
                         type: 'set',
                         key: 'main.stan',
                         value: text
                     })
                 },
-                dataFileContent: analysisFiles['data.json'] || '',
+                dataFileContent: kvStore['data.json'] || '',
                 setDataFileContent: (text: string) => {
-                    dispatchAnalysisFiles({
+                    kvStoreDispatch({
                         type: 'set',
                         key: 'data.json',
                         value: text
                     })
                 },
-                samplingOptsContent: analysisFiles['sampling_opts.json'] || '',
+                samplingOptsContent: kvStore['sampling_opts.json'] || '',
                 setSamplingOptsContent: (text: string) => {
-                    dispatchAnalysisFiles({
+                    kvStoreDispatch({
                         type: 'set',
                         key: 'sampling_opts.json',
                         value: text
@@ -66,7 +67,7 @@ const SetupSPAnalysis: FunctionComponent<PropsWithChildren<SetupSPAnalysisProps>
                 }
             }
         }
-    }, [analysisFiles])
+    }, [kvStore])
     return (
         <SPAnalysisContext.Provider value={value}>
             {children}

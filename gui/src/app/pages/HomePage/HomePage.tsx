@@ -41,42 +41,22 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
     const { localDataModel } = useSPAnalysis()
 
 
-    const stanFileContent = useMemo(() => (
-        localDataModel?.stanFileContent || ''
-    ), [localDataModel])
-
-    const saveStanFileContent = useCallback((text: string) => {
-        localDataModel?.setStanFileContent(text)
-    }, [localDataModel])
-
     const [editedStanFileContent, setEditedStanFileContent] = useState('')
     useEffect(() => {
-        setEditedStanFileContent(stanFileContent)
-    }, [stanFileContent])
+        setEditedStanFileContent(localDataModel.stanFileContent)
+    }, [localDataModel.stanFileContent])
 
-    const dataFileContent = useMemo(() => (
-        localDataModel?.dataFileContent || ''
-    ), [localDataModel])
-    const saveDataFileContent = useCallback((text: string) => {
-        localDataModel?.setDataFileContent(text)
-    }, [localDataModel])
     const [editedDataFileContent, setEditedDataFileContent] = useState('')
     useEffect(() => {
-        setEditedDataFileContent(dataFileContent)
-    }, [dataFileContent])
+        setEditedDataFileContent(localDataModel.dataFileContent)
+    }, [localDataModel.dataFileContent])
 
-    const samplingOptsContent = useMemo(() => (
-        localDataModel?.samplingOptsContent || JSON.stringify(defaultSamplingOpts, null, 2)
-    ), [localDataModel])
-    const setSamplingOptsContent = useCallback((text: string) => {
-        localDataModel?.setSamplingOptsContent(text)
-    }, [localDataModel])
     const samplingOpts = useMemo(() => (
-        { ...defaultSamplingOpts, ...JSON.parse(samplingOptsContent) }
-    ), [samplingOptsContent])
+        { ...defaultSamplingOpts, ...JSON.parse(localDataModel.samplingOptsContent || '{}') }
+    ), [localDataModel.samplingOptsContent])
     const setSamplingOpts = useCallback((opts: SamplingOpts) => {
-        setSamplingOptsContent(JSON.stringify(opts, null, 2))
-    }, [setSamplingOptsContent])
+        localDataModel.setSamplingOptsContent(JSON.stringify(opts, null, 2))
+    }, [localDataModel])
 
     const [compiledMainJsUrl, setCompiledMainJsUrl] = useState<string>('')
 
@@ -85,19 +65,13 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
 
     useEffect(() => {
         // update the title in the route
-        if (!localDataModel) return
         const newRoute = { ...route, title: localDataModel.title }
         setRoute(newRoute, true)
     }, [localDataModel.title, route, setRoute])
 
     useEffect(() => {
         // update the document title based on the route
-        if (!route.title) {
-            document.title = 'stan-playground'
-        }
-        else {
-            document.title = route.title
-        }
+        document.title = route?.title ?? 'stan-playground'
     }, [route.title])
 
     return (
@@ -125,8 +99,8 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
                         width={0}
                         height={0}
                         fileName="main.stan"
-                        fileContent={stanFileContent}
-                        onSaveContent={saveStanFileContent}
+                        fileContent={localDataModel.stanFileContent}
+                        onSaveContent={localDataModel.setStanFileContent}
                         editedFileContent={editedStanFileContent}
                         setEditedFileContent={setEditedStanFileContent}
                         readOnly={false}
@@ -135,8 +109,8 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
                     <RightView
                         width={0}
                         height={0}
-                        dataFileContent={dataFileContent}
-                        saveDataFileContent={saveDataFileContent}
+                        dataFileContent={localDataModel.dataFileContent}
+                        saveDataFileContent={localDataModel.setDataFileContent}
                         editedDataFileContent={editedDataFileContent}
                         setEditedDataFileContent={setEditedDataFileContent}
                         compiledMainJsUrl={compiledMainJsUrl}
