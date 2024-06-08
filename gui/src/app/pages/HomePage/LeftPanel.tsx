@@ -33,6 +33,14 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height }) => {
                     ))
                 }
                 <div>
+                    {/* This will probably be removed or replaced in the future. It's just for convenience during development. */}
+                    <button onClick={() => {
+                        const ok = window.confirm('Are you sure you want to clear all data in the editors?')
+                        if (!ok) return
+                        localDataModel.clearAll()
+                    }}>Clear all</button>
+                </div>
+                <div>
                     <p>
                         This panel will have controls for loading/saving data from cloud
                     </p>

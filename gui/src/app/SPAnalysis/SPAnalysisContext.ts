@@ -4,10 +4,13 @@ export type SPAnalysisDataModel = {
     title: string
     stanFileContent: string
     setStanFileContent: (text: string) => void
+    // in future, we may also want to track the compilation state for this stan file content
     dataFileContent: string
     setDataFileContent: (text: string) => void
     samplingOptsContent: string
     setSamplingOptsContent: (text: string) => void
+
+    clearAll: () => void
 }
 
 type SPAnalysisContextType = {
