@@ -1,18 +1,18 @@
 import { FunctionComponent, PropsWithChildren, useEffect, useMemo, useReducer, useState } from "react"
 import { SPAnalysisContext } from "./SPAnalysisContext"
 import useRoute, { getQueryFromSourceDataUri } from "../useRoute"
-import { defaultSamplingOpts } from "../StanSampler/StanSampler"
 import loadFilesFromGist from "./loadFilesFromGist"
 
 type SetupSPAnalysisProps = {
+    // will be used in future when we allow query parameters to be passed to the app
     sourceDataUri: string
 }
 
-type AnalysisFiles = {
+type KVStore = {
     [key: string]: string
 }
 
-type AnalysisFilesAction = {
+type KVStoreAction = {
     type: 'set'
     key: string
     value: string
@@ -21,7 +21,7 @@ type AnalysisFilesAction = {
     key: string
 }
 
-const analysisFilesReducer = (state: AnalysisFiles, action: AnalysisFilesAction): AnalysisFiles => {
+const kvStoreReducer = (state: KVStore, action: KVStoreAction): KVStore => {
     switch (action.type) {
         case 'set': {
             return {
@@ -42,46 +42,90 @@ const SetupSPAnalysis: FunctionComponent<PropsWithChildren<SetupSPAnalysisProps>
     if (route.page !== 'home') {
         throw Error('Unexpected route')
     }
-    const [sourceAnalysisFiles, setSourceAnalysisFiles] = useState<AnalysisFiles>({})
-    const [localAnalysisFiles, localAnalysisFilesDispatch] = useReducer(analysisFilesReducer, {})
+    const [sourceAnalysisFiles, setSourceAnalysisFiles] = useState<KVStore>({})
+    const [kvStore, kvStoreDispatch] = useReducer(kvStoreReducer, {})
+
+    ////////////////////////////////////////////////////////////////////////////////////////
+    // For convenience, we save the state to local storage so it is available on
+    // reload of the page But this will be revised in the future to use a more
+    // sophisticated storage mechanism.
+    useEffect(() => {
+        // as user reloads the page or closes the tab,
+        // we save the state to local storage
+        const handleBeforeUnload = () => {
+            localStorage.setItem('stan-playground-saved-state', JSON.stringify(kvStore))
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [kvStore]);
+    useEffect(() => {
+        // load the saved state on first load
+        const savedState = localStorage.getItem('stan-playground-saved-state')
+        if (!savedState) return
+        const parsedState = JSON.parse(savedState)
+        for (const key in parsedState) {
+            if (['main.stan', 'data.json', 'sampling_opts.json'].includes(key)) {
+                kvStoreDispatch({
+                    type: 'set',
+                    key,
+                    value: parsedState[key]
+                })
+            }
+        }
+    }, [])
+    ////////////////////////////////////////////////////////////////////////////////////////
+
     const value = useMemo(() => {
         return {
             localDataModel: {
+                // title is hard-coded for now because we don't yet have a mechanism for it to be changed
                 title: route.title,
-                stanFileContent: localAnalysisFiles['main.stan'] || '',
+                stanFileContent: kvStore['main.stan'] || '',
                 setStanFileContent: (text: string) => {
-                    localAnalysisFilesDispatch({
+                    kvStoreDispatch({
                         type: 'set',
                         key: 'main.stan',
                         value: text
                     })
                 },
-                dataFileContent: localAnalysisFiles['data.json'] || '',
+                dataFileContent: kvStore['data.json'] || '',
                 setDataFileContent: (text: string) => {
-                    localAnalysisFilesDispatch({
+                    kvStoreDispatch({
                         type: 'set',
                         key: 'data.json',
                         value: text
                     })
                 },
-                samplingOptsContent: localAnalysisFiles['sampling_opts.json'] || JSON.stringify(defaultSamplingOpts, null, 2),
+                samplingOptsContent: kvStore['sampling_opts.json'] || '',
                 setSamplingOptsContent: (text: string) => {
-                    localAnalysisFilesDispatch({
+                    kvStoreDispatch({
                         type: 'set',
                         key: 'sampling_opts.json',
                         value: text
                     })
+                },
+                clearAll: () => {
+                    for (const key of ['main.stan', 'data.json', 'sampling_opts.json']) {
+                        kvStoreDispatch({
+                            type: 'delete',
+                            key
+                        })
+                    }
                 }
             },
             sourceAnalysisFiles,
-            localAnalysisFiles
+            localAnalysisFiles: kvStore
         }
-    }, [localAnalysisFiles, route.title, sourceAnalysisFiles])
+    }, [kvStore, route.title, sourceAnalysisFiles])
     useEffect(() => {
         // initialize content based on sourceDataUri
         (async () => {
             const q = getQueryFromSourceDataUri(route.sourceDataUri)
-            const analysisFiles: AnalysisFiles = {}
+            const analysisFiles: KVStore = {}
             if (q.f) {
                 if (q.f.startsWith('https://gist.github.com')) {
                     const {files, description} = await loadFilesFromGist(q.f)
@@ -109,14 +153,14 @@ const SetupSPAnalysis: FunctionComponent<PropsWithChildren<SetupSPAnalysisProps>
             }
             setSourceAnalysisFiles(analysisFiles)
             for (const key in analysisFiles) {
-                localAnalysisFilesDispatch({
+                kvStoreDispatch({
                     type: 'set',
                     key,
                     value: analysisFiles[key]
                 })
             }
         })()
-    }, [route.sourceDataUri, setRoute, localAnalysisFilesDispatch, route])
+    }, [route.sourceDataUri, setRoute, kvStoreDispatch, route])
     return (
         <SPAnalysisContext.Provider value={value}>
             {children}
