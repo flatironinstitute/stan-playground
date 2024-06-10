@@ -168,8 +168,8 @@ describe("test tinystan code with a mocked WASM module", () => {
     });
 
     test("save_metric output is correct shape and layout", async () => {
-      const numParams = 5;
-      const { model } = await getMockedModel({ numFreeParams: numParams });
+      const numFreeParams = 5;
+      const { model } = await getMockedModel({ numFreeParams });
 
       const num_chains = 3;
 
@@ -181,14 +181,14 @@ describe("test tinystan code with a mocked WASM module", () => {
         });
         expect(metric).toBeDefined();
         expect(metric?.length).toEqual(num_chains);
-        expect(metric?.[0].length).toEqual(numParams);
+        expect(metric?.[0].length).toEqual(numFreeParams);
         expect(Array.isArray(metric?.[0][0])).toEqual(false);
         metric = metric as number[][];
 
         // ensure we are reading out of the heap in the expected order
         // see comment on expectColumnMajor for overview
         expect(metric[0][1]).toEqual(metric[0][0] + 1);
-        expect(metric[1][0]).toEqual(metric[0][0] + numParams);
+        expect(metric[1][0]).toEqual(metric[0][0] + numFreeParams);
       }
 
       {
@@ -200,17 +200,17 @@ describe("test tinystan code with a mocked WASM module", () => {
         });
         expect(metric).toBeDefined();
         expect(metric?.length).toEqual(num_chains);
-        expect(metric?.[0].length).toEqual(numParams);
+        expect(metric?.[0].length).toEqual(numFreeParams);
         expect(Array.isArray(metric?.[0][0])).toEqual(true);
         metric = metric as number[][][];
-        expect(metric?.[0][0].length).toEqual(numParams);
+        expect(metric?.[0][0].length).toEqual(numFreeParams);
 
         // ensure we are reading out of the heap in the expected order
         // see comment on expectColumnMajor for overview
         expect(metric[0][0][1]).toEqual(metric[0][0][0] + 1);
-        expect(metric[0][1][0]).toEqual(metric[0][0][0] + numParams);
+        expect(metric[0][1][0]).toEqual(metric[0][0][0] + numFreeParams);
         expect(metric[1][0][0]).toEqual(
-          metric[0][0][0] + numParams * numParams,
+          metric[0][0][0] + numFreeParams * numFreeParams,
         );
       }
     });
