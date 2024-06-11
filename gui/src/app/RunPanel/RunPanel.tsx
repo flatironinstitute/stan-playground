@@ -6,7 +6,7 @@ import { FunctionComponent, useCallback } from 'react';
 
 import StanSampler, { SamplingOpts } from '../StanSampler/StanSampler';
 import { useSamplerProgress, useSamplerStatus } from '../StanSampler/useStanSampler';
-import { Progress } from '../tinystan/Worker';
+import { Progress } from '../StanSampler/Worker';
 
 type RunPanelProps = {
     width: number;
@@ -18,7 +18,7 @@ type RunPanelProps = {
 };
 
 const RunPanel: FunctionComponent<RunPanelProps> = ({ width, height, sampler, data, dataIsSaved, samplingOpts }) => {
-    const {status: runStatus, errorMessage} = useSamplerStatus(sampler)
+    const { status: runStatus, errorMessage } = useSamplerStatus(sampler)
     const progress = useSamplerProgress(sampler)
 
     const handleRun = useCallback(async () => {

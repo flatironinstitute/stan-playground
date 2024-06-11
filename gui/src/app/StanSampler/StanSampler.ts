@@ -1,6 +1,6 @@
-import { SamplerParams } from '../tinystan';
-import { Progress, Replies, Requests } from '../tinystan/Worker';
-import StanWorker from '../tinystan/Worker?worker';
+import type { SamplerParams } from 'tinystan';
+import { Progress, Replies, Requests } from './Worker';
+import StanWorker from './Worker?worker';
 
 export type StanSamplerStatus = '' | 'loading' | 'loaded' | 'sampling' | 'completed' | 'failed';
 

@@ -1,4 +1,4 @@
-import StanModel from ".";
+import StanModel from "tinystan";
 
 export enum Requests {
     Load = "load",
