@@ -19,7 +19,6 @@ describe("test tinystan code with a mocked WASM module", () => {
     test("null call behavior", async () => {
       const { mockedModule, model } = await getMockedModel({});
       model.sample({});
-
       expect(mockedModule._tinystan_sample).toHaveBeenCalledTimes(1);
     });
 
@@ -30,7 +29,7 @@ describe("test tinystan code with a mocked WASM module", () => {
       expect(mockedModule._tinystan_sample).toHaveBeenCalledTimes(1);
     });
 
-    test("empty model errors", async () => {
+    test("model with no free parameters throws", async () => {
       const { mockedModule, model } = await getMockedModel({
         numFreeParams: 0,
       });
@@ -39,7 +38,7 @@ describe("test tinystan code with a mocked WASM module", () => {
       expect(mockedModule._tinystan_sample).toHaveBeenCalledTimes(0);
     });
 
-    test("model failing to allocate errors", async () => {
+    test("failure in model construction throws", async () => {
       const { mockedModule, model, getStdout } = await getMockedModel({
         modelFails: true,
       });
@@ -121,13 +120,17 @@ describe("test tinystan code with a mocked WASM module", () => {
       //    - draws is num_params x (num_chains * num_samples)
       // 2. save_warmup = true
       //    - draws is num_params x (num_chains * (num_samples + num_warmup))
-      {
+      for (const save_warmup of [false, true]) {
+        const EXPECTED_SAMPLES = save_warmup
+          ? num_samples + num_warmup
+          : num_samples;
+
         const { draws, paramNames } = model.sample({
           num_chains,
           num_samples,
           num_warmup,
-          save_warmup: false,
-          adapt: false,
+          save_warmup,
+          adapt: save_warmup,
         });
 
         expect(paramNames).toContain("a");
@@ -136,34 +139,10 @@ describe("test tinystan code with a mocked WASM module", () => {
 
         expect(draws.length).toEqual(N_PARAMS);
         draws.forEach((d) =>
-          expect(d.length).toEqual(num_chains * num_samples),
+          expect(d.length).toEqual(num_chains * EXPECTED_SAMPLES),
         );
 
-        expectColumnMajor(draws, N_PARAMS, num_chains * num_samples);
-      }
-
-      {
-        const { draws, paramNames } = model.sample({
-          num_chains,
-          num_samples,
-          num_warmup,
-          save_warmup: true,
-        });
-
-        expect(paramNames).toContain("a");
-        expect(paramNames).toContain("b");
-        expect(draws.length).toEqual(paramNames.length);
-
-        expect(draws.length).toEqual(N_PARAMS);
-        draws.forEach((d) =>
-          expect(d.length).toEqual(num_chains * (num_samples + num_warmup)),
-        );
-
-        expectColumnMajor(
-          draws,
-          N_PARAMS,
-          num_chains * (num_samples + num_warmup),
-        );
+        expectColumnMajor(draws, N_PARAMS, num_chains * EXPECTED_SAMPLES);
       }
     });
 
@@ -254,7 +233,7 @@ describe("test tinystan code with a mocked WASM module", () => {
       expect(mockedModule._tinystan_pathfinder).toHaveBeenCalledTimes(1);
     });
 
-    test("empty model errors", async () => {
+    test("model with no free parameters throws", async () => {
       const { mockedModule, model } = await getMockedModel({
         numFreeParams: 0,
       });
@@ -263,7 +242,7 @@ describe("test tinystan code with a mocked WASM module", () => {
       expect(mockedModule._tinystan_pathfinder).toHaveBeenCalledTimes(0);
     });
 
-    test("model failing to allocate errors", async () => {
+    test("failure in model construction throws", async () => {
       const { mockedModule, model, getStdout } = await getMockedModel({
         modelFails: true,
       });
@@ -319,11 +298,22 @@ describe("test tinystan code with a mocked WASM module", () => {
       //    - draws is num_params x (num_draws * num_paths)
       // 3. calculate_lp = false
       //    - draws is num_params x (num_draws * num_paths)
-      {
+      for (const [psis_resample, calculate_lp] of [
+        [true, true],
+        [false, true],
+        [true, false],
+      ]) {
+        const EXPECTED_SAMPLES =
+          calculate_lp && psis_resample
+            ? num_multi_draws
+            : num_draws * num_paths;
+
         const { draws, paramNames } = model.pathfinder({
           num_paths,
           num_draws,
           num_multi_draws,
+          psis_resample,
+          calculate_lp,
         });
 
         expect(paramNames).toContain("a");
@@ -331,45 +321,9 @@ describe("test tinystan code with a mocked WASM module", () => {
         expect(draws.length).toEqual(paramNames.length);
 
         expect(draws.length).toEqual(N_PARAMS);
-        draws.forEach((d) => expect(d.length).toEqual(num_multi_draws));
+        draws.forEach((d) => expect(d.length).toEqual(EXPECTED_SAMPLES));
 
-        expectColumnMajor(draws, N_PARAMS, num_multi_draws);
-      }
-
-      {
-        const { draws, paramNames } = model.pathfinder({
-          num_paths,
-          num_draws,
-          num_multi_draws,
-          psis_resample: false,
-        });
-
-        expect(paramNames).toContain("a");
-        expect(paramNames).toContain("b");
-        expect(draws.length).toEqual(paramNames.length);
-
-        expect(draws.length).toEqual(N_PARAMS);
-        draws.forEach((d) => expect(d.length).toEqual(num_draws * num_paths));
-
-        expectColumnMajor(draws, N_PARAMS, num_draws * num_paths);
-      }
-
-      {
-        const { draws, paramNames } = model.pathfinder({
-          num_paths,
-          num_draws,
-          num_multi_draws,
-          calculate_lp: false,
-        });
-
-        expect(paramNames).toContain("a");
-        expect(paramNames).toContain("b");
-        expect(draws.length).toEqual(paramNames.length);
-
-        expect(draws.length).toEqual(N_PARAMS);
-        draws.forEach((d) => expect(d.length).toEqual(num_draws * num_paths));
-
-        expectColumnMajor(draws, N_PARAMS, num_draws * num_paths);
+        expectColumnMajor(draws, N_PARAMS, EXPECTED_SAMPLES);
       }
     });
 
@@ -409,6 +363,8 @@ describe("test tinystan code with a mocked WASM module", () => {
 // next draw was from 'cols' away in memory
 //
 // Example:
+// A model with 4 parameters would produce the following if there
+// were 3 draws:
 // HEAP:
 // 1 2 3 4 5 6 7 8 9 10 11 12
 // 4x3 OUTPUT:

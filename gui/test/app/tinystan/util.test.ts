@@ -4,19 +4,19 @@ import {
   prepareStanJSON,
 } from "../../../src/app/tinystan/util";
 
-describe("tinystan string_safe_jsonify", () => {
-  test("string_safe_jsonify does not modify string objects", () => {
+describe("tinystan prepareStanJSON", () => {
+  test("prepareStanJSON does not modify string objects", () => {
     const mystr = "I am a string";
     expect(prepareStanJSON(mystr)).toEqual(mystr);
   });
 
-  test("string_safe_jsonify roundtrips non-string objects", () => {
+  test("prepareStanJSON roundtrips non-string objects", () => {
     const myobj = { a: "I'm a string", b: 15 };
     const roundTripped = JSON.parse(prepareStanJSON(myobj));
     expect(myobj).toEqual(roundTripped);
   });
 
-  test("repeated string_safe_jsonify calls are idempotent", () => {
+  test("repeated prepareStanJSON calls are idempotent", () => {
     const myobj = { a: "I'm a string", b: 15 };
     const stringified = prepareStanJSON(myobj);
     const stringifiedTwice = prepareStanJSON(stringified);
@@ -27,8 +27,8 @@ describe("tinystan string_safe_jsonify", () => {
   });
 });
 
-describe("soakingPrintCallback is functional", () => {
-  test("soakingPrintCallback stores multiple calls", () => {
+describe("printCallbackSponge is functional", () => {
+  test("printCallbackSponge stores multiple calls", () => {
     const { printCallback, getStdout } = printCallbackSponge();
     printCallback("Hello");
     printCallback("World");
