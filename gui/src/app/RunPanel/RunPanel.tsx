@@ -6,7 +6,7 @@ import { FunctionComponent, useCallback } from 'react';
 
 import StanSampler, { SamplingOpts } from '../StanSampler/StanSampler';
 import { useSamplerProgress, useSamplerStatus } from '../StanSampler/useStanSampler';
-import { Progress } from '../StanSampler/Worker';
+import { Progress } from '../StanSampler/StanModelWorker';
 
 type RunPanelProps = {
     width: number;

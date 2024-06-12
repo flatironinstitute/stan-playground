@@ -1,6 +1,6 @@
 import type { SamplerParams } from 'tinystan';
-import { Progress, Replies, Requests } from './Worker';
-import StanWorker from './Worker?worker';
+import { Progress, Replies, Requests } from './StanModelWorker';
+import StanWorkerUrl from './StanModelWorker?worker&url';
 
 export type StanSamplerStatus = '' | 'loading' | 'loaded' | 'sampling' | 'completed' | 'failed';
 
@@ -43,7 +43,7 @@ class StanSampler {
     }
 
     _initialize() {
-        this.#worker = new StanWorker
+        this.#worker = new Worker(StanWorkerUrl, { name: "tinystan worker", type: "module" })
         this.#status = 'loading'
         this.#worker.onmessage = (e) => {
             const purpose: Replies = e.data.purpose;
