@@ -1,15 +1,20 @@
+type StancFunction = (
+    name: string,
+    code: string,
+    args: string[],
+) => {
+    errors?: string[];
+    warnings?: string[];
+    result?: string;
+};
 
-let stanc: undefined
-    | ((
-        name: string,
-        code: string,
-        args: string[],
-    ) => {
-        errors?: string[];
-        warnings?: string[];
-        result?: string;
-    });
+type IncomingMessage = {
+    purpose: "format" | "check";
+    name: string;
+    code: string;
+};
 
+let stanc: undefined | StancFunction;
 
 try {
     // importScripts works like a script tag, but we get scoping naturally from the worker
@@ -23,7 +28,7 @@ try {
 
 let requestNumber = 0;
 
-onmessage = function (e) {
+onmessage = function (e: MessageEvent<IncomingMessage>) {
     const { purpose, name, code } = e.data;
 
     if (!stanc) {
