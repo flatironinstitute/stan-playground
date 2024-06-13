@@ -24,10 +24,7 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
         throw Error('Unexpected route')
     }
     return (
-        <SetupSPAnalysis
-            key={route.sourceDataUri || ''} // force complete re-render when sourceDataUri changes
-            sourceDataUri={route.sourceDataUri}
-        >
+        <SetupSPAnalysis>
             <HomePageChild width={width} height={height} />
         </SetupSPAnalysis>
     )
@@ -71,8 +68,8 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
 
     useEffect(() => {
         // update the document title based on the route
-        document.title = route?.title ?? 'stan-playground'
-    }, [route.title])
+        document.title = localDataModel.title || 'stan-playground'
+    }, [localDataModel.title])
 
     return (
         <div style={{ position: 'absolute', width, height, overflow: 'hidden' }}>
