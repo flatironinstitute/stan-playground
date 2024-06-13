@@ -125,6 +125,9 @@ const SetupSPAnalysis: FunctionComponent<PropsWithChildren<SetupSPAnalysisProps>
                     }
                     filesToSet['sampling_opts.json'] = JSON.stringify(sdq.inline_sampling_opts, null, 2)
                 }
+                if (sdq.title) {
+                    filesToSet['meta.json'] = JSON.stringify({ title: sdq.title }, null, 2)
+                }
                 if (canceled) return
                 for (const key in filesToSet) {
                     kvStoreDispatch({
