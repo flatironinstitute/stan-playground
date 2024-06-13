@@ -29,15 +29,6 @@ export default defineConfig({
     },
     exclude: [...configDefaults.exclude]
   },
-  build: {
-    rollupOptions: {
-      output: {
-        // needed so stanc.js has that actual name in distribution
-        // kind of hacky, but import.meta.url doesn't work in the Worker
-        assetFileNames: `assets/[name].[ext]`
-      }
-    },
-  },
   plugins: [react()],
   server:{
     host: "127.0.0.1"

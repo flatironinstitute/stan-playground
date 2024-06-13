@@ -1,6 +1,6 @@
 import { Done } from "@mui/icons-material";
 import { FunctionComponent } from "react";
-import { StancErrors } from "../Stanc/useStanc";
+import { StancErrors } from "../Stanc/Types";
 
 type Props = {
     width: number

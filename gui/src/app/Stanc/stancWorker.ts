@@ -1,24 +1,11 @@
-type StancFunction = (
-    name: string,
-    code: string,
-    args: string[],
-) => {
-    errors?: string[];
-    warnings?: string[];
-    result?: string;
-};
+import { StancFunction, IncomingMessage, Replies, Requests } from "./Types";
 
-type IncomingMessage = {
-    purpose: "format" | "check";
-    name: string;
-    code: string;
-};
+import rawStancJS from "./stanc.js?raw";
 
 let stanc: undefined | StancFunction;
-
 try {
-    // importScripts works like a script tag, but we get scoping naturally from the worker
-    importScripts('./stanc.js');
+    // stanc.js code is not a module, so most nice options for loading are unavailable
+    eval(rawStancJS);
     stanc = (globalThis as any).stanc;
     console.log("loaded stanc.js");
 } catch (e) {
@@ -32,7 +19,7 @@ onmessage = function (e: MessageEvent<IncomingMessage>) {
     const { purpose, name, code } = e.data;
 
     if (!stanc) {
-        postMessage({ error: "stanc.js not loaded yet!" });
+        this.postMessage({ error: "stanc.js failed to load!" });
         return;
     }
 
@@ -40,17 +27,17 @@ onmessage = function (e: MessageEvent<IncomingMessage>) {
 
     const output = stanc(name, code, args);
 
-    if (purpose === "format") {
-        this.postMessage({ purpose: "formatted", ...output });
-    } else if (purpose === "check") {
+    if (purpose === Requests.Format) {
+        this.postMessage({ purpose: Replies.Formatted, ...output });
+    } else if (purpose === Requests.Check) {
         requestNumber++;
 
         const { errors, warnings, result } = output;
         if (result) {
-            this.postMessage({ purpose: "checked", warnings, requestNumber });
+            this.postMessage({ purpose: Replies.Checked, warnings, requestNumber });
         } else {
             this.postMessage({
-                purpose: "checked",
+                purpose: Replies.Checked,
                 errors,
                 warnings,
                 requestNumber,
