@@ -1,7 +1,11 @@
 import asyncio
+import logging
+import threading
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator
+
+logger = logging.getLogger(__name__)
 
 
 def _get_compilation_lockfile_name(model_dir: Path) -> Path:
@@ -26,10 +30,16 @@ def compilation_output_lock(model_dir: Path) -> Generator[bool, None, None]:
         with lockfile.open(mode="x") as file:
             file.write("locked")
     except FileExistsError:
+        logger.debug(
+            "Thread %d failed to acquire lock on %s", threading.get_ident(), model_dir
+        )
         yield False
     else:
         # we have the lock, so we need to clean it up
         try:
+            logger.debug(
+                "Thread %d acquired lock on %s", threading.get_ident(), model_dir
+            )
             yield True
         finally:
             lockfile.unlink()
