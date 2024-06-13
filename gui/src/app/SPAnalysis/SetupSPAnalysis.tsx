@@ -61,7 +61,7 @@ const SetupSPAnalysis: FunctionComponent<PropsWithChildren<SetupSPAnalysisProps>
         if (!savedState) return
         const parsedState = JSON.parse(savedState)
         for (const key in parsedState) {
-            if (['main.stan', 'data.json', 'sampling_opts.json'].includes(key)) {
+            if (['main.stan', 'data.json', 'sampling_opts.json', 'meta.json'].includes(key)) {
                 kvStoreDispatch({
                     type: 'set',
                     key,
@@ -72,12 +72,18 @@ const SetupSPAnalysis: FunctionComponent<PropsWithChildren<SetupSPAnalysisProps>
     }, [])
     ////////////////////////////////////////////////////////////////////////////////////////
 
-    const [title, setTitle] = useState('Untitled')
-
     const value = useMemo(() => {
+        const meta = safeParseJson(kvStore['meta.json'] || '{}') || {}
+        const title = meta.title || 'Untitled'
+        const setTitle = (title: string) => {
+            kvStoreDispatch({
+                type: 'set',
+                key: 'meta.json',
+                value: JSON.stringify({ title })
+            })
+        }
         return {
             localDataModel: {
-                // title is hard-coded for now because we don't yet have a mechanism for it to be changed
                 title,
                 setTitle,
                 stanFileContent: kvStore['main.stan'] || '',
@@ -114,12 +120,20 @@ const SetupSPAnalysis: FunctionComponent<PropsWithChildren<SetupSPAnalysisProps>
                 }
             }
         }
-    }, [kvStore, title])
+    }, [kvStore])
     return (
         <SPAnalysisContext.Provider value={value}>
             {children}
         </SPAnalysisContext.Provider>
     )
+}
+
+const safeParseJson = (text: string): any => {
+    try {
+        return JSON.parse(text)
+    } catch (e) {
+        return null
+    }
 }
 
 export default SetupSPAnalysis
