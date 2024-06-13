@@ -1,4 +1,4 @@
-import { FunctionComponent, PropsWithChildren, useEffect, useMemo, useReducer, useState } from "react"
+import { FunctionComponent, PropsWithChildren, useEffect, useMemo, useReducer } from "react"
 import { SPAnalysisContext } from "./SPAnalysisContext"
 
 type SetupSPAnalysisProps = {
@@ -111,7 +111,7 @@ const SetupSPAnalysis: FunctionComponent<PropsWithChildren<SetupSPAnalysisProps>
                     })
                 },
                 clearAll: () => {
-                    for (const key of ['main.stan', 'data.json', 'sampling_opts.json']) {
+                    for (const key of ['main.stan', 'data.json', 'sampling_opts.json', 'meta.json']) {
                         kvStoreDispatch({
                             type: 'delete',
                             key
