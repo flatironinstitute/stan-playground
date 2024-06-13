@@ -1,4 +1,6 @@
 import asyncio
+import logging
+import time
 from hashlib import sha1
 from pathlib import Path
 from shutil import copy2
@@ -13,6 +15,8 @@ from .file_validation.compilation_files import (
     compilation_files_exist,
 )
 from .locking import compilation_output_lock, wait_until_free
+
+logger = logging.getLogger(__name__)
 
 
 def _compute_stan_program_hash(program_file: Path) -> str:
@@ -29,6 +33,7 @@ def make_canonical_model_dir(src_file: Path, built_model_dir: Path) -> Path:
 
 
 def copy_compiled_files_to_cache(job_dir: Path, model_dir: Path) -> None:
+    logger.info("Copying compiled files from %s to %s", job_dir, model_dir)
     for file in COMPILATION_OUTPUTS:
         source = job_dir / file
         if not source.exists():
@@ -50,6 +55,7 @@ async def compile_and_cache(
         # if there's a cache hit, make sure any copying is already complete,
         # then return without compiling
         await wait_until_free(model_dir)
+        logger.info("Cache hit for %s: %s", job_dir, model_dir)
         return
 
     # otherwise, compile in our job-specific folder
@@ -88,12 +94,25 @@ async def compile_stan_program(
     try:
         job_main = get_job_source_file(job_dir)
         cmd = f"emmake make {job_main.with_suffix('.js')} && emstrip {job_main.with_suffix('.wasm')}"
-        process = await asyncio.create_subprocess_shell(cmd, cwd=tinystan_dir)
-        await asyncio.wait_for(process.wait(), timeout=timeout)
+        logger.info("Compiling in %s", job_dir)
+        before = time.time()
+        process = await asyncio.create_subprocess_shell(
+            cmd,
+            cwd=tinystan_dir,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout)
+        logger.info("Compilation finished after %.2f seconds", time.time() - before)
     except (asyncio.TimeoutError, TimeoutError):
         raise StanPlaygroundCompilationTimeoutException()
 
     if process.returncode != 0:
+        logger.error(
+            "Compilation failed:\nstdout:\n%s\nstderr:\n%s",
+            stdout.decode("utf-8"),
+            stderr.decode("utf-8"),
+        )
         raise StanPlaygroundCompilationException(
-            f"Failed to compile model: exit code {process.returncode}"
+            f"Failed to compile model: {stderr.decode('utf-8')}"
         )
