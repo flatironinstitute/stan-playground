@@ -84,7 +84,6 @@ const SetupSPAnalysis: FunctionComponent<PropsWithChildren<SetupSPAnalysisProps>
         }
         return {
             localDataModel: {
-                // title is hard-coded for now because we don't yet have a mechanism for it to be changed
                 title,
                 setTitle,
                 stanFileContent: kvStore['main.stan'] || '',
