@@ -19,8 +19,6 @@ try {
   console.error(e);
 }
 
-let requestNumber = 0;
-
 self.onmessage = (e: MessageEvent<IncomingMessage>) => {
   const { purpose, name, code } = e.data;
 
@@ -36,17 +34,14 @@ self.onmessage = (e: MessageEvent<IncomingMessage>) => {
   if (purpose === Requests.Format) {
     self.postMessage({ purpose: Replies.Formatted, ...output });
   } else if (purpose === Requests.Check) {
-    requestNumber++;
-
     const { errors, warnings, result } = output;
     if (result) {
-      self.postMessage({ purpose: Replies.Checked, warnings, requestNumber });
+      self.postMessage({ purpose: Replies.Checked, warnings });
     } else {
       self.postMessage({
         purpose: Replies.Checked,
         errors,
         warnings,
-        requestNumber,
       });
     }
   }
