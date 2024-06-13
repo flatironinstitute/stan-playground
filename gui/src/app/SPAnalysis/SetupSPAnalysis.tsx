@@ -1,4 +1,4 @@
-import { FunctionComponent, PropsWithChildren, useEffect, useMemo, useReducer, useRef } from "react"
+import { FunctionComponent, PropsWithChildren, useEffect, useMemo, useReducer, useState } from "react"
 import { SPAnalysisContext } from "./SPAnalysisContext"
 
 type SetupSPAnalysisProps = {
@@ -72,11 +72,14 @@ const SetupSPAnalysis: FunctionComponent<PropsWithChildren<SetupSPAnalysisProps>
     }, [])
     ////////////////////////////////////////////////////////////////////////////////////////
 
+    const [title, setTitle] = useState('Untitled')
+
     const value = useMemo(() => {
         return {
             localDataModel: {
                 // title is hard-coded for now because we don't yet have a mechanism for it to be changed
-                title: 'Untitled',
+                title,
+                setTitle,
                 stanFileContent: kvStore['main.stan'] || '',
                 setStanFileContent: (text: string) => {
                     kvStoreDispatch({
@@ -111,7 +114,7 @@ const SetupSPAnalysis: FunctionComponent<PropsWithChildren<SetupSPAnalysisProps>
                 }
             }
         }
-    }, [kvStore])
+    }, [kvStore, title])
     return (
         <SPAnalysisContext.Provider value={value}>
             {children}
