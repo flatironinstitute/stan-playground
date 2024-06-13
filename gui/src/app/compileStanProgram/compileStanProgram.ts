@@ -1,4 +1,4 @@
-const compileStanProgram = async (stanWasmServerUrl: string, stanProgram: string, onStatus: (s: string) => void): Promise<{ mainJsUrl?: string, jobId?: string }> => {
+const compileStanProgram = async (stanWasmServerUrl: string, stanProgram: string, onStatus: (s: string) => void): Promise<{ mainJsUrl?: string }> => {
     try {
         onStatus("initiating job");
         const initiateJobUrl = `${stanWasmServerUrl}/job/initiate`
@@ -45,13 +45,8 @@ const compileStanProgram = async (stanWasmServerUrl: string, stanProgram: string
             }
         });
         if (!c.ok) {
-            let j = await c.json();
+            const j = await c.json();
             onStatus(`failed to run job: ${j?.message ?? c.statusText}`);
-            return {}
-        }
-        const respC = await c.json();
-        if (respC.status !== 'completed') {
-            onStatus(`job failed: ${JSON.stringify(respC)}`);
             return {}
         }
 
@@ -67,11 +62,11 @@ const compileStanProgram = async (stanWasmServerUrl: string, stanProgram: string
 
 
         onStatus("compiled");
-        return { mainJsUrl: downloadMainJsUrl, jobId: job_id }
+        return { mainJsUrl: downloadMainJsUrl }
     }
     catch (e) {
         onStatus(`failed to compile: ${e}`);
-        return { mainJsUrl: undefined }
+        return {}
     }
 }
 

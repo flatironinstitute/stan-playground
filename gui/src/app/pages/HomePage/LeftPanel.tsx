@@ -18,6 +18,7 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height }) => {
         localDataModel.setStanFileContent(stanie.stan)
         localDataModel.setDataFileContent(JSON.stringify(stanie.data, null, 2))
         localDataModel.setSamplingOptsContent(JSON.stringify(defaultSamplingOpts, null, 2))
+        localDataModel.setTitle(stanie.meta.title || 'Untitled')
     }, [localDataModel])
     return (
         <div style={{position: 'absolute', width, height, backgroundColor: 'lightgray', overflowY: 'auto'}}>
