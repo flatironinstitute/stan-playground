@@ -33,7 +33,7 @@ const useRoute = () => {
             return {
                 page: 'home',
                 sourceDataUri: p,
-                title: (query.t || '') as string
+                title:  decodeURI((query.t || '') as string)
             }
         }
     }, [p, query])
@@ -41,7 +41,7 @@ const useRoute = () => {
     const setRoute = useCallback((r: Route, replaceHistory?: boolean) => {
         let newQuery = {...query}
         if (r.page === 'home') {
-            newQuery = {p: '/', t: r.title}
+            newQuery = {p: '/', t: encodeURI(r.title)}
         }
         else if (r.page === 'about') {
             newQuery = {p: '/about'}
