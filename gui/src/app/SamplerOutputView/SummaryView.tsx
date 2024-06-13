@@ -2,6 +2,7 @@ import { FunctionComponent, useMemo } from "react"
 import { ess } from "./advanced/ess"
 import { computeMean, computePercentile, computeStdDev } from "./util"
 import rhat from "./advanced/rhat"
+import compute_effective_sample_size from "./ess_computation_from_stan/compute_effective_sample_size"
 
 type SummaryViewProps = {
     width: number
@@ -44,9 +45,14 @@ const columns = [
         title: '95th percentile of the parameter'
     },
     {
-        key: 'nEff',
-        label: 'N_Eff',
-        title: 'Effective sample size: A crude measure of the effective sample size (uses ess_imse)'
+        key: 'nEff1',
+        label: 'N_Eff1',
+        title: 'Effective sample size: A crude measure of the effective sample size (ported from bayes_kit untested)'
+    },
+    {
+        key: 'nEff2',
+        label: 'N_Eff2',
+        title: 'Effective sample size: A crude measure of the effective sample size (ported from stan C++ untested)'
     },
     {
         key: 'nEff/s',
@@ -73,14 +79,15 @@ const SummaryView: FunctionComponent<SummaryViewProps> = ({ width, height, draws
         for (const pname of paramNames) {
             const pDraws = draws[paramNames.indexOf(pname)];
             const pDrawsSorted = [...pDraws].sort((a, b) => a - b);
-            const ess = computeEss(pDraws, drawChainIds);
+            const ess1 = computeEss1(pDraws, drawChainIds);
+            const ess2 = computeEss2(pDraws, drawChainIds);
             const stdDev = computeStdDev(pDraws);
             const values = columns.map((column) => {
                 if (column.key === 'mean') {
                     return computeMean(pDraws);
                 }
                 else if (column.key === 'mcse') {
-                    return stdDev / Math.sqrt(ess);
+                    return stdDev / Math.sqrt(ess1);
                 }
                 else if (column.key === 'stdDev') {
                     return stdDev;
@@ -94,11 +101,14 @@ const SummaryView: FunctionComponent<SummaryViewProps> = ({ width, height, draws
                 else if (column.key === '95%') {
                     return computePercentile(pDrawsSorted, 0.95);
                 }
-                else if (column.key === 'nEff') {
-                    return ess;
+                else if (column.key === 'nEff1') {
+                    return ess1;
+                }
+                else if (column.key === 'nEff2') {
+                    return ess2;
                 }
                 else if (column.key === 'nEff/s') {
-                    return computeTimeSec ? ess / computeTimeSec : NaN;
+                    return computeTimeSec ? ess1 / computeTimeSec : NaN;
                 }
                 else if (column.key === 'rHat') {
                     const counts = computeChainCounts(drawChainIds, uniqueChainIds);
@@ -157,7 +167,7 @@ const SummaryView: FunctionComponent<SummaryViewProps> = ({ width, height, draws
     )
 }
 
-const computeEss = (x: number[], chainIds: number[]) => {
+const computeEss1 = (x: number[], chainIds: number[]) => {
     const uniqueChainIds = Array.from(new Set(chainIds)).sort();
     let sumEss = 0;
     for (const chainId of uniqueChainIds) {
@@ -166,6 +176,18 @@ const computeEss = (x: number[], chainIds: number[]) => {
         sumEss += essValue;
     }
     return sumEss;
+}
+
+const computeEss2 = (x: number[], chainIds: number[]) => {
+    const uniqueChainIds = Array.from(new Set(chainIds)).sort();
+    const draws: number[][] = new Array(uniqueChainIds.length).fill(0).map(() => []);
+    for (let i = 0; i < x.length; i++) {
+        const chainId = chainIds[i];
+        const chainIndex = uniqueChainIds.indexOf(chainId);
+        draws[chainIndex].push(x[i]);
+    }
+    const ess = compute_effective_sample_size(draws);
+    return ess;
 }
 
 const computeChainCounts = (chainIds: number[], uniqueChainIds: number[]) => {
