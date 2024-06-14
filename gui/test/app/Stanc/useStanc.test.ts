@@ -18,7 +18,7 @@ afterEach(() => {
 });
 
 describe("useStanc", () => {
-  test("requestFormat should format", async () => {
+  test("requestFormat should call the callback with a formatted model", async () => {
     const code = "data { int x; }";
     const setCode = vi.fn();
 
@@ -42,19 +42,18 @@ describe("useStanc", () => {
     expect(mockedStdout).toHaveBeenCalledWith("terminating stanc worker");
   });
 
-  test("changing code triggers a check", async () => {
-    let code = "data { int x; }";
+  test("changing the code triggers a check", async () => {
+    const initialCode = "data { int x; }";
     const setCode = vi.fn();
 
-    const { result, rerender, unmount } = renderHook(() =>
-      useStanc("main.stan", code, setCode),
+    const { result, rerender, unmount } = renderHook(({ code }: { code: string }) =>
+      useStanc("main.stan", code, setCode), { initialProps: { code: initialCode } },
     );
 
     expect(result.current.stancErrors.errors).toBeUndefined();
     expect(result.current.stancErrors.warnings).toBeUndefined();
 
-    code = "data { int x; ";
-    rerender();
+    rerender({ code: "data { int x; " });
 
     await waitFor(() => {
       expect(result.current.stancErrors.errors).toBeDefined();
@@ -67,7 +66,7 @@ describe("useStanc", () => {
     expect(mockedStdout).toHaveBeenCalledWith("terminating stanc worker");
   });
 
-  test("failure case", async () => {
+  test("gracefully refuses requests if stanc.js failed to load", async () => {
     vi.stubGlobal("eval", () => {
       throw new Error("test error");
     });
