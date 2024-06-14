@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import StanSampler, { StanSamplerStatus } from "./StanSampler";
-import { Progress } from "../tinystan/Worker";
+import { Progress } from "./StanModelWorker";
 
 const useStanSampler = (compiledMainJsUrl: string | undefined) => {
     const [sampler, setSampler] = useState<StanSampler | undefined>(undefined);

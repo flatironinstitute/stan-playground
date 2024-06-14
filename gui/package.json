@@ -32,7 +32,8 @@
     "rehype-mathjax": "^6.0.0",
     "rehype-raw": "^6.1.1",
     "remark-gfm": "^4.0.0",
-    "remark-math": "^6.0.0"
+    "remark-math": "^6.0.0",
+    "tinystan": "^0.0.2"
   },
   "devDependencies": {
     "@types/node": "^20.12.11",

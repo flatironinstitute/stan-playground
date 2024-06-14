@@ -6240,6 +6240,11 @@ tinyspy@^2.2.0:
   resolved "https://registry.yarnpkg.com/tinyspy/-/tinyspy-2.2.1.tgz#117b2342f1f38a0dbdcc73a50a454883adf861d1"
   integrity sha512-KYad6Vy5VDWV4GH3fjpseMQ/XU2BhIYP7Vzd0LG44qRWm/Yt2WCOTicFdvmgo6gWaqooMQCawTtILVQJupKu7A==
 
+tinystan@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/tinystan/-/tinystan-0.0.2.tgz#d4a233456b30f7a6c4866c7fefe96ee1258ccf0d"
+  integrity sha512-+vuijdM/zwNJsPwQAM9+bYZpfqDdMuAulvH0YQPOuWT3PLYD+ZRb0xrdn2w0kiB96e4Pnk1Ymv4o37PpZ3qdBw==
+
 to-fast-properties@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/to-fast-properties/-/to-fast-properties-2.0.0.tgz#dc5e698cbd079265bc73e0377681a4e4e83f616e"
