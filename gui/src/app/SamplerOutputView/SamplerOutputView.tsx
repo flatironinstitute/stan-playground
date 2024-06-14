@@ -235,7 +235,7 @@ const createZipBlobForMultipleCsvs = async (csvTexts: string[], uniqueChainIds: 
     const folder = zip.folder('draws');
     if (!folder) throw new Error('Failed to create folder');
     csvTexts.forEach((text, i) => {
-        folder.file(`chain-${uniqueChainIds[i]}.csv`, text);
+        folder.file(`chain_${uniqueChainIds[i]}.csv`, text);
     });
     const blob = await zip.generateAsync({type: 'blob'});
     return blob;
