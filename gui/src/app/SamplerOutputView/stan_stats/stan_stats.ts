@@ -3,9 +3,11 @@ Translated from
 https://github.com/stan-dev/stan/blob/develop/src/stan/analyze/mcmc/compute_effective_sample_size.hpp
 and
 https://github.com/stan-dev/stan/blob/develop/src/stan/analyze/mcmc/autocovariance.hpp
+and
+https://github.com/stan-dev/stan/blob/develop/src/stan/analyze/mcmc/compute_potential_scale_reduction.hpp
 */
 
-import { transform as inPlaceFftTransform, inverseTransform as inPlaceInverseFftTransform } from "../advanced/fft";
+import { transform as inPlaceFftTransform, inverseTransform as inPlaceInverseFftTransform } from "./fft";
 
 /**
  * Computes the effective sample size (ESS) for the specified
@@ -24,7 +26,7 @@ import { transform as inPlaceFftTransform, inverseTransform as inPlaceInverseFft
  * draws: arrays of draws for each chain
  * returns: effective sample size for the specified parameter
  */
-function compute_effective_sample_size(draws: number[][]): number {
+export function compute_effective_sample_size(draws: number[][]): number {
     const num_chains = draws.length;
 
     // use the minimum number of draws across all chains
@@ -71,7 +73,7 @@ function compute_effective_sample_size(draws: number[][]): number {
     const acov = new Array(num_chains).fill(0).map(() => new Array(num_draws).fill(0));
     // chain_mean: mean of each chain
     const chain_mean = new Array(num_chains).fill(0);
-    // chain_var: variance of each chain
+    // chain_var: sample variance of each chain
     const chain_var = new Array(num_chains).fill(0);
     for (let chain = 0; chain < num_chains; ++chain) {
         const draw = draws[chain];
@@ -261,4 +263,65 @@ export const compute_split_effective_sample_size = (draws: number[][]) => {
     return compute_effective_sample_size(split_draws);
 }
 
-export default compute_effective_sample_size;
+export function compute_potential_scale_reduction(draws: number[][]): number {
+    const num_chains = draws.length;
+    let num_draws = draws[0].length;
+    for (let chain = 1; chain < num_chains; ++chain) {
+        num_draws = Math.min(num_draws, draws[chain].length);
+    }
+
+    // check if chains are constant; all equal to first draw's value
+    let are_all_const = false;
+    const init_draw = new Array(num_chains).fill(0);
+    for (let chain_idx = 0; chain_idx < num_chains; chain_idx++) {
+        const draw = draws[chain_idx];
+        for (let n = 0; n < num_draws; n++) {
+            if (!isFinite(draw[n])) {
+                return NaN;
+            }
+        }
+
+        init_draw[chain_idx] = draw[0];
+
+        const precision = 1e-12;
+        if (draw.every(d => Math.abs(d - draw[0]) < precision)) {
+            are_all_const = true;
+        }
+    }
+
+    if (are_all_const) {
+        // If all chains are constant then return NaN
+        // if they all equal the same constant value
+        const precision = 1e-12;
+        if (init_draw.every(d => Math.abs(d - init_draw[0]) < precision)) {
+            return NaN;
+        }
+    }
+
+    // chain_mean: mean of each chain
+    const chain_mean = new Array(num_chains).fill(0);
+    // chain_var: sample variance of each chain
+    const chain_var = new Array(num_chains).fill(0);
+    for (let chain = 0; chain < num_chains; ++chain) {
+        const draw = draws[chain];
+        chain_mean[chain] = compute_mean(draw);
+        chain_var[chain] = compute_sample_variance(draw);
+    }
+
+    const var_between = num_draws * compute_sample_variance(chain_mean);
+    const var_within = compute_mean(chain_var);
+
+    return Math.sqrt((var_between / var_within + num_draws - 1) / num_draws);
+}
+
+export function compute_split_potential_scale_reduction(draws: number[][]): number {
+    const num_chains = draws.length;
+    let num_draws = draws[0].length;
+    for (let chain = 1; chain < num_chains; ++chain) {
+        num_draws = Math.min(num_draws, draws[chain].length);
+    }
+
+    const split_draws = split_chains(draws);
+
+    return compute_potential_scale_reduction(split_draws);
+}
