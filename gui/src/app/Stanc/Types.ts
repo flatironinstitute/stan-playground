@@ -11,23 +11,15 @@ export type StancFunction = (
   args: string[],
 ) => StancReturn;
 
-export enum Replies {
-  Formatted = "formatted",
-  Checked = "checked",
-}
+export type StancReplyMessage = { fatal: string } | StancReturn;
 
-export type StancReplyMessage = {
-  purpose?: Replies;
-  error: string;
-} & StancReturn;
-
-export enum Requests {
-  Format = "format",
-  Check = "check",
+export enum StancWorkerRequests {
+  FormatStanCode = "format",
+  CheckSyntax = "check",
 }
 
 export type StancRequestMessage = {
-  purpose: Requests;
+  purpose: StancWorkerRequests;
   name: string;
   code: string;
 };

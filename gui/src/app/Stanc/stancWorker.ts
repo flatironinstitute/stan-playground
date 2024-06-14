@@ -1,4 +1,9 @@
-import { StancFunction, StancRequestMessage, Replies, Requests } from "./Types";
+import {
+  StancFunction,
+  StancRequestMessage,
+  StancWorkerRequests,
+  StancReplyMessage,
+} from "./Types";
 import rawStancJS from "./stanc.js?raw";
 
 let stanc: undefined | StancFunction;
@@ -19,30 +24,37 @@ try {
   console.error(e);
 }
 
+// helper alias for type safety
+const postReply = (message: StancReplyMessage) => self.postMessage(message);
+
 self.onmessage = (e: MessageEvent<StancRequestMessage>) => {
   const { purpose, name, code } = e.data;
 
   if (!stanc) {
-    self.postMessage({ error: "stanc.js not loaded!" });
+    postReply({ fatal: "stanc.js not loaded!" });
     return;
   }
 
+  // stanc accepts the name (unused for our purposes, affects C++ code generation),
+  // model code, and arguments. These arguments are the same as supported by the
+  // stanc CLI, just without the leading "--".
   const args = [`filename-in-msg=${name}`, "auto-format", "max-line-length=78"];
-
+  // The return will include 'warnings', a list of compiler warnings, and then one of
+  // 'result' which is either the generated C++ code or the formatted model, or
+  // 'errors', which is a list of compiler errors. In practice, 'errors' only contains
+  // a single error
   const output = stanc(name, code, args);
 
-  if (purpose === Requests.Format) {
-    self.postMessage({ purpose: Replies.Formatted, ...output });
-  } else if (purpose === Requests.Check) {
-    const { errors, warnings, result } = output;
-    if (result) {
-      self.postMessage({ purpose: Replies.Checked, warnings });
-    } else {
-      self.postMessage({
-        purpose: Replies.Checked,
-        errors,
-        warnings,
-      });
+  switch (purpose) {
+    case StancWorkerRequests.FormatStanCode: {
+      postReply(output);
+      break;
+    }
+    case StancWorkerRequests.CheckSyntax: {
+      // if we just syntax checked, don't send back formatted code
+      const { errors, warnings } = output;
+      postReply({ errors, warnings });
+      break
     }
   }
 };

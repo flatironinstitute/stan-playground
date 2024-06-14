@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { StancReplyMessage, StancErrors, Replies, Requests } from "./Types";
+import {
+  StancReplyMessage,
+  StancErrors,
+  Replies,
+  StancWorkerRequests,
+} from "./Types";
 import stancWorkerURL from "./stancWorker?worker&url";
 
 const useStanc = (
@@ -28,17 +33,16 @@ const useStanc = (
     if (!stancWorker) return;
 
     stancWorker.onmessage = (e: MessageEvent<StancReplyMessage>) => {
-      const { purpose, result, error } = e.data;
-      if (error) {
-        // not loaded yet
-        console.error(error);
+      if ("fatal" in e.data) {
+        // only returned if stanc.js failed to load
+        console.error(e.data.fatal);
         return;
       }
-      setStancErrors({ ...e.data });
-      if (purpose === Replies.Formatted) {
-        if (result) {
-          onFormat(result);
-        }
+
+      const { result, warnings, errors } = e.data;
+      setStancErrors({ warnings, errors });
+      if (result) {
+        onFormat(result);
       }
     };
   }, [stancWorker, onFormat]);
@@ -46,7 +50,7 @@ const useStanc = (
   // automatic syntax checking
   useEffect(() => {
     stancWorker?.postMessage({
-      purpose: Requests.Check,
+      purpose: StancWorkerRequests.CheckSyntax,
       name: modelName,
       code,
     });
@@ -55,7 +59,7 @@ const useStanc = (
   // requesting formatting
   const requestFormat = useCallback(() => {
     stancWorker?.postMessage({
-      purpose: Requests.Format,
+      purpose: StancWorkerRequests.FormatStanCode,
       name: modelName,
       code,
     });
