@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  StancReplyMessage,
-  StancErrors,
-  Replies,
-  StancWorkerRequests,
-} from "./Types";
+import { StancReplyMessage, StancErrors, StancWorkerRequests } from "./Types";
+// https://vitejs.dev/guide/assets#importing-script-as-a-worker
+// https://vitejs.dev/guide/assets#importing-asset-as-url
 import stancWorkerURL from "./stancWorker?worker&url";
 
 const useStanc = (
@@ -41,7 +38,8 @@ const useStanc = (
 
       const { result, warnings, errors } = e.data;
       setStancErrors({ warnings, errors });
-      if (result) { // only format requests return a result
+      if (result) {
+        // only format requests return a result
         onFormat(result);
       }
     };

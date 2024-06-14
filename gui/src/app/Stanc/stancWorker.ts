@@ -4,7 +4,7 @@ import {
   StancWorkerRequests,
   StancReplyMessage,
 } from "./Types";
-import rawStancJS from "./stanc.js?raw";
+import rawStancJS from "./stanc.js?raw"; // https://vitejs.dev/guide/assets#importing-asset-as-string
 
 let stanc: undefined | StancFunction;
 try {
@@ -54,7 +54,7 @@ self.onmessage = (e: MessageEvent<StancRequestMessage>) => {
       // if we just syntax checked, don't send back formatted code
       const { errors, warnings } = output;
       postReply({ errors, warnings });
-      break
+      break;
     }
   }
 };
