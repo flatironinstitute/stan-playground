@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { StancWorkerMessage, StancErrors, Replies, Requests } from "./Types";
+import { StancReplyMessage, StancErrors, Replies, Requests } from "./Types";
 import stancWorkerURL from "./stancWorker?worker&url";
 
 const useStanc = (
@@ -27,7 +27,7 @@ const useStanc = (
   useEffect(() => {
     if (!stancWorker) return;
 
-    stancWorker.onmessage = (e: MessageEvent<StancWorkerMessage>) => {
+    stancWorker.onmessage = (e: MessageEvent<StancReplyMessage>) => {
       const { purpose, result, error } = e.data;
       if (error) {
         // not loaded yet

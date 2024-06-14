@@ -1,4 +1,4 @@
-import { StancFunction, IncomingMessage, Replies, Requests } from "./Types";
+import { StancFunction, StancRequestMessage, Replies, Requests } from "./Types";
 import rawStancJS from "./stanc.js?raw";
 
 let stanc: undefined | StancFunction;
@@ -19,7 +19,7 @@ try {
   console.error(e);
 }
 
-self.onmessage = (e: MessageEvent<IncomingMessage>) => {
+self.onmessage = (e: MessageEvent<StancRequestMessage>) => {
   const { purpose, name, code } = e.data;
 
   if (!stanc) {
