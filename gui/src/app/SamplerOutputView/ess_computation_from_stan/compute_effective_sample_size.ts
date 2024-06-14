@@ -67,22 +67,27 @@ function compute_effective_sample_size(draws: number[][]): number {
         }
     }
 
+    // acov: autocovariance for each chain
     const acov = new Array(num_chains).fill(0).map(() => new Array(num_draws).fill(0));
-    const chain_mean = new Array(num_chains).fill(0); // mean of each chain
-    const chain_var = new Array(num_chains).fill(0); // variance of each chain
+    // chain_mean: mean of each chain
+    const chain_mean = new Array(num_chains).fill(0);
+    // chain_var: variance of each chain
+    const chain_var = new Array(num_chains).fill(0);
     for (let chain = 0; chain < num_chains; ++chain) {
         const draw = draws[chain];
-        // the autocovariance is computed for each chain
         acov[chain] = autocovariance(draw);
         chain_mean[chain] = compute_mean(draw);
         chain_var[chain] = acov[chain][0] * num_draws / (num_draws - 1);
     }
 
+    // mean_var: mean of the chain variances
     const mean_var = compute_mean(chain_var);
+
     let var_plus = mean_var * (num_draws - 1) / num_draws;
     if (num_chains > 1) {
         var_plus += compute_variance(chain_mean);
     }
+
     const rho_hat_s = new Array(num_draws).fill(0);
     const acov_s = new Array(num_chains).fill(0);
     for (let chain = 0; chain < num_chains; ++chain) {
@@ -186,10 +191,7 @@ function autocorrelation(y: number[]): number[] {
 function autocovariance(y: number[]): number[] {
     const acov = autocorrelation(y);
     const variance = compute_variance(y);
-    for (let n = 0; n < y.length; n++) {
-        acov[n] *= variance;
-    }
-    return acov;
+    return acov.map(v => v * variance);
 }
 
 function fftNextGoodSize(n: number): number {
@@ -214,15 +216,45 @@ function fftNextGoodSize(n: number): number {
 function forwardFFT(signal: number[]): [number, number][] {
     const realPart = [...signal];
     const imagPart = new Array(signal.length).fill(0);
-    inPlaceFftTransform(realPart, imagPart);
+    inPlaceInverseFftTransform(realPart, imagPart);
     return realPart.map((v, i) => [v, imagPart[i]]);
 }
 
 function inverseFFT(freqvec: [number, number][]): [number, number][] {
     const realPart = freqvec.map(v => v[0]);
     const imagPart = freqvec.map(v => v[1]);
-    inPlaceInverseFftTransform(realPart, imagPart);
+    inPlaceFftTransform(realPart, imagPart);
     return realPart.map((v, i) => [v, imagPart[i]]);
+}
+
+const split_chains = (draws: number[][]) => {
+    const num_chains = draws.length;
+    let num_draws = draws[0].length;
+    for (let chain = 1; chain < num_chains; ++chain) {
+        num_draws = Math.min(num_draws, draws[chain].length);
+    }
+
+    const half = num_draws / 2;
+    const half_draws = Math.ceil(half);
+    const split_draws = new Array(2 * num_chains);
+    for (let n = 0; n < num_chains; ++n) {
+        split_draws[2 * n] = draws[n].slice(0, half_draws);
+        split_draws[2 * n + 1] = draws[n].slice(half_draws);
+    }
+
+    return split_draws;
+}
+
+export const compute_split_effective_sample_size = (draws: number[][]) => {
+    const num_chains = draws.length;
+    let num_draws = draws[0].length;
+    for (let chain = 1; chain < num_chains; ++chain) {
+        num_draws = Math.min(num_draws, draws[chain].length);
+    }
+
+    const split_draws = split_chains(draws);
+
+    return compute_effective_sample_size(split_draws);
 }
 
 export default compute_effective_sample_size;
