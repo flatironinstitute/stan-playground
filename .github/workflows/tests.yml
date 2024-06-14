@@ -27,5 +27,5 @@ jobs:
           cache-dependency-path: gui/yarn.lock
       - name: Install dependencies
         run: cd gui; yarn
-      - name: Build
+      - name: Test
         run: cd gui; yarn test
