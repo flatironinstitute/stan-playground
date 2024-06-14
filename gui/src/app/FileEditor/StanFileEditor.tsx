@@ -2,8 +2,8 @@ import { Splitter } from '@fi-sci/splitter';
 import { AutoFixHigh, Settings, } from "@mui/icons-material";
 import { FunctionComponent, useCallback, useEffect, useMemo, useState } from "react";
 import StanCompileResultWindow from "./StanCompileResultWindow";
+import useStanc from "../Stanc/useStanc";
 import TextEditor, { ToolbarItem } from "./TextEditor";
-import runStanc from "./runStanc";
 import compileStanProgram from '../compileStanProgram/compileStanProgram';
 
 type Props = {
@@ -22,16 +22,12 @@ type Props = {
 type CompileStatus = 'preparing' | 'compiling' | 'compiled' | 'failed' | ''
 
 const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSaveContent, editedFileContent, setEditedFileContent, readOnly, width, height, setCompiledUrl }) => {
-    const [validSyntax, setValidSyntax] = useState<boolean>(false)
-    const handleAutoFormat = useCallback(() => {
-        if (editedFileContent === undefined) return
-            ; (async () => {
-                const model = await runStanc('main.stan', editedFileContent, ["auto-format", "max-line-length=78"])
-                if (model.result) {
-                    setEditedFileContent(model.result)
-                }
-            })()
-    }, [editedFileContent, setEditedFileContent])
+
+    const { stancErrors, requestFormat } = useStanc("main.stan", editedFileContent, setEditedFileContent);
+
+    const validSyntax = useMemo(() => {
+        return stancErrors.errors === undefined
+    }, [stancErrors]);
 
     const [compileStatus, setCompileStatus] = useState<CompileStatus>('')
     const [theStanFileContentThasHasBeenCompiled, setTheStanFileContentThasHasBeenCompiled] = useState<string>('')
@@ -104,7 +100,7 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
                     icon: <AutoFixHigh />,
                     tooltip: 'Auto format this stan file',
                     label: 'auto format',
-                    onClick: handleAutoFormat,
+                    onClick: requestFormat,
                     color: 'darkblue'
                 })
             }
@@ -132,7 +128,7 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
         }
 
         return ret
-    }, [editedFileContent, fileContent, handleAutoFormat, handleCompile, compileStatus, compileMessage, validSyntax, readOnly])
+    }, [editedFileContent, fileContent, requestFormat, handleCompile, compileStatus, compileMessage, validSyntax, readOnly])
 
     const isCompiling = compileStatus === 'compiling'
 
@@ -162,8 +158,7 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
                 editedFileContent ? <StanCompileResultWindow
                     width={0}
                     height={0}
-                    mainStanText={editedFileContent}
-                    onValidityChanged={valid => setValidSyntax(valid)}
+                    stancErrors={stancErrors}
                 /> : (
                     <div style={{ padding: 20 }}>Select an example from the left panel</div>
                 )

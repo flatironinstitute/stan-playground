@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import StanSampler, { StanSamplerStatus } from "./StanSampler";
-import { Progress } from "../tinystan/Worker";
+import { Progress } from "./StanModelWorker";
 
 const useStanSampler = (compiledMainJsUrl: string | undefined) => {
     const [sampler, setSampler] = useState<StanSampler | undefined>(undefined);
@@ -61,12 +61,16 @@ export const useSamplerProgress = (sampler: StanSampler | undefined) => {
 export const useSamplerOutput = (sampler: StanSampler | undefined) => {
     const [draws, setDraws] = useState<number[][] | undefined>();
     const [paramNames, setParamNames] = useState<string[] | undefined>();
+    const [numChains, setNumChains] = useState<number | undefined>();
+    const [computeTimeSec, setComputeTimeSec] = useState<number | undefined>();
 
     useEffect(() => {
         let canceled = false;
         if (!sampler) {
             setDraws(undefined);
             setParamNames(undefined);
+            setNumChains(undefined);
+            setComputeTimeSec(undefined);
             return;
         }
         sampler.onStatusChanged(() => {
@@ -74,10 +78,14 @@ export const useSamplerOutput = (sampler: StanSampler | undefined) => {
             if (sampler.status === 'completed') {
                 setDraws(sampler.draws);
                 setParamNames(sampler.paramNames);
+                setNumChains(sampler.numChains);
+                setComputeTimeSec(sampler.computeTimeSec);
             }
             else {
                 setDraws(undefined)
                 setParamNames(undefined)
+                setNumChains(undefined)
+                setComputeTimeSec(undefined)
             }
         })
         return (
@@ -87,7 +95,7 @@ export const useSamplerOutput = (sampler: StanSampler | undefined) => {
         )
     }, [sampler]);
 
-    return { draws, paramNames }
+    return { draws, paramNames, numChains, computeTimeSec }
 }
 
 export default useStanSampler;
