@@ -1,8 +1,8 @@
 import { FunctionComponent, useMemo } from "react"
 import { ess } from "./advanced/ess"
-import { computeMean, computePercentile, computeStdDev } from "./util"
 import rhat from "./advanced/rhat"
 import compute_effective_sample_size from "./ess_computation_from_stan/compute_effective_sample_size"
+import { computeMean, computePercentile, computeStdDev } from "./util"
 
 type SummaryViewProps = {
     width: number
@@ -187,6 +187,7 @@ const computeEss2 = (x: number[], chainIds: number[]) => {
         draws[chainIndex].push(x[i]);
     }
     const ess = compute_effective_sample_size(draws);
+    // const ess = compute_split_effective_sample_size(draws);
     return ess;
 }
 
