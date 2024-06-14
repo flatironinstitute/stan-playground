@@ -85,7 +85,7 @@ function compute_effective_sample_size(draws: number[][]): number {
 
     let var_plus = mean_var * (num_draws - 1) / num_draws;
     if (num_chains > 1) {
-        var_plus += compute_variance(chain_mean);
+        var_plus += compute_sample_variance(chain_mean);
     }
 
     const rho_hat_s = new Array(num_draws).fill(0);
@@ -150,10 +150,14 @@ function compute_mean(arr: number[]): number {
     return compute_sum(arr) / arr.length;
 }
 
-function compute_variance(arr: number[]): number {
-    // QUESTION: is this the correct formula for variance?
+function compute_population_variance(arr: number[]): number {
     const mean = compute_mean(arr);
     return compute_mean(arr.map(d => (d - mean) ** 2));
+}
+
+function compute_sample_variance(arr: number[]): number {
+    const mean = compute_mean(arr);
+    return compute_sum(arr.map(d => (d - mean) ** 2)) / (arr.length - 1);
 }
 
 function autocorrelation(y: number[]): number[] {
@@ -190,7 +194,7 @@ function autocorrelation(y: number[]): number[] {
 
 function autocovariance(y: number[]): number[] {
     const acov = autocorrelation(y);
-    const variance = compute_variance(y);
+    const variance = compute_population_variance(y);
     return acov.map(v => v * variance);
 }
 
