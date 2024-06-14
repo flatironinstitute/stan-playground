@@ -1,6 +1,6 @@
-import { SamplerParams } from '../tinystan';
-import { Progress, Replies, Requests } from '../tinystan/Worker';
-import StanWorker from '../tinystan/Worker?worker';
+import type { SamplerParams } from 'tinystan';
+import { Progress, Replies, Requests } from './StanModelWorker';
+import StanWorkerUrl from './StanModelWorker?worker&url';
 
 export type StanSamplerStatus = '' | 'loading' | 'loaded' | 'sampling' | 'completed' | 'failed';
 
@@ -27,7 +27,10 @@ class StanSampler {
     #onProgressCallbacks: ((progress: Progress) => void)[] = [];
     #onStatusChangedCallbacks: (() => void)[] = [];
     #draws: number[][] = [];
+    #computeTimeSec: number | undefined = undefined;
     #paramNames: string[] = [];
+    #numChains: number = 0;
+    #samplingStartTimeSec: number = 0;
 
     private constructor(private compiledUrl: string) {
         this._initialize()
@@ -43,7 +46,7 @@ class StanSampler {
     }
 
     _initialize() {
-        this.#worker = new StanWorker
+        this.#worker = new Worker(StanWorkerUrl, { name: "tinystan worker", type: "module" })
         this.#status = 'loading'
         this.#worker.onmessage = (e) => {
             const purpose: Replies = e.data.purpose;
@@ -65,6 +68,7 @@ class StanSampler {
                     } else {
                         this.#draws = e.data.draws;
                         this.#paramNames = e.data.paramNames;
+                        this.#computeTimeSec = Date.now() / 1000 - this.#samplingStartTimeSec;
                         this.#status = 'completed';
                         this.#onStatusChangedCallbacks.forEach(cb => cb())
                     }
@@ -90,6 +94,11 @@ class StanSampler {
             console.warn('Model not loaded yet')
             return
         }
+        if (sampleConfig.num_chains === undefined) {
+            console.warn('Number of chains not specified')
+            return
+        }
+        this.#numChains = sampleConfig.num_chains;
         if (this.#status === 'sampling') {
             console.warn('Already sampling')
             return
@@ -102,6 +111,7 @@ class StanSampler {
         this.#paramNames = [];
         this.#worker
             .postMessage({ purpose: Requests.Sample, sampleConfig });
+        this.#samplingStartTimeSec = Date.now() / 1000;
         this.#status = 'sampling';
         this.#onStatusChangedCallbacks.forEach(cb => cb())
     }
@@ -127,11 +137,17 @@ class StanSampler {
     get paramNames() {
         return this.#paramNames;
     }
+    get numChains() {
+        return this.#numChains;
+    }
     get status() {
         return this.#status;
     }
     get errorMessage() {
         return this.#errorMessage;
+    }
+    get computeTimeSec() {
+        return this.#computeTimeSec;
     }
 }
 
