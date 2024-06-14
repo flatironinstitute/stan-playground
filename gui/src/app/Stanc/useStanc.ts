@@ -41,7 +41,7 @@ const useStanc = (
 
       const { result, warnings, errors } = e.data;
       setStancErrors({ warnings, errors });
-      if (result) {
+      if (result) { // only format requests return a result
         onFormat(result);
       }
     };
