@@ -7,6 +7,7 @@ import TabWidget from "../TabWidget/TabWidget"
 import TracePlotsView from "./TracePlotsView"
 import SummaryView from "./SummaryView"
 import HistsView from "./HistsView"
+import JSZip from 'jszip'
 
 type SamplerOutputViewProps = {
     width: number
@@ -142,13 +143,33 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({ width, height, draws, pa
         const csvText = prepareCsvText(draws, paramNames, drawChainIds, drawNumbers);
         downloadTextFile(csvText, 'draws.csv');
     }, [draws, paramNames, drawChainIds, drawNumbers]);
+    const handleExportToMultipleCsvs = useCallback(async () => {
+        const uniqueChainIds = Array.from(new Set(drawChainIds));
+        const csvTexts = prepareMultipleCsvsText(draws, paramNames, drawChainIds, uniqueChainIds);
+        const blob = await createZipBlobForMultipleCsvs(csvTexts, uniqueChainIds);
+        const fileName = 'SP-draws.zip';
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(url);
+    }, [draws, paramNames, drawChainIds]);
     return (
         <div style={{position: 'absolute', width, height, overflow: 'auto'}}>
-            <SmallIconButton
-                icon={<Download />}
-                label="Export to .csv"
-                onClick={handleExportToCsv}
-            />
+            <div>
+                <SmallIconButton
+                    icon={<Download />}
+                    label="Export to single .csv"
+                    onClick={handleExportToCsv}
+                />
+                &nbsp;
+                <SmallIconButton
+                    icon={<Download />}
+                    label="Export to multiple .csv"
+                    onClick={handleExportToMultipleCsvs}
+                />
+            </div>
             <table className="draws-table">
                 <thead>
                     <tr>
@@ -191,10 +212,40 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({ width, height, draws, pa
 }
 
 const prepareCsvText = (draws: number[][], paramNames: string[], drawChainIds: number[], drawNumbers: number[]) => {
+    // draws: Each element of draws is a column corresponding to a parameter, across all chains
+    // paramNames: The paramNames array contains the names of the parameters in the same order that they appear in the draws array
+    // drawChainIds: The drawChainIds array contains the chain id for each row in the draws array
+    // uniqueChainIds: The uniqueChainIds array contains the unique chain ids
     const lines = draws[0].map((_, i) => {
         return [`${drawChainIds[i]}`, `${drawNumbers[i]}`, ...paramNames.map((_, j) => draws[j][i])].join(',')
     })
     return [['Chain', 'Draw', ...paramNames].join(','), ...lines].join('\n')
+}
+
+const prepareMultipleCsvsText = (draws: number[][], paramNames: string[], drawChainIds: number[], uniqueChainIds: number[]) => {
+    // See the comments in prepareCsvText for the meaning of the arguments.
+    // Whereas prepareCsvText returns a CSV that represents a long-form table,
+    // this function returns multiple CSVs, one for each chain.
+    return uniqueChainIds.map(chainId => {
+        const drawIndicesForChain = drawChainIds.map((id, i) => id === chainId ? i : -1).filter(i => i >= 0);
+        const lines = drawIndicesForChain.map(i => {
+            return paramNames.map((_, j) => draws[j][i]).join(',')
+        })
+
+        return [paramNames.join(','), ...lines].join('\n')
+    })
+}
+
+const createZipBlobForMultipleCsvs = async (csvTexts: string[], uniqueChainIds: number[]) => {
+    const zip = new JSZip();
+    // put them all in a folder called 'draws'
+    const folder = zip.folder('draws');
+    if (!folder) throw new Error('Failed to create folder');
+    csvTexts.forEach((text, i) => {
+        folder.file(`chain_${uniqueChainIds[i]}.csv`, text);
+    });
+    const blob = await zip.generateAsync({type: 'blob'});
+    return blob;
 }
 
 const downloadTextFile = (text: string, filename: string) => {
