@@ -161,7 +161,6 @@ const computeEss = (x: number[], chainIds: number[]) => {
         draws[chainIndex].push(x[i]);
     }
     const ess = compute_effective_sample_size(draws);
-    // const ess = compute_split_effective_sample_size(draws);
     return ess;
 }
 

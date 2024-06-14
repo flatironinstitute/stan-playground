@@ -212,6 +212,10 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({ width, height, draws, pa
 }
 
 const prepareCsvText = (draws: number[][], paramNames: string[], drawChainIds: number[], drawNumbers: number[]) => {
+    // draws: Each element of draws is a column corresponding to a parameter, across all chains
+    // paramNames: The paramNames array contains the names of the parameters in the same order that they appear in the draws array
+    // drawChainIds: The drawChainIds array contains the chain id for each row in the draws array
+    // uniqueChainIds: The uniqueChainIds array contains the unique chain ids
     const lines = draws[0].map((_, i) => {
         return [`${drawChainIds[i]}`, `${drawNumbers[i]}`, ...paramNames.map((_, j) => draws[j][i])].join(',')
     })
@@ -219,6 +223,9 @@ const prepareCsvText = (draws: number[][], paramNames: string[], drawChainIds: n
 }
 
 const prepareMultipleCsvsText = (draws: number[][], paramNames: string[], drawChainIds: number[], uniqueChainIds: number[]) => {
+    // See the comments in prepareCsvText for the meaning of the arguments.
+    // Whereas prepareCsvText returns a CSV that represents a long-form table,
+    // this function returns multiple CSVs, one for each chain.
     return uniqueChainIds.map(chainId => {
         const drawIndicesForChain = drawChainIds.map((id, i) => id === chainId ? i : -1).filter(i => i >= 0);
         const lines = drawIndicesForChain.map(i => {
