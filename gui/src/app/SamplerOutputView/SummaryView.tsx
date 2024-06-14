@@ -152,26 +152,26 @@ const SummaryView: FunctionComponent<SummaryViewProps> = ({ width, height, draws
     )
 }
 
-const computeEss = (x: number[], chainIds: number[]) => {
+const drawsByChain = (draws: number[], chainIds: number[]): number[][] => {
+    // Group draws by chain for use in computing ESS and Rhat
     const uniqueChainIds = Array.from(new Set(chainIds)).sort();
-    const draws: number[][] = new Array(uniqueChainIds.length).fill(0).map(() => []);
-    for (let i = 0; i < x.length; i++) {
+    const drawsByChain: number[][] = new Array(uniqueChainIds.length).fill(0).map(() => []);
+    for (let i = 0; i < draws.length; i++) {
         const chainId = chainIds[i];
         const chainIndex = uniqueChainIds.indexOf(chainId);
-        draws[chainIndex].push(x[i]);
+        drawsByChain[chainIndex].push(draws[i]);
     }
+    return drawsByChain;
+}
+
+const computeEss = (x: number[], chainIds: number[]) => {
+    const draws = drawsByChain(x, chainIds);
     const ess = compute_effective_sample_size(draws);
     return ess;
 }
 
 const computeRhat = (x: number[], chainIds: number[]) => {
-    const uniqueChainIds = Array.from(new Set(chainIds)).sort();
-    const draws: number[][] = new Array(uniqueChainIds.length).fill(0).map(() => []);
-    for (let i = 0; i < x.length; i++) {
-        const chainId = chainIds[i];
-        const chainIndex = uniqueChainIds.indexOf(chainId);
-        draws[chainIndex].push(x[i]);
-    }
+    const draws = drawsByChain(x, chainIds);
     const rhat = compute_split_potential_scale_reduction(draws);
     return rhat;
 }
