@@ -29,6 +29,10 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
         return stancErrors.errors === undefined
     }, [stancErrors]);
 
+    const hasWarnings = useMemo(() => {
+        return (stancErrors.warnings) && (stancErrors.warnings.length > 0)
+    }, [stancErrors])
+
     const [compileStatus, setCompileStatus] = useState<CompileStatus>('')
     const [theStanFileContentThasHasBeenCompiled, setTheStanFileContentThasHasBeenCompiled] = useState<string>('')
     const [compileMessage, setCompileMessage] = useState<string>('')
@@ -103,6 +107,16 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
                 label: showLabelsOnButtons ? 'Syntax error' : '',
                 color: 'darkred',
                 tooltip: 'Syntax error in Stan file',
+                onClick: () => { setSyntaxWindowVisible(true) }
+            })
+        }
+        else if ((hasWarnings) && (!!editedFileContent)) {
+            ret.push({
+                type: 'button',
+                icon: <Cancel />,
+                label: showLabelsOnButtons ? 'Syntax warning' : '',
+                color: 'blue',
+                tooltip: 'Syntax warning in Stan file',
                 onClick: () => { setSyntaxWindowVisible(true) }
             })
         }
