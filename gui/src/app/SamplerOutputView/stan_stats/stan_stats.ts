@@ -240,24 +240,20 @@ const split_chains = (draws: number[][]) => {
         num_draws = Math.min(num_draws, draws[chain].length);
     }
 
-    const half = num_draws / 2;
-    const half_draws = Math.ceil(half);
+    const half = num_draws / 2.0;
+    // when N is odd, the (N+1)/2th draw is ignored
+    const end_first_half = Math.floor(half);
+    const start_second_half = Math.ceil(half);
     const split_draws = new Array(2 * num_chains);
     for (let n = 0; n < num_chains; ++n) {
-        split_draws[2 * n] = draws[n].slice(0, half_draws);
-        split_draws[2 * n + 1] = draws[n].slice(half_draws);
+        split_draws[2 * n] = draws[n].slice(0, end_first_half);
+        split_draws[2 * n + 1] = draws[n].slice(start_second_half);
     }
 
     return split_draws;
 }
 
 export const compute_split_effective_sample_size = (draws: number[][]) => {
-    const num_chains = draws.length;
-    let num_draws = draws[0].length;
-    for (let chain = 1; chain < num_chains; ++chain) {
-        num_draws = Math.min(num_draws, draws[chain].length);
-    }
-
     const split_draws = split_chains(draws);
 
     return compute_effective_sample_size(split_draws);
@@ -302,6 +298,7 @@ export function compute_potential_scale_reduction(draws: number[][]): number {
     const chain_mean = new Array(num_chains).fill(0);
     // chain_var: sample variance of each chain
     const chain_var = new Array(num_chains).fill(0);
+
     for (let chain = 0; chain < num_chains; ++chain) {
         const draw = draws[chain];
         chain_mean[chain] = compute_mean(draw);
@@ -315,12 +312,6 @@ export function compute_potential_scale_reduction(draws: number[][]): number {
 }
 
 export function compute_split_potential_scale_reduction(draws: number[][]): number {
-    const num_chains = draws.length;
-    let num_draws = draws[0].length;
-    for (let chain = 1; chain < num_chains; ++chain) {
-        num_draws = Math.min(num_draws, draws[chain].length);
-    }
-
     const split_draws = split_chains(draws);
 
     return compute_potential_scale_reduction(split_draws);
