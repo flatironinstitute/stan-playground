@@ -1,13 +1,9 @@
 import React, { FunctionComponent, Suspense } from 'react'
 
+import type { PlotParams } from 'react-plotly.js';
 const Plot = React.lazy(() => (import('react-plotly.js')))
 
-type LazyPlotlyPlotProps = {
-	data: any[]
-	layout: any
-}
-
-const LazyPlotlyPlot: FunctionComponent<LazyPlotlyPlotProps> = ({ data, layout }) => {
+const LazyPlotlyPlot: FunctionComponent<PlotParams> = ({ data, layout }) => {
 	return (
 		<Suspense fallback={<div>Loading plotly</div>}>
 			<Plot
