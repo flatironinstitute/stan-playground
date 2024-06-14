@@ -1,0 +1,32 @@
+.table1 {
+    border-collapse: collapse;
+    width: 100%;
+    text-align: left;
+    color: #333;
+    font-family: 'Roboto', sans-serif; 
+}
+
+.table1 td {
+    border: 1px solid #dfcece;
+    padding: 3px;
+}
+
+.table1 tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.table1 tr:hover {
+    background-color: #ddd;
+}
+
+.table1 td:first-child {
+    font-weight: bold;
+}
+
+.table2 {
+    border-collapse: collapse;
+    width: 100%;
+    text-align: left;
+    color: #333;
+    font-family: 'Roboto', sans-serif; 
+}
