@@ -18,6 +18,8 @@ export default defineConfig({
         // "**/types/*ts",
         "index.ts",
         "vite*ts",
+        // vitest seems to always reports 100% coverage for workers
+        "**/*Worker.ts",
 
       ],
       include: [

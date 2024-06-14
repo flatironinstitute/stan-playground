@@ -45,13 +45,13 @@ const progressPrintCallback = (msg: string) => {
         return;
     }
     const report = parseProgress(msg);
-    postMessage({ purpose: Replies.Progress, report })
+    self.postMessage({ purpose: Replies.Progress, report })
 }
 
 
 let model: StanModel;
 
-onmessage = function (e) {
+self.onmessage = (e) => {
     const purpose: Requests = e.data.purpose;
 
     switch (purpose) {
@@ -63,35 +63,35 @@ onmessage = function (e) {
                     m => {
                         model = m;
                         console.log("Web Worker loaded Stan model built from version " + m.stanVersion());
-                        postMessage({ purpose: Replies.ModelLoaded });
+                        self.postMessage({ purpose: Replies.ModelLoaded });
                     });
             break;
         }
         case Requests.Sample: {
             if (!model) {
-                postMessage({ purpose: Replies.StanReturn, error: "Model not loaded yet!" })
+                self.postMessage({ purpose: Replies.StanReturn, error: "Model not loaded yet!" })
                 return;
             }
             try {
                 const { paramNames, draws } = model.sample(e.data.sampleConfig);
                 // TODO? use an ArrayBuffer so we can transfer without serialization cost
-                postMessage({ purpose: Replies.StanReturn, draws, paramNames, error: null });
+                self.postMessage({ purpose: Replies.StanReturn, draws, paramNames, error: null });
             } catch (e: any) {
-                postMessage({ purpose: Replies.StanReturn, error: e.toString() })
+                self.postMessage({ purpose: Replies.StanReturn, error: e.toString() })
             }
             break;
         }
         case Requests.Pathfinder: {
             if (!model) {
-                postMessage({ purpose: Replies.StanReturn, error: "Model not loaded yet!" })
+                self.postMessage({ purpose: Replies.StanReturn, error: "Model not loaded yet!" })
                 return;
             }
             try {
                 const { draws, paramNames } = model.pathfinder(e.data.pathfinderConfig);
                 // TODO? use an ArrayBuffer so we can transfer without serialization cost
-                postMessage({ purpose: Replies.StanReturn, draws, paramNames, error: null });
+                self.postMessage({ purpose: Replies.StanReturn, draws, paramNames, error: null });
             } catch (e: any) {
-                postMessage({ purpose: Replies.StanReturn, error: e.toString() })
+                self.postMessage({ purpose: Replies.StanReturn, error: e.toString() })
             }
             break;
         }
