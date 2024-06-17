@@ -1,8 +1,7 @@
-import { FunctionComponent, useCallback } from "react"
-import examplesStanies, { Stanie } from "../../exampleStanies/exampleStanies"
 import { Hyperlink } from "@fi-sci/misc"
-import { useSPAnalysis } from "../../SPAnalysis/SPAnalysisContext"
-import { defaultSamplingOpts } from "../../StanSampler/StanSampler"
+import { FunctionComponent, useCallback, useContext } from "react"
+import examplesStanies, { Stanie } from "../../exampleStanies/exampleStanies"
+import { SPAnalysisContext } from "../../SPAnalysis/SPAnalysisContextProvider"
 
 type LeftPanelProps = {
     width: number
@@ -10,16 +9,12 @@ type LeftPanelProps = {
 }
 
 const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height }) => {
-    const {
-        localDataModel
-    } = useSPAnalysis()
+    // note: this is close enough to pass in directly if we wish
+    const { update } = useContext(SPAnalysisContext)
 
     const handleOpenExample = useCallback((stanie: Stanie) => () => {
-        localDataModel.setStanFileContent(stanie.stan)
-        localDataModel.setDataFileContent(JSON.stringify(stanie.data, null, 2))
-        localDataModel.setSamplingOptsContent(JSON.stringify(defaultSamplingOpts, null, 2))
-        localDataModel.setTitle(stanie.meta.title || 'Untitled')
-    }, [localDataModel])
+        update({ type: 'loadStanie', stanie })
+    }, [update])
     return (
         <div style={{position: 'absolute', width, height, backgroundColor: 'lightgray', overflowY: 'auto'}}>
             <div style={{margin: 5}}>
@@ -38,7 +33,7 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height }) => {
                     <button onClick={() => {
                         const ok = window.confirm('Are you sure you want to clear all data in the editors?')
                         if (!ok) return
-                        localDataModel.clearAll()
+                        update({ type: 'clear' })
                     }}>Clear all</button>
                 </div>
                 <div>

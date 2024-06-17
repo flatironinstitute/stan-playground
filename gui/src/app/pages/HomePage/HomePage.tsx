@@ -1,17 +1,16 @@
 import { Splitter } from "@fi-sci/splitter";
-import { FunctionComponent, useCallback, useEffect, useMemo, useState } from "react";
+import { FunctionComponent, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import DataFileEditor from "../../FileEditor/DataFileEditor";
 import StanFileEditor from "../../FileEditor/StanFileEditor";
 import RunPanel from "../../RunPanel/RunPanel";
 import SamplerOutputView from "../../SamplerOutputView/SamplerOutputView";
 import SamplingOptsPanel from "../../SamplingOptsPanel/SamplingOptsPanel";
-import { SamplingOpts, defaultSamplingOpts } from "../../StanSampler/StanSampler";
+import SPAnalysisContextProvider, { SPAnalysisContext } from '../../SPAnalysis/SPAnalysisContextProvider';
+import { SamplingOpts } from "../../StanSampler/StanSampler";
 import useStanSampler, { useSamplerStatus } from "../../StanSampler/useStanSampler";
 import useRoute from "../../useRoute";
-import SetupSPAnalysis from "../../SPAnalysis/SetupSPAnalysis";
-import { useSPAnalysis } from "../../SPAnalysis/SPAnalysisContext";
-import TopBar from "./TopBar";
 import LeftPanel from "./LeftPanel";
+import TopBar from "./TopBar";
 
 type Props = {
     width: number
@@ -24,12 +23,12 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
         throw Error('Unexpected route')
     }
     return (
-        <SetupSPAnalysis
+        <SPAnalysisContextProvider
             key={route.sourceDataUri || ''} // force complete re-render when sourceDataUri changes
             sourceDataUri={route.sourceDataUri}
         >
             <HomePageChild width={width} height={height} />
-        </SetupSPAnalysis>
+        </SPAnalysisContextProvider>
     )
 }
 
@@ -38,25 +37,22 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
     if (route.page !== 'home') {
         throw Error('Unexpected route')
     }
-    const { localDataModel } = useSPAnalysis()
-
+    const { data, update } = useContext(SPAnalysisContext)
+    // const { data: unsavedData, update: updateUnsaved } = useReducer( SPAnalysisReducer, data )
 
     const [editedStanFileContent, setEditedStanFileContent] = useState('')
     useEffect(() => {
-        setEditedStanFileContent(localDataModel.stanFileContent)
-    }, [localDataModel.stanFileContent])
+        setEditedStanFileContent(data.stanFileContent)
+    }, [data.stanFileContent])
 
     const [editedDataFileContent, setEditedDataFileContent] = useState('')
     useEffect(() => {
-        setEditedDataFileContent(localDataModel.dataFileContent)
-    }, [localDataModel.dataFileContent])
+        setEditedDataFileContent(data.dataFileContent)
+    }, [data?.dataFileContent])
 
-    const samplingOpts = useMemo(() => (
-        { ...defaultSamplingOpts, ...JSON.parse(localDataModel.samplingOptsContent || '{}') }
-    ), [localDataModel.samplingOptsContent])
     const setSamplingOpts = useCallback((opts: SamplingOpts) => {
-        localDataModel.setSamplingOptsContent(JSON.stringify(opts, null, 2))
-    }, [localDataModel])
+        update({type: 'setSamplingOpts', opts})
+    }, [update])
 
     const [compiledMainJsUrl, setCompiledMainJsUrl] = useState<string>('')
 
@@ -65,9 +61,9 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
 
     useEffect(() => {
         // update the title in the route
-        const newRoute = { ...route, title: localDataModel.title }
+        const newRoute = { ...route, title: data.meta.title }
         setRoute(newRoute, true)
-    }, [localDataModel.title, route, setRoute])
+    }, [data.meta.title, route, setRoute])
 
     useEffect(() => {
         // update the document title based on the route
@@ -99,8 +95,9 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
                         width={0}
                         height={0}
                         fileName="main.stan"
-                        fileContent={localDataModel.stanFileContent}
-                        onSaveContent={localDataModel.setStanFileContent}
+                        fileContent={data.stanFileContent}
+                        // this could be made more ergonomic
+                        onSaveContent={(src: string) => update({ type: 'saveStanSrc', src })}
                         editedFileContent={editedStanFileContent}
                         setEditedFileContent={setEditedStanFileContent}
                         readOnly={false}
@@ -109,12 +106,13 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
                     <RightView
                         width={0}
                         height={0}
-                        dataFileContent={localDataModel.dataFileContent}
-                        saveDataFileContent={localDataModel.setDataFileContent}
+                        dataFileContent={data.dataFileContent}
+                        // this could be more ergonomic
+                        saveDataFileContent={(data: string) => update({ type: 'updateData', data })}
                         editedDataFileContent={editedDataFileContent}
                         setEditedDataFileContent={setEditedDataFileContent}
                         compiledMainJsUrl={compiledMainJsUrl}
-                        samplingOpts={samplingOpts}
+                        samplingOpts={data.samplingOpts}
                         setSamplingOpts={setSamplingOpts}
                     />
                 </Splitter>
