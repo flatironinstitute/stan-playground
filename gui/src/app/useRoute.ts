@@ -11,6 +11,8 @@ export type Route = {
         inline_sampling_opts?: SamplingOpts
         title?: string
     }
+} | {
+    page: 'prototypes'
 }
 
 const useRoute = () => {
@@ -19,6 +21,9 @@ const useRoute = () => {
     const search = location.search
     const query = useMemo(() => (parseSearchString(search)), [search])
     const route: Route = useMemo(() => {
+        if (query.page === 'prototypes') {
+            return { page: 'prototypes' }
+        }
         const recognizedQueryKeys = new Set([
             'stan',
             'data',
@@ -78,8 +83,12 @@ const useRoute = () => {
 
     const setRoute = useCallback((r: Route, replaceHistory?: boolean) => {
         let newQuery: { [key: string]: string | undefined } | undefined = undefined
+        if (r.page === 'prototypes') {
+            navigate(location.pathname + '?page=prototypes', {replace: replaceHistory})
+            return
+        }
         if (r.page != 'home') {
-            console.error('Unexpected page in setRoute', r.page)
+            console.error('Unexpected page in setRoute', (r as any).page)
             return
         }
         if (r.sourceDataQuery) {

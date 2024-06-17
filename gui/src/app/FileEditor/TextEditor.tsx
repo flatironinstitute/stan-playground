@@ -140,7 +140,7 @@ const TextEditor: FunctionComponent<Props> = ({defaultText, text, onSaveText, ed
     return (
         <div style={{position: 'absolute', width, height, overflow: 'hidden'}} onKeyDown={handleKeyDown}>
             <NotSelectable>
-                <div style={{position: 'absolute', paddingLeft: 20, paddingTop: 3, width: width - 50, height: toolbarHeight, backgroundColor: 'lightgray', overflow: 'hidden'}}>
+                <div style={{position: 'absolute', paddingLeft: 20, paddingTop: 3, width: width - 20, height: toolbarHeight, backgroundColor: 'lightgray', overflow: 'hidden'}}>
                     {label}
                     &nbsp;&nbsp;&nbsp;
                     {!readOnly && (

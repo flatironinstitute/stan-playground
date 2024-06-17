@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FunctionComponent } from "react";
 import CompilationServerConnectionControl from "../../CompilationServerConnectionControl/CompilationServerConnectionControl";
-import { SmallIconButton } from "@fi-sci/misc";
+import { Hyperlink, SmallIconButton } from "@fi-sci/misc";
 import { QuestionMark } from "@mui/icons-material";
 import useRoute from "../../useRoute";
 import { Toolbar } from "@mui/material";
@@ -23,6 +23,7 @@ const TopBar: FunctionComponent<TopBarProps> = () => {
     <div>
       <Toolbar style={{minHeight: 20}}>
         Stan Playground - {localDataModel.title}
+        &nbsp;<Hyperlink onClick={() => setRoute({page: 'prototypes'})} color="lightblue">[View prototypes]</Hyperlink>
         <span style={{marginLeft: 'auto'}} />
         <CompilationServerConnectionControl />
         <span>

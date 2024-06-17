@@ -3,6 +3,7 @@ import { FunctionComponent } from "react";
 import StatusBar, { statusBarHeight } from "./StatusBar";
 import HomePage from "./pages/HomePage/HomePage";
 import useRoute from "./useRoute";
+import PrototypesWindow from "./Prototypes/PrototypesWindow";
 
 type Props = {
     // none
@@ -18,8 +19,11 @@ const MainWindow: FunctionComponent<Props> = () => {
                 {
                     route.page === 'home' ? (
                         <HomePage width={width} height={H} />
-                    ) : route.page === 'about' ? (
-                        <HomePage width={width} height={H} />
+                    ) : route.page === 'prototypes' ? (
+                        <PrototypesWindow
+                            width={width}
+                            height={H}
+                        />
                     ) : (
                         <div>404</div>
                     )
