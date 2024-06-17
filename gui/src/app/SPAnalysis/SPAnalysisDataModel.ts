@@ -7,7 +7,7 @@ type SPAnalysisBase = {
     dataFileContent: string
     samplingOpts: SamplingOpts
 }
-    
+
 type SPAnalysisEphemeralData = {
     // possible future things to track include the compilation status
     // of the current stan src file(s)

@@ -16,7 +16,8 @@ export type SPAnalysisReducerAction = {
     type: 'saveStanSrc',
     src: string
 } | {
-    // note: could trigger rerun of data-generating script
+    // note: could trigger rerun of data-generating script?
+    // or have a separate verb for that
     type: 'updateData',
     data: string
 } | {

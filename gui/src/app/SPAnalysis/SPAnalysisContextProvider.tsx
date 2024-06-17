@@ -34,7 +34,7 @@ const SPAnalysisContextProvider: FunctionComponent<PropsWithChildren<SPAnalysisC
 
         return () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
-        };    
+        };
     }, [data])
 
     useEffect(() => {

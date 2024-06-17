@@ -1,11 +1,12 @@
 import { Splitter } from "@fi-sci/splitter";
-import { FunctionComponent, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { FunctionComponent, useCallback, useContext, useEffect, useMemo, useReducer, useState } from "react";
 import DataFileEditor from "../../FileEditor/DataFileEditor";
 import StanFileEditor from "../../FileEditor/StanFileEditor";
 import RunPanel from "../../RunPanel/RunPanel";
 import SamplerOutputView from "../../SamplerOutputView/SamplerOutputView";
 import SamplingOptsPanel from "../../SamplingOptsPanel/SamplingOptsPanel";
 import SPAnalysisContextProvider, { SPAnalysisContext } from '../../SPAnalysis/SPAnalysisContextProvider';
+import { SPAnalysisReducer, SPAnalysisReducerType } from "../../SPAnalysis/SPAnalysisReducer";
 import { SamplingOpts } from "../../StanSampler/StanSampler";
 import useStanSampler, { useSamplerStatus } from "../../StanSampler/useStanSampler";
 import useRoute from "../../useRoute";
@@ -22,6 +23,9 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
     if (route.page !== 'home') {
         throw Error('Unexpected route')
     }
+    // NOTE: We should probably move the SPAnalysisContextProvider up to the App or MainWindow
+    // component; however this will wait on routing refactor since I don't want to add the `route`
+    // item in those contexts in this PR
     return (
         <SPAnalysisContextProvider
             key={route.sourceDataUri || ''} // force complete re-render when sourceDataUri changes
@@ -38,18 +42,13 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
         throw Error('Unexpected route')
     }
     const { data, update } = useContext(SPAnalysisContext)
-    // const { data: unsavedData, update: updateUnsaved } = useReducer( SPAnalysisReducer, data )
-
-    const [editedStanFileContent, setEditedStanFileContent] = useState('')
+    const [ unsavedData, updateUnsaved ] = useReducer<SPAnalysisReducerType>( SPAnalysisReducer, data )
     useEffect(() => {
-        setEditedStanFileContent(data.stanFileContent)
+        updateUnsaved({ type: 'saveStanSrc', src: data.stanFileContent })
     }, [data.stanFileContent])
-
-    const [editedDataFileContent, setEditedDataFileContent] = useState('')
     useEffect(() => {
-        setEditedDataFileContent(data.dataFileContent)
-    }, [data?.dataFileContent])
-
+        updateUnsaved({ type: 'updateData', data: data.dataFileContent })
+    }, [data.dataFileContent])
     const setSamplingOpts = useCallback((opts: SamplingOpts) => {
         update({type: 'setSamplingOpts', opts})
     }, [update])
@@ -96,10 +95,10 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
                         height={0}
                         fileName="main.stan"
                         fileContent={data.stanFileContent}
-                        // this could be made more ergonomic
+                        // this could be made more ergonomic?
                         onSaveContent={(src: string) => update({ type: 'saveStanSrc', src })}
-                        editedFileContent={editedStanFileContent}
-                        setEditedFileContent={setEditedStanFileContent}
+                        editedFileContent={unsavedData.stanFileContent}
+                        setEditedFileContent={(src: string) => updateUnsaved({ type: 'saveStanSrc', src })}
                         readOnly={false}
                         setCompiledUrl={setCompiledMainJsUrl}
                     />
@@ -107,10 +106,10 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
                         width={0}
                         height={0}
                         dataFileContent={data.dataFileContent}
-                        // this could be more ergonomic
+                        // this could be more ergonomic?
                         saveDataFileContent={(data: string) => update({ type: 'updateData', data })}
-                        editedDataFileContent={editedDataFileContent}
-                        setEditedDataFileContent={setEditedDataFileContent}
+                        editedDataFileContent={unsavedData.dataFileContent}
+                        setEditedDataFileContent={(data: string) => updateUnsaved({ type: 'updateData', data })}
                         compiledMainJsUrl={compiledMainJsUrl}
                         samplingOpts={data.samplingOpts}
                         setSamplingOpts={setSamplingOpts}
