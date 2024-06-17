@@ -13,6 +13,7 @@ export type Route = {
     }
 } | {
     page: 'prototypes'
+    selection: 'data.py' | 'data.r' | 'analysis.py'
 }
 
 const useRoute = () => {
@@ -22,7 +23,10 @@ const useRoute = () => {
     const query = useMemo(() => (parseSearchString(search)), [search])
     const route: Route = useMemo(() => {
         if (query.page === 'prototypes') {
-            return { page: 'prototypes' }
+            return {
+                page: 'prototypes',
+                selection: (query.selection || 'data.py') as 'data.py' | 'data.r' | 'analysis.py'
+            }
         }
         const recognizedQueryKeys = new Set([
             'stan',
@@ -84,7 +88,7 @@ const useRoute = () => {
     const setRoute = useCallback((r: Route, replaceHistory?: boolean) => {
         let newQuery: { [key: string]: string | undefined } | undefined = undefined
         if (r.page === 'prototypes') {
-            navigate(location.pathname + '?page=prototypes', {replace: replaceHistory})
+            navigate(location.pathname + `?page=prototypes&selection=${r.selection}`, {replace: replaceHistory})
             return
         }
         if (r.page != 'home') {
