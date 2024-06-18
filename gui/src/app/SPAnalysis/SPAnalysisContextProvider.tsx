@@ -47,11 +47,9 @@ const SPAnalysisContextProvider: FunctionComponent<PropsWithChildren<SPAnalysisC
     ////////////////////////////////////////////////////////////////////////////////////////
 
     return (
-        <>
-            <SPAnalysisContext.Provider value={{data, update}}>
-                {children}
-            </SPAnalysisContext.Provider>
-        </>
+        <SPAnalysisContext.Provider value={{data, update}}>
+            {children}
+        </SPAnalysisContext.Provider>
     )
 }
 
