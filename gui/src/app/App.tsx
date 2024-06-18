@@ -8,7 +8,7 @@ function App() {
   return (
     <BrowserRouter>
         <CustomStatusBarElementsContext.Provider value={{customStatusBarElements: customStatusBarStrings, customStatusBarElementsDispatch: customStatusBarStringsDispatch}}>
-            <MainWindow />
+          <MainWindow />
         </CustomStatusBarElementsContext.Provider>
     </BrowserRouter>
   )
