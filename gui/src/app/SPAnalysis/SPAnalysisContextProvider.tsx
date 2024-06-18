@@ -42,7 +42,7 @@ const SPAnalysisContextProvider: FunctionComponent<PropsWithChildren<SPAnalysisC
         const savedState = localStorage.getItem('stan-playground-saved-state')
         if (!savedState) return
         const parsedData = deserializeAnalysis(savedState)
-        update({ type: 'localStorageLoad', state: parsedData })
+        update({ type: 'loadLocalStorage', state: parsedData })
     }, [])
     ////////////////////////////////////////////////////////////////////////////////////////
 

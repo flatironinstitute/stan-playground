@@ -1,7 +1,7 @@
 import { Reducer } from "react"
 import { Stanie } from "../exampleStanies/exampleStanies"
 import { defaultSamplingOpts, SamplingOpts } from '../StanSampler/StanSampler'
-import { initialDataModel, SPAnalysisDataModel } from "./SPAnalysisDataModel"
+import { initialDataModel, SPAnalysisDataModel, SPAnalysisKnownFiles } from "./SPAnalysisDataModel"
 
 
 export type SPAnalysisReducerType = Reducer<SPAnalysisDataModel, SPAnalysisReducerAction>
@@ -13,18 +13,17 @@ export type SPAnalysisReducerAction = {
     type: 'retitle',
     title: string
 } | {
-    type: 'saveStanSrc',
-    src: string
+    type: 'editFile',
+    content: string,
+    filename: SPAnalysisKnownFiles
 } | {
-    // note: could trigger rerun of data-generating script?
-    // or have a separate verb for that
-    type: 'updateData',
-    data: string
+    type: 'commitFile',
+    filename: SPAnalysisKnownFiles
 } | {
     type: 'setSamplingOpts',
     opts: Partial<SamplingOpts>
 } | {
-    type: 'localStorageLoad',
+    type: 'loadLocalStorage',
     state: SPAnalysisDataModel
 } | {
     type: 'clear'
@@ -38,7 +37,12 @@ export const SPAnalysisReducer: SPAnalysisReducerType = (s: SPAnalysisDataModel,
                 stanFileContent: a.stanie.stan,
                 dataFileContent: JSON.stringify(a.stanie.data),
                 samplingOpts: defaultSamplingOpts,
-                meta: { ...s.meta, title: a.stanie.meta.title ?? 'Untitled' }
+                meta: { ...s.meta, title: a.stanie.meta.title ?? 'Untitled' },
+                ephemera: {
+                    ...s.ephemera,
+                    stanFileContent: a.stanie.stan,
+                    dataFileContent: JSON.stringify(a.stanie.data)
+                }
             }
         }
         case "retitle": {
@@ -47,25 +51,20 @@ export const SPAnalysisReducer: SPAnalysisReducerType = (s: SPAnalysisDataModel,
                 meta: { ...s.meta, title: a.title }
             }
         }
-        case "saveStanSrc": {
-            return {
-                ...s,
-                stanFileContent: a.src
-            }
+        case "editFile": {
+            const newEphemera = { ...s.ephemera }
+            newEphemera[a.filename] = a.content
+            return { ...s, ephemera: newEphemera }
         }
-        case "updateData": {
-            return {
-                ...s,
-                dataFileContent: a.data
-            }
+        case "commitFile": {
+            const newState = { ...s }
+            newState[a.filename] = s.ephemera[a.filename]
+            return newState
         }
         case "setSamplingOpts": {
-            return {
-                ...s,
-                samplingOpts: { ...s.samplingOpts, ...a.opts }
-            }
+            return { ...s, samplingOpts: { ...s.samplingOpts, ...a.opts }}
         }
-        case "localStorageLoad": {
+        case "loadLocalStorage": {
             return a.state;
         }
         case "clear": {
@@ -73,3 +72,4 @@ export const SPAnalysisReducer: SPAnalysisReducerType = (s: SPAnalysisDataModel,
         }
     }
 }
+

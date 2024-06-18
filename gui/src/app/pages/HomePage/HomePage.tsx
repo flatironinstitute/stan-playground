@@ -1,12 +1,12 @@
 import { Splitter } from "@fi-sci/splitter";
-import { FunctionComponent, useCallback, useContext, useEffect, useMemo, useReducer, useState } from "react";
+import { FunctionComponent, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import DataFileEditor from "../../FileEditor/DataFileEditor";
 import StanFileEditor from "../../FileEditor/StanFileEditor";
 import RunPanel from "../../RunPanel/RunPanel";
 import SamplerOutputView from "../../SamplerOutputView/SamplerOutputView";
 import SamplingOptsPanel from "../../SamplingOptsPanel/SamplingOptsPanel";
 import SPAnalysisContextProvider, { SPAnalysisContext } from '../../SPAnalysis/SPAnalysisContextProvider';
-import { SPAnalysisReducer, SPAnalysisReducerType } from "../../SPAnalysis/SPAnalysisReducer";
+import { SPAnalysisKnownFiles } from "../../SPAnalysis/SPAnalysisDataModel";
 import { SamplingOpts } from "../../StanSampler/StanSampler";
 import useStanSampler, { useSamplerStatus } from "../../StanSampler/useStanSampler";
 import useRoute from "../../useRoute";
@@ -42,13 +42,6 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
         throw Error('Unexpected route')
     }
     const { data, update } = useContext(SPAnalysisContext)
-    const [ unsavedData, updateUnsaved ] = useReducer<SPAnalysisReducerType>( SPAnalysisReducer, data )
-    useEffect(() => {
-        updateUnsaved({ type: 'saveStanSrc', src: data.stanFileContent })
-    }, [data.stanFileContent])
-    useEffect(() => {
-        updateUnsaved({ type: 'updateData', data: data.dataFileContent })
-    }, [data.dataFileContent])
     const setSamplingOpts = useCallback((opts: SamplingOpts) => {
         update({type: 'setSamplingOpts', opts})
     }, [update])
@@ -96,9 +89,9 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
                         fileName="main.stan"
                         fileContent={data.stanFileContent}
                         // this could be made more ergonomic?
-                        onSaveContent={(src: string) => update({ type: 'saveStanSrc', src })}
-                        editedFileContent={unsavedData.stanFileContent}
-                        setEditedFileContent={(src: string) => updateUnsaved({ type: 'saveStanSrc', src })}
+                        onSaveContent={() => update({ type: 'commitFile', filename: SPAnalysisKnownFiles.STANFILE })}
+                        editedFileContent={data.ephemera.stanFileContent}
+                        setEditedFileContent={(content: string) => update({ type: 'editFile', content, filename: SPAnalysisKnownFiles.STANFILE })}
                         readOnly={false}
                         setCompiledUrl={setCompiledMainJsUrl}
                     />
@@ -107,9 +100,9 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
                         height={0}
                         dataFileContent={data.dataFileContent}
                         // this could be more ergonomic?
-                        saveDataFileContent={(data: string) => update({ type: 'updateData', data })}
-                        editedDataFileContent={unsavedData.dataFileContent}
-                        setEditedDataFileContent={(data: string) => updateUnsaved({ type: 'updateData', data })}
+                        saveDataFileContent={() => update({ type: 'commitFile', filename: SPAnalysisKnownFiles.DATAFILE })}
+                        editedDataFileContent={data.ephemera.dataFileContent}
+                        setEditedDataFileContent={(content: string) => update({ type: 'editFile', content, filename: SPAnalysisKnownFiles.DATAFILE })}
                         compiledMainJsUrl={compiledMainJsUrl}
                         samplingOpts={data.samplingOpts}
                         setSamplingOpts={setSamplingOpts}
