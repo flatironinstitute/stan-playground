@@ -51,9 +51,8 @@ export const serializeAnalysis = (data: SPAnalysisDataModel): string => {
 export const deserializeAnalysis = (serialized: string): SPAnalysisDataModel => {
     const intermediary = JSON.parse(serialized)
     // Not sure if this is strictly necessary
-    intermediary.ephemera = {
-        stanFileContent: intermediary.stanFileContent,
-        dataFileContent: intermediary.dataFileContent
-    }
+    intermediary.ephemera = {}
+    const stringFileKeys = Object.values(SPAnalysisKnownFiles).filter((v) => isNaN(Number(v)));
+    stringFileKeys.forEach((k) => intermediary.ephemera[k] = intermediary[k]);
     return intermediary as SPAnalysisDataModel
 }
