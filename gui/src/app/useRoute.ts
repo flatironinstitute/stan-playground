@@ -33,7 +33,7 @@ const useRoute = () => {
             return {
                 page: 'home',
                 sourceDataUri: p,
-                title:  decodeURI((query.t || '') as string)
+                title: decodeURI((query.t || '') as string)
             }
         }
     }, [p, query])

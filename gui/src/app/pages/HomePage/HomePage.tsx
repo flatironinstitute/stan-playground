@@ -74,6 +74,11 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
         document.title = route?.title ?? 'stan-playground'
     }, [route.title])
 
+    const hasUnsavedChanges = useMemo(() => {
+        return editedStanFileContent !== localDataModel.stanFileContent
+            || editedDataFileContent !== localDataModel.dataFileContent
+    }, [editedStanFileContent, editedDataFileContent, localDataModel.stanFileContent, localDataModel.dataFileContent])
+
     return (
         <div style={{ position: 'absolute', width, height, overflow: 'hidden' }}>
             <div className="top-bar" style={{ position: 'absolute', left: 0, top: 0, width, height: topBarHeight, overflow: 'hidden' }}>
@@ -86,6 +91,7 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
                 <LeftPanel
                     width={leftPanelWidth}
                     height={height - topBarHeight - 2}
+                    hasUnsavedChanges={hasUnsavedChanges}
                 />
             </div>
             <div className="main-area" style={{ position: 'absolute', left: leftPanelWidth, top: topBarHeight + 2, width: width - leftPanelWidth, height: height - topBarHeight - 2, overflow: 'hidden' }}>
