@@ -1,6 +1,7 @@
 import { createContext, FunctionComponent, PropsWithChildren, useEffect, useReducer } from "react"
-import { deserializeAnalysis, initialDataModel, serializeAnalysis, SPAnalysisDataModel } from "./SPAnalysisDataModel"
+import { initialDataModel, SPAnalysisDataModel } from "./SPAnalysisDataModel"
 import { SPAnalysisReducer, SPAnalysisReducerAction, SPAnalysisReducerType } from "./SPAnalysisReducer"
+import { deserializeAnalysisFromLocalStorage, serializeAnalysisToLocalStorage } from "./SPAnalysisSerialization"
 
 type SPAnalysisContextType = {
     data: SPAnalysisDataModel
@@ -27,7 +28,7 @@ const SPAnalysisContextProvider: FunctionComponent<PropsWithChildren<SPAnalysisC
     useEffect(() => {
         // as user reloads the page or closes the tab, save state to local storage
         const handleBeforeUnload = () => {
-            const state = serializeAnalysis(data)
+            const state = serializeAnalysisToLocalStorage(data)
             localStorage.setItem('stan-playground-saved-state', state)
         };
         window.addEventListener('beforeunload', handleBeforeUnload);
@@ -41,7 +42,7 @@ const SPAnalysisContextProvider: FunctionComponent<PropsWithChildren<SPAnalysisC
         // load the saved state on first load
         const savedState = localStorage.getItem('stan-playground-saved-state')
         if (!savedState) return
-        const parsedData = deserializeAnalysis(savedState)
+        const parsedData = deserializeAnalysisFromLocalStorage(savedState)
         update({ type: 'loadLocalStorage', state: parsedData })
     }, [])
     ////////////////////////////////////////////////////////////////////////////////////////

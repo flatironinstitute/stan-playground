@@ -6,7 +6,7 @@ import RunPanel from "../../RunPanel/RunPanel";
 import SamplerOutputView from "../../SamplerOutputView/SamplerOutputView";
 import SamplingOptsPanel from "../../SamplingOptsPanel/SamplingOptsPanel";
 import SPAnalysisContextProvider, { SPAnalysisContext } from '../../SPAnalysis/SPAnalysisContextProvider';
-import { SPAnalysisKnownFiles } from "../../SPAnalysis/SPAnalysisDataModel";
+import { modelHasUnsavedChanges, SPAnalysisKnownFiles } from "../../SPAnalysis/SPAnalysisDataModel";
 import { SamplingOpts } from "../../StanSampler/StanSampler";
 import useStanSampler, { useSamplerStatus } from "../../StanSampler/useStanSampler";
 import useRoute from "../../useRoute";
@@ -62,10 +62,6 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
         document.title = route?.title ?? 'stan-playground'
     }, [route.title])
 
-    const hasUnsavedChanges = useMemo(() => {
-        return editedStanFileContent !== localDataModel.stanFileContent
-            || editedDataFileContent !== localDataModel.dataFileContent
-    }, [editedStanFileContent, editedDataFileContent, localDataModel.stanFileContent, localDataModel.dataFileContent])
 
     return (
         <div style={{ position: 'absolute', width, height, overflow: 'hidden' }}>
@@ -79,7 +75,7 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
                 <LeftPanel
                     width={leftPanelWidth}
                     height={height - topBarHeight - 2}
-                    hasUnsavedChanges={hasUnsavedChanges}
+                    hasUnsavedChanges={modelHasUnsavedChanges(data)}
                 />
             </div>
             <div className="main-area" style={{ position: 'absolute', left: leftPanelWidth, top: topBarHeight + 2, width: width - leftPanelWidth, height: height - topBarHeight - 2, overflow: 'hidden' }}>

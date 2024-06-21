@@ -1,29 +1,17 @@
-import { FunctionComponent, useMemo } from "react"
-import { useSPAnalysis } from "../../SPAnalysis/SPAnalysisContext"
-import JSZip from 'jszip'
+import { FunctionComponent, useContext } from "react"
+
+import { mapModelToFileManifest } from "../../SPAnalysis/FileMapping"
+import { SPAnalysisContext } from "../../SPAnalysis/SPAnalysisContextProvider"
+import { serializeAsZip } from "../../SPAnalysis/SPAnalysisSerialization"
+import { triggerDownload } from "../../util/triggerDownload"
 
 type ExportWindowProps = {
     onClose: () => void
 }
 
 const ExportWindow: FunctionComponent<ExportWindowProps> = ({ onClose }) => {
-    const { localDataModel } = useSPAnalysis()
-
-    const files = useMemo(() => {
-        return {
-            'main.stan': localDataModel.stanFileContent,
-            'data.json': localDataModel.dataFileContent,
-            'sampling_opts.json': localDataModel.samplingOptsContent,
-            'meta.json': JSON.stringify({
-                // Even though the folder name is derived from the
-                // title, we still include it in a meta file because
-                // we want to preserve the spaces in the title. When
-                // loading, if the meta.json is not present, we will
-                // use the folder name to derive the title.
-                title: localDataModel.title
-            })
-        }
-    }, [localDataModel])
+    const { data, update } = useContext(SPAnalysisContext)
+    const fileManifest = mapModelToFileManifest(data)
 
     return (
         <div>
@@ -34,13 +22,14 @@ const ExportWindow: FunctionComponent<ExportWindowProps> = ({ onClose }) => {
                         <td>Title</td>
                         <td>
                             <EditTitleComponent
-                                value={localDataModel.title}
-                                onChange={localDataModel.setTitle}
+                                value={data.meta.title}
+                                // onChange={localDataModel.setTitle}
+                                onChange={(newTitle: string) => update({ type: 'retitle', title: newTitle })}
                             />
                         </td>
                     </tr>
                     {
-                        Object.entries(files).map(([name, content], i) => (
+                        Object.entries(fileManifest).filter(([name, _]) => name !== 'UNUSED').map(([name, content], i) => (
                             <tr key={i}>
                                 <td>{name}</td>
                                 <td>
@@ -53,24 +42,7 @@ const ExportWindow: FunctionComponent<ExportWindowProps> = ({ onClose }) => {
             </table>
             <div>
                 <button onClick={async () => {
-                    const title = localDataModel.title
-                    const folderName = replaceSpaces(title)
-                    const zip = new JSZip()
-                    const folder = zip.folder(folderName)
-                    if (!folder) {
-                        throw new Error('Could not create folder in zip file')
-                    }
-                    Object.entries(files).forEach(([name, content]) => {
-                        folder.file(name, content)
-                    })
-                    const zipBlob = await zip.generateAsync({type: 'blob'})
-                    const zipBlobUrl = URL.createObjectURL(zipBlob)
-                    const a = document.createElement('a')
-                    a.href = zipBlobUrl
-                    a.download = `SP-${folderName}.zip`
-                    a.click()
-                    URL.revokeObjectURL(zipBlobUrl)
-                    onClose()
+                    serializeAsZip(data).then(([zipBlob, name]) => triggerDownload(zipBlob, name, onClose))
                 }}>
                     Export to .zip file
                 </button>
@@ -79,9 +51,6 @@ const ExportWindow: FunctionComponent<ExportWindowProps> = ({ onClose }) => {
     )
 }
 
-const replaceSpaces = (str: string) => {
-    return str.replace(/ /g, '_')
-}
 
 type EditTitleComponentProps = {
     value: string

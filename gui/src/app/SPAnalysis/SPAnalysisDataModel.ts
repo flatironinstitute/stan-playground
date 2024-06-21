@@ -9,7 +9,7 @@ type SPAnalysisFiles = {
     [filetype in SPAnalysisKnownFiles]: string
 }
 
-type SPAnalysisBase = SPAnalysisFiles &
+export type SPAnalysisBase = SPAnalysisFiles &
 {
     samplingOpts: SamplingOpts
 }
@@ -42,17 +42,26 @@ export const initialDataModel: SPAnalysisDataModel = {
     samplingOpts: defaultSamplingOpts
 }
 
-export const serializeAnalysis = (data: SPAnalysisDataModel): string => {
-    const intermediary = {
-        ...data, ephemera: undefined }
-    return JSON.stringify(intermediary)
+export const persistStateToEphemera = (data: SPAnalysisDataModel): SPAnalysisDataModel => {
+    const newEphemera = { ...data.ephemera }
+    getStringKnownFileKeys().forEach(k => newEphemera[k] = data[k])
+    return {
+        ...data,
+        ephemera: newEphemera
+    }
 }
 
-export const deserializeAnalysis = (serialized: string): SPAnalysisDataModel => {
-    const intermediary = JSON.parse(serialized)
-    // Not sure if this is strictly necessary
-    intermediary.ephemera = {}
-    const stringFileKeys = Object.values(SPAnalysisKnownFiles).filter((v) => isNaN(Number(v)));
-    stringFileKeys.forEach((k) => intermediary.ephemera[k] = intermediary[k]);
-    return intermediary as SPAnalysisDataModel
+export const getStringKnownFileKeys = () => Object.values(SPAnalysisKnownFiles).filter((v) => isNaN(Number(v)));
+
+export const modelHasUnsavedChanges = (data: SPAnalysisDataModel): boolean => {
+    const stringFileKeys = getStringKnownFileKeys()
+    return stringFileKeys.every((k) => data[k] !== data.ephemera[k])
 }
+
+export const stringifyField = (data: SPAnalysisDataModel, field: keyof SPAnalysisDataModel): string => {
+    if (field === 'ephemera') return ''
+    const value = data[field]
+    if (typeof value === 'string') return value
+    return JSON.stringify(value)
+}
+
