@@ -1,7 +1,7 @@
 import { Reducer } from "react"
 import { Stanie } from "../exampleStanies/exampleStanies"
 import { defaultSamplingOpts, SamplingOpts } from '../StanSampler/StanSampler'
-import { FileToFieldsMap } from "./FileMapping"
+import { FieldsContentsMap } from "./FileMapping"
 import { initialDataModel, persistStateToEphemera, SPAnalysisDataModel, SPAnalysisKnownFiles } from "./SPAnalysisDataModel"
 
 
@@ -12,7 +12,7 @@ export type SPAnalysisReducerAction = {
     stanie: Stanie
 } | {
     type: 'loadFiles',
-    files: Partial<FileToFieldsMap>,
+    files: Partial<FieldsContentsMap>,
     clearExisting: boolean
 } | {
     type: 'retitle',
@@ -101,7 +101,7 @@ const loadFileFromString = (data: SPAnalysisDataModel, field: SPAnalysisKnownFil
     return newData
 }
 
-const loadFromProjectFiles = (data: SPAnalysisDataModel, files: Partial<FileToFieldsMap>, clearExisting: boolean = false): SPAnalysisDataModel => {
+const loadFromProjectFiles = (data: SPAnalysisDataModel, files: Partial<FieldsContentsMap>, clearExisting: boolean = false): SPAnalysisDataModel => {
     console.log(`Loading from files with manifest ${JSON.stringify(files)}`)
     let newData = clearExisting ? initialDataModel : data
     delete files['ephemera']     // just to be sure

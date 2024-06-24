@@ -1,6 +1,6 @@
 import JSZip from "jszip"
 import { replaceSpaces } from "../util/replaceSpaces"
-import { FileNames, FileRegistry, mapFilesToModel, mapModelToFileManifest, SPAnalysisFileMap } from "./FileMapping"
+import { FileNames, FileRegistry, mapFileContentsToModel, mapModelToFileManifest, SPAnalysisFileMap } from "./FileMapping"
 import { getStringKnownFileKeys, SPAnalysisDataModel } from "./SPAnalysisDataModel"
 
 export const serializeAnalysisToLocalStorage = (data: SPAnalysisDataModel): string => {
@@ -73,7 +73,7 @@ export const deserializeZipToFiles = async (zipBuffer: ArrayBuffer) => {
 
     }
     console.log(`Requesting map from files object ${JSON.stringify(files)}`)
-    return mapFilesToModel(files as Partial<FileRegistry>)
+    return mapFileContentsToModel(files as Partial<FileRegistry>)
 }
 
 // export const loadFromZip = async (localDataModel: any, _name: string, content: ArrayBuffer, o: {replaceProject: boolean}) => {

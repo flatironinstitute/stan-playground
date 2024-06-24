@@ -1,5 +1,5 @@
 import { FunctionComponent, useCallback, useContext, useEffect, useState } from "react"
-import { FileNames, FileRegistry, FileToFieldsMap, mapFilesToModel } from "../../SPAnalysis/FileMapping"
+import { FieldsContentsMap, FileNames, FileRegistry, mapFileContentsToModel } from "../../SPAnalysis/FileMapping"
 import { SPAnalysisContext } from "../../SPAnalysis/SPAnalysisContextProvider"
 import { deserializeZipToFiles, parseFile } from "../../SPAnalysis/SPAnalysisSerialization"
 import UploadFilesArea from "./UploadFilesArea"
@@ -30,7 +30,7 @@ const ImportWindow: FunctionComponent<ImportWindowProps> = ({ onClose }) => {
                 if (replaceProject) {
                     update({ type: 'retitle', title: filesUploaded[0].name })
                 }
-                const fileManifest: Partial<FileToFieldsMap> = { 'stanFileContent': parseFile(filesUploaded[0].content) }
+                const fileManifest: Partial<FieldsContentsMap> = { 'stanFileContent': parseFile(filesUploaded[0].content) }
                 update({ type: 'loadFiles', files: fileManifest, clearExisting: replaceProject })
                 // await loadFromStanFile(localDataModel, filesUploaded[0].name, filesUploaded[0].content, {replaceProject})
             }
@@ -44,7 +44,7 @@ const ImportWindow: FunctionComponent<ImportWindowProps> = ({ onClose }) => {
                     files[file.name as FileNames] = parseFile(file.content)
                 }
 
-                const fileManifest = mapFilesToModel(files);
+                const fileManifest = mapFileContentsToModel(files);
                 update({ type: 'loadFiles', files: fileManifest, clearExisting: replaceProject })
             }
             // else if ((filesUploaded.length === 1) && (filesUploaded[0].name === 'data.json')) {
