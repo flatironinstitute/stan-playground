@@ -23,13 +23,12 @@ const ExportWindow: FunctionComponent<ExportWindowProps> = ({ onClose }) => {
                         <td>
                             <EditTitleComponent
                                 value={data.meta.title}
-                                // onChange={localDataModel.setTitle}
                                 onChange={(newTitle: string) => update({ type: 'retitle', title: newTitle })}
                             />
                         </td>
                     </tr>
                     {
-                        Object.entries(fileManifest).filter(([name, _]) => name !== 'UNUSED').map(([name, content], i) => (
+                        Object.entries(fileManifest).map(([name, content], i) => (
                             <tr key={i}>
                                 <td>{name}</td>
                                 <td>

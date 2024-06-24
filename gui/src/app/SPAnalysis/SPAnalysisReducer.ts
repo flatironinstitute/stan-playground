@@ -102,13 +102,9 @@ const loadFileFromString = (data: SPAnalysisDataModel, field: SPAnalysisKnownFil
 }
 
 const loadFromProjectFiles = (data: SPAnalysisDataModel, files: Partial<FieldsContentsMap>, clearExisting: boolean = false): SPAnalysisDataModel => {
-    console.log(`Loading from files with manifest ${JSON.stringify(files)}`)
     let newData = clearExisting ? initialDataModel : data
-    delete files['ephemera']     // just to be sure
     if (Object.keys(files).includes('meta')) {
-        // console.log(`files includes meta, loading from string ${files.meta}`)
         newData = loadMetaFromString(newData, files.meta ?? '')
-        // console.log(`newData is now ${JSON.stringify(newData)}`)
         delete files['meta']
     }
     if (Object.keys(files).includes('samplingOpts')) {
@@ -116,9 +112,7 @@ const loadFromProjectFiles = (data: SPAnalysisDataModel, files: Partial<FieldsCo
         delete files['samplingOpts']
     }
     const fileKeys = Object.keys(files) as SPAnalysisKnownFiles[]
-    console.log(`Entering reducer, newData is now ${JSON.stringify(newData)}`)
     newData = fileKeys.reduce((currData, currField) => loadFileFromString(currData, currField, files[currField] ?? ''), newData)
-    console.log(`Exiting reducer, newData is now ${JSON.stringify(newData)}`)
     newData = persistStateToEphemera(newData)
     return newData
 }

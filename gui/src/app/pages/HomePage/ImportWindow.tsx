@@ -21,9 +21,7 @@ const ImportWindow: FunctionComponent<ImportWindowProps> = ({ onClose }) => {
             if ((filesUploaded.length === 1) && (filesUploaded[0].name.endsWith('.zip'))) {
                 // a single .zip file
                 const fileManifest = await deserializeZipToFiles(filesUploaded[0].content)
-                // console.log(`received file manifest: ${JSON.stringify(fileManifest)}`)
                 update({ type: 'loadFiles', files: fileManifest, clearExisting: replaceProject })
-                // await loadFromZip(localDataModel, filesUploaded[0].name, filesUploaded[0].content, {replaceProject})
             }
             else if ((filesUploaded.length === 1) && (filesUploaded[0].name.endsWith('.stan'))) {
                 // a single .stan file
@@ -32,33 +30,19 @@ const ImportWindow: FunctionComponent<ImportWindowProps> = ({ onClose }) => {
                 }
                 const fileManifest: Partial<FieldsContentsMap> = { 'stanFileContent': parseFile(filesUploaded[0].content) }
                 update({ type: 'loadFiles', files: fileManifest, clearExisting: replaceProject })
-                // await loadFromStanFile(localDataModel, filesUploaded[0].name, filesUploaded[0].content, {replaceProject})
             }
             else {
                 const files: Partial<FileRegistry> = {}
                 for (const file of filesUploaded) {
-                    if (! Object.values(FileNames).includes(file.name as any)) {
+                    if ( !Object.values(FileNames).includes(file.name as any) ){
                         throw Error(`Unrecognized file: ${file.name}`)
                     }
-                    // todo: check that I'm using the enum right here
                     files[file.name as FileNames] = parseFile(file.content)
                 }
 
                 const fileManifest = mapFileContentsToModel(files);
                 update({ type: 'loadFiles', files: fileManifest, clearExisting: replaceProject })
             }
-            // else if ((filesUploaded.length === 1) && (filesUploaded[0].name === 'data.json')) {
-            //     // a single data.json file
-            //     await loadFromFiles(localDataModel, filesUploaded, {replaceProject})
-            // }
-            // else {
-            //     for (const file of filesUploaded) {
-            //         if (!['main.stan', 'data.json', 'sampling_opts.json', 'meta.json'].includes(file.name)) {
-            //             throw Error('Unrecognized file: ' + file.name)
-            //         }
-            //     }
-            //     await loadFromFiles(localDataModel, filesUploaded, {replaceProject})
-            // }
             onClose()
         }
         catch (e: any) {
