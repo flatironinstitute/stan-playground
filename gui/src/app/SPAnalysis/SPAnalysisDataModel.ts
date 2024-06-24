@@ -31,6 +31,8 @@ export type SPAnalysisDataModel = SPAnalysisBase &
     ephemera: SPAnalysisEphemeralData
 }
 
+export type SPAnalysisPersistentDataModel = Omit<SPAnalysisDataModel, "ephemera">
+
 export const initialDataModel: SPAnalysisDataModel = {
     meta: { title: "Undefined" },
     ephemera: {
