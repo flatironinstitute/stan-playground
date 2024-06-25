@@ -2,3 +2,22 @@ body {
   margin: 0;
   font-family: 'Arial', sans-serif;
 }
+
+.top-bar {
+  background: #555;
+  color: white;
+  padding-top: 2px;
+  padding-left: 10px;
+  font-size: 16px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.left-panel {
+  background-image: repeating-linear-gradient(
+    45deg,
+    #f0f0f0 1px,
+    #e0e0e0 6px
+  );
+  margin: 0px;
+  font-size: 14px;
+}
