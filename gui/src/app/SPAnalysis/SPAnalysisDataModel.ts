@@ -9,7 +9,7 @@ type SPAnalysisFiles = {
     [filetype in SPAnalysisKnownFiles]: string
 }
 
-export type SPAnalysisBase = SPAnalysisFiles &
+type SPAnalysisBase = SPAnalysisFiles &
 {
     samplingOpts: SamplingOpts
 }
