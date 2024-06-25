@@ -41,7 +41,7 @@ const ExportWindow: FunctionComponent<ExportWindowProps> = ({ onClose }) => {
             </table>
             <div>
                 <button onClick={async () => {
-                    serializeAsZip(data).then(([zipBlob, name]) => triggerDownload(zipBlob, name, onClose))
+                    serializeAsZip(data).then(([zipBlob, name]) => triggerDownload(zipBlob, `SP-${name}.zip`, onClose))
                 }}>
                     Export to .zip file
                 </button>
