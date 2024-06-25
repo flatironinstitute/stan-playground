@@ -9,7 +9,6 @@ import SPAnalysisContextProvider, { SPAnalysisContext } from '../../SPAnalysis/S
 import { SPAnalysisKnownFiles } from "../../SPAnalysis/SPAnalysisDataModel";
 import { SamplingOpts } from "../../StanSampler/StanSampler";
 import useStanSampler, { useSamplerStatus } from "../../StanSampler/useStanSampler";
-import useRoute from "../../useRoute";
 import LeftPanel from "./LeftPanel";
 import TopBar from "./TopBar";
 
@@ -19,31 +18,23 @@ type Props = {
 }
 
 const HomePage: FunctionComponent<Props> = ({ width, height }) => {
-    const { route } = useRoute()
-    if (route.page !== 'home') {
-        throw Error('Unexpected route')
-    }
+
     // NOTE: We should probably move the SPAnalysisContextProvider up to the App or MainWindow
     // component; however this will wait on routing refactor since I don't want to add the `route`
     // item in those contexts in this PR
     return (
-        <SPAnalysisContextProvider
-            key={route.sourceDataUri || ''} // force complete re-render when sourceDataUri changes
-            sourceDataUri={route.sourceDataUri}
-        >
+        <SPAnalysisContextProvider>
             <HomePageChild width={width} height={height} />
         </SPAnalysisContextProvider>
     )
 }
 
 const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
-    const { route, setRoute } = useRoute()
-    if (route.page !== 'home') {
-        throw Error('Unexpected route')
-    }
+
+
     const { data, update } = useContext(SPAnalysisContext)
     const setSamplingOpts = useCallback((opts: SamplingOpts) => {
-        update({type: 'setSamplingOpts', opts})
+        update({ type: 'setSamplingOpts', opts })
     }, [update])
 
     const [compiledMainJsUrl, setCompiledMainJsUrl] = useState<string>('')
@@ -52,20 +43,14 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
     const topBarHeight = 25
 
     useEffect(() => {
-        // update the title in the route
-        const newRoute = { ...route, title: data.meta.title }
-        setRoute(newRoute, true)
-    }, [data.meta.title, route, setRoute])
-
-    useEffect(() => {
-        // update the document title based on the route
-        document.title = route?.title ?? 'stan-playground'
-    }, [route.title])
+        document.title = "Stan Playground - " + data.meta.title;
+    }, [data.meta.title])
 
     return (
         <div style={{ position: 'absolute', width, height, overflow: 'hidden' }}>
             <div className="top-bar" style={{ position: 'absolute', left: 0, top: 0, width, height: topBarHeight, overflow: 'hidden' }}>
                 <TopBar
+                    title = {data.meta.title}
                     width={width}
                     height={topBarHeight}
                 />
