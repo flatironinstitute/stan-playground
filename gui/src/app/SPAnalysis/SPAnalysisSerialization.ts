@@ -1,5 +1,5 @@
 import JSZip from "jszip"
-import { replaceSpaces } from "../util/replaceSpaces"
+import { replaceSpacesWithUnderscores } from "../util/replaceSpaces"
 import { FileNames, FileRegistry, mapFileContentsToModel, mapModelToFileManifest, SPAnalysisFileMap } from "./FileMapping"
 import { getStringKnownFileKeys, SPAnalysisDataModel } from "./SPAnalysisDataModel"
 
@@ -20,7 +20,7 @@ export const deserializeAnalysisFromLocalStorage = (serialized: string): SPAnaly
 
 export const serializeAsZip = async (data: SPAnalysisDataModel): Promise<[Blob, string]> => {
     const fileManifest = mapModelToFileManifest(data)
-    const folderName = replaceSpaces(data.meta.title)
+    const folderName = replaceSpacesWithUnderscores(data.meta.title)
     const zip = new JSZip()
     const folder = zip.folder(folderName)
     if (!folder) {
