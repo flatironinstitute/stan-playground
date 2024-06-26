@@ -28,7 +28,7 @@ export type SPAnalysisReducerAction = {
     type: 'setSamplingOpts',
     opts: Partial<SamplingOpts>
 } | {
-    type: 'loadLocalStorage',
+    type: 'loadInitialData',
     state: SPAnalysisDataModel
 } | {
     type: 'clear'
@@ -71,9 +71,9 @@ export const SPAnalysisReducer: SPAnalysisReducerType = (s: SPAnalysisDataModel,
             return newState
         }
         case "setSamplingOpts": {
-            return { ...s, samplingOpts: { ...s.samplingOpts, ...a.opts }}
+            return { ...s, samplingOpts: { ...s.samplingOpts, ...a.opts } }
         }
-        case "loadLocalStorage": {
+        case "loadInitialData": {
             return a.state;
         }
         case "clear": {
