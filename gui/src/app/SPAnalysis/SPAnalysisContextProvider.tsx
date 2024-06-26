@@ -96,12 +96,20 @@ const fetchRemoteAnalysis = async (query: QueryParams) => {
             data.samplingOpts = JSON.parse(text);
         }
     } else {
-        for (const k in Object.keys(data.samplingOpts)) {
-            const key = k as keyof SamplingOpts;
-            const setting = query[key];
-            if (setting) {
-                data.samplingOpts[key] = parseInt(setting);
-            }
+        if (query.num_chains) {
+            data.samplingOpts.num_chains = parseInt(query.num_chains);
+        }
+        if (query.num_warmup) {
+            data.samplingOpts.num_warmup = parseInt(query.num_warmup);
+        }
+        if (query.num_samples) {
+            data.samplingOpts.num_samples = parseInt(query.num_samples);
+        }
+        if (query.init_radius) {
+            data.samplingOpts.init_radius = parseFloat(query.init_radius);
+        }
+        if (query.seed) {
+            data.samplingOpts.seed = parseInt(query.seed);
         }
     }
 
