@@ -65,25 +65,28 @@ const deepCopy = (obj: any) => {
 export const fetchRemoteAnalysis = async (query: QueryParams) => {
     // any special 'project' query could be loaded here at the top
     const data: SPAnalysisDataModel = deepCopy(initialDataModel)
-    
-    if (query.stan) {
-        const stanFileContent = await tryFetch(query.stan)
-        if (stanFileContent) {
-            data.stanFileContent = stanFileContent
-        }
+
+    const stanFilePromise = query.stan ? tryFetch(query.stan) : Promise.resolve(undefined);
+    const dataFilePromise = query.data ? tryFetch(query.data) : Promise.resolve(undefined);
+    const sampling_optsPromise = query.sampling_opts ? tryFetch(query.sampling_opts) : Promise.resolve(undefined);
+
+    const stanFileContent = await stanFilePromise;
+    if (stanFileContent) {
+        data.stanFileContent = stanFileContent;
     }
-    if (query.data) {
-        const dataFileContent = await tryFetch(query.data)
-        if (dataFileContent) {
-            data.dataFileContent = dataFileContent
-        }
+    const dataFileContent = await dataFilePromise;
+    if (dataFileContent) {
+        data.dataFileContent = dataFileContent;
     }
 
-    if (query.sampling_opts) {
-        const text = await tryFetch(query.sampling_opts)
-        if (text) {
-            // TODO(bmw) validate
-            data.samplingOpts = JSON.parse(text)
+    const sampling_opts = await sampling_optsPromise;
+    if (sampling_opts) {
+        try {
+            const parsed = JSON.parse(sampling_opts)
+            // TODO validate the parsed object
+            data.samplingOpts = parsed
+        } catch (err) {
+            console.error('Failed to parse sampling_opts', err)
         }
     } else {
         if (query.num_chains) {
