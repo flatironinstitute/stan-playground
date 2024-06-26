@@ -42,7 +42,7 @@ type DrawsDisplayProps = {
     numChains: number,
     paramNames: string[]
     computeTimeSec: number | undefined
-    samplingOpts: SamplingOpts | undefined // for including in exported zip
+    samplingOpts: SamplingOpts // for including in exported zip
 }
 
 const tabs = [
@@ -135,7 +135,7 @@ type DrawsViewProps = {
     paramNames: string[]
     drawChainIds: number[]
     drawNumbers: number[]
-    samplingOpts: SamplingOpts | undefined // for including in exported zip
+    samplingOpts: SamplingOpts // for including in exported zip
 }
 
 const DrawsView: FunctionComponent<DrawsViewProps> = ({ width, height, draws, paramNames, drawChainIds, drawNumbers, samplingOpts }) => {
@@ -241,7 +241,7 @@ const prepareMultipleCsvsText = (draws: number[][], paramNames: string[], drawCh
     })
 }
 
-const createZipBlobForMultipleCsvs = async (csvTexts: string[], uniqueChainIds: number[], samplingOpts: SamplingOpts | undefined) => {
+const createZipBlobForMultipleCsvs = async (csvTexts: string[], uniqueChainIds: number[], samplingOpts: SamplingOpts) => {
     const zip = new JSZip();
     // put them all in a folder called 'draws'
     const folder = zip.folder('draws');
@@ -249,14 +249,8 @@ const createZipBlobForMultipleCsvs = async (csvTexts: string[], uniqueChainIds: 
     csvTexts.forEach((text, i) => {
         folder.file(`chain_${uniqueChainIds[i]}.csv`, text);
     });
-    if (samplingOpts) {
-        const samplingOptsText = JSON.stringify(samplingOpts, null, 2);
-        folder.file('sampling_opts.json', samplingOptsText);
-    }
-    else {
-        // this should not happen, but just in case we'll log a warning
-        console.warn('Not including sampling options in zip file');
-    }
+    const samplingOptsText = JSON.stringify(samplingOpts, null, 2);
+    folder.file('sampling_opts.json', samplingOptsText);
     const blob = await zip.generateAsync({type: 'blob'});
     return blob;
 }
