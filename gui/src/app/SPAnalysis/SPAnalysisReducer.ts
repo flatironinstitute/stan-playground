@@ -32,16 +32,17 @@ export type SPAnalysisReducerAction = {
 export const SPAnalysisReducer: SPAnalysisReducerType = (s: SPAnalysisDataModel, a: SPAnalysisReducerAction) => {
     switch (a.type) {
         case "loadStanie": {
+            const dataFileContent = JSON.stringify(a.stanie.data, null, 2);
             return {
                 ...s,
                 stanFileContent: a.stanie.stan,
-                dataFileContent: JSON.stringify(a.stanie.data),
+                dataFileContent,
                 samplingOpts: defaultSamplingOpts,
                 meta: { ...s.meta, title: a.stanie.meta.title ?? 'Untitled' },
                 ephemera: {
                     ...s.ephemera,
                     stanFileContent: a.stanie.stan,
-                    dataFileContent: JSON.stringify(a.stanie.data)
+                    dataFileContent,
                 }
             }
         }
