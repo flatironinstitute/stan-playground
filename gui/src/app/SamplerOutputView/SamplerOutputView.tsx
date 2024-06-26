@@ -2,7 +2,7 @@ import { SmallIconButton } from "@fi-sci/misc"
 import { Download } from "@mui/icons-material"
 import JSZip from 'jszip'
 import { FunctionComponent, useCallback, useMemo, useState } from "react"
-import StanSampler from "../StanSampler/StanSampler"
+import StanSampler, { SamplingOpts } from "../StanSampler/StanSampler"
 import { useSamplerOutput } from "../StanSampler/useStanSampler"
 import TabWidget from "../TabWidget/TabWidget"
 import { triggerDownload } from "../util/triggerDownload"
@@ -30,6 +30,7 @@ const SamplerOutputView: FunctionComponent<SamplerOutputViewProps> = ({width, he
             paramNames={paramNames}
             numChains={numChains}
             computeTimeSec={computeTimeSec}
+            samplingOpts={sampler.samplingOpts}
         />
     )
 }
@@ -41,6 +42,7 @@ type DrawsDisplayProps = {
     numChains: number,
     paramNames: string[]
     computeTimeSec: number | undefined
+    samplingOpts: SamplingOpts | undefined // for including in exported zip
 }
 
 const tabs = [
@@ -70,7 +72,7 @@ const tabs = [
     }
 ]
 
-const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({ width, height, draws, paramNames, numChains, computeTimeSec }) => {
+const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({ width, height, draws, paramNames, numChains, computeTimeSec, samplingOpts }) => {
 
     const [currentTabId, setCurrentTabId] = useState('summary');
 
@@ -106,6 +108,7 @@ const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({ width, height, dra
                 paramNames={paramNames}
                 drawChainIds={drawChainIds}
                 drawNumbers={drawNumbers}
+                samplingOpts={samplingOpts}
             />
             <HistsView
                 width={0}
@@ -132,9 +135,10 @@ type DrawsViewProps = {
     paramNames: string[]
     drawChainIds: number[]
     drawNumbers: number[]
+    samplingOpts: SamplingOpts | undefined // for including in exported zip
 }
 
-const DrawsView: FunctionComponent<DrawsViewProps> = ({ width, height, draws, paramNames, drawChainIds, drawNumbers }) => {
+const DrawsView: FunctionComponent<DrawsViewProps> = ({ width, height, draws, paramNames, drawChainIds, drawNumbers, samplingOpts }) => {
     const [abbreviatedToNumRows, setAbbreviatedToNumRows] = useState<number | undefined>(300);
     const draws2 = useMemo(() => {
         if (abbreviatedToNumRows === undefined) return draws;
@@ -147,7 +151,7 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({ width, height, draws, pa
     const handleExportToMultipleCsvs = useCallback(async () => {
         const uniqueChainIds = Array.from(new Set(drawChainIds));
         const csvTexts = prepareMultipleCsvsText(draws, paramNames, drawChainIds, uniqueChainIds);
-        const blob = await createZipBlobForMultipleCsvs(csvTexts, uniqueChainIds);
+        const blob = await createZipBlobForMultipleCsvs(csvTexts, uniqueChainIds, samplingOpts);
         const fileName = 'SP-draws.zip';
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -155,7 +159,7 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({ width, height, draws, pa
         a.download = fileName;
         a.click();
         URL.revokeObjectURL(url);
-    }, [draws, paramNames, drawChainIds]);
+    }, [draws, paramNames, drawChainIds, samplingOpts]);
     return (
         <div style={{position: 'absolute', width, height, overflow: 'auto'}}>
             <div>
@@ -237,7 +241,7 @@ const prepareMultipleCsvsText = (draws: number[][], paramNames: string[], drawCh
     })
 }
 
-const createZipBlobForMultipleCsvs = async (csvTexts: string[], uniqueChainIds: number[]) => {
+const createZipBlobForMultipleCsvs = async (csvTexts: string[], uniqueChainIds: number[], samplingOpts: SamplingOpts | undefined) => {
     const zip = new JSZip();
     // put them all in a folder called 'draws'
     const folder = zip.folder('draws');
@@ -245,6 +249,14 @@ const createZipBlobForMultipleCsvs = async (csvTexts: string[], uniqueChainIds: 
     csvTexts.forEach((text, i) => {
         folder.file(`chain_${uniqueChainIds[i]}.csv`, text);
     });
+    if (samplingOpts) {
+        const samplingOptsText = JSON.stringify(samplingOpts, null, 2);
+        folder.file('sampling_opts.json', samplingOptsText);
+    }
+    else {
+        // this should not happen, but just in case we'll log a warning
+        console.warn('Not including sampling options in zip file');
+    }
     const blob = await zip.generateAsync({type: 'blob'});
     return blob;
 }

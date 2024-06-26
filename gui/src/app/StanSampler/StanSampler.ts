@@ -31,6 +31,7 @@ class StanSampler {
     #paramNames: string[] = [];
     #numChains: number = 0;
     #samplingStartTimeSec: number = 0;
+    #samplingOpts: SamplingOpts | undefined = undefined; // the sampling options used in the last sample call
 
     private constructor(private compiledUrl: string) {
         this._initialize()
@@ -107,6 +108,7 @@ class StanSampler {
             console.warn('Model not loaded yet')
             return
         }
+        this.#samplingOpts = samplingOpts;
         this.#draws = [];
         this.#paramNames = [];
         this.#worker
@@ -148,6 +150,9 @@ class StanSampler {
     }
     get computeTimeSec() {
         return this.#computeTimeSec;
+    }
+    get samplingOpts() {
+        return this.#samplingOpts;
     }
 }
 
