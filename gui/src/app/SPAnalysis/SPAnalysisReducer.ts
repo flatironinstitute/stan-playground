@@ -28,13 +28,20 @@ export type SPAnalysisReducerAction = {
     type: 'setSamplingOpts',
     opts: Partial<SamplingOpts>
 } | {
-    type: 'loadLocalStorage',
+    type: 'loadInitialData',
     state: SPAnalysisDataModel
 } | {
     type: 'clear'
 }
 
-export const SPAnalysisReducer: SPAnalysisReducerType = (s: SPAnalysisDataModel, a: SPAnalysisReducerAction) => {
+export const SPAnalysisReducer = (onDirty: () => void) => (s: SPAnalysisDataModel, a: SPAnalysisReducerAction) => {
+    if (a.type !== "loadInitialData") {
+        // TextEditor seems to trigger occasional spurious edits where nothing changes
+        if (a.type !== "editFile" || s[a.filename] != a.content) {
+            onDirty();
+        }
+    }
+
     switch (a.type) {
         case "loadStanie": {
             const dataFileContent = JSON.stringify(a.stanie.data, null, 2);
@@ -78,9 +85,9 @@ export const SPAnalysisReducer: SPAnalysisReducerType = (s: SPAnalysisDataModel,
             return newState
         }
         case "setSamplingOpts": {
-            return { ...s, samplingOpts: { ...s.samplingOpts, ...a.opts }}
+            return { ...s, samplingOpts: { ...s.samplingOpts, ...a.opts } }
         }
-        case "loadLocalStorage": {
+        case "loadInitialData": {
             return a.state;
         }
         case "clear": {

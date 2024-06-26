@@ -1,7 +1,8 @@
-import { createContext, FunctionComponent, PropsWithChildren, useEffect, useReducer } from "react"
 import { initialDataModel, SPAnalysisDataModel } from "./SPAnalysisDataModel"
+import { createContext, FunctionComponent, PropsWithChildren, useEffect, useReducer } from "react"
 import { SPAnalysisReducer, SPAnalysisReducerAction, SPAnalysisReducerType } from "./SPAnalysisReducer"
 import { deserializeAnalysisFromLocalStorage, serializeAnalysisToLocalStorage } from "./SPAnalysisSerialization"
+import { fetchRemoteAnalysis, queryStringHasParameters, useQueryParams } from "./SPAnalysisQueryLoading"
 
 type SPAnalysisContextType = {
     data: SPAnalysisDataModel
@@ -14,16 +15,16 @@ type SPAnalysisContextProviderProps = {
 
 export const SPAnalysisContext = createContext<SPAnalysisContextType>({
     data: initialDataModel,
-    update: () => {}
+    update: () => { }
 })
 
-const SPAnalysisContextProvider: FunctionComponent<PropsWithChildren<SPAnalysisContextProviderProps>> = ({children}) => {
-    const [data, update] = useReducer<SPAnalysisReducerType>(SPAnalysisReducer, initialDataModel)
 
-    ////////////////////////////////////////////////////////////////////////////////////////
-    // For convenience, we save the state to local storage so it is available on
-    // reload of the page But this will be revised in the future to use a more
-    // sophisticated storage mechanism.
+const SPAnalysisContextProvider: FunctionComponent<PropsWithChildren<SPAnalysisContextProviderProps>> = ({ children }) => {
+
+    const { queries, clearSearchParams } = useQueryParams();
+
+    const [data, update] = useReducer<SPAnalysisReducerType>(SPAnalysisReducer(clearSearchParams), initialDataModel)
+
     useEffect(() => {
         // as user reloads the page or closes the tab, save state to local storage
         const handleBeforeUnload = () => {
@@ -38,17 +39,25 @@ const SPAnalysisContextProvider: FunctionComponent<PropsWithChildren<SPAnalysisC
     }, [data])
 
     useEffect(() => {
-        // load the saved state on first load
-        const savedState = localStorage.getItem('stan-playground-saved-state')
-        if (!savedState) return
-        const parsedData = deserializeAnalysisFromLocalStorage(savedState)
-        if (!parsedData) return // unsuccessful parse or type cast
-        update({ type: 'loadLocalStorage', state: parsedData })
-    }, [])
-    ////////////////////////////////////////////////////////////////////////////////////////
+        if (data != initialDataModel) return;
+
+        if (queryStringHasParameters(queries)) {
+            fetchRemoteAnalysis(queries).then((data) => {
+                update({ type: 'loadInitialData', state: data })
+            })
+        } else {
+            // load the saved state on first load
+            const savedState = localStorage.getItem('stan-playground-saved-state')
+            if (!savedState) return
+            const parsedData = deserializeAnalysisFromLocalStorage(savedState)
+            if (!parsedData) return // unsuccessful parse or type cast
+            update({ type: 'loadInitialData', state: parsedData })
+        }
+
+    }, [data, queries])
 
     return (
-        <SPAnalysisContext.Provider value={{data, update}}>
+        <SPAnalysisContext.Provider value={{ data, update }}>
             {children}
         </SPAnalysisContext.Provider>
     )

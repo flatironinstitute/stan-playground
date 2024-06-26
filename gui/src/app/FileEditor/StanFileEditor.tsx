@@ -1,5 +1,5 @@
 import { Splitter } from '@fi-sci/splitter';
-import { AutoFixHigh, Settings, } from "@mui/icons-material";
+import { AutoFixHigh, Cancel, Settings, } from "@mui/icons-material";
 import { FunctionComponent, useCallback, useEffect, useMemo, useState } from "react";
 import StanCompileResultWindow from "./StanCompileResultWindow";
 import useStanc from "../Stanc/useStanc";
@@ -28,6 +28,10 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
     const validSyntax = useMemo(() => {
         return stancErrors.errors === undefined
     }, [stancErrors]);
+
+    const hasWarnings = useMemo(() => {
+        return (stancErrors.warnings) && (stancErrors.warnings.length > 0)
+    }, [stancErrors])
 
     const [compileStatus, setCompileStatus] = useState<CompileStatus>('')
     const [theStanFileContentThasHasBeenCompiled, setTheStanFileContentThasHasBeenCompiled] = useState<string>('')
@@ -89,8 +93,33 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
         }
     }, [fileContent, handleCompile, didInitialCompile])
 
+    const showLabelsOnButtons = width > 700
+    const [syntaxWindowVisible, setSyntaxWindowVisible] = useState(false)
+
     const toolbarItems: ToolbarItem[] = useMemo(() => {
         const ret: ToolbarItem[] = []
+
+        // invalid syntax
+        if ((!validSyntax) && (!!editedFileContent)) {
+            ret.push({
+                type: 'button',
+                icon: <Cancel />,
+                label: showLabelsOnButtons ? 'Syntax error' : '',
+                color: 'darkred',
+                tooltip: 'Syntax error in Stan file',
+                onClick: () => { setSyntaxWindowVisible(true) }
+            })
+        }
+        else if ((hasWarnings) && (!!editedFileContent)) {
+            ret.push({
+                type: 'button',
+                icon: <Cancel />,
+                label: showLabelsOnButtons ? 'Syntax warning' : '',
+                color: 'blue',
+                tooltip: 'Syntax warning in Stan file',
+                onClick: () => { setSyntaxWindowVisible(true) }
+            })
+        }
 
         // auto format
         if (!readOnly) {
@@ -99,7 +128,7 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
                     type: 'button',
                     icon: <AutoFixHigh />,
                     tooltip: 'Auto format this stan file',
-                    label: 'auto format',
+                    label: showLabelsOnButtons ? 'auto format': undefined,
                     onClick: requestFormat,
                     color: 'darkblue'
                 })
@@ -128,7 +157,7 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
         }
 
         return ret
-    }, [editedFileContent, fileContent, requestFormat, handleCompile, compileStatus, compileMessage, validSyntax, readOnly])
+    }, [editedFileContent, fileContent, handleCompile, requestFormat, showLabelsOnButtons, validSyntax, compileStatus, compileMessage, readOnly])
 
     const isCompiling = compileStatus === 'compiling'
 
@@ -140,6 +169,7 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
             height={height}
             initialPosition={height - compileResultsHeight}
             direction="vertical"
+            hideSecondChild={!(!editedFileContent || syntaxWindowVisible)}
         >
             <TextEditor
                 width={0}
@@ -159,6 +189,7 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
                     width={0}
                     height={0}
                     stancErrors={stancErrors}
+                    onClose={() => setSyntaxWindowVisible(false)}
                 /> : (
                     <div style={{ padding: 20 }}>Select an example from the left panel</div>
                 )
