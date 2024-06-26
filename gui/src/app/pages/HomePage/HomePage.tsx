@@ -121,7 +121,7 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
 // the width of the left panel when it is expanded based on the overall width
 const determineLeftPanelWidth = (width: number) => {
     const minWidth = 250
-    const maxWidth = 500
+    const maxWidth = 400
     return Math.min(maxWidth, Math.max(minWidth, width / 4))
 }
 
