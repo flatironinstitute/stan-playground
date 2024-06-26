@@ -29,9 +29,8 @@ class StanSampler {
     #draws: number[][] = [];
     #computeTimeSec: number | undefined = undefined;
     #paramNames: string[] = [];
-    #numChains: number = 0;
     #samplingStartTimeSec: number = 0;
-    #samplingOpts: SamplingOpts | undefined = undefined; // the sampling options used in the last sample call
+    #samplingOpts: SamplingOpts = defaultSamplingOpts; // the sampling options used in the last sample call
 
     private constructor(private compiledUrl: string) {
         this._initialize()
@@ -99,7 +98,6 @@ class StanSampler {
             console.warn('Number of chains not specified')
             return
         }
-        this.#numChains = sampleConfig.num_chains;
         if (this.#status === 'sampling') {
             console.warn('Already sampling')
             return
@@ -138,9 +136,6 @@ class StanSampler {
     }
     get paramNames() {
         return this.#paramNames;
-    }
-    get numChains() {
-        return this.#numChains;
     }
     get status() {
         return this.#status;
