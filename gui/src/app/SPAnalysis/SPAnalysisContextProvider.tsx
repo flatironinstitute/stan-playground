@@ -1,9 +1,8 @@
 import { initialDataModel, SPAnalysisDataModel } from "./SPAnalysisDataModel"
-import { createContext, FunctionComponent, PropsWithChildren, useCallback, useEffect, useReducer } from "react"
+import { createContext, FunctionComponent, PropsWithChildren, useEffect, useReducer } from "react"
 import { SPAnalysisReducer, SPAnalysisReducerAction, SPAnalysisReducerType } from "./SPAnalysisReducer"
-import { useSearchParams } from "react-router-dom"
 import { deserializeAnalysisFromLocalStorage, serializeAnalysisToLocalStorage } from "./SPAnalysisSerialization"
-import { fromSearchParams, fetchRemoteAnalysis, queryStringHasParameters } from "./SPAnalysisQueryLoading"
+import { fetchRemoteAnalysis, queryStringHasParameters, useQueryParams } from "./SPAnalysisQueryLoading"
 
 type SPAnalysisContextType = {
     data: SPAnalysisDataModel
@@ -20,18 +19,10 @@ export const SPAnalysisContext = createContext<SPAnalysisContextType>({
 
 
 const SPAnalysisContextProvider: FunctionComponent<PropsWithChildren<SPAnalysisContextProviderProps>> = ({ children }) => {
-    const [searchParams, setSearchParams] = useSearchParams();
 
-    const onDirty = useCallback(() => {
-        // whenever the data state is 'dirty', we want to
-        // clear the URL bar as to indiciate that the viewed content is
-        // no longer what the link would point to
-        if (searchParams.size !== 0)
-            setSearchParams(new URLSearchParams())
-    }, [searchParams, setSearchParams]);
+    const { queries, clearSearchParams } = useQueryParams();
 
-
-    const [data, update] = useReducer<SPAnalysisReducerType>(SPAnalysisReducer(onDirty), initialDataModel)
+    const [data, update] = useReducer<SPAnalysisReducerType>(SPAnalysisReducer(clearSearchParams), initialDataModel)
 
     useEffect(() => {
         // as user reloads the page or closes the tab, save state to local storage
@@ -49,9 +40,8 @@ const SPAnalysisContextProvider: FunctionComponent<PropsWithChildren<SPAnalysisC
     useEffect(() => {
         if (data != initialDataModel) return;
 
-        const query = fromSearchParams(searchParams);
-        if (queryStringHasParameters(query)) {
-            fetchRemoteAnalysis(query).then((data) => {
+        if (queryStringHasParameters(queries)) {
+            fetchRemoteAnalysis(queries).then((data) => {
                 update({ type: 'loadInitialData', state: data })
             })
         } else {
@@ -62,7 +52,7 @@ const SPAnalysisContextProvider: FunctionComponent<PropsWithChildren<SPAnalysisC
             update({ type: 'loadInitialData', state: parsedData })
         }
 
-    }, [data, searchParams])
+    }, [data, queries])
 
     return (
         <SPAnalysisContext.Provider value={{ data, update }}>

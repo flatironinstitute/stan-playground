@@ -1,4 +1,6 @@
+import { useSearchParams } from "react-router-dom";
 import { SPAnalysisDataModel, initialDataModel, persistStateToEphemera } from "./SPAnalysisDataModel";
+import { useCallback } from "react";
 
 
 enum QueryParamKeys {
@@ -17,7 +19,17 @@ type QueryParams = {
     [key in QueryParamKeys]: string | null
 }
 
-export const fromSearchParams = (searchParams: URLSearchParams) => {
+export const useQueryParams = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    const clearSearchParams = useCallback(() => {
+        // whenever the data state is 'dirty', we want to
+        // clear the URL bar as to indiciate that the viewed content is
+        // no longer what the link would point to
+        if (searchParams.size !== 0)
+            setSearchParams(new URLSearchParams())
+    }, [searchParams, setSearchParams]);
+
     for (const key of searchParams.keys()) {
         // warn on unknown keys
         if (!Object.values(QueryParamKeys).includes(key as QueryParamKeys)) {
@@ -25,7 +37,7 @@ export const fromSearchParams = (searchParams: URLSearchParams) => {
         }
     }
 
-    const query: QueryParams = {
+    const queries: QueryParams = {
         stan: searchParams.get(QueryParamKeys.StanFile),
         data: searchParams.get(QueryParamKeys.DataFile),
         sampling_opts: searchParams.get(QueryParamKeys.SamplingOpts),
@@ -36,7 +48,8 @@ export const fromSearchParams = (searchParams: URLSearchParams) => {
         init_radius: searchParams.get(QueryParamKeys.SOInitRadius),
         seed: searchParams.get(QueryParamKeys.SOSeed),
     }
-    return query
+
+    return { queries, clearSearchParams }
 }
 
 export const queryStringHasParameters = (query: QueryParams) => {
