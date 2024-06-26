@@ -27,6 +27,7 @@ const isSPAnalysisBase = (x: any): x is SPAnalysisBase => {
     if (!x) return false
     if (typeof x !== 'object') return false
     if (!isSamplingOpts(x.samplingOpts)) return false
+    if (!isSPAnalysisFiles(x)) return false
     return true
 }
 
