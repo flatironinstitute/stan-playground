@@ -78,7 +78,7 @@ export const useSamplerOutput = (sampler: StanSampler | undefined) => {
             if (sampler.status === 'completed') {
                 setDraws(sampler.draws);
                 setParamNames(sampler.paramNames);
-                setNumChains(sampler.numChains);
+                setNumChains(sampler.samplingOpts.num_chains);
                 setComputeTimeSec(sampler.computeTimeSec);
             }
             else {
