@@ -1,18 +1,21 @@
-import { Hyperlink } from "@fi-sci/misc"
+import { Hyperlink, SmallIconButton } from "@fi-sci/misc"
 import ModalWindow, { useModalWindow } from "@fi-sci/modal-window"
 import { FunctionComponent, useCallback, useContext } from "react"
 import examplesStanies, { Stanie } from "../../exampleStanies/exampleStanies"
 import { SPAnalysisContext } from "../../SPAnalysis/SPAnalysisContextProvider"
 import ExportWindow from "./ExportWindow"
 import ImportWindow from "./ImportWindow"
+import { ChevronLeft, ChevronRight } from "@mui/icons-material"
 
 type LeftPanelProps = {
     width: number
     height: number
     hasUnsavedChanges: boolean
+    collapsed: boolean
+    onSetCollapsed: (collapsed: boolean) => void
 }
 
-const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, hasUnsavedChanges }) => {
+const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, hasUnsavedChanges, collapsed, onSetCollapsed }) => {
     // note: this is close enough to pass in directly if we wish
     const { update } = useContext(SPAnalysisContext)
 
@@ -22,9 +25,21 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, hasUnsave
 
     const { visible: exportVisible, handleOpen: exportOpen, handleClose: exportClose } = useModalWindow()
     const { visible: importVisible, handleOpen: importOpen, handleClose: importClose } = useModalWindow()
+
+    if (collapsed) {
+        return (
+            <div style={{position: 'absolute', width, height, backgroundColor: 'lightgray', overflowY: 'auto'}}>
+                <div style={{margin: 5}}>
+                    <ExpandButton onClick={() => onSetCollapsed(false)} />
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div style={{position: 'absolute', width, height, backgroundColor: 'lightgray', overflowY: 'auto'}}>
             <div style={{margin: 5}}>
+                <CollapseButton onClick={() => onSetCollapsed(true)} />
                 <h3>Examples</h3>
                 {
                     examplesStanies.map((stanie, i) => (
@@ -82,6 +97,26 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, hasUnsave
                 />
             </ModalWindow>
         </div>
+    )
+}
+
+const ExpandButton: FunctionComponent<{ onClick: () => void }> = ({ onClick }) => {
+    return (
+        <SmallIconButton
+            icon={<ChevronRight />}
+            onClick={onClick}
+            title="Expand"
+        />
+    )
+}
+
+const CollapseButton: FunctionComponent<{ onClick: () => void }> = ({ onClick }) => {
+    return (
+        <SmallIconButton
+            icon={<ChevronLeft />}
+            onClick={onClick}
+            title="Collapse"
+        />
     )
 }
 

@@ -1,5 +1,5 @@
 import { Splitter } from "@fi-sci/splitter";
-import { FunctionComponent, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { FunctionComponent, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import DataFileEditor from "../../FileEditor/DataFileEditor";
 import StanFileEditor from "../../FileEditor/StanFileEditor";
 import RunPanel from "../../RunPanel/RunPanel";
@@ -30,8 +30,6 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
 }
 
 const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
-
-
     const { data, update } = useContext(SPAnalysisContext)
     const setSamplingOpts = useCallback((opts: SamplingOpts) => {
         update({ type: 'setSamplingOpts', opts })
@@ -39,13 +37,31 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
 
     const [compiledMainJsUrl, setCompiledMainJsUrl] = useState<string>('')
 
-    const leftPanelWidth = Math.max(250, Math.min(340, width * 0.2))
+    const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(determineShouldBeInitiallyCollapsed(width))
+    const expandedLeftPanelWidth = determineLeftPanelWidth(width) // what the width would be if expanded
+    const leftPanelWidth = leftPanelCollapsed ? 20 : expandedLeftPanelWidth // the actual width
+
+    // We automatically collapse the panel if user has resized the window to be
+    // too small but we only want to do this right when we cross the threshold,
+    // not every time we resize by a pixel. Similar for expanding the panel when
+    // we cross the threshold in the other direction.
+    const lastWidth = useRef(width)
+    useEffect(() => {
+        if (!determineShouldBeInitiallyCollapsed(lastWidth.current) && determineShouldBeInitiallyCollapsed(width)) {
+            lastWidth.current = width
+            setLeftPanelCollapsed(true)
+        }
+        else if (determineShouldBeInitiallyCollapsed(lastWidth.current) && !determineShouldBeInitiallyCollapsed(width)) {
+            lastWidth.current = width
+            setLeftPanelCollapsed(false)
+        }
+    }, [width])
+
     const topBarHeight = 25
 
     useEffect(() => {
         document.title = "Stan Playground - " + data.meta.title;
     }, [data.meta.title])
-
 
     return (
         <div style={{ position: 'absolute', width, height, overflow: 'hidden' }}>
@@ -58,6 +74,8 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
             </div>
             <div className="left-panel" style={{ position: 'absolute', left: 0, top: topBarHeight + 2, width: leftPanelWidth, height: height - topBarHeight - 2, overflow: 'auto' }}>
                 <LeftPanel
+                    collapsed={leftPanelCollapsed}
+                    onSetCollapsed={setLeftPanelCollapsed}
                     width={leftPanelWidth}
                     height={height - topBarHeight - 2}
                     hasUnsavedChanges={modelHasUnsavedChanges(data)}
@@ -98,6 +116,19 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
             </div>
         </div>
     )
+}
+
+// the width of the left panel when it is expanded based on the overall width
+const determineLeftPanelWidth = (width: number) => {
+    const minWidth = 250
+    const maxWidth = 500
+    return Math.min(maxWidth, Math.max(minWidth, width / 4))
+}
+
+// whether the left panel should be collapsed initially based on the overall
+// width
+const determineShouldBeInitiallyCollapsed = (width: number) => {
+    return width < 800
 }
 
 type RightViewProps = {
