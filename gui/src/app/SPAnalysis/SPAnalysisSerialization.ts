@@ -1,7 +1,7 @@
 import JSZip from "jszip"
 import { replaceSpacesWithUnderscores } from "../util/replaceSpaces"
 import { FileNames, FileRegistry, mapFileContentsToModel, mapModelToFileManifest, SPAnalysisFileMap } from "./FileMapping"
-import { getStringKnownFileKeys, SPAnalysisDataModel } from "./SPAnalysisDataModel"
+import { getStringKnownFileKeys, isSPAnalysisDataModel, SPAnalysisDataModel } from "./SPAnalysisDataModel"
 
 export const serializeAnalysisToLocalStorage = (data: SPAnalysisDataModel): string => {
     const intermediary = {
@@ -9,13 +9,23 @@ export const serializeAnalysisToLocalStorage = (data: SPAnalysisDataModel): stri
     return JSON.stringify(intermediary)
 }
 
-export const deserializeAnalysisFromLocalStorage = (serialized: string): SPAnalysisDataModel => {
-    const intermediary = JSON.parse(serialized)
-    // Not sure if this is strictly necessary
-    intermediary.ephemera = {}
-    const stringFileKeys = getStringKnownFileKeys()
-    stringFileKeys.forEach((k) => intermediary.ephemera[k] = intermediary[k]);
-    return intermediary as SPAnalysisDataModel
+export const deserializeAnalysisFromLocalStorage = (serialized: string): SPAnalysisDataModel | undefined => {
+    try {
+        const intermediary = JSON.parse(serialized)
+        // Not sure if this is strictly necessary
+        intermediary.ephemera = {}
+        const stringFileKeys = getStringKnownFileKeys()
+        stringFileKeys.forEach((k) => intermediary.ephemera[k] = intermediary[k]);
+        if (!isSPAnalysisDataModel(intermediary)) {
+            console.warn(intermediary)
+            throw Error('Deserialized data is not a valid SPAnalysisDataModel')
+        }
+        return intermediary
+    }
+    catch (e) {
+        console.error('Error deserializing data from local storage', e)
+        return undefined
+    }
 }
 
 export const serializeAsZip = async (data: SPAnalysisDataModel): Promise<[Blob, string]> => {

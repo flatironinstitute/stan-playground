@@ -12,6 +12,17 @@ export type SamplingOpts = {
     seed: number | undefined
 }
 
+export const isSamplingOpts = (x: any): x is SamplingOpts => {
+    if (!x) return false
+    if (typeof x !== 'object') return false
+    if (typeof x.num_chains !== 'number') return false
+    if (typeof x.num_warmup !== 'number') return false
+    if (typeof x.num_samples !== 'number') return false
+    if (typeof x.init_radius !== 'number') return false
+    if (x.seed !== undefined && typeof x.seed !== 'number') return false
+    return true
+}
+
 export const defaultSamplingOpts: SamplingOpts = {
     num_chains: 4,
     num_warmup: 1000,

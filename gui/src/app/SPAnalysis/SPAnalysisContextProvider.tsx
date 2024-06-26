@@ -9,6 +9,7 @@ type SPAnalysisContextType = {
 }
 
 type SPAnalysisContextProviderProps = {
+    //
 }
 
 export const SPAnalysisContext = createContext<SPAnalysisContextType>({
@@ -41,6 +42,7 @@ const SPAnalysisContextProvider: FunctionComponent<PropsWithChildren<SPAnalysisC
         const savedState = localStorage.getItem('stan-playground-saved-state')
         if (!savedState) return
         const parsedData = deserializeAnalysisFromLocalStorage(savedState)
+        if (!parsedData) return // unsuccessful parse or type cast
         update({ type: 'loadLocalStorage', state: parsedData })
     }, [])
     ////////////////////////////////////////////////////////////////////////////////////////
