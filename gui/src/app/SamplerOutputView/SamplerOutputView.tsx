@@ -1,13 +1,14 @@
 import { SmallIconButton } from "@fi-sci/misc"
 import { Download } from "@mui/icons-material"
+import JSZip from 'jszip'
 import { FunctionComponent, useCallback, useMemo, useState } from "react"
 import StanSampler from "../StanSampler/StanSampler"
 import { useSamplerOutput } from "../StanSampler/useStanSampler"
 import TabWidget from "../TabWidget/TabWidget"
-import TracePlotsView from "./TracePlotsView"
-import SummaryView from "./SummaryView"
+import { triggerDownload } from "../util/triggerDownload"
 import HistsView from "./HistsView"
-import JSZip from 'jszip'
+import SummaryView from "./SummaryView"
+import TracePlotsView from "./TracePlotsView"
 
 type SamplerOutputViewProps = {
     width: number
@@ -250,11 +251,7 @@ const createZipBlobForMultipleCsvs = async (csvTexts: string[], uniqueChainIds: 
 
 const downloadTextFile = (text: string, filename: string) => {
     const blob = new Blob([text], {type: 'text/plain'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
+    triggerDownload(blob, filename, () => {});
 }
 
 export default SamplerOutputView
