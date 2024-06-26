@@ -34,7 +34,14 @@ export type SPAnalysisReducerAction = {
     type: 'clear'
 }
 
-export const SPAnalysisReducer: SPAnalysisReducerType = (s: SPAnalysisDataModel, a: SPAnalysisReducerAction) => {
+export const SPAnalysisReducer = (onDirty: () => void) => (s: SPAnalysisDataModel, a: SPAnalysisReducerAction) => {
+    if (a.type !== "loadInitialData") {
+        // TextEditor seems to trigger occasional spurious edits where nothing changes
+        if (a.type !== "editFile" || s[a.filename] != a.content) {
+            onDirty();
+        }
+    }
+
     switch (a.type) {
         case "loadStanie": {
             const dataFileContent = JSON.stringify(a.stanie.data, null, 2);

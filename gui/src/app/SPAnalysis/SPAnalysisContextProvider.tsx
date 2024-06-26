@@ -1,5 +1,5 @@
-import { createContext, FunctionComponent, PropsWithChildren, useEffect, useReducer } from "react"
-import {  initialDataModel, SPAnalysisDataModel, modelHasUnsavedChanges } from "./SPAnalysisDataModel"
+import { initialDataModel, SPAnalysisDataModel } from "./SPAnalysisDataModel"
+import { createContext, FunctionComponent, PropsWithChildren, useCallback, useEffect, useReducer } from "react"
 import { SPAnalysisReducer, SPAnalysisReducerAction, SPAnalysisReducerType } from "./SPAnalysisReducer"
 import { useSearchParams } from "react-router-dom"
 import { deserializeAnalysisFromLocalStorage, serializeAnalysisToLocalStorage } from "./SPAnalysisSerialization"
@@ -20,9 +20,18 @@ export const SPAnalysisContext = createContext<SPAnalysisContextType>({
 
 
 const SPAnalysisContextProvider: FunctionComponent<PropsWithChildren<SPAnalysisContextProviderProps>> = ({ children }) => {
-    const [data, update] = useReducer<SPAnalysisReducerType>(SPAnalysisReducer, initialDataModel)
-
     const [searchParams, setSearchParams] = useSearchParams();
+
+    const onDirty = useCallback(() => {
+        // whenever the data state is 'dirty', we want to
+        // clear the URL bar as to indiciate that the viewed content is
+        // no longer what the link would point to
+        if (searchParams.size !== 0)
+            setSearchParams(new URLSearchParams())
+    }, [searchParams, setSearchParams]);
+
+
+    const [data, update] = useReducer<SPAnalysisReducerType>(SPAnalysisReducer(onDirty), initialDataModel)
 
     ////////////////////////////////////////////////////////////////////////////////////////
     // For convenience, we save the state to local storage so it is available on
@@ -62,17 +71,6 @@ const SPAnalysisContextProvider: FunctionComponent<PropsWithChildren<SPAnalysisC
         }
 
     }, [data, searchParams])
-
-
-    useEffect(() => {
-        // whenever the data state is 'dirty', we want to
-        // clear the URL bar as to indiciate that the viewed content is
-        // no longer what the link would point to
-        if (searchParams.size !== 0 && modelHasUnsavedChanges(data)) {
-            setSearchParams(new URLSearchParams());
-        }
-    }, [data, searchParams, setSearchParams])
-
 
     return (
         <SPAnalysisContext.Provider value={{ data, update }}>
