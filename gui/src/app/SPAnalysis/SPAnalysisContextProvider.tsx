@@ -9,8 +9,6 @@ type SPAnalysisContextType = {
 }
 
 type SPAnalysisContextProviderProps = {
-    // may be used in the future when we allow parameters to be passed through the string
-    sourceDataUri: string
 }
 
 export const SPAnalysisContext = createContext<SPAnalysisContextType>({
