@@ -1,4 +1,4 @@
-import { SPAnalysisDataModel, initialDataModel } from "./SPAnalysisDataModel";
+import { SPAnalysisDataModel, initialDataModel, persistStateToEphemera } from "./SPAnalysisDataModel";
 
 
 enum QueryParamKeys {
@@ -37,7 +37,10 @@ export const fromSearchParams = (searchParams: URLSearchParams) => {
         seed: searchParams.get(QueryParamKeys.SOSeed),
     }
     return query
+}
 
+export const queryStringHasParameters = (query: QueryParams) => {
+    return Object.values(query).some(v => v !== null)
 }
 
 const tryFetch = async (url: string) => {
@@ -60,10 +63,9 @@ const deepCopy = (obj: any) => {
 }
 
 export const fetchRemoteAnalysis = async (query: QueryParams) => {
-
     // any special 'project' query could be loaded here at the top
     const data: SPAnalysisDataModel = deepCopy(initialDataModel)
-
+    
     if (query.stan) {
         const stanFileContent = await tryFetch(query.stan)
         if (stanFileContent) {
@@ -105,9 +107,5 @@ export const fetchRemoteAnalysis = async (query: QueryParams) => {
         data.meta.title = query.title
     }
 
-    // TODO(bmw) create a 'setEphemera' helper?
-    data.ephemera.stanFileContent = data.stanFileContent
-    data.ephemera.dataFileContent = data.dataFileContent
-
-    return data
+    return persistStateToEphemera(data);
 }

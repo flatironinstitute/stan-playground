@@ -3,7 +3,7 @@ import { createContext, FunctionComponent, PropsWithChildren, useCallback, useEf
 import { SPAnalysisReducer, SPAnalysisReducerAction, SPAnalysisReducerType } from "./SPAnalysisReducer"
 import { useSearchParams } from "react-router-dom"
 import { deserializeAnalysisFromLocalStorage, serializeAnalysisToLocalStorage } from "./SPAnalysisSerialization"
-import { fromSearchParams, fetchRemoteAnalysis } from "./SPAnalysisQueryLoading"
+import { fromSearchParams, fetchRemoteAnalysis, queryStringHasParameters } from "./SPAnalysisQueryLoading"
 
 type SPAnalysisContextType = {
     data: SPAnalysisDataModel
@@ -33,10 +33,6 @@ const SPAnalysisContextProvider: FunctionComponent<PropsWithChildren<SPAnalysisC
 
     const [data, update] = useReducer<SPAnalysisReducerType>(SPAnalysisReducer(onDirty), initialDataModel)
 
-    ////////////////////////////////////////////////////////////////////////////////////////
-    // For convenience, we save the state to local storage so it is available on
-    // reload of the page But this will be revised in the future to use a more
-    // sophisticated storage mechanism.
     useEffect(() => {
         // as user reloads the page or closes the tab, save state to local storage
         const handleBeforeUnload = () => {
@@ -49,16 +45,12 @@ const SPAnalysisContextProvider: FunctionComponent<PropsWithChildren<SPAnalysisC
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
     }, [data])
-    ////////////////////////////////////////////////////////////////////////////////////////
-
 
     useEffect(() => {
         if (data != initialDataModel) return;
 
         const query = fromSearchParams(searchParams);
-
-        // any query is set
-        if (Object.values(query).some(v => v !== null)) {
+        if (queryStringHasParameters(query)) {
             fetchRemoteAnalysis(query).then((data) => {
                 update({ type: 'loadInitialData', state: data })
             })
