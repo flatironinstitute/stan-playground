@@ -53,11 +53,11 @@ export const persistStateToEphemera = (data: SPAnalysisDataModel): SPAnalysisDat
     }
 }
 
-export const getStringKnownFileKeys = () => Object.values(SPAnalysisKnownFiles).filter((v) => isNaN(Number(v)));
+export const getStringKnownFileKeys = () => Object.values(SPAnalysisKnownFiles);
 
 export const modelHasUnsavedChanges = (data: SPAnalysisDataModel): boolean => {
     const stringFileKeys = getStringKnownFileKeys()
-    return stringFileKeys.every((k) => data[k] !== data.ephemera[k])
+    return stringFileKeys.some((k) => data[k] !== data.ephemera[k])
 }
 
 export const stringifyField = (data: SPAnalysisDataModel, field: keyof SPAnalysisDataModel): string => {
