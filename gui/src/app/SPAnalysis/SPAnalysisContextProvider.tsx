@@ -24,7 +24,6 @@ const SPAnalysisContextProvider: FunctionComponent<PropsWithChildren<SPAnalysisC
 
     const [searchParams, setSearchParams] = useSearchParams();
 
-
     useEffect(() => {
         // as user reloads the page or closes the tab, save state to local storage
         const handleBeforeUnload = () => {
@@ -39,8 +38,6 @@ const SPAnalysisContextProvider: FunctionComponent<PropsWithChildren<SPAnalysisC
     }, [data])
 
     useEffect(() => {
-        if (searchParams.size === 0 && data !== initialDataModel) return;
-
         const queries = fromQueryParams(searchParams)
         if (queryStringHasParameters(queries)) {
             fetchRemoteAnalysis(queries).then((data) => {
@@ -58,8 +55,10 @@ const SPAnalysisContextProvider: FunctionComponent<PropsWithChildren<SPAnalysisC
             const parsedData = deserializeAnalysisFromLocalStorage(savedState)
             update({ type: 'loadInitialData', state: parsedData })
         }
-
-    }, [data, searchParams, setSearchParams])
+        // once we have loaded some data, we don't need the localStorage again
+        // and it will be overwritten by the above event listener on close
+        localStorage.removeItem('stan-playground-saved-state')
+    }, [searchParams, setSearchParams])
 
     return (
         <SPAnalysisContext.Provider value={{ data, update }}>
