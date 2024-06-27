@@ -1,6 +1,7 @@
 import { useSearchParams } from "react-router-dom";
 import { SPAnalysisDataModel, initialDataModel, persistStateToEphemera } from "./SPAnalysisDataModel";
 import { useCallback } from "react";
+import { isSamplingOpts } from "../StanSampler/StanSampler";
 
 
 enum QueryParamKeys {
@@ -96,8 +97,12 @@ export const fetchRemoteAnalysis = async (query: QueryParams) => {
     if (sampling_opts) {
         try {
             const parsed = JSON.parse(sampling_opts)
-            // TODO validate the parsed object
-            data.samplingOpts = parsed
+            if (isSamplingOpts(parsed)) {
+                data.samplingOpts = parsed
+            }
+            else {
+                console.error('Invalid sampling_opts in fetchRemoteAnalysis', parsed)
+            }
         } catch (err) {
             console.error('Failed to parse sampling_opts', err)
         }
