@@ -39,11 +39,9 @@ const DataRFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSav
             throw new Error('Cannot run edited code')
         }
         setStatus('loading')
-        await new Promise(resolve => setTimeout(resolve, 100))
         try {
             const webR = await loadWebRInstance()
             setStatus('running')
-            await new Promise(resolve => setTimeout(resolve, 100))
             const rCode = fileContent + '\n\n' + `
 # Convert the list to JSON format
 json_data <- jsonlite::toJSON(data, pretty = TRUE, auto_unbox = TRUE)

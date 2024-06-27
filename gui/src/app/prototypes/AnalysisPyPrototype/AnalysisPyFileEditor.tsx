@@ -63,10 +63,11 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({fileName, fileContent, 
             outputDiv.innerHTML = ''
         }
         setStatus('loading')
-        await new Promise(resolve => setTimeout(resolve, 100))
         try {
             const pyodide = await loadPyodideInstance()
             setStatus('running')
+            // the runPython call is going to be blocking, so we want to give
+            // react a chance to update the status in the UI.
             await new Promise(resolve => setTimeout(resolve, 100))
 
             // here's where we can pass in globals
