@@ -3,8 +3,9 @@ import { AutoFixHigh, Cancel, Settings, } from "@mui/icons-material";
 import { FunctionComponent, useCallback, useEffect, useMemo, useState } from "react";
 import StanCompileResultWindow from "./StanCompileResultWindow";
 import useStanc from "../Stanc/useStanc";
-import TextEditor, { ToolbarItem } from "./TextEditor";
+import TextEditor, { CodeMarker, ToolbarItem } from "./TextEditor";
 import compileStanProgram from '../compileStanProgram/compileStanProgram';
+import { StancErrors } from '../Stanc/Types';
 
 type Props = {
     fileName: string
@@ -157,7 +158,7 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
         }
 
         return ret
-    }, [editedFileContent, fileContent, handleCompile, requestFormat, showLabelsOnButtons, validSyntax, compileStatus, compileMessage, readOnly])
+    }, [editedFileContent, fileContent, handleCompile, requestFormat, showLabelsOnButtons, validSyntax, compileStatus, compileMessage, readOnly, hasWarnings])
 
     const isCompiling = compileStatus === 'compiling'
 
@@ -183,6 +184,7 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
                 onSetEditedText={setEditedFileContent}
                 readOnly={!isCompiling ? readOnly : true}
                 toolbarItems={toolbarItems}
+                codeMarkers={stancErrorsToCodeMarkers(stancErrors)}
             />
             {
                 editedFileContent ? <StanCompileResultWindow
@@ -211,6 +213,44 @@ const stringChecksum = (str: string) => {
         hash = hash & hash; // Convert to 32bit integer
     }
     return hash;
+}
+
+const stancErrorsToCodeMarkers = (stancErrors: StancErrors) => {
+    const cm: CodeMarker[] = []
+    const errorsAndWarnings = [...(stancErrors.errors || []), ...(stancErrors.warnings || [])]
+    for (const x of errorsAndWarnings) {
+        if (!x) continue
+
+        // Example: Syntax error in 'main.stan', line 1, column 0 to column 1, parsing error:
+
+        let lineNumber: number | undefined = undefined
+        let startColumn: number | undefined = undefined
+        let endColumn: number | undefined = undefined
+
+        const sections = x.split(',').map(x => x.trim())
+        for (const section of sections) {
+            if (section.startsWith('line ')) {
+                lineNumber = parseInt(section.slice('line '.length))
+            }
+            else if (section.startsWith('column ')) {
+                const cols = section.slice('column '.length).split(' to ')
+                startColumn = parseInt(cols[0])
+                endColumn = cols.length > 1 ? parseInt(cols[1].slice('column '.length)) : startColumn + 1
+            }
+        }
+
+        if ((lineNumber !== undefined) && (startColumn !== undefined) && (endColumn !== undefined)) {
+            cm.push({
+                startLineNumber: lineNumber,
+                startColumn: startColumn + 1,
+                endLineNumber: lineNumber,
+                endColumn: endColumn + 1,
+                message: x,
+                severity: x.toLowerCase().startsWith('warning') ? 'warning' : 'error'
+            })
+        }
+    }
+    return cm
 }
 
 
