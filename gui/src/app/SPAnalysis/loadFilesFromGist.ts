@@ -17,29 +17,30 @@ const loadFilesFromGist = async (gistUri: string): Promise<{ files: { [key: stri
     for (const fname in gistFiles) {
         const file = gistFiles[fname]
         if (!file) continue
-        let content = file.content
+        const content = file.content
         if (content === undefined) continue
-        // Gists do not support empty files or whitespace-only files. This
-        // provides a workaround for that by allowing the user to specify an
-        // empty file by starting the content with the string '<<empty>>'. This
-        // is then removed from the content.
-        if (content.startsWith('<<empty>>')) {
-            const x = content.slice('<<empty>>'.length)
-            if (x.trim() === '') {
-                content = x
-            }
-        }
-        // Gists do not support directories This is a placeholder for the future
-        // where we may want a subdirectory structure for project files. Here we
-        // replace the '|' character with '/' to simulate a directory structure.
-        const fname2 = replaceBarsWithSlashes(fname)
-        files[fname2] = content
+
+        // In the future, we may want to do the following to support empty files
+        // (gists do not allow empty files or files with only whitespace)
+        // if (content.startsWith('<<empty>>')) {
+        //     const x = content.slice('<<empty>>'.length)
+        //     if (x.trim() === '') {
+        //         content = x
+        //     }
+        // }
+
+        // In the future, we may want to do the following to support directories
+        // (gists do not support directories)
+        // files[fname] = replaceBarsWithSlashes(fname)
+
+        files[fname] = content
     }
     return { files, description }
 }
 
-const replaceBarsWithSlashes = (s: string) => {
-    return s.split('|').join('/')
-}
+// see above comment
+// const replaceBarsWithSlashes = (s: string) => {
+//     return s.split('|').join('/')
+// }
 
 export default loadFilesFromGist
