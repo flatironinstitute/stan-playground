@@ -95,9 +95,9 @@ export const fetchRemoteAnalysis = async (query: QueryParams) => {
         }
     }
 
-    const stanFilePromise = query.stan ? tryFetch(query.stan) : Promise.resolve(undefined);
-    const dataFilePromise = query.data ? tryFetch(query.data) : Promise.resolve(undefined);
-    const sampling_optsPromise = query.sampling_opts ? tryFetch(query.sampling_opts) : Promise.resolve(undefined);
+    const stanFilePromise = query.stan ? tryFetch(query.stan) : Promise.resolve(`// Unable to load from ${query.stan}`);
+    const dataFilePromise = query.data ? tryFetch(query.data) : Promise.resolve(`// Unable to load from ${query.data}`);
+    const sampling_optsPromise = query.sampling_opts ? tryFetch(query.sampling_opts) : Promise.resolve(`// Unable to load from ${query.sampling_opts}`);
 
     const stanFileContent = await stanFilePromise;
     if (stanFileContent) {
