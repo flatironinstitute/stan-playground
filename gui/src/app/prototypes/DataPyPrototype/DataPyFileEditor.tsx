@@ -24,7 +24,9 @@ const loadPyodideInstance = async () => {
             stderr: (x: string) => console.error(x)
         })
         pyodide = p
-        await pyodide.loadPackage(['numpy'])
+        await pyodide.loadPackage(['numpy', 'micropip'])
+        const micropip = pyodide.pyimport('micropip')
+        await micropip.install('stanio')
         return pyodide
     } else {
         return pyodide
@@ -53,29 +55,9 @@ const DataPyFileEditor: FunctionComponent<Props> = ({fileName, fileContent, onSa
 
             // We serialize the data object to json string in the python script
             script += '\n'
-            script += 'import numpy as np\n'
-            script += 'def _sp_serialize(x):\n'
-            script += '    if isinstance(x, dict):\n'
-            script += '        ret = {}\n'
-            script += '        for key in x:\n'
-            script += '            ret[key] = _sp_serialize(x[key])\n'
-            script += '        return ret\n'
-            script += '    elif isinstance(x, list):\n'
-            script += '        ret = []\n'
-            script += '        for val in x:\n'
-            script += '            ret.append(_sp_serialize(val))\n'
-            script += '        return ret\n'
-            script += '    elif isinstance(x, tuple):\n'
-            script += '        ret = []\n'
-            script += '        for val in x:\n'
-            script += '            ret.append(_sp_serialize(val))\n'
-            script += '        return ret\n'
-            script += '    elif isinstance(x, np.ndarray):\n'
-            script += '        return _sp_serialize(x.tolist())\n'
-            script += '    else:\n'
-            script += '        return x\n'
+            script += 'import stanio\n'
             script += 'import json\n'
-            script += 'data = json.dumps(_sp_serialize(data))\n'
+            script += 'data = stanio.dump_stan_json(data)\n'
             pyodide.runPython(script, {globals})
 
             if (setData) {

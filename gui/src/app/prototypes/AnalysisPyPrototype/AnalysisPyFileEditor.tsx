@@ -71,7 +71,7 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({fileName, fileContent, 
 
             // here's where we can pass in globals
             const globals = pyodide.toPy({ _sp_example_global: 5 });
-            let script = fileContent
+            const script = fileContent
             pyodide.runPython(script, {globals})
             setStatus('completed')
         }
