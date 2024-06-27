@@ -19,28 +19,9 @@ const loadFilesFromGist = async (gistUri: string): Promise<{ files: { [key: stri
         if (!file) continue
         const content = file.content
         if (content === undefined) continue
-
-        // In the future, we may want to do the following to support empty files
-        // (gists do not allow empty files or files with only whitespace)
-        // if (content.startsWith('<<empty>>')) {
-        //     const x = content.slice('<<empty>>'.length)
-        //     if (x.trim() === '') {
-        //         content = x
-        //     }
-        // }
-
-        // In the future, we may want to do the following to support directories
-        // (gists do not support directories)
-        // files[fname] = replaceBarsWithSlashes(fname)
-
         files[fname] = content
     }
     return { files, description }
 }
-
-// see above comment
-// const replaceBarsWithSlashes = (s: string) => {
-//     return s.split('|').join('/')
-// }
 
 export default loadFilesFromGist
