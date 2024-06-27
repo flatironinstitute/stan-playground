@@ -229,10 +229,10 @@ const stancErrorsToCodeMarkers = (stancErrors: StancErrors) => {
 
         const sections = x.split(',').map(x => x.trim())
         for (const section of sections) {
-            if (section.startsWith('line ')) {
+            if ((section.startsWith('line ')) && (lineNumber === undefined)) {
                 lineNumber = parseInt(section.slice('line '.length))
             }
-            else if (section.startsWith('column ')) {
+            else if ((section.startsWith('column ')) && (startColumn === undefined)) {
                 const cols = section.slice('column '.length).split(' to ')
                 startColumn = parseInt(cols[0])
                 endColumn = cols.length > 1 ? parseInt(cols[1].slice('column '.length)) : startColumn + 1
