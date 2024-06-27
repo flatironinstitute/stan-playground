@@ -240,18 +240,51 @@ const stancErrorsToCodeMarkers = (stancErrors: StancErrors) => {
         }
 
         if ((lineNumber !== undefined) && (startColumn !== undefined) && (endColumn !== undefined)) {
+            const isWarning = x.toLowerCase().startsWith('warning')
             cm.push({
                 startLineNumber: lineNumber,
                 startColumn: startColumn + 1,
                 endLineNumber: lineNumber,
                 endColumn: endColumn + 1,
-                message: x,
-                severity: x.toLowerCase().startsWith('warning') ? 'warning' : 'error'
+                message: isWarning ? getWarningMessage(x) : getErrorMessage(x),
+                severity: isWarning ? 'warning' : 'error'
             })
         }
     }
     return cm
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Adapted from https://github.com/WardBrian/vscode-stan-extension
+function getWarningMessage(message: string) {
+    let warning = message.replace(/Warning.*column \d+: /s, "");
+    warning = warning.replace(/\s+/gs, " ");
+    warning = warning.trim();
+    warning = message.includes("included from")
+      ? "Warning in included file:\n" + warning
+      : warning;
+    return warning;
+}
+
+function getErrorMessage(message: string) {
+    let error = message;
+    // cut off code snippet for display
+    if (message.includes("------\n")) {
+      error = error.split("------\n")[2];
+    }
+    error = error.trim();
+    error = message.includes("included from")
+      ? "Error in included file:\n" + error
+      : error;
+
+    // only relevant to vscode-stan-extension:
+    // error = error.includes("given information about")
+    //   ? error +
+    //     "\nConsider updating the includePaths setting of vscode-stan-extension"
+    //   : error;
+
+    return error;
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export default StanFileEditor
