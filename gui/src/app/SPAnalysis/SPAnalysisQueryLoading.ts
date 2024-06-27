@@ -1,9 +1,13 @@
 import { useSearchParams } from "react-router-dom";
 import { SPAnalysisDataModel, initialDataModel, persistStateToEphemera } from "./SPAnalysisDataModel";
 import { useCallback } from "react";
+import loadFilesFromGist from "./loadFilesFromGist";
+import { loadFromProjectFiles } from "./SPAnalysisReducer";
+import { mapFileContentsToModel } from "./FileMapping";
 
 
 enum QueryParamKeys {
+    Project= "project",
     StanFile = "stan",
     DataFile = "data",
     SamplingOpts = "sampling_opts",
@@ -38,6 +42,7 @@ export const useQueryParams = () => {
     }
 
     const queries: QueryParams = {
+        project: searchParams.get(QueryParamKeys.Project),
         stan: searchParams.get(QueryParamKeys.StanFile),
         data: searchParams.get(QueryParamKeys.DataFile),
         sampling_opts: searchParams.get(QueryParamKeys.SamplingOpts),
@@ -76,8 +81,19 @@ const deepCopy = (obj: any) => {
 }
 
 export const fetchRemoteAnalysis = async (query: QueryParams) => {
-    // any special 'project' query could be loaded here at the top
-    const data: SPAnalysisDataModel = deepCopy(initialDataModel)
+    const projectUri = query.project
+
+    let data: SPAnalysisDataModel = deepCopy(initialDataModel);
+    if (projectUri) {
+        if (projectUri.startsWith('https://gist.github.com/')) {
+            const contentLoadedFromGist = await loadFilesFromGist(projectUri);
+            data = loadFromProjectFiles(data, mapFileContentsToModel(contentLoadedFromGist.files), false);
+            data.meta.title = contentLoadedFromGist.description;
+        } else {
+            // right now we only support loading from a gist
+            console.error('Unsupported project URI', projectUri)
+        }
+    }
 
     const stanFilePromise = query.stan ? tryFetch(query.stan) : Promise.resolve(undefined);
     const dataFilePromise = query.data ? tryFetch(query.data) : Promise.resolve(undefined);

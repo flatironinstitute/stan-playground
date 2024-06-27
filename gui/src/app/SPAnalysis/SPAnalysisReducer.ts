@@ -109,7 +109,7 @@ const loadFileFromString = (data: SPAnalysisDataModel, field: SPAnalysisKnownFil
     return newData
 }
 
-const loadFromProjectFiles = (data: SPAnalysisDataModel, files: Partial<FieldsContentsMap>, clearExisting: boolean = false): SPAnalysisDataModel => {
+export const loadFromProjectFiles = (data: SPAnalysisDataModel, files: Partial<FieldsContentsMap>, clearExisting: boolean = false): SPAnalysisDataModel => {
     let newData = clearExisting ? initialDataModel : data
     if (Object.keys(files).includes('meta')) {
         newData = loadMetaFromString(newData, files.meta ?? '')
