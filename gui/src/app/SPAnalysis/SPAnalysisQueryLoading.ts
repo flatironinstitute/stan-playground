@@ -61,18 +61,18 @@ export const queryStringHasParameters = (query: QueryParams) => {
     return Object.values(query).some(v => v !== null)
 }
 
-const tryFetch = async (url: string) => {
+const tryFetch = async (url: string, fallback: string | undefined) => {
     console.log('Fetching content from', url)
     try {
         const req = await fetch(url)
         if (!req.ok) {
             console.error('Failed to fetch from url', url, req.status, req.statusText)
-            return undefined
+            return fallback
         }
         return await req.text()
     } catch (err) {
         console.error('Failed to fetch from url', url, err)
-        return undefined
+        return fallback
     }
 }
 
@@ -95,9 +95,9 @@ export const fetchRemoteAnalysis = async (query: QueryParams) => {
         }
     }
 
-    const stanFilePromise = query.stan ? tryFetch(query.stan) : Promise.resolve(`// Unable to load from ${query.stan}`);
-    const dataFilePromise = query.data ? tryFetch(query.data) : Promise.resolve(`// Unable to load from ${query.data}`);
-    const sampling_optsPromise = query.sampling_opts ? tryFetch(query.sampling_opts) : Promise.resolve(`// Unable to load from ${query.sampling_opts}`);
+    const stanFilePromise = query.stan ? tryFetch(query.stan, `// Unable to load from ${query.stan}`) : Promise.resolve(undefined);
+    const dataFilePromise = query.data ? tryFetch(query.data, `Unable to load from ${query.data}`) : Promise.resolve(undefined);
+    const sampling_optsPromise = query.sampling_opts ? tryFetch(query.sampling_opts, undefined) : Promise.resolve(undefined);
 
     const stanFileContent = await stanFilePromise;
     if (stanFileContent) {
