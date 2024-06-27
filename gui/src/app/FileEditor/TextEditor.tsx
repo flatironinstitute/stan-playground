@@ -78,21 +78,13 @@ const TextEditor: FunctionComponent<Props> = ({defaultText, text, onSaveText, ed
         if (editor === undefined) return
         const model = editor.getModel()
         if (model === null) return
-        const toSeverity = (s: 'error' | 'warning' | 'hint' | 'info'): monaco.MarkerSeverity => {
-            switch (s) {
-                case 'error': return monaco.MarkerSeverity.Error
-                case 'warning': return monaco.MarkerSeverity.Warning
-                case 'hint': return monaco.MarkerSeverity.Hint
-                case 'info': return monaco.MarkerSeverity.Info
-            }
-        }
         const modelMarkers = codeMarkers.map(marker => ({
             startLineNumber: marker.startLineNumber,
             startColumn: marker.startColumn,
             endLineNumber: marker.endLineNumber,
             endColumn: marker.endColumn,
             message: marker.message,
-            severity: toSeverity(marker.severity)
+            severity: toMonacoMarkerSeverity(marker.severity)
         }))
         monacoInstance.editor.setModelMarkers(model, 'stan-playground', modelMarkers)
     }, [codeMarkers, monacoInstance, editor])
@@ -215,6 +207,15 @@ const TextEditor: FunctionComponent<Props> = ({defaultText, text, onSaveText, ed
             </div>
         </div>
     )
+}
+
+const toMonacoMarkerSeverity = (s: 'error' | 'warning' | 'hint' | 'info'): monaco.MarkerSeverity => {
+    switch (s) {
+        case 'error': return monaco.MarkerSeverity.Error
+        case 'warning': return monaco.MarkerSeverity.Warning
+        case 'hint': return monaco.MarkerSeverity.Hint
+        case 'info': return monaco.MarkerSeverity.Info
+    }
 }
 
 const ToolbarItemComponent: FunctionComponent<{item: ToolbarItem}> = ({item}) => {

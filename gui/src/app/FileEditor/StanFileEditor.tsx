@@ -216,42 +216,54 @@ const stringChecksum = (str: string) => {
 }
 
 const stancErrorsToCodeMarkers = (stancErrors: StancErrors) => {
-    const cm: CodeMarker[] = []
-    const errorsAndWarnings = [...(stancErrors.errors || []), ...(stancErrors.warnings || [])]
-    for (const x of errorsAndWarnings) {
-        if (!x) continue
+    const codeMarkers: CodeMarker[] = []
 
-        // Example: Syntax error in 'main.stan', line 1, column 0 to column 1, parsing error:
+    for (const x of stancErrors.errors || []) {
+        const marker = stancErrorStringToMarker(x, 'error')
+        if (marker) codeMarkers.push(marker)
+    }
+    for (const x of stancErrors.warnings || []) {
+        const marker = stancErrorStringToMarker(x, 'warning')
+        if (marker) codeMarkers.push(marker)
+    }
 
-        let lineNumber: number | undefined = undefined
-        let startColumn: number | undefined = undefined
-        let endColumn: number | undefined = undefined
+    return codeMarkers
+}
 
-        const sections = x.split(',').map(x => x.trim())
-        for (const section of sections) {
-            if ((section.startsWith('line ')) && (lineNumber === undefined)) {
-                lineNumber = parseInt(section.slice('line '.length))
-            }
-            else if ((section.startsWith('column ')) && (startColumn === undefined)) {
-                const cols = section.slice('column '.length).split(' to ')
-                startColumn = parseInt(cols[0])
-                endColumn = cols.length > 1 ? parseInt(cols[1].slice('column '.length)) : startColumn + 1
-            }
+const stancErrorStringToMarker = (x: string, severity: 'error' | 'warning'): CodeMarker | undefined => {
+    if (!x) return undefined
+
+    // Example: Syntax error in 'main.stan', line 1, column 0 to column 1, parsing error:
+
+    let lineNumber: number | undefined = undefined
+    let startColumn: number | undefined = undefined
+    let endColumn: number | undefined = undefined
+
+    const sections = x.split(',').map(x => x.trim())
+    for (const section of sections) {
+        if ((section.startsWith('line ')) && (lineNumber === undefined)) {
+            lineNumber = parseInt(section.slice('line '.length))
         }
-
-        if ((lineNumber !== undefined) && (startColumn !== undefined) && (endColumn !== undefined)) {
-            const isWarning = x.toLowerCase().startsWith('warning')
-            cm.push({
-                startLineNumber: lineNumber,
-                startColumn: startColumn + 1,
-                endLineNumber: lineNumber,
-                endColumn: endColumn + 1,
-                message: isWarning ? getWarningMessage(x) : getErrorMessage(x),
-                severity: isWarning ? 'warning' : 'error'
-            })
+        else if ((section.startsWith('column ')) && (startColumn === undefined)) {
+            const cols = section.slice('column '.length).split(' to ')
+            startColumn = parseInt(cols[0])
+            endColumn = cols.length > 1 ? parseInt(cols[1].slice('column '.length)) : startColumn + 1
         }
     }
-    return cm
+
+    if ((lineNumber !== undefined) && (startColumn !== undefined) && (endColumn !== undefined)) {
+        return {
+            startLineNumber: lineNumber,
+            startColumn: startColumn + 1,
+            endLineNumber: lineNumber,
+            endColumn: endColumn + 1,
+            message: severity === 'warning' ? getWarningMessage(x) : getErrorMessage(x),
+            severity
+        }
+    }
+    else {
+        return undefined
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
