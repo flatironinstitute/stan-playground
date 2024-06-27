@@ -140,8 +140,13 @@ const TextEditor: FunctionComponent<Props> = ({defaultText, text, onSaveText, ed
     return (
         <div style={{position: 'absolute', width, height, overflow: 'hidden'}} onKeyDown={handleKeyDown}>
             <NotSelectable>
-                <div style={{position: 'absolute', paddingLeft: 20, paddingTop: 3, width: width - 50, height: toolbarHeight, backgroundColor: 'lightgray', overflow: 'hidden'}}>
-                    {label}
+                <div style={{position: 'absolute', paddingLeft: 20, paddingTop: 3, width: width, height: toolbarHeight, backgroundColor: 'lightgray', overflow: 'hidden'}}>
+                    <span
+                        // drop it down a bit
+                        style={{position: 'relative', top: 1}}
+                    >
+                        {label}
+                    </span>
                     &nbsp;&nbsp;&nbsp;
                     {!readOnly && (
                         <SmallIconButton onClick={handleSave} icon={<Save />} title="Save file" disabled={text === editedText} label="save" />
