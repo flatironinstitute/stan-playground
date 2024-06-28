@@ -1,8 +1,8 @@
 import { Reducer } from "react"
 import { Stanie } from "../exampleStanies/exampleStanies"
-import { defaultSamplingOpts, SamplingOpts } from '../StanSampler/StanSampler'
+import { defaultSamplingOpts, isSamplingOpts, SamplingOpts } from '../StanSampler/StanSampler'
 import { FieldsContentsMap } from "./FileMapping"
-import { initialDataModel, persistStateToEphemera, SPAnalysisDataModel, SPAnalysisKnownFiles } from "./SPAnalysisDataModel"
+import { initialDataModel, isSPAnalysisMetaData, persistStateToEphemera, SPAnalysisDataModel, SPAnalysisKnownFiles } from "./SPAnalysisDataModel"
 
 
 export type SPAnalysisReducerType = Reducer<SPAnalysisDataModel, SPAnalysisReducerAction>
@@ -52,7 +52,14 @@ export const SPAnalysisReducer = (s: SPAnalysisDataModel, a: SPAnalysisReducerAc
             }
         }
         case "loadFiles": {
-            return loadFromProjectFiles(s, a.files, a.clearExisting)
+            try {
+                return loadFromProjectFiles(s, a.files, a.clearExisting)
+            }
+            catch (e) {
+                // probably sampling opts or meta files were not valid
+                console.error('Error loading files', e)
+                return s
+            }
         }
         case "retitle": {
             return {
@@ -84,14 +91,18 @@ export const SPAnalysisReducer = (s: SPAnalysisDataModel, a: SPAnalysisReducerAc
 
 const loadMetaFromString = (data: SPAnalysisDataModel, json: string, clearExisting: boolean = false): SPAnalysisDataModel => {
     const newMeta = JSON.parse(json)
-    // TODO: properly check type of deserialized meta
+    if (!isSPAnalysisMetaData(newMeta)) {
+        throw Error('Deserialized meta is not valid')
+    }
     const newMetaMember = clearExisting ? { ...newMeta } : { ...data.meta, ...newMeta }
     return { ...data, meta: newMetaMember }
 }
 
 const loadSamplingOptsFromString = (data: SPAnalysisDataModel, json: string, clearExisting: boolean = false): SPAnalysisDataModel => {
     const newSampling = JSON.parse(json)
-    // TODO: properly check type/fields of deserialized sampling opts
+    if (!isSamplingOpts(newSampling)) {
+        throw Error('Deserialized sampling opts are not valid')
+    }
     const newSamplingOptsMember = clearExisting ? { ...newSampling } : { ...data.samplingOpts, ...newSampling }
     return { ...data, samplingOpts: newSamplingOptsMember }
 }
