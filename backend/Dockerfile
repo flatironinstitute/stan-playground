@@ -1,5 +1,5 @@
 # Dockerfile
-FROM emscripten/emsdk:3.1.59 as builder
+FROM emscripten/emsdk:3.1.59 AS builder
 
 # Set the working directory
 WORKDIR /app
@@ -8,12 +8,14 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     git \
     cmake \
-    make
+    make \
+    wget \
+    tar
 
 # Clone the oneTBB library and checkout the specific commit
-RUN git clone https://github.com/oneapi-src/oneTBB.git && \
-    cd oneTBB && \
-    git checkout 4a87ca1
+RUN wget https://github.com/oneapi-src/oneTBB/archive/refs/tags/v2021.13.0.tar.gz && \
+    tar -xvf v2021.13.0.tar.gz && \
+    mv oneTBB-2021.13.0 oneTBB
 
 # Build oneTBB with emscripten
 RUN mkdir oneTBB/build && cd oneTBB/build && \
