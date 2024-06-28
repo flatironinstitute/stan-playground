@@ -59,11 +59,7 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({ width, height, hasUnsave
                         update({ type: 'clear' })
                     }}>Clear all</button>
                 </div>
-                <div>
-                    <p>
-                        This panel will have controls for loading/saving data from cloud
-                    </p>
-                </div>
+                <div>&nbsp;</div>
                 <div>
                     <button
                         onClick={importOpen}
