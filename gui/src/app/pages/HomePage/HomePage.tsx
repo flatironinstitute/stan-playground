@@ -45,15 +45,12 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
     // too small but we only want to do this right when we cross the threshold,
     // not every time we resize by a pixel. Similar for expanding the panel when
     // we cross the threshold in the other direction.
-    const lastWidth = useRef(width)
+    const lastShouldBeCollapsed = useRef(determineShouldBeInitiallyCollapsed(width))
     useEffect(() => {
-        if (!determineShouldBeInitiallyCollapsed(lastWidth.current) && determineShouldBeInitiallyCollapsed(width)) {
-            lastWidth.current = width
-            setLeftPanelCollapsed(true)
-        }
-        else if (determineShouldBeInitiallyCollapsed(lastWidth.current) && !determineShouldBeInitiallyCollapsed(width)) {
-            lastWidth.current = width
-            setLeftPanelCollapsed(false)
+        const shouldBeCollapsed = determineShouldBeInitiallyCollapsed(width)
+        if (shouldBeCollapsed !== lastShouldBeCollapsed.current) {
+            lastShouldBeCollapsed.current = shouldBeCollapsed
+            setLeftPanelCollapsed(shouldBeCollapsed)
         }
     }, [width])
 
