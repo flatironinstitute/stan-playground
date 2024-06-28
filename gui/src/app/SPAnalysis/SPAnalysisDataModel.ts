@@ -60,6 +60,10 @@ export const modelHasUnsavedChanges = (data: SPAnalysisDataModel): boolean => {
     return stringFileKeys.some((k) => data[k] !== data.ephemera[k])
 }
 
+export const modelHasUnsavedDataFileChanges = (data: SPAnalysisDataModel): boolean => {
+    return data.dataFileContent !== data.ephemera.dataFileContent
+}
+
 export const stringifyField = (data: SPAnalysisDataModel, field: keyof SPAnalysisDataModel): string => {
     if (field === 'ephemera') return ''
     const value = data[field]

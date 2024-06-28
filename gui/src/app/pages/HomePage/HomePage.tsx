@@ -6,7 +6,7 @@ import RunPanel from "../../RunPanel/RunPanel";
 import SamplerOutputView from "../../SamplerOutputView/SamplerOutputView";
 import SamplingOptsPanel from "../../SamplingOptsPanel/SamplingOptsPanel";
 import SPAnalysisContextProvider, { SPAnalysisContext } from '../../SPAnalysis/SPAnalysisContextProvider';
-import { modelHasUnsavedChanges, SPAnalysisKnownFiles } from "../../SPAnalysis/SPAnalysisDataModel";
+import { modelHasUnsavedChanges, modelHasUnsavedDataFileChanges, SPAnalysisKnownFiles } from "../../SPAnalysis/SPAnalysisDataModel";
 import { SamplingOpts } from "../../StanSampler/StanSampler";
 import useStanSampler, { useSamplerStatus } from "../../StanSampler/useStanSampler";
 import LeftPanel from "./LeftPanel";
@@ -160,7 +160,6 @@ type RightViewProps = {
 
 const RightView: FunctionComponent<RightViewProps> = ({ width, height, compiledMainJsUrl }) => {
     const { data, update } = useContext(SPAnalysisContext)
-    const dataIsSaved = data.dataFileContent === data.ephemera.dataFileContent
     const parsedData = useMemo(() => {
         try {
             return JSON.parse(data.dataFileContent)
@@ -193,7 +192,7 @@ const RightView: FunctionComponent<RightViewProps> = ({ width, height, compiledM
                     height={samplingOptsPanelHeight}
                     sampler={sampler}
                     data={parsedData}
-                    dataIsSaved={dataIsSaved}
+                    dataIsSaved={!modelHasUnsavedDataFileChanges(data)}
                     samplingOpts={data.samplingOpts}
                 />
             </div>
