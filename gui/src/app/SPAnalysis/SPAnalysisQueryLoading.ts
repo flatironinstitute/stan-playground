@@ -68,17 +68,22 @@ export const fetchRemoteAnalysis = async (query: QueryParams) => {
     // any special 'project' query could be loaded here at the top
     const data: SPAnalysisDataModel = deepCopy(initialDataModel)
 
-    const stanFilePromise = query.stan ? tryFetch(query.stan) : Promise.resolve(undefined);
-    const dataFilePromise = query.data ? tryFetch(query.data) : Promise.resolve(undefined);
+    const stanFilePromise = query.stan ? tryFetch(query.stan) : Promise.resolve(data.stanFileContent);
+    const dataFilePromise = query.data ? tryFetch(query.data) : Promise.resolve(data.dataFileContent);
     const sampling_optsPromise = query.sampling_opts ? tryFetch(query.sampling_opts) : Promise.resolve(undefined);
 
     const stanFileContent = await stanFilePromise;
-    if (stanFileContent) {
+    if (stanFileContent !== undefined) {
         data.stanFileContent = stanFileContent;
+    } else {
+        data.stanFileContent = `// Failed to load content from ${query.stan}`;
     }
+
     const dataFileContent = await dataFilePromise;
-    if (dataFileContent) {
+    if (dataFileContent !== undefined) {
         data.dataFileContent = dataFileContent;
+    } else {
+        data.dataFileContent = `// Failed to load content from ${query.data}`;
     }
 
     const sampling_opts = await sampling_optsPromise;
