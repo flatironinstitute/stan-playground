@@ -9,6 +9,16 @@ import { Hyperlink, SmallIconButton } from "@fi-sci/misc";
 
 type Monaco = typeof monaco
 
+// An interface for passing markers (squiggles) to the editor without depending on monaco types
+export type CodeMarker = {
+    startLineNumber: number
+    startColumn: number
+    endLineNumber: number
+    endColumn: number
+    message: string
+    severity: 'error' | 'warning' | 'hint' | 'info'
+}
+
 type Props = {
     defaultText?: string
     text: string | undefined
@@ -23,6 +33,7 @@ type Props = {
     label: string
     width: number
     height: number
+    codeMarkers?: CodeMarker[]
 }
 
 export type ToolbarItem = {
@@ -38,7 +49,7 @@ export type ToolbarItem = {
     color?: string
 }
 
-const TextEditor: FunctionComponent<Props> = ({defaultText, text, onSaveText, editedText, onSetEditedText, readOnly, wordWrap, onReload, toolbarItems, language, label, width, height}) => {
+const TextEditor: FunctionComponent<Props> = ({defaultText, text, onSaveText, editedText, onSetEditedText, readOnly, wordWrap, onReload, toolbarItems, language, label, width, height, codeMarkers}) => {
     const handleChange = useCallback((value: string | undefined) => {
         onSetEditedText(value || '')
     }, [onSetEditedText])
@@ -60,10 +71,27 @@ const TextEditor: FunctionComponent<Props> = ({defaultText, text, onSaveText, ed
         if (editor.getValue() === editedText) return
         editor.setValue(editedText || defaultText || '')
     }, [editedText, editor, defaultText])
+    const [monacoInstance, setMonacoInstance] = useState<Monaco | undefined>(undefined)
+    useEffect(() => {
+        if (!monacoInstance) return
+        if (codeMarkers === undefined) return
+        if (editor === undefined) return
+        const model = editor.getModel()
+        if (model === null) return
+        const modelMarkers = codeMarkers.map(marker => ({
+            startLineNumber: marker.startLineNumber,
+            startColumn: marker.startColumn,
+            endLineNumber: marker.endLineNumber,
+            endColumn: marker.endColumn,
+            message: marker.message,
+            severity: toMonacoMarkerSeverity(marker.severity)
+        }))
+        monacoInstance.editor.setModelMarkers(model, 'stan-playground', modelMarkers)
+    }, [codeMarkers, monacoInstance, editor])
     const handleEditorDidMount = useCallback((editor: editor.IStandaloneCodeEditor, monaco: Monaco) => {
+        setMonacoInstance(monaco);
         (async () => {
             if (language === 'stan') {
-
                 monaco.editor.defineTheme('vs-stan', {
                     base: 'vs-dark',
                     inherit: true,
@@ -140,8 +168,13 @@ const TextEditor: FunctionComponent<Props> = ({defaultText, text, onSaveText, ed
     return (
         <div style={{position: 'absolute', width, height, overflow: 'hidden'}} onKeyDown={handleKeyDown}>
             <NotSelectable>
-                <div style={{position: 'absolute', paddingLeft: 20, paddingTop: 3, width: width - 50, height: toolbarHeight, backgroundColor: 'lightgray', overflow: 'hidden'}}>
-                    {label}
+                <div style={{position: 'absolute', paddingLeft: 20, paddingTop: 3, width: width, height: toolbarHeight, backgroundColor: 'lightgray', overflow: 'hidden'}}>
+                    <span
+                        // drop it down a bit
+                        style={{position: 'relative', top: 1}}
+                    >
+                        {label}
+                    </span>
                     &nbsp;&nbsp;&nbsp;
                     {!readOnly && (
                         <SmallIconButton onClick={handleSave} icon={<Save />} title="Save file" disabled={text === editedText} label="save" />
@@ -179,6 +212,15 @@ const TextEditor: FunctionComponent<Props> = ({defaultText, text, onSaveText, ed
             </div>
         </div>
     )
+}
+
+const toMonacoMarkerSeverity = (s: 'error' | 'warning' | 'hint' | 'info'): monaco.MarkerSeverity => {
+    switch (s) {
+        case 'error': return monaco.MarkerSeverity.Error
+        case 'warning': return monaco.MarkerSeverity.Warning
+        case 'hint': return monaco.MarkerSeverity.Hint
+        case 'info': return monaco.MarkerSeverity.Info
+    }
 }
 
 const ToolbarItemComponent: FunctionComponent<{item: ToolbarItem}> = ({item}) => {

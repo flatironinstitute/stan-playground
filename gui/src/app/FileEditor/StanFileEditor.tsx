@@ -3,8 +3,9 @@ import { AutoFixHigh, Cancel, Settings, } from "@mui/icons-material";
 import { FunctionComponent, useCallback, useEffect, useMemo, useState } from "react";
 import StanCompileResultWindow from "./StanCompileResultWindow";
 import useStanc from "../Stanc/useStanc";
-import TextEditor, { ToolbarItem } from "./TextEditor";
+import TextEditor, { CodeMarker, ToolbarItem } from "./TextEditor";
 import compileStanProgram from '../compileStanProgram/compileStanProgram';
+import { StancErrors } from '../Stanc/Types';
 
 type Props = {
     fileName: string
@@ -157,7 +158,7 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
         }
 
         return ret
-    }, [editedFileContent, fileContent, handleCompile, requestFormat, showLabelsOnButtons, validSyntax, compileStatus, compileMessage, readOnly])
+    }, [editedFileContent, fileContent, handleCompile, requestFormat, showLabelsOnButtons, validSyntax, compileStatus, compileMessage, readOnly, hasWarnings])
 
     const isCompiling = compileStatus === 'compiling'
 
@@ -183,6 +184,7 @@ const StanFileEditor: FunctionComponent<Props> = ({ fileName, fileContent, onSav
                 onSetEditedText={setEditedFileContent}
                 readOnly={!isCompiling ? readOnly : true}
                 toolbarItems={toolbarItems}
+                codeMarkers={stancErrorsToCodeMarkers(stancErrors)}
             />
             {
                 editedFileContent ? <StanCompileResultWindow
@@ -213,5 +215,88 @@ const stringChecksum = (str: string) => {
     return hash;
 }
 
+const stancErrorsToCodeMarkers = (stancErrors: StancErrors) => {
+    const codeMarkers: CodeMarker[] = []
+
+    for (const x of stancErrors.errors || []) {
+        const marker = stancErrorStringToMarker(x, 'error')
+        if (marker) codeMarkers.push(marker)
+    }
+    for (const x of stancErrors.warnings || []) {
+        const marker = stancErrorStringToMarker(x, 'warning')
+        if (marker) codeMarkers.push(marker)
+    }
+
+    return codeMarkers
+}
+
+const stancErrorStringToMarker = (x: string, severity: 'error' | 'warning'): CodeMarker | undefined => {
+    if (!x) return undefined
+
+    // Example: Syntax error in 'main.stan', line 1, column 0 to column 1, parsing error:
+
+    let lineNumber: number | undefined = undefined
+    let startColumn: number | undefined = undefined
+    let endColumn: number | undefined = undefined
+
+    const sections = x.split(',').map(x => x.trim())
+    for (const section of sections) {
+        if ((section.startsWith('line ')) && (lineNumber === undefined)) {
+            lineNumber = parseInt(section.slice('line '.length))
+        }
+        else if ((section.startsWith('column ')) && (startColumn === undefined)) {
+            const cols = section.slice('column '.length).split(' to ')
+            startColumn = parseInt(cols[0])
+            endColumn = cols.length > 1 ? parseInt(cols[1].slice('column '.length)) : startColumn + 1
+        }
+    }
+
+    if ((lineNumber !== undefined) && (startColumn !== undefined) && (endColumn !== undefined)) {
+        return {
+            startLineNumber: lineNumber,
+            startColumn: startColumn + 1,
+            endLineNumber: lineNumber,
+            endColumn: endColumn + 1,
+            message: severity === 'warning' ? getWarningMessage(x) : getErrorMessage(x),
+            severity
+        }
+    }
+    else {
+        return undefined
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Adapted from https://github.com/WardBrian/vscode-stan-extension
+function getWarningMessage(message: string) {
+    let warning = message.replace(/Warning.*column \d+: /s, "");
+    warning = warning.replace(/\s+/gs, " ");
+    warning = warning.trim();
+    warning = message.includes("included from")
+      ? "Warning in included file:\n" + warning
+      : warning;
+    return warning;
+}
+
+function getErrorMessage(message: string) {
+    let error = message;
+    // cut off code snippet for display
+    if (message.includes("------\n")) {
+      error = error.split("------\n")[2];
+    }
+    error = error.trim();
+    error = message.includes("included from")
+      ? "Error in included file:\n" + error
+      : error;
+
+    // only relevant to vscode-stan-extension:
+    // error = error.includes("given information about")
+    //   ? error +
+    //     "\nConsider updating the includePaths setting of vscode-stan-extension"
+    //   : error;
+
+    return error;
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export default StanFileEditor
