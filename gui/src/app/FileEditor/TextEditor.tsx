@@ -22,7 +22,7 @@ export type CodeMarker = {
 type Props = {
     defaultText?: string
     text: string | undefined
-    onSaveText: (text: string) => void
+    onSaveText: () => void
     editedText?: string
     onSetEditedText: (text: string) => void
     language: string
@@ -54,8 +54,8 @@ const TextEditor: FunctionComponent<Props> = ({defaultText, text, onSaveText, ed
         onSetEditedText(value || '')
     }, [onSetEditedText])
     const handleSave = useCallback(() => {
-        onSaveText(editedText || '')
-    }, [editedText, onSaveText])
+        onSaveText()
+    }, [onSaveText])
 
     //////////////////////////////////////////////////
     // Seems that it is important to set the initial value of the editor
