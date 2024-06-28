@@ -2,7 +2,7 @@ import { Hyperlink, SmallIconButton } from "@fi-sci/misc";
 import ModalWindow, { useModalWindow } from "@fi-sci/modal-window";
 import { FunctionComponent, useCallback, useContext } from "react";
 import examplesStanies, { Stanie } from "../../exampleStanies/exampleStanies";
-import { SPAnalysisContext } from "../../SPAnalysis/SPAnalysisContextProvider";
+import { ProjectContext } from "../../Project/ProjectContextProvider";
 import ExportWindow from "./ExportWindow";
 import ImportWindow from "./ImportWindow";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
@@ -23,7 +23,7 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({
   onSetCollapsed,
 }) => {
   // note: this is close enough to pass in directly if we wish
-  const { update } = useContext(SPAnalysisContext);
+  const { update } = useContext(ProjectContext);
 
   const handleOpenExample = useCallback(
     (stanie: Stanie) => () => {

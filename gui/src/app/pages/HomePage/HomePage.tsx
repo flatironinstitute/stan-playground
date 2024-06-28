@@ -13,14 +13,14 @@ import StanFileEditor from "../../FileEditor/StanFileEditor";
 import RunPanel from "../../RunPanel/RunPanel";
 import SamplerOutputView from "../../SamplerOutputView/SamplerOutputView";
 import SamplingOptsPanel from "../../SamplingOptsPanel/SamplingOptsPanel";
-import SPAnalysisContextProvider, {
-  SPAnalysisContext,
-} from "../../SPAnalysis/SPAnalysisContextProvider";
+import ProjectContextProvider, {
+  ProjectContext,
+} from "../../Project/ProjectContextProvider";
 import {
   modelHasUnsavedChanges,
   modelHasUnsavedDataFileChanges,
-  SPAnalysisKnownFiles,
-} from "../../SPAnalysis/SPAnalysisDataModel";
+  ProjectKnownFiles,
+} from "../../Project/ProjectDataModel";
 import { SamplingOpts } from "../../StanSampler/StanSampler";
 import useStanSampler, {
   useSamplerStatus,
@@ -34,18 +34,18 @@ type Props = {
 };
 
 const HomePage: FunctionComponent<Props> = ({ width, height }) => {
-  // NOTE: We should probably move the SPAnalysisContextProvider up to the App or MainWindow
+  // NOTE: We should probably move the ProjectContextProvider up to the App or MainWindow
   // component; however this will wait on routing refactor since I don't want to add the `route`
   // item in those contexts in this PR
   return (
-    <SPAnalysisContextProvider>
+    <ProjectContextProvider>
       <HomePageChild width={width} height={height} />
-    </SPAnalysisContextProvider>
+    </ProjectContextProvider>
   );
 };
 
 const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
-  const { data } = useContext(SPAnalysisContext);
+  const { data } = useContext(ProjectContext);
 
   const [compiledMainJsUrl, setCompiledMainJsUrl] = useState<string>("");
 
@@ -167,7 +167,7 @@ const LeftView: FunctionComponent<LeftViewProps> = ({
   height,
   setCompiledMainJsUrl,
 }) => {
-  const { data, update } = useContext(SPAnalysisContext);
+  const { data, update } = useContext(ProjectContext);
   return (
     <Splitter
       direction="vertical"
@@ -184,7 +184,7 @@ const LeftView: FunctionComponent<LeftViewProps> = ({
         onSaveContent={() =>
           update({
             type: "commitFile",
-            filename: SPAnalysisKnownFiles.STANFILE,
+            filename: ProjectKnownFiles.STANFILE,
           })
         }
         editedFileContent={data.ephemera.stanFileContent}
@@ -192,7 +192,7 @@ const LeftView: FunctionComponent<LeftViewProps> = ({
           update({
             type: "editFile",
             content,
-            filename: SPAnalysisKnownFiles.STANFILE,
+            filename: ProjectKnownFiles.STANFILE,
           })
         }
         readOnly={false}
@@ -206,7 +206,7 @@ const LeftView: FunctionComponent<LeftViewProps> = ({
         onSaveContent={() =>
           update({
             type: "commitFile",
-            filename: SPAnalysisKnownFiles.DATAFILE,
+            filename: ProjectKnownFiles.DATAFILE,
           })
         }
         editedFileContent={data.ephemera.dataFileContent}
@@ -214,7 +214,7 @@ const LeftView: FunctionComponent<LeftViewProps> = ({
           update({
             type: "editFile",
             content,
-            filename: SPAnalysisKnownFiles.DATAFILE,
+            filename: ProjectKnownFiles.DATAFILE,
           })
         }
         readOnly={false}
@@ -234,7 +234,7 @@ const RightView: FunctionComponent<RightViewProps> = ({
   height,
   compiledMainJsUrl,
 }) => {
-  const { data, update } = useContext(SPAnalysisContext);
+  const { data, update } = useContext(ProjectContext);
   const parsedData = useMemo(() => {
     try {
       return JSON.parse(data.dataFileContent);

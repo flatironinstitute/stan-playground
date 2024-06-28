@@ -10,12 +10,12 @@ import {
   FileNames,
   FileRegistry,
   mapFileContentsToModel,
-} from "../../SPAnalysis/FileMapping";
-import { SPAnalysisContext } from "../../SPAnalysis/SPAnalysisContextProvider";
+} from "../../Project/FileMapping";
+import { ProjectContext } from "../../Project/ProjectContextProvider";
 import {
   deserializeZipToFiles,
   parseFile,
-} from "../../SPAnalysis/SPAnalysisSerialization";
+} from "../../Project/ProjectSerialization";
 import UploadFilesArea from "./UploadFilesArea";
 
 type ImportWindowProps = {
@@ -23,7 +23,7 @@ type ImportWindowProps = {
 };
 
 const ImportWindow: FunctionComponent<ImportWindowProps> = ({ onClose }) => {
-  const { update } = useContext(SPAnalysisContext);
+  const { update } = useContext(ProjectContext);
   const [errorText, setErrorText] = useState<string | null>(null);
   const [filesUploaded, setFilesUploaded] = useState<
     { name: string; content: ArrayBuffer }[] | null
@@ -105,7 +105,7 @@ const ImportWindow: FunctionComponent<ImportWindowProps> = ({ onClose }) => {
 
   return (
     <div>
-      <h3>Import analysis</h3>
+      <h3>Import project</h3>
       <div>
         You can upload:
         <ul>

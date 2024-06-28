@@ -1,8 +1,8 @@
 import { FunctionComponent, useContext } from "react";
 
-import { mapModelToFileManifest } from "../../SPAnalysis/FileMapping";
-import { SPAnalysisContext } from "../../SPAnalysis/SPAnalysisContextProvider";
-import { serializeAsZip } from "../../SPAnalysis/SPAnalysisSerialization";
+import { mapModelToFileManifest } from "../../Project/FileMapping";
+import { ProjectContext } from "../../Project/ProjectContextProvider";
+import { serializeAsZip } from "../../Project/ProjectSerialization";
 import { triggerDownload } from "../../util/triggerDownload";
 
 type ExportWindowProps = {
@@ -10,12 +10,12 @@ type ExportWindowProps = {
 };
 
 const ExportWindow: FunctionComponent<ExportWindowProps> = ({ onClose }) => {
-  const { data, update } = useContext(SPAnalysisContext);
+  const { data, update } = useContext(ProjectContext);
   const fileManifest = mapModelToFileManifest(data);
 
   return (
     <div>
-      <h3>Export this analysis</h3>
+      <h3>Export this project</h3>
       <table className="table1">
         <tbody>
           <tr>

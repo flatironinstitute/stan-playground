@@ -1,26 +1,26 @@
 import JSZip from "jszip";
 import { replaceSpacesWithUnderscores } from "../util/replaceSpaces";
 import {
-  SPAnalysisDataModel,
-  SPAnalysisKnownFiles,
+  ProjectDataModel,
+  ProjectKnownFiles,
   getStringKnownFileKeys,
   initialDataModel,
-  isSPAnalysisDataModel,
-  isSPAnalysisMetaData,
+  isProjectDataModel,
+  isProjectMetaData,
   persistStateToEphemera,
-} from "./SPAnalysisDataModel";
+} from "./ProjectDataModel";
 import {
   FieldsContentsMap,
   FileNames,
   FileRegistry,
-  SPAnalysisFileMap,
+  ProjectFileMap,
   mapFileContentsToModel,
   mapModelToFileManifest,
 } from "./FileMapping";
 import { isSamplingOpts } from "../StanSampler/StanSampler";
 
-export const serializeAnalysisToLocalStorage = (
-  data: SPAnalysisDataModel,
+export const serializeProjectToLocalStorage = (
+  data: ProjectDataModel,
 ): string => {
   const intermediary = {
     ...data,
@@ -29,18 +29,18 @@ export const serializeAnalysisToLocalStorage = (
   return JSON.stringify(intermediary);
 };
 
-export const deserializeAnalysisFromLocalStorage = (
+export const deserializeProjectFromLocalStorage = (
   serialized: string,
-): SPAnalysisDataModel | undefined => {
+): ProjectDataModel | undefined => {
   try {
     const intermediary = JSON.parse(serialized);
     // Not sure if this is strictly necessary
     intermediary.ephemera = {};
     const stringFileKeys = getStringKnownFileKeys();
     stringFileKeys.forEach((k) => (intermediary.ephemera[k] = intermediary[k]));
-    if (!isSPAnalysisDataModel(intermediary)) {
+    if (!isProjectDataModel(intermediary)) {
       console.warn(intermediary);
-      throw Error("Deserialized data is not a valid SPAnalysisDataModel");
+      throw Error("Deserialized data is not a valid ProjectDataModel");
     }
     return intermediary;
   } catch (e) {
@@ -50,7 +50,7 @@ export const deserializeAnalysisFromLocalStorage = (
 };
 
 export const serializeAsZip = async (
-  data: SPAnalysisDataModel,
+  data: ProjectDataModel,
 ): Promise<[Blob, string]> => {
   const fileManifest = mapModelToFileManifest(data);
   const folderName = replaceSpacesWithUnderscores(data.meta.title);
@@ -92,7 +92,7 @@ export const deserializeZipToFiles = async (zipBuffer: ArrayBuffer) => {
     const file = zip.files[name];
     if (file.dir) continue;
     const basename = name.substring(folderLength);
-    if (Object.values(SPAnalysisFileMap).includes(basename as FileNames)) {
+    if (Object.values(ProjectFileMap).includes(basename as FileNames)) {
       const content = await file.async("arraybuffer");
       const decoded = new TextDecoder().decode(content);
       files[basename] = decoded;
@@ -106,12 +106,12 @@ export const deserializeZipToFiles = async (zipBuffer: ArrayBuffer) => {
 };
 
 const loadMetaFromString = (
-  data: SPAnalysisDataModel,
+  data: ProjectDataModel,
   json: string,
   clearExisting: boolean = false,
-): SPAnalysisDataModel => {
+): ProjectDataModel => {
   const newMeta = JSON.parse(json);
-  if (!isSPAnalysisMetaData(newMeta)) {
+  if (!isProjectMetaData(newMeta)) {
     throw Error("Deserialized meta is not valid");
   }
   const newMetaMember = clearExisting
@@ -121,10 +121,10 @@ const loadMetaFromString = (
 };
 
 const loadSamplingOptsFromString = (
-  data: SPAnalysisDataModel,
+  data: ProjectDataModel,
   json: string,
   clearExisting: boolean = false,
-): SPAnalysisDataModel => {
+): ProjectDataModel => {
   const newSampling = JSON.parse(json);
   if (!isSamplingOpts(newSampling)) {
     throw Error("Deserialized sampling opts are not valid");
@@ -136,21 +136,21 @@ const loadSamplingOptsFromString = (
 };
 
 const loadFileFromString = (
-  data: SPAnalysisDataModel,
-  field: SPAnalysisKnownFiles,
+  data: ProjectDataModel,
+  field: ProjectKnownFiles,
   contents: string,
   replaceProject: boolean = false,
-): SPAnalysisDataModel => {
+): ProjectDataModel => {
   const newData = replaceProject ? { ...initialDataModel } : { ...data };
   newData[field] = contents;
   return newData;
 };
 
 export const loadFromProjectFiles = (
-  data: SPAnalysisDataModel,
+  data: ProjectDataModel,
   files: Partial<FieldsContentsMap>,
   clearExisting: boolean = false,
-): SPAnalysisDataModel => {
+): ProjectDataModel => {
   let newData = clearExisting ? initialDataModel : data;
   if (Object.keys(files).includes("meta")) {
     newData = loadMetaFromString(newData, files.meta ?? "");
@@ -160,7 +160,7 @@ export const loadFromProjectFiles = (
     newData = loadSamplingOptsFromString(newData, files.samplingOpts ?? "");
     delete files["samplingOpts"];
   }
-  const fileKeys = Object.keys(files) as SPAnalysisKnownFiles[];
+  const fileKeys = Object.keys(files) as ProjectKnownFiles[];
   newData = fileKeys.reduce(
     (currData, currField) =>
       loadFileFromString(currData, currField, files[currField] ?? ""),

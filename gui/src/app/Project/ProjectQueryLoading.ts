@@ -1,11 +1,11 @@
 import { isSamplingOpts } from "../StanSampler/StanSampler";
 import { mapFileContentsToModel } from "./FileMapping";
 import {
-  SPAnalysisDataModel,
+  ProjectDataModel,
   initialDataModel,
   persistStateToEphemera,
-} from "./SPAnalysisDataModel";
-import { loadFromProjectFiles } from "./SPAnalysisSerialization";
+} from "./ProjectDataModel";
+import { loadFromProjectFiles } from "./ProjectSerialization";
 import loadFilesFromGist from "./loadFilesFromGist";
 
 enum QueryParamKeys {
@@ -77,10 +77,10 @@ const deepCopy = (obj: any) => {
   return JSON.parse(JSON.stringify(obj));
 };
 
-export const fetchRemoteAnalysis = async (query: QueryParams) => {
+export const fetchRemoteProject = async (query: QueryParams) => {
   const projectUri = query.project;
 
-  let data: SPAnalysisDataModel = deepCopy(initialDataModel);
+  let data: ProjectDataModel = deepCopy(initialDataModel);
   if (projectUri) {
     if (projectUri.startsWith("https://gist.github.com/")) {
       let contentLoadedFromGist: {
@@ -138,7 +138,7 @@ export const fetchRemoteAnalysis = async (query: QueryParams) => {
       if (isSamplingOpts(parsed)) {
         data.samplingOpts = parsed;
       } else {
-        console.error("Invalid sampling_opts in fetchRemoteAnalysis", parsed);
+        console.error("Invalid sampling_opts in fetchRemoteProject", parsed);
       }
     } catch (err) {
       console.error("Failed to parse sampling_opts", err);

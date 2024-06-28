@@ -1,4 +1,4 @@
-import { initialDataModel, SPAnalysisDataModel } from "./SPAnalysisDataModel";
+import { initialDataModel, ProjectDataModel } from "./ProjectDataModel";
 import {
   createContext,
   FunctionComponent,
@@ -7,40 +7,40 @@ import {
   useReducer,
 } from "react";
 import {
-  SPAnalysisReducer,
-  SPAnalysisReducerAction,
-  SPAnalysisReducerType,
-} from "./SPAnalysisReducer";
+  ProjectReducer,
+  ProjectReducerAction,
+  ProjectReducerType,
+} from "./ProjectReducer";
 import {
-  deserializeAnalysisFromLocalStorage,
-  serializeAnalysisToLocalStorage,
-} from "./SPAnalysisSerialization";
+  deserializeProjectFromLocalStorage,
+  serializeProjectToLocalStorage,
+} from "./ProjectSerialization";
 import {
-  fetchRemoteAnalysis,
+  fetchRemoteProject,
   queryStringHasParameters,
   fromQueryParams,
-} from "./SPAnalysisQueryLoading";
+} from "./ProjectQueryLoading";
 import { useSearchParams } from "react-router-dom";
 
-type SPAnalysisContextType = {
-  data: SPAnalysisDataModel;
-  update: React.Dispatch<SPAnalysisReducerAction>;
+type ProjectContextType = {
+  data: ProjectDataModel;
+  update: React.Dispatch<ProjectReducerAction>;
 };
 
-type SPAnalysisContextProviderProps = {
+type ProjectContextProviderProps = {
   //
 };
 
-export const SPAnalysisContext = createContext<SPAnalysisContextType>({
+export const ProjectContext = createContext<ProjectContextType>({
   data: initialDataModel,
   update: () => {},
 });
 
-const SPAnalysisContextProvider: FunctionComponent<
-  PropsWithChildren<SPAnalysisContextProviderProps>
+const ProjectContextProvider: FunctionComponent<
+  PropsWithChildren<ProjectContextProviderProps>
 > = ({ children }) => {
-  const [data, update] = useReducer<SPAnalysisReducerType>(
-    SPAnalysisReducer,
+  const [data, update] = useReducer<ProjectReducerType>(
+    ProjectReducer,
     initialDataModel,
   );
 
@@ -49,7 +49,7 @@ const SPAnalysisContextProvider: FunctionComponent<
   useEffect(() => {
     // as user reloads the page or closes the tab, save state to local storage
     const handleBeforeUnload = () => {
-      const state = serializeAnalysisToLocalStorage(data);
+      const state = serializeProjectToLocalStorage(data);
       localStorage.setItem("stan-playground-saved-state", state);
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -62,7 +62,7 @@ const SPAnalysisContextProvider: FunctionComponent<
   useEffect(() => {
     const queries = fromQueryParams(searchParams);
     if (queryStringHasParameters(queries)) {
-      fetchRemoteAnalysis(queries).then((data) => {
+      fetchRemoteProject(queries).then((data) => {
         update({ type: "loadInitialData", state: data });
 
         // set title so that history is better preserved in the browser
@@ -74,7 +74,7 @@ const SPAnalysisContextProvider: FunctionComponent<
       // load the saved state on first load
       const savedState = localStorage.getItem("stan-playground-saved-state");
       if (!savedState) return;
-      const parsedData = deserializeAnalysisFromLocalStorage(savedState);
+      const parsedData = deserializeProjectFromLocalStorage(savedState);
       if (!parsedData) return; // unsuccessful parse or type cast
       update({ type: "loadInitialData", state: parsedData });
     }
@@ -84,10 +84,10 @@ const SPAnalysisContextProvider: FunctionComponent<
   }, [searchParams, setSearchParams]);
 
   return (
-    <SPAnalysisContext.Provider value={{ data, update }}>
+    <ProjectContext.Provider value={{ data, update }}>
       {children}
-    </SPAnalysisContext.Provider>
+    </ProjectContext.Provider>
   );
 };
 
-export default SPAnalysisContextProvider;
+export default ProjectContextProvider;

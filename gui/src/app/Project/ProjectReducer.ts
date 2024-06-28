@@ -4,17 +4,17 @@ import { defaultSamplingOpts, SamplingOpts } from "../StanSampler/StanSampler";
 import { FieldsContentsMap } from "./FileMapping";
 import {
   initialDataModel,
-  SPAnalysisDataModel,
-  SPAnalysisKnownFiles,
-} from "./SPAnalysisDataModel";
-import { loadFromProjectFiles } from "./SPAnalysisSerialization";
+  ProjectDataModel,
+  ProjectKnownFiles,
+} from "./ProjectDataModel";
+import { loadFromProjectFiles } from "./ProjectSerialization";
 
-export type SPAnalysisReducerType = Reducer<
-  SPAnalysisDataModel,
-  SPAnalysisReducerAction
+export type ProjectReducerType = Reducer<
+  ProjectDataModel,
+  ProjectReducerAction
 >;
 
-export type SPAnalysisReducerAction =
+export type ProjectReducerAction =
   | {
       type: "loadStanie";
       stanie: Stanie;
@@ -31,11 +31,11 @@ export type SPAnalysisReducerAction =
   | {
       type: "editFile";
       content: string;
-      filename: SPAnalysisKnownFiles;
+      filename: ProjectKnownFiles;
     }
   | {
       type: "commitFile";
-      filename: SPAnalysisKnownFiles;
+      filename: ProjectKnownFiles;
     }
   | {
       type: "setSamplingOpts";
@@ -43,15 +43,15 @@ export type SPAnalysisReducerAction =
     }
   | {
       type: "loadInitialData";
-      state: SPAnalysisDataModel;
+      state: ProjectDataModel;
     }
   | {
       type: "clear";
     };
 
-export const SPAnalysisReducer = (
-  s: SPAnalysisDataModel,
-  a: SPAnalysisReducerAction,
+export const ProjectReducer = (
+  s: ProjectDataModel,
+  a: ProjectReducerAction,
 ) => {
   switch (a.type) {
     case "loadStanie": {
