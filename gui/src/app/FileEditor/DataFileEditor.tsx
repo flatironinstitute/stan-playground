@@ -5,7 +5,7 @@ import TextEditor, { ToolbarItem } from "./TextEditor";
 type Props = {
     fileName: string
     fileContent: string
-    onSaveContent: (text: string) => void
+    onSaveContent: () => void
     editedFileContent: string
     setEditedFileContent: (text: string) => void
     onDeleteFile?: () => void

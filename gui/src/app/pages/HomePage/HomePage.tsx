@@ -132,7 +132,7 @@ type RightViewProps = {
     width: number
     height: number
     dataFileContent: string
-    saveDataFileContent: (text: string) => void
+    saveDataFileContent: () => void
     editedDataFileContent: string
     setEditedDataFileContent: (text: string) => void
     compiledMainJsUrl?: string
