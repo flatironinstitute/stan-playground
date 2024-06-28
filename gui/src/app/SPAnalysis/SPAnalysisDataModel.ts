@@ -1,4 +1,4 @@
-import { SamplingOpts, defaultSamplingOpts } from "../StanSampler/StanSampler"
+import { SamplingOpts, defaultSamplingOpts, isSamplingOpts } from "../StanSampler/StanSampler"
 
 export enum SPAnalysisKnownFiles {
     STANFILE = 'stanFileContent',
@@ -9,13 +9,37 @@ type SPAnalysisFiles = {
     [filetype in SPAnalysisKnownFiles]: string
 }
 
+const isSPAnalysisFiles = (x: any): x is SPAnalysisFiles => {
+    if (!x) return false
+    if (typeof x !== 'object') return false
+    for (const k of Object.values(SPAnalysisKnownFiles)) {
+        if (typeof x[k] !== 'string') return false
+    }
+    return true
+}
+
 type SPAnalysisBase = SPAnalysisFiles &
 {
     samplingOpts: SamplingOpts
 }
 
+const isSPAnalysisBase = (x: any): x is SPAnalysisBase => {
+    if (!x) return false
+    if (typeof x !== 'object') return false
+    if (!isSamplingOpts(x.samplingOpts)) return false
+    if (!isSPAnalysisFiles(x)) return false
+    return true
+}
+
 type SPAnalysisMetadata = {
     title: string
+}
+
+export const isSPAnalysisMetaData = (x: any): x is SPAnalysisMetadata => {
+    if (!x) return false
+    if (typeof x !== 'object') return false
+    if (typeof x.title !== 'string') return false
+    return true
 }
 
 type SPAnalysisEphemeralData = SPAnalysisFiles & {
@@ -25,11 +49,26 @@ type SPAnalysisEphemeralData = SPAnalysisFiles & {
     server?: string
 }
 
+const isSPAnalysisEphemeralData = (x: any): x is SPAnalysisEphemeralData => {
+    if (!isSPAnalysisFiles(x)) return false
+    return true
+}
+
 export type SPAnalysisDataModel = SPAnalysisBase &
 {
     meta: SPAnalysisMetadata,
     ephemera: SPAnalysisEphemeralData
 }
+
+export const isSPAnalysisDataModel = (x: any): x is SPAnalysisDataModel => {
+    if (!x) return false
+    if (typeof x !== 'object') return false
+    if (!isSPAnalysisMetaData(x.meta)) return false
+    if (!isSPAnalysisEphemeralData(x.ephemera)) return false
+    if (!isSPAnalysisBase(x)) return false
+    return true
+}
+
 
 export type SPAnalysisPersistentDataModel = Omit<SPAnalysisDataModel, "ephemera">
 
