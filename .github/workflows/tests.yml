@@ -31,3 +31,20 @@ jobs:
         run: cd gui; yarn
       - name: Test
         run: cd gui; yarn test
+
+  frontend-build:
+    name: yarn build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'yarn'
+          cache-dependency-path: gui/yarn.lock
+      - name: Install dependencies
+        run: cd gui; yarn
+      - name: Build
+        run: cd gui; yarn build
