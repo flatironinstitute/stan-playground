@@ -30,10 +30,7 @@ const HomePage: FunctionComponent<Props> = ({ width, height }) => {
 }
 
 const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
-    const { data, update } = useContext(SPAnalysisContext)
-    const setSamplingOpts = useCallback((opts: SamplingOpts) => {
-        update({ type: 'setSamplingOpts', opts })
-    }, [update])
+    const { data } = useContext(SPAnalysisContext)
 
     const [compiledMainJsUrl, setCompiledMainJsUrl] = useState<string>('')
 
@@ -54,7 +51,7 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
         }
     }, [width])
 
-    const topBarHeight = 25
+    const topBarHeight = 22
 
     useEffect(() => {
         document.title = "Stan Playground - " + data.meta.title;
@@ -85,29 +82,15 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
                     direction="horizontal"
                     initialPosition={Math.min(800, (width - leftPanelWidth) / 2)}
                 >
-                    <StanFileEditor
+                    <LeftView
                         width={0}
                         height={0}
-                        fileName="main.stan"
-                        fileContent={data.stanFileContent}
-                        // this could be made more ergonomic?
-                        onSaveContent={() => update({ type: 'commitFile', filename: SPAnalysisKnownFiles.STANFILE })}
-                        editedFileContent={data.ephemera.stanFileContent}
-                        setEditedFileContent={(content: string) => update({ type: 'editFile', content, filename: SPAnalysisKnownFiles.STANFILE })}
-                        readOnly={false}
-                        setCompiledUrl={setCompiledMainJsUrl}
+                        setCompiledMainJsUrl={setCompiledMainJsUrl}
                     />
                     <RightView
                         width={0}
                         height={0}
-                        dataFileContent={data.dataFileContent}
-                        // this could be more ergonomic?
-                        saveDataFileContent={() => update({ type: 'commitFile', filename: SPAnalysisKnownFiles.DATAFILE })}
-                        editedDataFileContent={data.ephemera.dataFileContent}
-                        setEditedDataFileContent={(content: string) => update({ type: 'editFile', content, filename: SPAnalysisKnownFiles.DATAFILE })}
                         compiledMainJsUrl={compiledMainJsUrl}
-                        samplingOpts={data.samplingOpts}
-                        setSamplingOpts={setSamplingOpts}
                     />
                 </Splitter>
             </div>
@@ -117,8 +100,8 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
 
 // the width of the left panel when it is expanded based on the overall width
 const determineLeftPanelWidth = (width: number) => {
-    const minWidth = 250
-    const maxWidth = 400
+    const minWidth = 150
+    const maxWidth = 250
     return Math.min(maxWidth, Math.max(minWidth, width / 4))
 }
 
@@ -128,46 +111,60 @@ const determineShouldBeInitiallyCollapsed = (width: number) => {
     return width < 800
 }
 
-type RightViewProps = {
+type LeftViewProps = {
     width: number
     height: number
-    dataFileContent: string
-    saveDataFileContent: (text: string) => void
-    editedDataFileContent: string
-    setEditedDataFileContent: (text: string) => void
-    compiledMainJsUrl?: string
-    samplingOpts: SamplingOpts
-    setSamplingOpts: (opts: SamplingOpts) => void
+    setCompiledMainJsUrl: (url: string) => void
 }
 
-const RightView: FunctionComponent<RightViewProps> = ({ width, height, dataFileContent, saveDataFileContent, editedDataFileContent, setEditedDataFileContent, compiledMainJsUrl, samplingOpts, setSamplingOpts }) => {
+const LeftView: FunctionComponent<LeftViewProps> = ({ width, height, setCompiledMainJsUrl }) => {
+    const { data, update } = useContext(SPAnalysisContext)
     return (
         <Splitter
             direction="vertical"
             width={width}
             height={height}
-            initialPosition={height / 3}
+            initialPosition={2 * height / 3}
         >
+            <StanFileEditor
+                width={0}
+                height={0}
+                fileName="main.stan"
+                fileContent={data.stanFileContent}
+                // this could be made more ergonomic?
+                onSaveContent={() => update({ type: 'commitFile', filename: SPAnalysisKnownFiles.STANFILE })}
+                editedFileContent={data.ephemera.stanFileContent}
+                setEditedFileContent={(content: string) => update({ type: 'editFile', content, filename: SPAnalysisKnownFiles.STANFILE })}
+                readOnly={false}
+                setCompiledUrl={setCompiledMainJsUrl}
+            />
             <DataFileEditor
                 width={0}
                 height={0}
                 fileName="data.json"
-                fileContent={dataFileContent}
-                onSaveContent={saveDataFileContent}
-                editedFileContent={editedDataFileContent}
-                setEditedFileContent={setEditedDataFileContent}
+                fileContent={data.dataFileContent}
+                onSaveContent={() => update({ type: 'commitFile', filename: SPAnalysisKnownFiles.DATAFILE })}
+                editedFileContent={data.ephemera.dataFileContent}
+                setEditedFileContent={(content: string) => update({ type: 'editFile', content, filename: SPAnalysisKnownFiles.DATAFILE })}
                 readOnly={false}
             />
-            <LowerRightView
-                width={0}
-                height={0}
-                compiledMainJsUrl={compiledMainJsUrl}
-                dataFileContent={dataFileContent}
-                dataIsSaved={dataFileContent === editedDataFileContent}
-                samplingOpts={samplingOpts}
-                setSamplingOpts={setSamplingOpts}
-            />
         </Splitter>
+    )
+}
+
+type RightViewProps = {
+    width: number
+    height: number
+    compiledMainJsUrl?: string
+}
+
+const RightView: FunctionComponent<RightViewProps> = ({ width, height, compiledMainJsUrl }) => {
+    return (
+        <LowerRightView
+            width={width}
+            height={height}
+            compiledMainJsUrl={compiledMainJsUrl}
+        />
     )
 }
 
@@ -175,23 +172,25 @@ type LowerRightViewProps = {
     width: number
     height: number
     compiledMainJsUrl?: string
-    dataFileContent: string
-    dataIsSaved: boolean
-    samplingOpts: SamplingOpts
-    setSamplingOpts: (opts: SamplingOpts) => void
 }
 
-const LowerRightView: FunctionComponent<LowerRightViewProps> = ({ width, height, compiledMainJsUrl, dataFileContent, dataIsSaved, samplingOpts, setSamplingOpts }) => {
+const LowerRightView: FunctionComponent<LowerRightViewProps> = ({ width, height, compiledMainJsUrl }) => {
+    const { data, update } = useContext(SPAnalysisContext)
+    const dataIsSaved = data.dataFileContent === data.ephemera.dataFileContent
     const parsedData = useMemo(() => {
         try {
-            return JSON.parse(dataFileContent)
+            return JSON.parse(data.dataFileContent)
         }
         catch (e) {
             return undefined
         }
-    }, [dataFileContent])
+    }, [data.dataFileContent])
     const samplingOptsPanelHeight = 160
     const samplingOptsPanelWidth = Math.min(180, width / 2)
+
+    const setSamplingOpts = useCallback((opts: SamplingOpts) => {
+        update({ type: 'setSamplingOpts', opts })
+    }, [update])
 
     const { sampler } = useStanSampler(compiledMainJsUrl)
     const { status: samplerStatus } = useSamplerStatus(sampler)
@@ -200,7 +199,7 @@ const LowerRightView: FunctionComponent<LowerRightViewProps> = ({ width, height,
         <div style={{ position: 'absolute', width, height }}>
             <div style={{ position: 'absolute', width: samplingOptsPanelWidth, height: samplingOptsPanelHeight }}>
                 <SamplingOptsPanel
-                    samplingOpts={samplingOpts}
+                    samplingOpts={data.samplingOpts}
                     setSamplingOpts={!isSampling ? setSamplingOpts : undefined}
                 />
             </div>
@@ -211,7 +210,7 @@ const LowerRightView: FunctionComponent<LowerRightViewProps> = ({ width, height,
                     sampler={sampler}
                     data={parsedData}
                     dataIsSaved={dataIsSaved}
-                    samplingOpts={samplingOpts}
+                    samplingOpts={data.samplingOpts}
                 />
             </div>
             <div style={{ position: 'absolute', width, top: samplingOptsPanelHeight, height: height - samplingOptsPanelHeight }}>
