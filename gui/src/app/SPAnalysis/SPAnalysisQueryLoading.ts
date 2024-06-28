@@ -75,7 +75,19 @@ export const fetchRemoteAnalysis = async (query: QueryParams) => {
     let data: SPAnalysisDataModel = deepCopy(initialDataModel);
     if (projectUri) {
         if (projectUri.startsWith('https://gist.github.com/')) {
-            const contentLoadedFromGist = await loadFilesFromGist(projectUri);
+            let contentLoadedFromGist: {
+                files: { [key: string]: string }
+                description: string
+            }
+            try {
+                contentLoadedFromGist = await loadFilesFromGist(projectUri);
+            }
+            catch (err) {
+                console.error('Failed to load content from gist', err);
+                alert(`Failed to load content from gist ${projectUri}`);
+                // do not continue with any other query parameters if we failed to load the gist
+                return persistStateToEphemera(data);
+            }
             data = loadFromProjectFiles(data, mapFileContentsToModel(contentLoadedFromGist.files), false);
             data.meta.title = contentLoadedFromGist.description;
         } else {
