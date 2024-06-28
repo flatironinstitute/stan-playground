@@ -53,7 +53,14 @@ export const SPAnalysisReducer = (s: SPAnalysisDataModel, a: SPAnalysisReducerAc
             }
         }
         case "loadFiles": {
-            return loadFromProjectFiles(s, a.files, a.clearExisting)
+            try {
+                return loadFromProjectFiles(s, a.files, a.clearExisting)
+            }
+            catch (e) {
+                // probably sampling opts or meta files were not valid
+                console.error('Error loading files', e)
+                return s
+            }
         }
         case "retitle": {
             return {

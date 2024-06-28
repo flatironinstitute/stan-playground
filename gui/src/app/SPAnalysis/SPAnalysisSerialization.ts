@@ -1,7 +1,8 @@
 import JSZip from "jszip"
 import { replaceSpacesWithUnderscores } from "../util/replaceSpaces"
-import { FieldsContentsMap, FileNames, FileRegistry, mapFileContentsToModel, mapModelToFileManifest, SPAnalysisFileMap } from "./FileMapping"
-import { getStringKnownFileKeys, initialDataModel, persistStateToEphemera, SPAnalysisDataModel, SPAnalysisKnownFiles } from "./SPAnalysisDataModel"
+import { SPAnalysisDataModel, SPAnalysisKnownFiles, getStringKnownFileKeys, initialDataModel, isSPAnalysisDataModel, isSPAnalysisMetaData, persistStateToEphemera } from "./SPAnalysisDataModel"
+import { FieldsContentsMap, FileNames, FileRegistry, SPAnalysisFileMap, mapFileContentsToModel, mapModelToFileManifest } from "./FileMapping"
+import { isSamplingOpts } from "../StanSampler/StanSampler"
 
 export const serializeAnalysisToLocalStorage = (data: SPAnalysisDataModel): string => {
     const intermediary = {
@@ -9,13 +10,23 @@ export const serializeAnalysisToLocalStorage = (data: SPAnalysisDataModel): stri
     return JSON.stringify(intermediary)
 }
 
-export const deserializeAnalysisFromLocalStorage = (serialized: string): SPAnalysisDataModel => {
-    const intermediary = JSON.parse(serialized)
-    // Not sure if this is strictly necessary
-    intermediary.ephemera = {}
-    const stringFileKeys = getStringKnownFileKeys()
-    stringFileKeys.forEach((k) => intermediary.ephemera[k] = intermediary[k]);
-    return intermediary as SPAnalysisDataModel
+export const deserializeAnalysisFromLocalStorage = (serialized: string): SPAnalysisDataModel | undefined => {
+    try {
+        const intermediary = JSON.parse(serialized)
+        // Not sure if this is strictly necessary
+        intermediary.ephemera = {}
+        const stringFileKeys = getStringKnownFileKeys()
+        stringFileKeys.forEach((k) => intermediary.ephemera[k] = intermediary[k]);
+        if (!isSPAnalysisDataModel(intermediary)) {
+            console.warn(intermediary)
+            throw Error('Deserialized data is not a valid SPAnalysisDataModel')
+        }
+        return intermediary
+    }
+    catch (e) {
+        console.error('Error deserializing data from local storage', e)
+        return undefined
+    }
 }
 
 export const serializeAsZip = async (data: SPAnalysisDataModel): Promise<[Blob, string]> => {
@@ -73,14 +84,18 @@ export const deserializeZipToFiles = async (zipBuffer: ArrayBuffer) => {
 
 const loadMetaFromString = (data: SPAnalysisDataModel, json: string, clearExisting: boolean = false): SPAnalysisDataModel => {
     const newMeta = JSON.parse(json)
-    // TODO: properly check type of deserialized meta
+    if (!isSPAnalysisMetaData(newMeta)) {
+        throw Error('Deserialized meta is not valid')
+    }
     const newMetaMember = clearExisting ? { ...newMeta } : { ...data.meta, ...newMeta }
     return { ...data, meta: newMetaMember }
 }
 
 const loadSamplingOptsFromString = (data: SPAnalysisDataModel, json: string, clearExisting: boolean = false): SPAnalysisDataModel => {
     const newSampling = JSON.parse(json)
-    // TODO: properly check type/fields of deserialized sampling opts
+    if (!isSamplingOpts(newSampling)) {
+        throw Error('Deserialized sampling opts are not valid')
+    }
     const newSamplingOptsMember = clearExisting ? { ...newSampling } : { ...data.samplingOpts, ...newSampling }
     return { ...data, samplingOpts: newSamplingOptsMember }
 }

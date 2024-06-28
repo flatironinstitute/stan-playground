@@ -32,7 +32,7 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({ sampling
         setSamplingOpts && setSamplingOpts(defaultSamplingOpts)
     }, [setSamplingOpts])
     return (
-        <div>
+        <div style={{padding: 10}}>
             <Grid container spacing={sp1}>
                 <Grid container item xs={12} spacing={sp2} title="Number of sampling chains">
                     <Grid item xs={6}>

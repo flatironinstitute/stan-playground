@@ -1,7 +1,8 @@
-import { SPAnalysisDataModel, initialDataModel, persistStateToEphemera } from "./SPAnalysisDataModel";
-import loadFilesFromGist from "./loadFilesFromGist";
+import { isSamplingOpts } from "../StanSampler/StanSampler";
 import { mapFileContentsToModel } from "./FileMapping";
+import { SPAnalysisDataModel, initialDataModel, persistStateToEphemera } from "./SPAnalysisDataModel";
 import { loadFromProjectFiles } from "./SPAnalysisSerialization";
+import loadFilesFromGist from "./loadFilesFromGist";
 
 
 enum QueryParamKeys {
@@ -118,8 +119,12 @@ export const fetchRemoteAnalysis = async (query: QueryParams) => {
     if (sampling_opts) {
         try {
             const parsed = JSON.parse(sampling_opts)
-            // TODO validate the parsed object
-            data.samplingOpts = parsed
+            if (isSamplingOpts(parsed)) {
+                data.samplingOpts = parsed
+            }
+            else {
+                console.error('Invalid sampling_opts in fetchRemoteAnalysis', parsed)
+            }
         } catch (err) {
             console.error('Failed to parse sampling_opts', err)
         }
