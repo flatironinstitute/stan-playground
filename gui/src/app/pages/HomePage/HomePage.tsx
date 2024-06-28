@@ -159,22 +159,6 @@ type RightViewProps = {
 }
 
 const RightView: FunctionComponent<RightViewProps> = ({ width, height, compiledMainJsUrl }) => {
-    return (
-        <LowerRightView
-            width={width}
-            height={height}
-            compiledMainJsUrl={compiledMainJsUrl}
-        />
-    )
-}
-
-type LowerRightViewProps = {
-    width: number
-    height: number
-    compiledMainJsUrl?: string
-}
-
-const LowerRightView: FunctionComponent<LowerRightViewProps> = ({ width, height, compiledMainJsUrl }) => {
     const { data, update } = useContext(SPAnalysisContext)
     const dataIsSaved = data.dataFileContent === data.ephemera.dataFileContent
     const parsedData = useMemo(() => {
