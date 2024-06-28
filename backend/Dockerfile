@@ -1,5 +1,5 @@
 # Dockerfile
-FROM emscripten/emsdk:3.1.59 as builder
+FROM emscripten/emsdk:3.1.59 AS builder
 
 # Set the working directory
 WORKDIR /app
