@@ -2,13 +2,14 @@ import { FunctionComponent, useState } from "react"
 import AnalysisPyPrototype from "./AnalysisPyPrototype/AnalysisPyPrototype"
 import DataPyPrototype from "./DataPyPrototype/DataPyPrototype"
 import DataRPrototype from "./DataRPrototype/DataRPrototype"
+import AnalysisRPrototype from "./AnalysisRPrototype/AnalysisRPrototype"
 
 type TestDataPyWindowProps = {
     width: number
     height: number
 }
 
-type PrototypesWindowSelection = 'data.py' | 'data.r' | 'analysis.py'
+type PrototypesWindowSelection = 'data.py' | 'data.r' | 'analysis.py' | 'analysis.r'
 
 const PrototypesWindow: FunctionComponent<TestDataPyWindowProps> = ({width, height}) => {
     const leftPanelWidth = 300
@@ -33,6 +34,10 @@ const PrototypesWindow: FunctionComponent<TestDataPyWindowProps> = ({width, heig
                     <div>
                         <input type="radio" id="analysis.py" name="example" value="analysis.py" checked={selection === 'analysis.py'} onChange={() => setSelection('analysis.py')} />
                         <label htmlFor="analysis.py">analysis.py</label>
+                    </div>
+                    <div>
+                        <input type="radio" id="analysis.r" name="example" value="analysis.r" checked={selection === 'analysis.r'} onChange={() => setSelection('analysis.r')} />
+                        <label htmlFor="analysis.r">analysis.r</label>
                     </div>
                     {
                         selection === 'data.py' ? (
@@ -59,6 +64,12 @@ const PrototypesWindow: FunctionComponent<TestDataPyWindowProps> = ({width, heig
                                     This is an example of how downstream analysis via Python script might work. It uses Pyodide in the browser.
                                 </p>
                             </div>
+                        ) : selection === 'analysis.r' ? (
+                            <div>
+                                <p>
+                                    This is an example of how downstream analysis via R script might work. It uses webr in the browser.
+                                </p>
+                            </div>
                         ) : <div />
                     }
                 </div>
@@ -77,6 +88,11 @@ const PrototypesWindow: FunctionComponent<TestDataPyWindowProps> = ({width, heig
                         />
                     ) : selection === 'analysis.py' ? (
                         <AnalysisPyPrototype
+                            width={width - leftPanelWidth}
+                            height={height}
+                        />
+                    ) : selection === 'analysis.r' ? (
+                        <AnalysisRPrototype
                             width={width - leftPanelWidth}
                             height={height}
                         />
