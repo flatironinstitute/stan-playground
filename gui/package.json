@@ -20,6 +20,7 @@
     "@monaco-editor/react": "^4.6.0",
     "@mui/icons-material": "^5.15.17",
     "@mui/material": "^5.15.17",
+    "@octokit/rest": "^21.0.0",
     "jszip": "^3.10.1",
     "monaco-editor": "^0.48.0",
     "plotly.js-cartesian-dist": "^2.33.0",

@@ -1,7 +1,8 @@
 import JSZip from "jszip"
 import { replaceSpacesWithUnderscores } from "../util/replaceSpaces"
-import { FileNames, FileRegistry, mapFileContentsToModel, mapModelToFileManifest, SPAnalysisFileMap } from "./FileMapping"
-import { getStringKnownFileKeys, isSPAnalysisDataModel, SPAnalysisDataModel } from "./SPAnalysisDataModel"
+import { SPAnalysisDataModel, SPAnalysisKnownFiles, getStringKnownFileKeys, initialDataModel, isSPAnalysisDataModel, isSPAnalysisMetaData, persistStateToEphemera } from "./SPAnalysisDataModel"
+import { FieldsContentsMap, FileNames, FileRegistry, SPAnalysisFileMap, mapFileContentsToModel, mapModelToFileManifest } from "./FileMapping"
+import { isSamplingOpts } from "../StanSampler/StanSampler"
 
 export const serializeAnalysisToLocalStorage = (data: SPAnalysisDataModel): string => {
     const intermediary = {
@@ -79,4 +80,44 @@ export const deserializeZipToFiles = async (zipBuffer: ArrayBuffer) => {
 
     }
     return mapFileContentsToModel(files as Partial<FileRegistry>)
+}
+
+const loadMetaFromString = (data: SPAnalysisDataModel, json: string, clearExisting: boolean = false): SPAnalysisDataModel => {
+    const newMeta = JSON.parse(json)
+    if (!isSPAnalysisMetaData(newMeta)) {
+        throw Error('Deserialized meta is not valid')
+    }
+    const newMetaMember = clearExisting ? { ...newMeta } : { ...data.meta, ...newMeta }
+    return { ...data, meta: newMetaMember }
+}
+
+const loadSamplingOptsFromString = (data: SPAnalysisDataModel, json: string, clearExisting: boolean = false): SPAnalysisDataModel => {
+    const newSampling = JSON.parse(json)
+    if (!isSamplingOpts(newSampling)) {
+        throw Error('Deserialized sampling opts are not valid')
+    }
+    const newSamplingOptsMember = clearExisting ? { ...newSampling } : { ...data.samplingOpts, ...newSampling }
+    return { ...data, samplingOpts: newSamplingOptsMember }
+}
+
+const loadFileFromString = (data: SPAnalysisDataModel, field: SPAnalysisKnownFiles, contents: string, replaceProject: boolean = false): SPAnalysisDataModel => {
+    const newData = replaceProject ? { ...initialDataModel } : { ...data }
+    newData[field] = contents
+    return newData
+}
+
+export const loadFromProjectFiles = (data: SPAnalysisDataModel, files: Partial<FieldsContentsMap>, clearExisting: boolean = false): SPAnalysisDataModel => {
+    let newData = clearExisting ? initialDataModel : data
+    if (Object.keys(files).includes('meta')) {
+        newData = loadMetaFromString(newData, files.meta ?? '')
+        delete files['meta']
+    }
+    if (Object.keys(files).includes('samplingOpts')) {
+        newData = loadSamplingOptsFromString(newData, files.samplingOpts ?? '')
+        delete files['samplingOpts']
+    }
+    const fileKeys = Object.keys(files) as SPAnalysisKnownFiles[]
+    newData = fileKeys.reduce((currData, currField) => loadFileFromString(currData, currField, files[currField] ?? ''), newData)
+    newData = persistStateToEphemera(newData)
+    return newData
 }

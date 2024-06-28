@@ -1,8 +1,12 @@
-import { SPAnalysisDataModel, initialDataModel, persistStateToEphemera } from "./SPAnalysisDataModel";
 import { isSamplingOpts } from "../StanSampler/StanSampler";
+import { mapFileContentsToModel } from "./FileMapping";
+import { SPAnalysisDataModel, initialDataModel, persistStateToEphemera } from "./SPAnalysisDataModel";
+import { loadFromProjectFiles } from "./SPAnalysisSerialization";
+import loadFilesFromGist from "./loadFilesFromGist";
 
 
 enum QueryParamKeys {
+    Project= "project",
     StanFile = "stan",
     DataFile = "data",
     SamplingOpts = "sampling_opts",
@@ -28,6 +32,7 @@ export const fromQueryParams = (searchParams: URLSearchParams) => {
     }
 
     const queries: QueryParams = {
+        project: searchParams.get(QueryParamKeys.Project),
         stan: searchParams.get(QueryParamKeys.StanFile),
         data: searchParams.get(QueryParamKeys.DataFile),
         sampling_opts: searchParams.get(QueryParamKeys.SamplingOpts),
@@ -66,20 +71,48 @@ const deepCopy = (obj: any) => {
 }
 
 export const fetchRemoteAnalysis = async (query: QueryParams) => {
-    // any special 'project' query could be loaded here at the top
-    const data: SPAnalysisDataModel = deepCopy(initialDataModel)
+    const projectUri = query.project
 
-    const stanFilePromise = query.stan ? tryFetch(query.stan) : Promise.resolve(undefined);
-    const dataFilePromise = query.data ? tryFetch(query.data) : Promise.resolve(undefined);
+    let data: SPAnalysisDataModel = deepCopy(initialDataModel);
+    if (projectUri) {
+        if (projectUri.startsWith('https://gist.github.com/')) {
+            let contentLoadedFromGist: {
+                files: { [key: string]: string }
+                description: string
+            }
+            try {
+                contentLoadedFromGist = await loadFilesFromGist(projectUri);
+            }
+            catch (err) {
+                console.error('Failed to load content from gist', err);
+                alert(`Failed to load content from gist ${projectUri}`);
+                // do not continue with any other query parameters if we failed to load the gist
+                return persistStateToEphemera(data);
+            }
+            data = loadFromProjectFiles(data, mapFileContentsToModel(contentLoadedFromGist.files), false);
+            data.meta.title = contentLoadedFromGist.description;
+        } else {
+            // right now we only support loading from a gist
+            console.error('Unsupported project URI', projectUri)
+        }
+    }
+
+    const stanFilePromise = query.stan ? tryFetch(query.stan) : Promise.resolve(data.stanFileContent);
+    const dataFilePromise = query.data ? tryFetch(query.data) : Promise.resolve(data.dataFileContent);
     const sampling_optsPromise = query.sampling_opts ? tryFetch(query.sampling_opts) : Promise.resolve(undefined);
 
     const stanFileContent = await stanFilePromise;
-    if (stanFileContent) {
+    if (stanFileContent !== undefined) {
         data.stanFileContent = stanFileContent;
+    } else {
+        data.stanFileContent = `// Failed to load content from ${query.stan}`;
     }
+
     const dataFileContent = await dataFilePromise;
-    if (dataFileContent) {
+    if (dataFileContent !== undefined) {
         data.dataFileContent = dataFileContent;
+    } else {
+        data.dataFileContent = `// Failed to load content from ${query.data}`;
     }
 
     const sampling_opts = await sampling_optsPromise;

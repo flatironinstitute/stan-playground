@@ -1,8 +1,9 @@
 import { Reducer } from "react"
 import { Stanie } from "../exampleStanies/exampleStanies"
-import { defaultSamplingOpts, isSamplingOpts, SamplingOpts } from '../StanSampler/StanSampler'
+import { defaultSamplingOpts, SamplingOpts } from '../StanSampler/StanSampler'
 import { FieldsContentsMap } from "./FileMapping"
-import { initialDataModel, isSPAnalysisMetaData, persistStateToEphemera, SPAnalysisDataModel, SPAnalysisKnownFiles } from "./SPAnalysisDataModel"
+import { initialDataModel, SPAnalysisDataModel, SPAnalysisKnownFiles } from "./SPAnalysisDataModel"
+import { loadFromProjectFiles } from "./SPAnalysisSerialization"
 
 
 export type SPAnalysisReducerType = Reducer<SPAnalysisDataModel, SPAnalysisReducerAction>
@@ -87,44 +88,4 @@ export const SPAnalysisReducer = (s: SPAnalysisDataModel, a: SPAnalysisReducerAc
             return initialDataModel
         }
     }
-}
-
-const loadMetaFromString = (data: SPAnalysisDataModel, json: string, clearExisting: boolean = false): SPAnalysisDataModel => {
-    const newMeta = JSON.parse(json)
-    if (!isSPAnalysisMetaData(newMeta)) {
-        throw Error('Deserialized meta is not valid')
-    }
-    const newMetaMember = clearExisting ? { ...newMeta } : { ...data.meta, ...newMeta }
-    return { ...data, meta: newMetaMember }
-}
-
-const loadSamplingOptsFromString = (data: SPAnalysisDataModel, json: string, clearExisting: boolean = false): SPAnalysisDataModel => {
-    const newSampling = JSON.parse(json)
-    if (!isSamplingOpts(newSampling)) {
-        throw Error('Deserialized sampling opts are not valid')
-    }
-    const newSamplingOptsMember = clearExisting ? { ...newSampling } : { ...data.samplingOpts, ...newSampling }
-    return { ...data, samplingOpts: newSamplingOptsMember }
-}
-
-const loadFileFromString = (data: SPAnalysisDataModel, field: SPAnalysisKnownFiles, contents: string, replaceProject: boolean = false): SPAnalysisDataModel => {
-    const newData = replaceProject ? { ...initialDataModel } : { ...data }
-    newData[field] = contents
-    return newData
-}
-
-const loadFromProjectFiles = (data: SPAnalysisDataModel, files: Partial<FieldsContentsMap>, clearExisting: boolean = false): SPAnalysisDataModel => {
-    let newData = clearExisting ? initialDataModel : data
-    if (Object.keys(files).includes('meta')) {
-        newData = loadMetaFromString(newData, files.meta ?? '')
-        delete files['meta']
-    }
-    if (Object.keys(files).includes('samplingOpts')) {
-        newData = loadSamplingOptsFromString(newData, files.samplingOpts ?? '')
-        delete files['samplingOpts']
-    }
-    const fileKeys = Object.keys(files) as SPAnalysisKnownFiles[]
-    newData = fileKeys.reduce((currData, currField) => loadFileFromString(currData, currField, files[currField] ?? ''), newData)
-    newData = persistStateToEphemera(newData)
-    return newData
 }
