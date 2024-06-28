@@ -1,7 +1,7 @@
 import { SPAnalysisDataModel, initialDataModel, persistStateToEphemera } from "./SPAnalysisDataModel";
 import loadFilesFromGist from "./loadFilesFromGist";
-import { loadFromProjectFiles } from "./SPAnalysisReducer";
 import { mapFileContentsToModel } from "./FileMapping";
+import { loadFromProjectFiles } from "./SPAnalysisSerialization";
 
 
 enum QueryParamKeys {
