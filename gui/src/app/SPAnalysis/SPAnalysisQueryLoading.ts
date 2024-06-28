@@ -1,6 +1,4 @@
-import { useSearchParams } from "react-router-dom";
 import { SPAnalysisDataModel, initialDataModel, persistStateToEphemera } from "./SPAnalysisDataModel";
-import { useCallback } from "react";
 import loadFilesFromGist from "./loadFilesFromGist";
 import { loadFromProjectFiles } from "./SPAnalysisReducer";
 import { mapFileContentsToModel } from "./FileMapping";
@@ -23,16 +21,7 @@ type QueryParams = {
     [key in QueryParamKeys]: string | null
 }
 
-export const useQueryParams = () => {
-    const [searchParams, setSearchParams] = useSearchParams();
-
-    const clearSearchParams = useCallback(() => {
-        // whenever the data state is 'dirty', we want to
-        // clear the URL bar as to indiciate that the viewed content is
-        // no longer what the link would point to
-        if (searchParams.size !== 0)
-            setSearchParams(new URLSearchParams())
-    }, [searchParams, setSearchParams]);
+export const fromQueryParams = (searchParams: URLSearchParams) => {
 
     for (const key of searchParams.keys()) {
         // warn on unknown keys
@@ -54,7 +43,7 @@ export const useQueryParams = () => {
         seed: searchParams.get(QueryParamKeys.SOSeed),
     }
 
-    return { queries, clearSearchParams }
+    return queries;
 }
 
 export const queryStringHasParameters = (query: QueryParams) => {
