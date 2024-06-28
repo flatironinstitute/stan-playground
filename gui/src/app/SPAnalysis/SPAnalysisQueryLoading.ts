@@ -50,18 +50,18 @@ export const queryStringHasParameters = (query: QueryParams) => {
     return Object.values(query).some(v => v !== null)
 }
 
-const tryFetch = async (url: string, fallback: string | undefined) => {
+const tryFetch = async (url: string) => {
     console.log('Fetching content from', url)
     try {
         const req = await fetch(url)
         if (!req.ok) {
             console.error('Failed to fetch from url', url, req.status, req.statusText)
-            return fallback
+            return undefined
         }
         return await req.text()
     } catch (err) {
         console.error('Failed to fetch from url', url, err)
-        return fallback
+        return undefined
     }
 }
 
@@ -84,17 +84,22 @@ export const fetchRemoteAnalysis = async (query: QueryParams) => {
         }
     }
 
-    const stanFilePromise = query.stan ? tryFetch(query.stan, `// Unable to load from ${query.stan}`) : Promise.resolve(undefined);
-    const dataFilePromise = query.data ? tryFetch(query.data, `Unable to load from ${query.data}`) : Promise.resolve(undefined);
-    const sampling_optsPromise = query.sampling_opts ? tryFetch(query.sampling_opts, undefined) : Promise.resolve(undefined);
+    const stanFilePromise = query.stan ? tryFetch(query.stan) : Promise.resolve(data.stanFileContent);
+    const dataFilePromise = query.data ? tryFetch(query.data) : Promise.resolve(data.dataFileContent);
+    const sampling_optsPromise = query.sampling_opts ? tryFetch(query.sampling_opts) : Promise.resolve(undefined);
 
     const stanFileContent = await stanFilePromise;
-    if (stanFileContent) {
+    if (stanFileContent !== undefined) {
         data.stanFileContent = stanFileContent;
+    } else {
+        data.stanFileContent = `// Failed to load content from ${query.stan}`;
     }
+
     const dataFileContent = await dataFilePromise;
-    if (dataFileContent) {
+    if (dataFileContent !== undefined) {
         data.dataFileContent = dataFileContent;
+    } else {
+        data.dataFileContent = `// Failed to load content from ${query.data}`;
     }
 
     const sampling_opts = await sampling_optsPromise;
