@@ -9,11 +9,13 @@ import { serializeAsZip } from "../../Project/ProjectSerialization";
 import { triggerDownload } from "../../util/triggerDownload";
 import saveAsGitHubGist from "./saveAsGitHubGist";
 
-type ExportWindowProps = {
+type SaveProjectWindowProps = {
   onClose: () => void;
 };
 
-const ExportWindow: FunctionComponent<ExportWindowProps> = ({ onClose }) => {
+const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
+  onClose,
+}) => {
   const { data, update } = useContext(ProjectContext);
   const fileManifest = mapModelToFileManifest(data);
 
@@ -21,7 +23,7 @@ const ExportWindow: FunctionComponent<ExportWindowProps> = ({ onClose }) => {
 
   return (
     <div>
-      <h3>Export this project</h3>
+      <h3>Save this project</h3>
       <table className="table1" style={{ maxWidth: 500 }}>
         <tbody>
           <tr>
@@ -53,7 +55,7 @@ const ExportWindow: FunctionComponent<ExportWindowProps> = ({ onClose }) => {
               );
             }}
           >
-            Export to .zip file
+            Save to .zip file
           </button>
           &nbsp;
           <button
@@ -61,7 +63,7 @@ const ExportWindow: FunctionComponent<ExportWindowProps> = ({ onClose }) => {
               setExportingToGist(true);
             }}
           >
-            Export to GitHub Gist
+            Save to GitHub Gist
           </button>
         </div>
       )}
@@ -117,13 +119,13 @@ const GistExportView: FunctionComponent<GistExportViewProps> = ({
       });
       setGistUrl(gistUrl);
     } catch (err: any) {
-      alert(`Error exporting to GitHub Gist: ${err.message}`);
+      alert(`Error saving to GitHub Gist: ${err.message}`);
     }
   }, [gitHubPersonalAccessToken, fileManifest, title]);
 
   return (
     <div style={{ maxWidth: 800 }}>
-      <h3>Export to GitHub Gist</h3>
+      <h3>Save to GitHub Gist</h3>
       <p>
         In order to save this project as a GitHub Gist, you will need to provide
         a GitHub Personal Access Token.&nbsp; This token will be used to
@@ -161,7 +163,7 @@ const GistExportView: FunctionComponent<GistExportViewProps> = ({
       {!gistUrl && (
         <div>
           <button onClick={handleExport} disabled={!gitHubPersonalAccessToken}>
-            Export to GitHub Gist
+            Save to GitHub Gist
           </button>
           &nbsp;
           <button onClick={onClose}>Cancel</button>
@@ -170,7 +172,7 @@ const GistExportView: FunctionComponent<GistExportViewProps> = ({
       {gistUrl && (
         <div>
           <p>
-            Successfully exported to GitHub Gist:&nbsp;
+            Successfully saved to GitHub Gist:&nbsp;
             <a href={gistUrl} target="_blank" rel="noreferrer">
               {gistUrl}
             </a>
@@ -203,4 +205,4 @@ const makeSPShareableLinkFromGistUrl = (gistUrl: string) => {
   return url;
 };
 
-export default ExportWindow;
+export default SaveProjectWindow;
