@@ -1,11 +1,11 @@
-import { Splitter } from "@fi-sci/splitter"
-import { FunctionComponent, useEffect, useState } from "react"
-import AnalysisPyFileEditor from "./AnalysisPyFileEditor"
+import { Splitter } from "@fi-sci/splitter";
+import { FunctionComponent, useEffect, useState } from "react";
+import AnalysisPyFileEditor from "./AnalysisPyFileEditor";
 
 type AnalysisPyPrototypeProps = {
-    width: number
-    height: number
-}
+  width: number;
+  height: number;
+};
 
 const exampleScript = `import sys
 import numpy as np
@@ -37,57 +37,57 @@ plt.show()
 
 # Raise an exception intentionally
 raise Exception('test exception')
-`
+`;
 
-const AnalysisPyPrototype: FunctionComponent<AnalysisPyPrototypeProps> = ({width, height}) => {
-    const [script, setScript] = useState<string>('')
-    const [editedScript, setEditedScript] = useState<string>('')
+const AnalysisPyPrototype: FunctionComponent<AnalysisPyPrototypeProps> = ({
+  width,
+  height,
+}) => {
+  const [script, setScript] = useState<string>("");
+  const [editedScript, setEditedScript] = useState<string>("");
 
-    useEffect(() => {
-        setScript(exampleScript)
-        setEditedScript(exampleScript)
-    }, [])
+  useEffect(() => {
+    setScript(exampleScript);
+    setEditedScript(exampleScript);
+  }, []);
 
-    const [outputDiv, setOutputDiv] = useState<HTMLDivElement | null>(null)
+  const [outputDiv, setOutputDiv] = useState<HTMLDivElement | null>(null);
 
-    return (
-        <Splitter
-            width={width}
-            height={height}
-            initialPosition={height / 2}
-            direction="vertical"
-        >
-            <AnalysisPyFileEditor
-                width={0}
-                height={0}
-                fileName="analysis.py"
-                fileContent={script}
-                onSaveContent={setScript}
-                editedFileContent={editedScript}
-                setEditedFileContent={setEditedScript}
-                readOnly={false}
-                outputDiv={outputDiv}
-            />
-            <AnalysisPyOutputWindow
-                width={0}
-                height={0}
-                onOutputDiv={setOutputDiv}
-            />
-        </Splitter>
-    )
-}
+  return (
+    <Splitter
+      width={width}
+      height={height}
+      initialPosition={height / 2}
+      direction="vertical"
+    >
+      <AnalysisPyFileEditor
+        width={0}
+        height={0}
+        fileName="analysis.py"
+        fileContent={script}
+        onSaveContent={setScript}
+        editedFileContent={editedScript}
+        setEditedFileContent={setEditedScript}
+        readOnly={false}
+        outputDiv={outputDiv}
+      />
+      <AnalysisPyOutputWindow width={0} height={0} onOutputDiv={setOutputDiv} />
+    </Splitter>
+  );
+};
 
 type AnalysisPyOutputWindowProps = {
-    width: number
-    height: number
-    onOutputDiv: (div: HTMLDivElement) => void
-}
+  width: number;
+  height: number;
+  onOutputDiv: (div: HTMLDivElement) => void;
+};
 
-const AnalysisPyOutputWindow: FunctionComponent<AnalysisPyOutputWindowProps> = ({width, height, onOutputDiv}) => {
-    return (
-        <div style={{width, height, overflow: 'auto'}} ref={onOutputDiv}>
-        </div>
-    )
-}
+const AnalysisPyOutputWindow: FunctionComponent<
+  AnalysisPyOutputWindowProps
+> = ({ width, height, onOutputDiv }) => {
+  return (
+    <div style={{ width, height, overflow: "auto" }} ref={onOutputDiv}></div>
+  );
+};
 
-export default AnalysisPyPrototype
+export default AnalysisPyPrototype;

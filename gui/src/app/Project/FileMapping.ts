@@ -1,8 +1,12 @@
-import { SPAnalysisDataModel, SPAnalysisPersistentDataModel, stringifyField } from "./SPAnalysisDataModel"
+import {
+  ProjectDataModel,
+  ProjectPersistentDataModel,
+  stringifyField,
+} from "./ProjectDataModel";
 
 // This code exists to provide rigorous definitions for the mappings between
 // the in-memory representation of a Stan Playground project (i.e. the
-// SPAnalysisDataModel) and the on-disk representation of its parts, as (for example)
+// ProjectDataModel) and the on-disk representation of its parts, as (for example)
 // when downloading or uploading a zip.
 //
 // Effectively, we need to map among three things:
@@ -16,29 +20,29 @@ import { SPAnalysisDataModel, SPAnalysisPersistentDataModel, stringifyField } fr
 // (that's the FileNames enum).
 
 export enum FileNames {
-    META = 'meta.json',
-    SAMPLING = 'sampling_opts.json',
-    STANFILE = 'main.stan',
-    DATAFILE = 'data.json',
+  META = "meta.json",
+  SAMPLING = "sampling_opts.json",
+  STANFILE = "main.stan",
+  DATAFILE = "data.json",
 }
 
 // FileMapType enforces an exhaustive mapping from data-model fields to the
 // known file names that store those fields. (This is the 1-2 leg of the
 // triangle).
 type FileMapType = {
-    [name in keyof SPAnalysisPersistentDataModel]: FileNames
-}
+  [name in keyof ProjectPersistentDataModel]: FileNames;
+};
 
 // This dictionary stores the actual (global) fields-to-file-names map.
 // Because it's of type FileMapType, it enforces that every key in the
 // data model (except the "ephemera" key, which is not to be preserved)
 // maps to some file name
-export const SPAnalysisFileMap: FileMapType = {
-    meta: FileNames.META,
-    samplingOpts: FileNames.SAMPLING,
-    stanFileContent: FileNames.STANFILE,
-    dataFileContent: FileNames.DATAFILE,
-}
+export const ProjectFileMap: FileMapType = {
+  meta: FileNames.META,
+  samplingOpts: FileNames.SAMPLING,
+  stanFileContent: FileNames.STANFILE,
+  dataFileContent: FileNames.DATAFILE,
+};
 
 // The FileRegistry is the 2-3 leg of the triangle: it maps the known file names
 // to their actual contents when read from disk.
@@ -48,21 +52,23 @@ export const SPAnalysisFileMap: FileMapType = {
 // the file it came from, and the file with the field of the data model, so we
 // know how to (re)populate the data model.
 export type FileRegistry = {
-    [name in FileNames]: string
-}
+  [name in FileNames]: string;
+};
 
 // This is a serialization function that maps a data model to a FileRegistry,
 // i.e. a dictionary mapping the intended file names to their intended contents.
-export const mapModelToFileManifest = (data: SPAnalysisDataModel): Partial<FileRegistry> => {
-    const fileManifest: Partial<FileRegistry> = {};
-    const fields = Object.keys(SPAnalysisFileMap) as (keyof SPAnalysisDataModel)[]
-    fields.forEach((k) => {
-        if (k === "ephemera") return;
-        const key = SPAnalysisFileMap[k]
-        fileManifest[key] = stringifyField(data, k)
-    })
-    return fileManifest
-}
+export const mapModelToFileManifest = (
+  data: ProjectDataModel,
+): Partial<FileRegistry> => {
+  const fileManifest: Partial<FileRegistry> = {};
+  const fields = Object.keys(ProjectFileMap) as (keyof ProjectDataModel)[];
+  fields.forEach((k) => {
+    if (k === "ephemera") return;
+    const key = ProjectFileMap[k];
+    fileManifest[key] = stringifyField(data, k);
+  });
+  return fileManifest;
+};
 
 // This is used during deserialization as an intermediate representation.
 // It maps the (named) fields of the data model to the string representation of their
@@ -70,36 +76,38 @@ export const mapModelToFileManifest = (data: SPAnalysisDataModel): Partial<FileR
 // During actual deserialization, special case files can be deserialized as needed,
 // and the actual file list can just be mapped directly.
 export type FieldsContentsMap = {
-    [name in keyof SPAnalysisPersistentDataModel]: string
-}
+  [name in keyof ProjectPersistentDataModel]: string;
+};
 
-// This is the inverse of the SPAnalysisFileMap dictionary; with the bonus that it actually
+// This is the inverse of the ProjectFileMap dictionary; with the bonus that it actually
 // populates the fields.
-export const mapFileContentsToModel = (files: Partial<FileRegistry>): Partial<FieldsContentsMap> => {
-    const fields = Object.keys(files)
-    const theMap: Partial<FieldsContentsMap> = {}
-    fields.forEach(f => {
-        switch (f) {
-            case FileNames.META: {
-                theMap.meta = files[f]
-                break;
-            }
-            case FileNames.DATAFILE: {
-                theMap.dataFileContent = files[f]
-                break;
-            }
-            case FileNames.STANFILE: {
-                theMap.stanFileContent = files[f]
-                break;
-            }
-            case FileNames.SAMPLING: {
-                theMap.samplingOpts = files[f]
-                break;
-            }
-            default:
-                // Don't do anything for unrecognized filenames
-                break;
-        }
-    })
-    return theMap
-}
+export const mapFileContentsToModel = (
+  files: Partial<FileRegistry>,
+): Partial<FieldsContentsMap> => {
+  const fields = Object.keys(files);
+  const theMap: Partial<FieldsContentsMap> = {};
+  fields.forEach((f) => {
+    switch (f) {
+      case FileNames.META: {
+        theMap.meta = files[f];
+        break;
+      }
+      case FileNames.DATAFILE: {
+        theMap.dataFileContent = files[f];
+        break;
+      }
+      case FileNames.STANFILE: {
+        theMap.stanFileContent = files[f];
+        break;
+      }
+      case FileNames.SAMPLING: {
+        theMap.samplingOpts = files[f];
+        break;
+      }
+      default:
+        // Don't do anything for unrecognized filenames
+        break;
+    }
+  });
+  return theMap;
+};

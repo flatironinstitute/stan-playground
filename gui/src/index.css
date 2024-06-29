@@ -1,6 +1,6 @@
 body {
   margin: 0;
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
 }
 
 .top-bar {
@@ -13,11 +13,7 @@ body {
 }
 
 .left-panel {
-  background-image: repeating-linear-gradient(
-    45deg,
-    #f0f0f0 1px,
-    #e0e0e0 6px
-  );
+  background-image: repeating-linear-gradient(45deg, #f0f0f0 1px, #e0e0e0 6px);
   margin: 0px;
   font-size: 14px;
 }
