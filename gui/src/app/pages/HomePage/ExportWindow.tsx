@@ -1,6 +1,9 @@
 import { FunctionComponent, useCallback, useContext, useState } from "react";
 
-import { FileRegistry, mapModelToFileManifest } from "../../Project/FileMapping";
+import {
+  FileRegistry,
+  mapModelToFileManifest,
+} from "../../Project/FileMapping";
 import { ProjectContext } from "../../Project/ProjectContextProvider";
 import { serializeAsZip } from "../../Project/ProjectSerialization";
 import { triggerDownload } from "../../util/triggerDownload";
@@ -69,17 +72,6 @@ const ExportWindow: FunctionComponent<ExportWindowProps> = ({ onClose }) => {
           onClose={onClose}
         />
       )}
-      <div>
-        <button
-          onClick={async () => {
-            serializeAsZip(data).then(([zipBlob, name]) =>
-              triggerDownload(zipBlob, `SP-${name}.zip`, onClose),
-            );
-          }}
-        >
-          Export to .zip file
-        </button>
-      </div>
     </div>
   );
 };
