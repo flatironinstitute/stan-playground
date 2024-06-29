@@ -47,7 +47,7 @@ const DataPyPrototype: FunctionComponent<DataPyPrototypeProps> = ({
         height={0}
         fileName="data.py"
         fileContent={script}
-        onSaveContent={setScript}
+        onSaveContent={() => setScript(editedScript)}
         editedFileContent={editedScript}
         setEditedFileContent={setEditedScript}
         readOnly={false}

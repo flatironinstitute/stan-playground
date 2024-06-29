@@ -6,7 +6,7 @@ import TextEditor, { ToolbarItem } from "../../FileEditor/TextEditor";
 type Props = {
   fileName: string;
   fileContent: string;
-  onSaveContent: (text: string) => void;
+  onSaveContent: () => void;
   editedFileContent: string;
   setEditedFileContent: (text: string) => void;
   readOnly: boolean;
@@ -145,7 +145,7 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
       });
     }
     return ret;
-  }, [fileContent, editedFileContent, handleRun, status]);
+  }, [fileContent, editedFileContent, handleRun, status, outputDiv]);
 
   return (
     <TextEditor

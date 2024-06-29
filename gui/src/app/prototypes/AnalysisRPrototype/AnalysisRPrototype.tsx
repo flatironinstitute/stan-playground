@@ -58,7 +58,7 @@ const AnalysisRPrototype: FunctionComponent<AnalysisRPrototypeProps> = ({
           height={0}
           fileName="analysis.r"
           fileContent={script}
-          onSaveContent={setScript}
+          onSaveContent={() => setScript(editedScript)}
           editedFileContent={editedScript}
           setEditedFileContent={setEditedScript}
           readOnly={false}

@@ -65,7 +65,7 @@ const AnalysisPyPrototype: FunctionComponent<AnalysisPyPrototypeProps> = ({
         height={0}
         fileName="analysis.py"
         fileContent={script}
-        onSaveContent={setScript}
+        onSaveContent={() => setScript(editedScript)}
         editedFileContent={editedScript}
         setEditedFileContent={setEditedScript}
         readOnly={false}
