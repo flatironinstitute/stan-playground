@@ -3,9 +3,17 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "prettier": {
+    "tabWidth": 2,
+    "semi": true,
+    "experimentalTernaries": false,
+    "bracketSameLine": false,
+    "arrowParens": "always"
+  },
   "scripts": {
     "dev": "vite --port 3000",
     "build": "tsc && vite build",
+    "format": "prettier --write .",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest run",
@@ -49,6 +57,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
     "jsdom": "^24.1.0",
+    "prettier": "^3.3.2",
     "typescript": "^5.0.2",
     "vite": "^5.2.12",
     "vitest": "^1.6.0"

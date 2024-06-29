@@ -1,15 +1,14 @@
-
 export type StanieMetaData = {
-    title?: string
-}
+  title?: string;
+};
 
 export type Stanie = {
-    stan: string
-    data: { [key: string]: any }
-    meta: StanieMetaData
-}
+  stan: string;
+  data: { [key: string]: any };
+  meta: StanieMetaData;
+};
 
-const examplesStanies: Stanie[] = []
+const examplesStanies: Stanie[] = [];
 
 const linearRegressionStan = `
 data {
@@ -25,46 +24,27 @@ parameters {
 model {
     y ~ normal(alpha + beta * x, sigma);
 }
-    `.trim()
+    `.trim();
 
 // generated with beta = 1.25, alpha = -0.1, sigma = 0.1
 const linearRegressionData = {
-    "N": 10,
-    "x": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-    ],
-    "y": [
-        1.175246231294085,
-        2.407986514262124,
-        3.722795906507695,
-        4.913215145535075,
-        6.086548493077272,
-        7.278023025499204,
-        8.587414785721538,
-        9.990151691417916,
-        11.251678394115302,
-        12.406899413685272
-    ]
-}
+  N: 10,
+  x: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  y: [
+    1.175246231294085, 2.407986514262124, 3.722795906507695, 4.913215145535075,
+    6.086548493077272, 7.278023025499204, 8.587414785721538, 9.990151691417916,
+    11.251678394115302, 12.406899413685272,
+  ],
+};
 
 const linearRegressionMeta = {
-    title: 'Linear regression'
-}
+  title: "Linear regression",
+};
 examplesStanies.push({
-    stan: linearRegressionStan,
-    data: linearRegressionData,
-    meta: linearRegressionMeta
-})
-
+  stan: linearRegressionStan,
+  data: linearRegressionData,
+  meta: linearRegressionMeta,
+});
 
 const SIRStan = `
 // the "susceptible-infected-recovered" model
@@ -115,27 +95,27 @@ generated quantities {
   array[n_days] real pred_cases = poisson_rng(y[ : , 2]);
   // array[n_days] real pred_cases = neg_binomial_2_rng(y[,2], phi);
 }
-`.trim()
+`.trim();
 
 const SIRData = {
-    "_source": "This data comes from the R package 'outbreaks'",
-    "_description": "Influenza in a boarding school in England, 1978",
-    "N": 763,
-    "cases": [3, 8, 26, 76, 225, 298, 258, 233, 189, 128, 68, 29, 14, 4],
-    "n_days": 14,
-    "ts": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
-    "t0": 0,
-    "y0": [762, 1, 0]
-}
+  _source: "This data comes from the R package 'outbreaks'",
+  _description: "Influenza in a boarding school in England, 1978",
+  N: 763,
+  cases: [3, 8, 26, 76, 225, 298, 258, 233, 189, 128, 68, 29, 14, 4],
+  n_days: 14,
+  ts: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+  t0: 0,
+  y0: [762, 1, 0],
+};
 
 const SIRMeta = {
-    title: 'Disease transmission'
-}
+  title: "Disease transmission",
+};
 
 examplesStanies.push({
-    stan: SIRStan,
-    data: SIRData,
-    meta: SIRMeta
-})
+  stan: SIRStan,
+  data: SIRData,
+  meta: SIRMeta,
+});
 
 export default examplesStanies;

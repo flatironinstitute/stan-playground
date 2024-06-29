@@ -46,8 +46,9 @@ describe("useStanc", () => {
     const initialCode = "data { int x; }";
     const setCode = vi.fn();
 
-    const { result, rerender, unmount } = renderHook(({ code }: { code: string }) =>
-      useStanc("main.stan", code, setCode), { initialProps: { code: initialCode } },
+    const { result, rerender, unmount } = renderHook(
+      ({ code }: { code: string }) => useStanc("main.stan", code, setCode),
+      { initialProps: { code: initialCode } },
     );
 
     expect(result.current.stancErrors.errors).toBeUndefined();
