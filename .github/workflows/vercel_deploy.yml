@@ -1,0 +1,36 @@
+name: Vercel deploy
+
+on:
+  push:
+    branches:
+      - main
+      - vercel-deploy-2  # for initial test
+  # manual trigger
+  workflow_dispatch:
+
+jobs:
+  vercel-deploy:
+    name: Vercel deploy
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@v2
+        -
+            name: Install Vercel CLI
+            run: npm install --global vercel@latest
+        -
+            name: Create .vercel/project.json
+            run: |
+              cd gui
+              mkdir -p .vercel
+              echo '{"projectId":"${{ secrets.VERCEL_PROJECT_ID }}", "orgId":"${{ secrets.VERCEL_ORG_ID }}"}' > .vercel/project.json
+        -
+            name: Pull Vercel Environment Information
+            run: |
+              cd gui
+              vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        -
+            name: Build Project Artifacts
+            run: |
+              cd gui
+              vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
+
