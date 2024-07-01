@@ -12,18 +12,9 @@ import {
 } from "react";
 import { highlightJsData } from "./stanLang";
 import { Hyperlink, SmallIconButton } from "@fi-sci/misc";
+import { CodeMarker } from "../Stanc/Linting";
 
 type Monaco = typeof monaco;
-
-// An interface for passing markers (squiggles) to the editor without depending on monaco types
-export type CodeMarker = {
-  startLineNumber: number;
-  startColumn: number;
-  endLineNumber: number;
-  endColumn: number;
-  message: string;
-  severity: "error" | "warning" | "hint" | "info";
-};
 
 type Props = {
   defaultText?: string;
