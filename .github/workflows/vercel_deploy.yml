@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - vercel-deploy  # for initial test
+      - vercel-deploy-2  # for initial test
   # manual trigger
   workflow_dispatch:
 
