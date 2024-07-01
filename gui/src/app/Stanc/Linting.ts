@@ -14,16 +14,14 @@ export type CodeMarker = Position & {
 };
 
 export const stancErrorsToCodeMarkers = (stancErrors: StancErrors) => {
-  const codeMarkers: CodeMarker[] = [];
-
-  for (const x of stancErrors.errors || []) {
-    const marker = stancMessageToMarker(x, "error");
-    if (marker) codeMarkers.push(marker);
-  }
-  for (const x of stancErrors.warnings || []) {
-    const marker = stancMessageToMarker(x, "warning");
-    if (marker) codeMarkers.push(marker);
-  }
+  const codeMarkers = [
+    ...(stancErrors.errors || []).map((error) =>
+      stancMessageToMarker(error, "error"),
+    ),
+    ...(stancErrors.warnings || []).map((warning) =>
+      stancMessageToMarker(warning, "warning"),
+    ),
+  ];
 
   return codeMarkers;
 };
@@ -49,16 +47,12 @@ const stancMessageToMarker = (
   };
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Adapted from https://github.com/WardBrian/vscode-stan-extension
 
 const locationFromMessage = (message: string): Position | undefined => {
-  if (!message) return;
-  // format is "in 'filename', line (#)), column (#) to (line #,)? column (#)"
+  if (!message) return undefined;
+  // format is "in 'filename', line (#), column (#) to (line #,)? column (#)"
   const start = message.matchAll(/'.*', line (\d+), column (\d+)( to)?/g);
-  if (!start) {
-    return undefined;
-  }
   // there will be multiple in the case of #included files
   const lastMatch = Array.from(start).pop();
   if (!lastMatch) {
@@ -85,30 +79,22 @@ const locationFromMessage = (message: string): Position | undefined => {
   return { startLineNumber, startColumn, endLineNumber, endColumn };
 };
 
-function getWarningMessage(message: string) {
+const getWarningMessage = (message: string) => {
   let warning = message.replace(/Warning.*column \d+:/s, "");
   warning = warning.replace(/\s+/gs, " ");
   warning = warning.trim();
-  warning = message.includes("included from")
-    ? "Warning in included file:\n" + warning
-    : warning;
   return warning;
-}
+};
 
-function getErrorMessage(message: string) {
+const getErrorMessage = (message: string) => {
   let error = message;
   // cut off code snippet for display
   if (message.includes("------\n")) {
     error = error.split("------\n")[2];
   }
   error = error.trim();
-  error = message.includes("included from")
-    ? "Error in included file:\n" + error
-    : error;
-
   return error;
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+};
 
 export const exportedForTesting = {
   locationFromMessage,

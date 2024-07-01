@@ -54,7 +54,8 @@ describe("Linting", () => {
       expect(position.startColumn).toEqual(position.endColumn);
 
       expect(position.startLineNumber).toEqual(1);
-      expect(position.startColumn).toEqual(13); // 0 vs 1 based indexing
+      // NOTE: stanc emits 0-based column numbers, but Monaco is 1-based
+      expect(position.startColumn).toEqual(13);
     });
 
     test("should detect the position of a single line, multi-column error", () => {
