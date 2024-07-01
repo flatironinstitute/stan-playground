@@ -1,5 +1,8 @@
 import { assert, describe, expect, test } from "vitest";
-import { exportedForTesting } from "../../../src/app/Stanc/Linting";
+import {
+  exportedForTesting,
+  stancErrorsToCodeMarkers,
+} from "../../../src/app/Stanc/Linting";
 
 const { locationFromMessage, getWarningMessage, getErrorMessage } =
   exportedForTesting;
@@ -40,6 +43,12 @@ and the right hand side has type
 
 describe("Linting", () => {
   describe("position detection", () => {
+    test("empty message returns undefined", () => {
+      const message = "";
+      const position = locationFromMessage(message);
+      expect(position).toBeUndefined();
+    });
+
     test("random message returns undefined", () => {
       const message = "random message";
       const position = locationFromMessage(message);
@@ -108,6 +117,50 @@ The left hand side has type
 and the right hand side has type
   int`,
       );
+    });
+  });
+
+  describe("from Stanc Errors", () => {
+    test("empty errors returns empty list", () => {
+      const stancErrors = {};
+      const codeMarkers = stancErrorsToCodeMarkers(stancErrors);
+      expect(codeMarkers).toEqual([]);
+    });
+
+    test("bogus errors returns empty list", () => {
+      const stancErrors = {
+        errors: ["bogus error"],
+        warnings: ["bogus warning"],
+      };
+      const codeMarkers = stancErrorsToCodeMarkers(stancErrors);
+      expect(codeMarkers).toEqual([]);
+    });
+
+    test("single warning returns single warning marker", () => {
+      const stancErrors = {
+        warnings: [jacobianWarning],
+      };
+      const codeMarkers = stancErrorsToCodeMarkers(stancErrors);
+      expect(codeMarkers).toHaveLength(1);
+      expect(codeMarkers[0]?.severity).toEqual("warning");
+    });
+
+    test("single error returns single error marker", () => {
+      const stancErrors = {
+        errors: [multiColumnError],
+      };
+      const codeMarkers = stancErrorsToCodeMarkers(stancErrors);
+      expect(codeMarkers).toHaveLength(1);
+      expect(codeMarkers[0]?.severity).toEqual("error");
+    });
+
+    test("full stanc errors returns all markers", () => {
+      const stancErrors = {
+        errors: [multiColumnError, multiLineError],
+        warnings: [jacobianWarning, jacobianWarning, jacobianWarning],
+      };
+      const codeMarkers = stancErrorsToCodeMarkers(stancErrors);
+      expect(codeMarkers).toHaveLength(5);
     });
   });
 });

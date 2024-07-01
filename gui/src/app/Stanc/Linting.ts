@@ -23,7 +23,7 @@ export const stancErrorsToCodeMarkers = (stancErrors: StancErrors) => {
     ),
   ];
 
-  return codeMarkers;
+  return codeMarkers.filter((marker) => marker !== undefined);
 };
 
 const stancMessageToMarker = (
