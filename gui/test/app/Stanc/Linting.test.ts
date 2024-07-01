@@ -12,6 +12,10 @@ const jacobianWarning = `Warning in 'jacobian.stan', line 1, column 12: Variable
     be a reserved word starting in Stan 2.38.0. Please rename it!
 `;
 
+// note: stanc can produce warnings like this that do not contain a position!
+const emptyModelWarning = `Warning: Empty file 'empty.stan' detected; this is a valid stan model but
+    likely unintended!`;
+
 const multiColumnError = `Semantic error in 'multicol.stan', line 3, column 4 to column 10:
    -------------------------------------------------
      1:  parameters {
@@ -49,9 +53,8 @@ describe("Linting", () => {
       expect(position).toBeUndefined();
     });
 
-    test("random message returns undefined", () => {
-      const message = "random message";
-      const position = locationFromMessage(message);
+    test("message without position returns undefined", () => {
+      const position = locationFromMessage(emptyModelWarning);
       expect(position).toBeUndefined();
     });
 
