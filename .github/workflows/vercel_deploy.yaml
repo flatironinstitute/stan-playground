@@ -5,9 +5,9 @@ on:
     branches:
       - main
       - vercel-deploy  # for initial test
-    paths:
-      # only run workflow when changes are made to these files
-      - gui/package.json
+    # paths:
+    #   # only run workflow when changes are made to these files
+    #   - gui/package.json
   # manual trigger
   workflow_dispatch:
 
