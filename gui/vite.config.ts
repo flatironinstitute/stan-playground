@@ -31,4 +31,9 @@ export default defineConfig({
   server: {
     host: "127.0.0.1",
   },
+  worker: {
+    // Need for importing pyodide in the worker
+    // See https://github.com/flatironinstitute/stan-playground/pull/94#issuecomment-2201549860
+    format: 'es'
+  }
 });
