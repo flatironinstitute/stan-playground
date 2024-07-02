@@ -7,7 +7,7 @@ import {
 import { ProjectContext } from "../../Project/ProjectContextProvider";
 import { serializeAsZip } from "../../Project/ProjectSerialization";
 import { triggerDownload } from "../../util/triggerDownload";
-import saveAsGitHubGist from "./saveAsGitHubGist";
+import saveAsGitHubGist from "../../gists/saveAsGitHubGist";
 
 type SaveProjectWindowProps = {
   onClose: () => void;
@@ -132,18 +132,23 @@ const GistExportView: FunctionComponent<GistExportViewProps> = ({
         authenticate with GitHub and create a new Gist with the files in this
         project.&nbsp; You can create a new Personal Access Token by visiting
         your{" "}
-        <a href="https://github.com/settings" target="_blank" rel="noreferrer">
+        <a
+          href="https://github.com/settings/tokens?type=beta"
+          target="_blank"
+          rel="noreferrer"
+        >
           GitHub settings
         </a>
-        .&nbsp; Go to <i>Developer settings</i> and <i>Tokens (classic)</i>
-        .&nbsp; Generate a new classic token and be sure to only grant gist
-        scope with an expiration date.&nbsp; Copy the token and paste it into
-        the field below.
+        .&nbsp; Go to <i>Fine-grained tokens</i> and generate a new fine-grained
+        token. Be sure to only grant Gist read/write permission by using Gists
+        item in the <i>Account Permissions</i> section. You should also specify
+        an expiration date.&nbsp; Copy the token and paste it into the field
+        below.
       </p>
       <p>
         For security reasons, your token will not be saved in this
-        application,&nbsp; so you may want to store it securely in a text file
-        for future use.
+        application,&nbsp; so you should store it securely in a text file for
+        future use.
       </p>
       <table className="table1" style={{ maxWidth: 500 }}>
         <tbody>
