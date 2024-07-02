@@ -1,7 +1,15 @@
-import { FunctionComponent, useCallback, useMemo, useState } from "react";
+import {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { PlayArrow } from "@mui/icons-material";
-import { PyodideInterface, loadPyodide } from "pyodide";
 import TextEditor, { ToolbarItem } from "../../FileEditor/TextEditor";
+// https://vitejs.dev/guide/assets#importing-script-as-a-worker
+// https://vitejs.dev/guide/assets#importing-asset-as-url
+import analysisPyWorkerURL from "./analysisPyWorker?worker&url";
 
 type Props = {
   fileName: string;
@@ -30,36 +38,55 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
     "idle" | "loading" | "running" | "completed" | "failed"
   >("idle");
 
-  const loadPyodideInstance = useMemo(() => {
-    let pyodide: PyodideInterface | null = null;
-    const loadPyodideInstance = async () => {
-      if (pyodide === null) {
-        const p = await loadPyodide({
-          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.1/full",
-          stdout: (x: string) => {
-            const color = "blue";
-            const pre = document.createElement("pre");
-            pre.style.color = color;
-            pre.appendChild(document.createTextNode(x));
-            outputDiv?.appendChild(pre);
-          },
-          stderr: (x: string) => {
-            const color = "red";
-            const pre = document.createElement("pre");
-            pre.style.color = color;
-            pre.appendChild(document.createTextNode(x));
-            outputDiv?.appendChild(pre);
-          },
-        });
-        pyodide = p;
-        await pyodide.loadPackage(["numpy", "matplotlib"]);
-        return pyodide;
-      } else {
-        return pyodide;
+  const [analysisPyWorker, setAnalysisPyWorker] = useState<Worker | undefined>(
+    undefined,
+  );
+
+  // worker creation
+  useEffect(() => {
+    const worker = new Worker(analysisPyWorkerURL, {
+      name: "dataPyWorker",
+      type: "module",
+    });
+    setAnalysisPyWorker(worker);
+    return () => {
+      console.log("terminating dataPy worker");
+      worker.terminate();
+    };
+  }, []);
+
+  // message handling
+  useEffect(() => {
+    if (!analysisPyWorker) return;
+
+    analysisPyWorker.onmessage = (e: MessageEvent) => {
+      const dd = e.data;
+      if (dd.type === "setStatus") {
+        setStatus(dd.status);
+      } else if (dd.type === "addImage") {
+        const b64 = dd.image;
+        const imageUrl = `data:image/png;base64,${b64}`;
+
+        const img = document.createElement("img");
+        img.src = imageUrl;
+
+        const divElement = document.createElement("div");
+        divElement.appendChild(img);
+        outputDiv?.appendChild(divElement);
+      } else if (dd.type === "stdout") {
+        console.log(dd.data);
+        const divElement = document.createElement("div");
+        divElement.textContent = dd.data;
+        outputDiv?.appendChild(divElement);
+      } else if (dd.type === "stderr") {
+        console.error(dd.data);
+        const divElement = document.createElement("div");
+        divElement.textContent = dd.data;
+        divElement.style.color = "red";
+        outputDiv?.appendChild(divElement);
       }
     };
-    return loadPyodideInstance;
-  }, [outputDiv]);
+  }, [analysisPyWorker, outputDiv]);
 
   const handleRun = useCallback(async () => {
     if (status === "running") {
@@ -68,36 +95,12 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
     if (editedFileContent !== fileContent) {
       throw new Error("Cannot run edited code");
     }
-    const oldPyodideMplTarget = (document as any).pyodideMplTarget;
-    (document as any).pyodideMplTarget = outputDiv;
-    // clear the output div
-    if (outputDiv) {
-      outputDiv.innerHTML = "";
-    }
-    setStatus("loading");
-    try {
-      const pyodide = await loadPyodideInstance();
-      setStatus("running");
-      // the runPython call is going to be blocking, so we want to give
-      // react a chance to update the status in the UI.
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      // here's where we can pass in globals
-      const globals = pyodide.toPy({ _sp_example_global: 5 });
-      const script = fileContent;
-      pyodide.runPython(script, { globals });
-      setStatus("completed");
-    } catch (e: any) {
-      console.error(e);
-      const pre = document.createElement("pre");
-      pre.style.color = "red";
-      pre.appendChild(document.createTextNode(e.toString()));
-      outputDiv?.appendChild(pre);
-      setStatus("failed");
-    } finally {
-      (document as any).pyodideMplTarget = oldPyodideMplTarget;
-    }
-  }, [editedFileContent, fileContent, status, loadPyodideInstance, outputDiv]);
+    if (outputDiv) outputDiv.innerHTML = "";
+    analysisPyWorker?.postMessage({
+      type: "run",
+      code: fileContent,
+    });
+  }, [editedFileContent, fileContent, status, analysisPyWorker, outputDiv]);
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     const ret: ToolbarItem[] = [];
     const runnable = fileContent === editedFileContent && outputDiv;

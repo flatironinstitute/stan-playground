@@ -1,10 +1,12 @@
 import { Splitter } from "@fi-sci/splitter";
 import { FunctionComponent, useEffect, useState } from "react";
 import AnalysisPyFileEditor from "./AnalysisPyFileEditor";
+import AnalysisPyFileEditorNoWorker from "./AnalysisPyFileEditorNoWorker";
 
 type AnalysisPyPrototypeProps = {
   width: number;
   height: number;
+  useWorker?: boolean;
 };
 
 const exampleScript = `import sys
@@ -42,6 +44,7 @@ raise Exception('test exception')
 const AnalysisPyPrototype: FunctionComponent<AnalysisPyPrototypeProps> = ({
   width,
   height,
+  useWorker = true
 }) => {
   const [script, setScript] = useState<string>("");
   const [editedScript, setEditedScript] = useState<string>("");
@@ -60,18 +63,34 @@ const AnalysisPyPrototype: FunctionComponent<AnalysisPyPrototypeProps> = ({
       initialPosition={height / 2}
       direction="vertical"
     >
-      <AnalysisPyFileEditor
-        width={0}
-        height={0}
-        fileName="analysis.py"
-        fileContent={script}
-        onSaveContent={() => setScript(editedScript)}
-        editedFileContent={editedScript}
-        setEditedFileContent={setEditedScript}
-        readOnly={false}
-        outputDiv={outputDiv}
-      />
-      <AnalysisPyOutputWindow width={0} height={0} onOutputDiv={setOutputDiv} />
+      {useWorker ? (
+        <AnalysisPyFileEditor
+          key="analsyis-py-file-editor-worker"
+          width={0}
+          height={0}
+          fileName="analysis.py"
+          fileContent={script}
+          onSaveContent={() => setScript(editedScript)}
+          editedFileContent={editedScript}
+          setEditedFileContent={setEditedScript}
+          readOnly={false}
+          outputDiv={outputDiv}
+        />
+      ) : (
+        <AnalysisPyFileEditorNoWorker
+          key="analsyis-py-file-editor-no-worker"
+          width={0}
+          height={0}
+          fileName="analysis.py"
+          fileContent={script}
+          onSaveContent={() => setScript(editedScript)}
+          editedFileContent={editedScript}
+          setEditedFileContent={setEditedScript}
+          readOnly={false}
+          outputDiv={outputDiv}
+        />
+      )}
+      <AnalysisPyOutputWindow key={`analysis-py-output-window-${useWorker}`} width={0} height={0} onOutputDiv={setOutputDiv} />
     </Splitter>
   );
 };

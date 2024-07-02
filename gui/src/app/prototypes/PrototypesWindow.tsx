@@ -13,6 +13,7 @@ type PrototypesWindowSelection =
   | "data.py"
   | "data.r"
   | "analysis.py"
+  | "analysis.py-no-worker"
   | "analysis.r";
 
 const PrototypesWindow: FunctionComponent<TestDataPyWindowProps> = ({
@@ -82,6 +83,17 @@ const PrototypesWindow: FunctionComponent<TestDataPyWindowProps> = ({
           <div>
             <input
               type="radio"
+              id="analysis.py-no-worker"
+              name="example"
+              value="analysis.py-no-worker"
+              checked={selection === "analysis.py-no-worker"}
+              onChange={() => setSelection("analysis.py-no-worker")}
+            />
+            <label htmlFor="analysis.py-no-worker">analysis.py (no worker)</label>
+          </div>
+          <div>
+            <input
+              type="radio"
               id="analysis.r"
               name="example"
               value="analysis.r"
@@ -119,6 +131,14 @@ const PrototypesWindow: FunctionComponent<TestDataPyWindowProps> = ({
                 might work. It uses Pyodide in the browser.
               </p>
             </div>
+          ) : selection === "analysis.py-no-worker" ? (
+            <div>
+              <p>
+                This is an example of how downstream analysis via Python script
+                might work. It uses Pyodide in the browser, but does not use a
+                web worker.
+              </p>
+            </div>
           ) : selection === "analysis.r" ? (
             <div>
               <p>
@@ -146,7 +166,14 @@ const PrototypesWindow: FunctionComponent<TestDataPyWindowProps> = ({
         ) : selection === "data.r" ? (
           <DataRPrototype width={width - leftPanelWidth} height={height} />
         ) : selection === "analysis.py" ? (
-          <AnalysisPyPrototype width={width - leftPanelWidth} height={height} />
+          <AnalysisPyPrototype key="analysis-py-worker" width={width - leftPanelWidth} height={height} />
+        ) : selection === "analysis.py-no-worker" ? (
+          <AnalysisPyPrototype
+            key="analysis-py-no-worker"
+            width={width - leftPanelWidth}
+            height={height}
+            useWorker={false}
+          />
         ) : selection === "analysis.r" ? (
           <AnalysisRPrototype width={width - leftPanelWidth} height={height} />
         ) : (
