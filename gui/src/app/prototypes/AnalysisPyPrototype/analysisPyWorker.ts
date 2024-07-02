@@ -6,14 +6,14 @@ const loadPyodideInstance = async () => {
     const p = await loadPyodide({
       indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.1/full",
       stdout: (x: string) => {
-        self.postMessage({ type: "stdout", data: x });
+        sendStdout(x);
       },
       stderr: (x: string) => {
-        self.postMessage({ type: "stderr", data: x });
+        sendStderr(x);
       },
+      packages: ["numpy", "matplotlib"],
     });
     pyodide = p;
-    await pyodide.loadPackage(["numpy", "matplotlib"]);
     return pyodide;
   } else {
     return pyodide;
@@ -27,6 +27,14 @@ self.onmessage = (e) => {
   }
 };
 
+const sendStdout = (data: string) => {
+  self.postMessage({ type: "stdout", data });
+};
+
+const sendStderr = (data: string) => {
+  self.postMessage({ type: "stderr", data });
+};
+
 const setStatus = (status: string) => {
   self.postMessage({ type: "setStatus", status });
 };
@@ -37,7 +45,7 @@ const addImage = (image: any) => {
 
 // see https://github.com/pyodide/matplotlib-pyodide/issues/6#issuecomment-1242747625
 // replace show() with a function that base64 encodes the image and then stashes it for us
-const MPLPreample = `
+const MPLPreamble = `
 SP_IMAGES = []
 def patch_matplotlib(SP_IMAGES):
     import os
@@ -62,30 +70,53 @@ const run = async (code: string) => {
   try {
     const pyodide = await loadPyodideInstance();
     setStatus("running");
-    // the runPython call is going to be blocking, so we want to give
-    // react a chance to update the status in the UI.
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // Is the following needed for the message to get posted?
+    // await new Promise((resolve) => setTimeout(resolve, 100));
 
     // here's where we can pass in globals
     const globals = pyodide.toPy({ _sp_example_global: 5 });
-    const script = MPLPreample + '\n' + code + '\nprint("-----x", len(SP_IMAGES))';
+    const script = MPLPreamble + "\n" + code;
     let succeeded = false;
     try {
-      await pyodide.runPython(script, { globals });
-      succeeded = false;
-    }
-    catch (e) {
+      if (script.includes("arviz")) {
+        // If the script has arviz, we need to install it
+        setStatus("loading");
+        try {
+          await pyodide.loadPackage("micropip");
+          const microPip = pyodide.pyimport("micropip");
+          await microPip.install("arviz<0.18");
+        }
+        finally {
+          setStatus("running");
+        }
+      }
+      pyodide.runPython(script, { globals });
+      succeeded = true;
+    } catch (e: any) {
       console.error(e);
+      sendStderr(e.toString());
     }
 
-    const images = globals.toJs().get("SP_IMAGES");
+    const images = globals.get("SP_IMAGES").toJs();
+    if (!isListOfStrings(images)) {
+      throw new Error("Expected SP_IMAGES to be a list of strings");
+    }
 
     for (const image of images) {
       addImage(image);
     }
     setStatus(succeeded ? "completed" : "failed");
-  } catch (e) {
+  } catch (e: any) {
     console.error(e);
+    self.postMessage({
+      type: "stderr",
+      data: "UNEXPECTED ERROR: " + e.toString(),
+    });
     setStatus("failed");
   }
+};
+
+const isListOfStrings = (x: any): x is string[] => {
+  if (!x) return false;
+  return Array.isArray(x) && x.every((y) => typeof y === "string");
 };

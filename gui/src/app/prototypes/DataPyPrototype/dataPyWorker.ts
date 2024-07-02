@@ -10,10 +10,10 @@ const loadPyodideInstance = async () => {
       },
       stderr: (x: string) => {
         self.postMessage({ type: "stderr", data: x });
-      }
+      },
+      packages: ["numpy", "micropip"]
     });
     pyodide = p;
-    await pyodide.loadPackage(["numpy", "micropip"]);
     const micropip = pyodide.pyimport("micropip");
     await micropip.install("stanio");
     return pyodide;

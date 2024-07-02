@@ -50,9 +50,9 @@ const AnalysisPyFileEditorNoWorker: FunctionComponent<Props> = ({
             pre.appendChild(document.createTextNode(x));
             outputDiv?.appendChild(pre);
           },
+          packages: ["numpy", "matplotlib"]
         });
         pyodide = p;
-        await pyodide.loadPackage(["numpy", "matplotlib"]);
         return pyodide;
       } else {
         return pyodide;

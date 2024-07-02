@@ -76,13 +76,18 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
       } else if (dd.type === "stdout") {
         console.log(dd.data);
         const divElement = document.createElement("div");
-        divElement.textContent = dd.data;
+        divElement.style.color = "blue";
+        const preElement = document.createElement("pre");
+        divElement.appendChild(preElement);
+        preElement.textContent = dd.data;
         outputDiv?.appendChild(divElement);
       } else if (dd.type === "stderr") {
         console.error(dd.data);
         const divElement = document.createElement("div");
-        divElement.textContent = dd.data;
         divElement.style.color = "red";
+        const preElement = document.createElement("pre");
+        divElement.appendChild(preElement);
+        preElement.textContent = dd.data;
         outputDiv?.appendChild(divElement);
       }
     };
