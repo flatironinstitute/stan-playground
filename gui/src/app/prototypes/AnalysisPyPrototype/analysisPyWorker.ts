@@ -70,9 +70,6 @@ const run = async (code: string) => {
   try {
     const pyodide = await loadPyodideInstance();
     setStatus("running");
-    // Is the following needed for the message to get posted?
-    // await new Promise((resolve) => setTimeout(resolve, 100));
-
     // here's where we can pass in globals
     const globals = pyodide.toPy({ _sp_example_global: 5 });
     const script = MPLPreamble + "\n" + code;
