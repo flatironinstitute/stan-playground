@@ -9,6 +9,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           monaco: ["monaco-editor", "@monaco-editor/react"],
+          utilities: ["jszip", "@octokit/rest"],
         },
       },
     },
