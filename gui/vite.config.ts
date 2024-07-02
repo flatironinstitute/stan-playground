@@ -4,6 +4,16 @@ import { configDefaults, coverageConfigDefaults } from "vitest/config";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          monaco: ["monaco-editor", "@monaco-editor/react"],
+          utilities: ["jszip", "@octokit/rest"],
+        },
+      },
+    },
+  },
   test: {
     // note for testing: mockReset clears all spies/mocks and resets to empty function,
     // while restoreMocks: true calls .mockRestore() thereby clearing spies & mock
