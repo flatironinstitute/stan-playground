@@ -3,8 +3,8 @@ import ModalWindow, { useModalWindow } from "@fi-sci/modal-window";
 import { FunctionComponent, useCallback, useContext } from "react";
 import examplesStanies, { Stanie } from "../../exampleStanies/exampleStanies";
 import { ProjectContext } from "../../Project/ProjectContextProvider";
-import ExportWindow from "./ExportWindow";
-import ImportWindow from "./ImportWindow";
+import SaveProjectWindow from "./SaveProjectWindow";
+import LoadProjectWindow from "./LoadProjectWindow";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 
 type LeftPanelProps = {
@@ -33,14 +33,14 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({
   );
 
   const {
-    visible: exportVisible,
-    handleOpen: exportOpen,
-    handleClose: exportClose,
+    visible: saveProjectVisible,
+    handleOpen: saveProjectOpen,
+    handleClose: saveProjectClose,
   } = useModalWindow();
   const {
-    visible: importVisible,
-    handleOpen: importOpen,
-    handleClose: importClose,
+    visible: loadProjectVisible,
+    handleOpen: loadProjectOpen,
+    handleClose: loadProjectClose,
   } = useModalWindow();
 
   if (collapsed) {
@@ -83,6 +83,16 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({
         ))}
         <hr />
         <div>
+          <button onClick={loadProjectOpen} disabled={hasUnsavedChanges}>
+            Load project
+          </button>
+          &nbsp;
+          <button onClick={saveProjectOpen} disabled={hasUnsavedChanges}>
+            Save project
+          </button>
+        </div>
+        <div>&nbsp;</div>
+        <div>
           {/* This will probably be removed or replaced in the future. It's just for convenience during development. */}
           <button
             onClick={() => {
@@ -96,22 +106,12 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({
             Clear all
           </button>
         </div>
-        <div>&nbsp;</div>
-        <div>
-          <button onClick={importOpen} disabled={hasUnsavedChanges}>
-            Import
-          </button>
-          &nbsp;
-          <button onClick={exportOpen} disabled={hasUnsavedChanges}>
-            Export
-          </button>
-        </div>
       </div>
-      <ModalWindow visible={importVisible} onClose={importClose}>
-        <ImportWindow onClose={importClose} />
+      <ModalWindow visible={loadProjectVisible} onClose={loadProjectClose}>
+        <LoadProjectWindow onClose={loadProjectClose} />
       </ModalWindow>
-      <ModalWindow visible={exportVisible} onClose={exportClose}>
-        <ExportWindow onClose={exportClose} />
+      <ModalWindow visible={saveProjectVisible} onClose={saveProjectClose}>
+        <SaveProjectWindow onClose={saveProjectClose} />
       </ModalWindow>
     </div>
   );
