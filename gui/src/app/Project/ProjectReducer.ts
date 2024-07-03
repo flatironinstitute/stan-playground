@@ -60,6 +60,7 @@ export const ProjectReducer = (
         ...s,
         stanFileContent: a.stanie.stan,
         dataFileContent,
+        analysisPyFileContent: '',
         samplingOpts: defaultSamplingOpts,
         meta: { ...s.meta, title: a.stanie.meta.title ?? "Untitled" },
         ephemera: {

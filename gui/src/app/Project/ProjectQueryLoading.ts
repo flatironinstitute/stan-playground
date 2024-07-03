@@ -12,6 +12,7 @@ enum QueryParamKeys {
   Project = "project",
   StanFile = "stan",
   DataFile = "data",
+  AnalysisPyFile = "analysis.py",
   SamplingOpts = "sampling_opts",
   Title = "title",
   SONumChains = "num_chains",
@@ -37,6 +38,7 @@ export const fromQueryParams = (searchParams: URLSearchParams) => {
     project: searchParams.get(QueryParamKeys.Project),
     stan: searchParams.get(QueryParamKeys.StanFile),
     data: searchParams.get(QueryParamKeys.DataFile),
+    'analysis.py': searchParams.get(QueryParamKeys.AnalysisPyFile),
     sampling_opts: searchParams.get(QueryParamKeys.SamplingOpts),
     title: searchParams.get(QueryParamKeys.Title),
     num_chains: searchParams.get(QueryParamKeys.SONumChains),
@@ -113,6 +115,9 @@ export const fetchRemoteProject = async (query: QueryParams) => {
   const dataFilePromise = query.data
     ? tryFetch(query.data)
     : Promise.resolve(data.dataFileContent);
+  const analysisPyFilePromise = query['analysis.py']
+    ? tryFetch(query['analysis.py'])
+    : Promise.resolve(data.analysisPyFileContent);
   const sampling_optsPromise = query.sampling_opts
     ? tryFetch(query.sampling_opts)
     : Promise.resolve(undefined);
@@ -129,6 +134,13 @@ export const fetchRemoteProject = async (query: QueryParams) => {
     data.dataFileContent = dataFileContent;
   } else {
     data.dataFileContent = `// Failed to load content from ${query.data}`;
+  }
+
+  const analysisPyFileContent = await analysisPyFilePromise;
+  if (analysisPyFileContent !== undefined) {
+    data.analysisPyFileContent = analysisPyFileContent;
+  } else {
+    data.analysisPyFileContent = `# Failed to load content from ${query['analysis.py']}`;
   }
 
   const sampling_opts = await sampling_optsPromise;

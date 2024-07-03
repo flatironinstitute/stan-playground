@@ -7,6 +7,7 @@ import {
 export enum ProjectKnownFiles {
   STANFILE = "stanFileContent",
   DATAFILE = "dataFileContent",
+  ANALYSISPYFILE = "analysisPyFileContent",
 }
 
 type ProjectFiles = {
@@ -78,9 +79,11 @@ export const initialDataModel: ProjectDataModel = {
   ephemera: {
     stanFileContent: "",
     dataFileContent: "",
+    analysisPyFileContent: "",
   },
   stanFileContent: "",
   dataFileContent: "",
+  analysisPyFileContent: "",
   samplingOpts: defaultSamplingOpts,
 };
 

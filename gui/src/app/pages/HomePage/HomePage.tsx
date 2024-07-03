@@ -1,32 +1,25 @@
 import { Splitter } from "@fi-sci/splitter";
 import {
   FunctionComponent,
-  useCallback,
   useContext,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
 import DataFileEditor from "../../FileEditor/DataFileEditor";
 import StanFileEditor from "../../FileEditor/StanFileEditor";
-import RunPanel from "../../RunPanel/RunPanel";
-import SamplerOutputView from "../../SamplerOutputView/SamplerOutputView";
-import SamplingOptsPanel from "../../SamplingOptsPanel/SamplingOptsPanel";
 import ProjectContextProvider, {
   ProjectContext,
 } from "../../Project/ProjectContextProvider";
 import {
-  modelHasUnsavedChanges,
-  modelHasUnsavedDataFileChanges,
   ProjectKnownFiles,
+  modelHasUnsavedChanges,
 } from "../../Project/ProjectDataModel";
-import { SamplingOpts } from "../../StanSampler/StanSampler";
-import useStanSampler, {
-  useSamplerStatus,
-} from "../../StanSampler/useStanSampler";
 import LeftPanel from "./LeftPanel";
+import SamplingWindow from "./SamplingWindow/SamplingWindow";
 import TopBar from "./TopBar";
+import TabWidget from "../../TabWidget/TabWidget";
+import AnalysisPyWindow from "./AnalysisPyWindow/AnalysisPyWindow";
 
 type Props = {
   width: number;
@@ -143,6 +136,60 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
   );
 };
 
+type RightViewProps = {
+  width: number;
+  height: number;
+  compiledMainJsUrl: string;
+};
+
+const tabs = [
+  {
+    id: "sampling",
+    label: "Sampling",
+    title: "Run sampling and view draws",
+    closeable: false,
+  },
+  {
+    id: "analysis.py",
+    label: "Analysis (Py)",
+    title: "Python analysis",
+    closeable: false,
+  },
+  {
+    id: "analysis.r",
+    label: "Analysis (R)",
+    title: "R analysis",
+    closeable: false,
+  }
+];
+
+const RightView: FunctionComponent<RightViewProps> = ({
+  width,
+  height,
+  compiledMainJsUrl,
+}) => {
+  const [currentTabId, setCurrentTabId] = useState("sampling");
+  return (
+    <TabWidget
+      width={width}
+      height={height}
+      tabs={tabs}
+      currentTabId={currentTabId}
+      setCurrentTabId={setCurrentTabId}
+    >
+      <SamplingWindow
+        width={width}
+        height={height}
+        compiledMainJsUrl={compiledMainJsUrl}
+      />
+      <AnalysisPyWindow width={width} height={height} />
+      <div>
+        R Analysis not yet implemented
+      </div>
+    </TabWidget>
+  );
+};
+
 // the width of the left panel when it is expanded based on the overall width
 const determineLeftPanelWidth = (width: number) => {
   const minWidth = 150;
@@ -220,90 +267,6 @@ const LeftView: FunctionComponent<LeftViewProps> = ({
         readOnly={false}
       />
     </Splitter>
-  );
-};
-
-type RightViewProps = {
-  width: number;
-  height: number;
-  compiledMainJsUrl?: string;
-};
-
-const RightView: FunctionComponent<RightViewProps> = ({
-  width,
-  height,
-  compiledMainJsUrl,
-}) => {
-  const { data, update } = useContext(ProjectContext);
-  const parsedData = useMemo(() => {
-    try {
-      return JSON.parse(data.dataFileContent);
-    } catch (e) {
-      return undefined;
-    }
-  }, [data.dataFileContent]);
-  const samplingOptsPanelHeight = 160;
-  const samplingOptsPanelWidth = Math.min(180, width / 2);
-
-  const setSamplingOpts = useCallback(
-    (opts: SamplingOpts) => {
-      update({ type: "setSamplingOpts", opts });
-    },
-    [update],
-  );
-
-  const { sampler } = useStanSampler(compiledMainJsUrl);
-  const { status: samplerStatus } = useSamplerStatus(sampler);
-  const isSampling = samplerStatus === "sampling";
-  return (
-    <div style={{ position: "absolute", width, height }}>
-      <div
-        style={{
-          position: "absolute",
-          width: samplingOptsPanelWidth,
-          height: samplingOptsPanelHeight,
-        }}
-      >
-        <SamplingOptsPanel
-          samplingOpts={data.samplingOpts}
-          setSamplingOpts={!isSampling ? setSamplingOpts : undefined}
-        />
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          left: samplingOptsPanelWidth,
-          width: width - samplingOptsPanelWidth,
-          top: 0,
-          height: samplingOptsPanelHeight,
-        }}
-      >
-        <RunPanel
-          width={width}
-          height={samplingOptsPanelHeight}
-          sampler={sampler}
-          data={parsedData}
-          dataIsSaved={!modelHasUnsavedDataFileChanges(data)}
-          samplingOpts={data.samplingOpts}
-        />
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          width,
-          top: samplingOptsPanelHeight,
-          height: height - samplingOptsPanelHeight,
-        }}
-      >
-        {sampler && (
-          <SamplerOutputView
-            width={width}
-            height={height - samplingOptsPanelHeight}
-            sampler={sampler}
-          />
-        )}
-      </div>
-    </div>
   );
 };
 
