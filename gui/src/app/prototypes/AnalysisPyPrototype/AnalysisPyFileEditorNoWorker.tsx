@@ -1,6 +1,6 @@
-import { FunctionComponent, useCallback, useMemo, useState } from "react";
 import { PlayArrow } from "@mui/icons-material";
-import { PyodideInterface, loadPyodide } from "pyodide";
+import { loadPyodide } from "pyodide";
+import { FunctionComponent, useCallback, useMemo, useState } from "react";
 import TextEditor, { ToolbarItem } from "../../FileEditor/TextEditor";
 
 type Props = {
