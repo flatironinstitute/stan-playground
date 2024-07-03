@@ -53,7 +53,6 @@ self.onmessage = (e) => {
     if (!["data.py", "analysis.py"].includes(message.mode)) {
       throw Error("Invalid pyodideWorkerMode");
     }
-    console.log("---- setting pyodideWorkerMode", message.mode);
     pyodideWorkerMode = message.mode;
   } else if (message.type === "run") {
     run(message.code);
@@ -126,7 +125,6 @@ const run = async (code: string) => {
           setStatus("running");
         }
       }
-      console.log("--- running script", script);
       pyodide.runPython(script, { globals });
       succeeded = true;
     } catch (e: any) {
@@ -200,9 +198,7 @@ const getScriptPreable = (mode: PyodideWorkerMode): string => {
     // replace show() with a function that base64 encodes the image and then stashes it for us
 
     return `SP_IMAGES = []
-print('---- 0')
 def patch_matplotlib(SP_IMAGES):
-  print('--- 1')
   import os
   os.environ['MPLBACKEND'] = 'AGG'
   import base64
@@ -217,9 +213,7 @@ def patch_matplotlib(SP_IMAGES):
     SP_IMAGES.append(base64.b64encode(buf.read()).decode('utf-8'))
     matplotlib.pyplot.clf()
   matplotlib.pyplot.show = show
-print('--- a')
 patch_matplotlib(SP_IMAGES)
-print('--- b')
 `;
   } else {
     return "";
