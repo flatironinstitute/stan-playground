@@ -6,7 +6,7 @@ import {
   persistStateToEphemera,
 } from "./ProjectDataModel";
 import { loadFromProjectFiles } from "./ProjectSerialization";
-import loadFilesFromGist from "./loadFilesFromGist";
+import loadFilesFromGist from "../gists/loadFilesFromGist";
 
 enum QueryParamKeys {
   Project = "project",
