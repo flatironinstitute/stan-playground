@@ -7,9 +7,8 @@ import {
 } from "react";
 import { PlayArrow } from "@mui/icons-material";
 import TextEditor, { ToolbarItem } from "../../FileEditor/TextEditor";
-// https://vitejs.dev/guide/assets#importing-script-as-a-worker
-// https://vitejs.dev/guide/assets#importing-asset-as-url
-import analysisPyWorkerURL from "./analysisPyWorker?worker&url";
+import { PydodideWorkerStatus } from "../pyodideWorker/pyodideWorkerTypes";
+import PyodideWorkerInterface from "../pyodideWorker/pyodideWorkerInterface";
 
 type Props = {
   fileName: string;
@@ -34,37 +33,38 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
   height,
   outputDiv,
 }) => {
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "running" | "completed" | "failed"
-  >("idle");
+  const [status, setStatus] = useState<PydodideWorkerStatus>("idle");
 
-  const [analysisPyWorker, setAnalysisPyWorker] = useState<Worker | undefined>(
-    undefined,
-  );
+  const [analysisPyWorker, setAnalysisPyWorker] = useState<
+    PyodideWorkerInterface | undefined
+  >(undefined);
 
   // worker creation
   useEffect(() => {
-    const worker = new Worker(analysisPyWorkerURL, {
-      name: "dataPyWorker",
-      type: "module",
-    });
-    setAnalysisPyWorker(worker);
-    return () => {
-      console.log("terminating dataPy worker");
-      worker.terminate();
-    };
-  }, []);
-
-  // message handling
-  useEffect(() => {
-    if (!analysisPyWorker) return;
-
-    analysisPyWorker.onmessage = (e: MessageEvent) => {
-      const dd = e.data;
-      if (dd.type === "setStatus") {
-        setStatus(dd.status);
-      } else if (dd.type === "addImage") {
-        const b64 = dd.image;
+    const worker = PyodideWorkerInterface.create("analysis.py", {
+      onStdout: (x) => {
+        console.log(x);
+        const divElement = document.createElement("div");
+        divElement.style.color = "blue";
+        const preElement = document.createElement("pre");
+        divElement.appendChild(preElement);
+        preElement.textContent = x;
+        outputDiv?.appendChild(divElement);
+      },
+      onStderr: (x) => {
+        console.error(x);
+        const divElement = document.createElement("div");
+        divElement.style.color = "red";
+        const preElement = document.createElement("pre");
+        divElement.appendChild(preElement);
+        preElement.textContent = x;
+        outputDiv?.appendChild(divElement);
+      },
+      onStatus: (status) => {
+        setStatus(status);
+      },
+      onImage: (image) => {
+        const b64 = image;
         const imageUrl = `data:image/png;base64,${b64}`;
 
         const img = document.createElement("img");
@@ -73,25 +73,13 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
         const divElement = document.createElement("div");
         divElement.appendChild(img);
         outputDiv?.appendChild(divElement);
-      } else if (dd.type === "stdout") {
-        console.log(dd.data);
-        const divElement = document.createElement("div");
-        divElement.style.color = "blue";
-        const preElement = document.createElement("pre");
-        divElement.appendChild(preElement);
-        preElement.textContent = dd.data;
-        outputDiv?.appendChild(divElement);
-      } else if (dd.type === "stderr") {
-        console.error(dd.data);
-        const divElement = document.createElement("div");
-        divElement.style.color = "red";
-        const preElement = document.createElement("pre");
-        divElement.appendChild(preElement);
-        preElement.textContent = dd.data;
-        outputDiv?.appendChild(divElement);
-      }
+      },
+    });
+    setAnalysisPyWorker(worker);
+    return () => {
+      worker.destroy();
     };
-  }, [analysisPyWorker, outputDiv]);
+  }, [outputDiv]);
 
   const handleRun = useCallback(async () => {
     if (status === "running") {
@@ -100,12 +88,11 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
     if (editedFileContent !== fileContent) {
       throw new Error("Cannot run edited code");
     }
-    if (outputDiv) outputDiv.innerHTML = "";
-    analysisPyWorker?.postMessage({
-      type: "run",
-      code: fileContent,
-    });
-  }, [editedFileContent, fileContent, status, analysisPyWorker, outputDiv]);
+    if (!analysisPyWorker) {
+      throw new Error("analysisPyWorker is not defined");
+    }
+    analysisPyWorker.run(fileContent);
+  }, [editedFileContent, fileContent, status, analysisPyWorker]);
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     const ret: ToolbarItem[] = [];
     const runnable = fileContent === editedFileContent && outputDiv;

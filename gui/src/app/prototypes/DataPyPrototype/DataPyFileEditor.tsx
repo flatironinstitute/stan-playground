@@ -7,9 +7,8 @@ import {
 } from "react";
 import { PlayArrow } from "@mui/icons-material";
 import TextEditor, { ToolbarItem } from "../../FileEditor/TextEditor";
-// https://vitejs.dev/guide/assets#importing-script-as-a-worker
-// https://vitejs.dev/guide/assets#importing-asset-as-url
-import dataPyWorkerURL from "./dataPyWorker?worker&url";
+import PyodideWorkerInterface from "../pyodideWorker/pyodideWorkerInterface";
+import { PydodideWorkerStatus } from "../pyodideWorker/pyodideWorkerTypes";
 
 type Props = {
   fileName: string;
@@ -34,44 +33,31 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
   width,
   height,
 }) => {
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "running" | "completed" | "failed"
-  >("idle");
+  const [status, setStatus] = useState<PydodideWorkerStatus>("idle");
 
-  const [dataPyWorker, setDataPyWorker] = useState<Worker | undefined>(
-    undefined,
-  );
+  const [dataPyWorker, setDataPyWorker] = useState<
+    PyodideWorkerInterface | undefined
+  >(undefined);
 
   // worker creation
   useEffect(() => {
-    const worker = new Worker(dataPyWorkerURL, {
-      name: "dataPyWorker",
-      type: "module",
+    const worker = PyodideWorkerInterface.create("data.py", {
+      onStdout: (x) => {
+        console.log(x);
+      },
+      onStderr: (x) => {
+        console.error(x);
+      },
+      onStatus: (status) => {
+        setStatus(status);
+      },
+      onData: setData,
     });
     setDataPyWorker(worker);
     return () => {
-      console.log("terminating dataPy worker");
-      worker.terminate();
+      worker.destroy();
     };
-  }, []);
-
-  // message handling
-  useEffect(() => {
-    if (!dataPyWorker) return;
-
-    dataPyWorker.onmessage = (e: MessageEvent) => {
-      const dd = e.data;
-      if (dd.type === "setStatus") {
-        setStatus(dd.status);
-      } else if (dd.type === "setData") {
-        setData && setData(dd.data);
-      } else if (dd.type === "stdout") {
-        console.log(dd.data);
-      } else if (dd.type === "stderr") {
-        console.error(dd.data);
-      }
-    };
-  }, [dataPyWorker, setData]);
+  }, [setData]);
 
   const handleRun = useCallback(async () => {
     if (status === "running") {
@@ -80,10 +66,10 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
     if (editedFileContent !== fileContent) {
       throw new Error("Cannot run edited code");
     }
-    dataPyWorker?.postMessage({
-      type: "run",
-      code: fileContent,
-    });
+    if (!dataPyWorker) {
+      throw new Error("dataPyWorker is not defined");
+    }
+    dataPyWorker.run(fileContent);
   }, [editedFileContent, fileContent, status, dataPyWorker]);
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     const ret: ToolbarItem[] = [];
