@@ -4,29 +4,30 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useState,
 } from "react";
 import { ProjectContext } from "../../../Project/ProjectContextProvider";
 import { modelHasUnsavedDataFileChanges } from "../../../Project/ProjectDataModel";
 import RunPanel from "../../../RunPanel/RunPanel";
-import { SamplingOpts } from "../../../StanSampler/StanSampler";
+import StanSampler, { SamplingOpts } from "../../../StanSampler/StanSampler";
 import useStanSampler, {
   useSamplerStatus,
 } from "../../../StanSampler/useStanSampler";
 import SamplerOutputView from "../../../SamplerOutputView/SamplerOutputView";
 import SamplingOptsPanel from "../../../SamplingOptsPanel/SamplingOptsPanel";
+import TabWidget from "../../../TabWidget/TabWidget";
+import AnalysisPyWindow from "../AnalysisPyWindow/AnalysisPyWindow";
 
 type SamplingWindowProps = {
   width: number;
   height: number;
   compiledMainJsUrl?: string;
-  onStanSampler: (sampler: any) => void; // todo: lift the state rather than having to use this callback
 };
 
 const SamplingWindow: FunctionComponent<SamplingWindowProps> = ({
   width,
   height,
-  compiledMainJsUrl,
-  onStanSampler,
+  compiledMainJsUrl
 }) => {
   const { data, update } = useContext(ProjectContext);
   const parsedData = useMemo(() => {
@@ -47,9 +48,6 @@ const SamplingWindow: FunctionComponent<SamplingWindowProps> = ({
   );
 
   const { sampler } = useStanSampler(compiledMainJsUrl);
-  useEffect(() => {
-    onStanSampler(sampler);
-  }, [sampler, onStanSampler]);
   const { status: samplerStatus } = useSamplerStatus(sampler);
   const isSampling = samplerStatus === "sampling";
   return (
@@ -92,15 +90,63 @@ const SamplingWindow: FunctionComponent<SamplingWindowProps> = ({
           height: height - samplingOptsPanelHeight,
         }}
       >
-        {sampler && (
-          <SamplerOutputView
-            width={width}
-            height={height - samplingOptsPanelHeight}
-            sampler={sampler}
-          />
-        )}
+        <SamplingResultsArea
+          width={width}
+          height={height - samplingOptsPanelHeight}
+          sampler={sampler}
+        />
       </div>
     </div>
+  );
+};
+
+const samplingResultsTabs = [
+  {
+    id: "output",
+    label: "Output",
+    title: "View the output of the sampler",
+    closeable: false,
+  },
+  {
+    id: "analysis.py",
+    label: "Analysis (Py)",
+    title: "Python analysis",
+    closeable: false,
+  },
+  {
+    id: "analysis.r",
+    label: "Analysis (R)",
+    title: "R analysis",
+    closeable: false,
+  }
+];
+
+type SamplingResultsAreaProps = {
+  width: number;
+  height: number;
+  sampler: StanSampler | undefined;
+};
+
+const SamplingResultsArea: FunctionComponent<SamplingResultsAreaProps> = ({
+  width,
+  height,
+  sampler,
+}) => {
+  const [currentTabId, setCurrentTabId] = useState("output");
+  return (
+    <TabWidget
+      width={width}
+      height={height}
+      tabs={samplingResultsTabs}
+      currentTabId={currentTabId}
+      setCurrentTabId={setCurrentTabId}
+    >
+      <SamplerOutputView width={width} height={height} sampler={sampler} />
+      <AnalysisPyWindow width={width} height={height} stanSampler={sampler || null} />
+      <div>
+        <div style={{ padding: 5 }}>R analysis not yet implemented</div>
+      </div>
+    </TabWidget>
   );
 };
 

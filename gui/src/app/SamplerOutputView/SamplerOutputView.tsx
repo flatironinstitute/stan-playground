@@ -13,7 +13,7 @@ import TracePlotsView from "./TracePlotsView";
 type SamplerOutputViewProps = {
   width: number;
   height: number;
-  sampler: StanSampler;
+  sampler: StanSampler | undefined;
 };
 
 const SamplerOutputView: FunctionComponent<SamplerOutputViewProps> = ({
@@ -25,6 +25,7 @@ const SamplerOutputView: FunctionComponent<SamplerOutputViewProps> = ({
     useSamplerOutput(sampler);
 
   if (!draws || !paramNames || !numChains) return <span />;
+  if (!sampler) return <span>No sampler</span>;
   return (
     <DrawsDisplay
       width={width}

@@ -177,13 +177,16 @@ const RightPane: FunctionComponent<RightPaneProps> = ({
 
 const getScriptHeaderForEmptyDraws = () => {
   return `
-class _SPSampling:
-  def __init__(self):
-    self.draws = []
-    self.parameter_names = []
-    self.num_chains = 0
-sp_sampling = _SPSampling()
+raise Exception("You must run the sampler before executing the analysis script.")
 `;
+//   return `
+// class _SPSampling:
+//   def __init__(self):
+//     self.draws = []
+//     self.parameter_names = []
+//     self.num_chains = 0
+// sp_sampling = _SPSampling()
+// `;
 };
 
 const getScriptHeaderForNonemptyDraws = () => {

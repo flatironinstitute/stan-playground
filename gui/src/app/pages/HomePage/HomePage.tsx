@@ -18,9 +18,6 @@ import {
 import LeftPanel from "./LeftPanel";
 import SamplingWindow from "./SamplingWindow/SamplingWindow";
 import TopBar from "./TopBar";
-import TabWidget from "../../TabWidget/TabWidget";
-import AnalysisPyWindow from "./AnalysisPyWindow/AnalysisPyWindow";
-import StanSampler from "../../StanSampler/StanSampler";
 
 type Props = {
   width: number;
@@ -143,55 +140,17 @@ type RightViewProps = {
   compiledMainJsUrl: string;
 };
 
-const tabs = [
-  {
-    id: "sampling",
-    label: "Sampling",
-    title: "Run sampling and view draws",
-    closeable: false,
-  },
-  {
-    id: "analysis.py",
-    label: "Analysis (Py)",
-    title: "Python analysis",
-    closeable: false,
-  },
-  {
-    id: "analysis.r",
-    label: "Analysis (R)",
-    title: "R analysis",
-    closeable: false,
-  },
-];
-
 const RightView: FunctionComponent<RightViewProps> = ({
   width,
   height,
   compiledMainJsUrl,
 }) => {
-  const [currentTabId, setCurrentTabId] = useState("sampling");
-  const [stanSampler, setStanSampler] = useState<StanSampler | null>(null);
   return (
-    <TabWidget
+    <SamplingWindow
       width={width}
       height={height}
-      tabs={tabs}
-      currentTabId={currentTabId}
-      setCurrentTabId={setCurrentTabId}
-    >
-      <SamplingWindow
-        width={width}
-        height={height}
-        compiledMainJsUrl={compiledMainJsUrl}
-        onStanSampler={setStanSampler} // todo: lift the state rather than having to use this callback
-      />
-      <AnalysisPyWindow
-        width={width}
-        height={height}
-        stanSampler={stanSampler}
-      />
-      <div>R Analysis not yet implemented</div>
-    </TabWidget>
+      compiledMainJsUrl={compiledMainJsUrl}
+    />
   );
 };
 
