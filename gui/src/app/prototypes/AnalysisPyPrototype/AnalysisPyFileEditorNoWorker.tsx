@@ -31,34 +31,28 @@ const AnalysisPyFileEditorNoWorker: FunctionComponent<Props> = ({
   >("idle");
 
   const loadPyodideInstance = useMemo(() => {
-    let pyodide: PyodideInterface | null = null;
-    const loadPyodideInstance = async () => {
-      if (pyodide === null) {
-        const p = await loadPyodide({
-          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.1/full",
-          stdout: (x: string) => {
-            const color = "blue";
-            const pre = document.createElement("pre");
-            pre.style.color = color;
-            pre.appendChild(document.createTextNode(x));
-            outputDiv?.appendChild(pre);
-          },
-          stderr: (x: string) => {
-            const color = "red";
-            const pre = document.createElement("pre");
-            pre.style.color = color;
-            pre.appendChild(document.createTextNode(x));
-            outputDiv?.appendChild(pre);
-          },
-          packages: ["numpy", "matplotlib"]
-        });
-        pyodide = p;
-        return pyodide;
-      } else {
-        return pyodide;
-      }
+    const load = async () => {
+      const p = await loadPyodide({
+        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.1/full",
+        stdout: (x: string) => {
+          const color = "blue";
+          const pre = document.createElement("pre");
+          pre.style.color = color;
+          pre.appendChild(document.createTextNode(x));
+          outputDiv?.appendChild(pre);
+        },
+        stderr: (x: string) => {
+          const color = "red";
+          const pre = document.createElement("pre");
+          pre.style.color = color;
+          pre.appendChild(document.createTextNode(x));
+          outputDiv?.appendChild(pre);
+        },
+        packages: ["numpy", "matplotlib"],
+      });
+      return p;
     };
-    return loadPyodideInstance;
+    return load;
   }, [outputDiv]);
 
   const handleRun = useCallback(async () => {
