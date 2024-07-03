@@ -54,7 +54,8 @@ const AnalysisPyPrototype: FunctionComponent<AnalysisPyPrototypeProps> = ({
     setEditedScript(exampleScript);
   }, []);
 
-  const [outputDiv, setOutputDiv] = useState<HTMLDivElement | null>(null);
+  const [imageOutputDiv, setImageOutputDiv] = useState<HTMLDivElement | null>(null);
+  const [consoleOutputDiv, setConsoleOutputDiv] = useState<HTMLDivElement | null>(null);
 
   return (
     <Splitter
@@ -74,7 +75,8 @@ const AnalysisPyPrototype: FunctionComponent<AnalysisPyPrototypeProps> = ({
           editedFileContent={editedScript}
           setEditedFileContent={setEditedScript}
           readOnly={false}
-          outputDiv={outputDiv}
+          imageOutputDiv={imageOutputDiv}
+          consoleOutputDiv={consoleOutputDiv}
         />
       ) : (
         <AnalysisPyFileEditorNoWorker
@@ -87,12 +89,54 @@ const AnalysisPyPrototype: FunctionComponent<AnalysisPyPrototypeProps> = ({
           editedFileContent={editedScript}
           setEditedFileContent={setEditedScript}
           readOnly={false}
-          outputDiv={outputDiv}
+          outputDiv={imageOutputDiv}
         />
       )}
-      <AnalysisPyOutputWindow key={`analysis-py-output-window-${useWorker}`} width={0} height={0} onOutputDiv={setOutputDiv} />
+      <BottomView width={0} height={0} onConsoleOutputDiv={setConsoleOutputDiv} onImageOutputDiv={setImageOutputDiv} />
     </Splitter>
   );
+};
+
+type BottomViewProps = {
+  width: number;
+  height: number;
+  onConsoleOutputDiv: (div: HTMLDivElement) => void;
+  onImageOutputDiv: (div: HTMLDivElement) => void;
+};
+
+const BottomView: FunctionComponent<BottomViewProps> = ({
+  width,
+  height,
+  onConsoleOutputDiv,
+  onImageOutputDiv
+}) => {
+  return (
+    <Splitter
+      width={width}
+      height={height}
+      initialPosition={width / 2}
+      direction="horizontal"
+    >
+      <AnalysisPyOutputWindow width={0} height={0} onOutputDiv={onImageOutputDiv} />
+      <ConsoleOutputWindow width={0} height={0} onConsoleOutputDiv={onConsoleOutputDiv} />
+    </Splitter>
+  );
+};
+
+type ConsoleOutputWindowProps = {
+  width: number;
+  height: number;
+  onConsoleOutputDiv: (div: HTMLDivElement) => void;
+};
+
+const ConsoleOutputWindow: FunctionComponent<ConsoleOutputWindowProps> = ({
+  width,
+  height,
+  onConsoleOutputDiv,
+}) => {
+  return (
+    <div style={{ position: 'absolute', width, height, overflow: 'auto' }} ref={onConsoleOutputDiv} />
+  )
 };
 
 type AnalysisPyOutputWindowProps = {

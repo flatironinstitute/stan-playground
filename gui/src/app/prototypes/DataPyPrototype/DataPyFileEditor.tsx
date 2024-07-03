@@ -20,6 +20,7 @@ type Props = {
   setData?: (data: any) => void;
   width: number;
   height: number;
+  outputDiv?: HTMLDivElement | null;
 };
 
 const DataPyFileEditor: FunctionComponent<Props> = ({
@@ -32,6 +33,7 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
   readOnly,
   width,
   height,
+  outputDiv,
 }) => {
   const [status, setStatus] = useState<PydodideWorkerStatus>("idle");
 
@@ -44,9 +46,21 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
     const worker = PyodideWorkerInterface.create("data.py", {
       onStdout: (x) => {
         console.log(x);
+        const divElement = document.createElement("div");
+        divElement.style.color = "blue";
+        const preElement = document.createElement("pre");
+        divElement.appendChild(preElement);
+        preElement.textContent = x;
+        outputDiv?.appendChild(divElement);
       },
       onStderr: (x) => {
         console.error(x);
+        const divElement = document.createElement("div");
+        divElement.style.color = "red";
+        const preElement = document.createElement("pre");
+        divElement.appendChild(preElement);
+        preElement.textContent = x;
+        outputDiv?.appendChild(divElement);
       },
       onStatus: (status) => {
         setStatus(status);
@@ -57,7 +71,7 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
     return () => {
       worker.destroy();
     };
-  }, [setData]);
+  }, [setData, outputDiv]);
 
   const handleRun = useCallback(async () => {
     if (status === "running") {
@@ -69,8 +83,11 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
     if (!dataPyWorker) {
       throw new Error("dataPyWorker is not defined");
     }
+    if (outputDiv) {
+      outputDiv.innerHTML = "";
+    }
     dataPyWorker.run(fileContent);
-  }, [editedFileContent, fileContent, status, dataPyWorker]);
+  }, [editedFileContent, fileContent, status, dataPyWorker, outputDiv]);
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     const ret: ToolbarItem[] = [];
     const runnable = fileContent === editedFileContent;

@@ -43,7 +43,8 @@ const AnalysisRPrototype: FunctionComponent<AnalysisRPrototypeProps> = ({
     setEditedScript(exampleScript);
   }, []);
 
-  const [outputDiv, setOutputDiv] = useState<HTMLDivElement | null>(null);
+  const [imageOutputDiv, setImageOutputDiv] = useState<HTMLDivElement | null>(null);
+  const [consoleOutputDiv, setConsoleOutputDiv] = useState<HTMLDivElement | null>(null);
 
   return (
     <Splitter
@@ -52,7 +53,7 @@ const AnalysisRPrototype: FunctionComponent<AnalysisRPrototypeProps> = ({
       initialPosition={height / 2}
       direction="vertical"
     >
-      {outputDiv ? (
+      {imageOutputDiv ? (
         <AnalysisRFileEditor
           width={0}
           height={0}
@@ -62,14 +63,57 @@ const AnalysisRPrototype: FunctionComponent<AnalysisRPrototypeProps> = ({
           editedFileContent={editedScript}
           setEditedFileContent={setEditedScript}
           readOnly={false}
-          outputDiv={outputDiv}
+          imageOutputDiv={imageOutputDiv}
+          consoleOutputDiv={consoleOutputDiv || undefined}
         />
       ) : (
         <div />
       )}
-      <AnalysisROutputWindow width={0} height={0} onOutputDiv={setOutputDiv} />
+      <BottomView width={0} height={0} onConsoleOutputDiv={setConsoleOutputDiv} onImageOutputDiv={setImageOutputDiv} />
     </Splitter>
   );
+};
+
+type BottomViewProps = {
+  width: number;
+  height: number;
+  onConsoleOutputDiv: (div: HTMLDivElement) => void;
+  onImageOutputDiv: (div: HTMLDivElement) => void;
+};
+
+const BottomView: FunctionComponent<BottomViewProps> = ({
+  width,
+  height,
+  onConsoleOutputDiv,
+  onImageOutputDiv
+}) => {
+  return (
+    <Splitter
+      width={width}
+      height={height}
+      initialPosition={width / 2}
+      direction="horizontal"
+    >
+      <AnalysisROutputWindow width={0} height={0} onOutputDiv={onImageOutputDiv} />
+      <ConsoleOutputWindow width={0} height={0} onConsoleOutputDiv={onConsoleOutputDiv} />
+    </Splitter>
+  );
+};
+
+type ConsoleOutputWindowProps = {
+  width: number;
+  height: number;
+  onConsoleOutputDiv: (div: HTMLDivElement) => void;
+};
+
+const ConsoleOutputWindow: FunctionComponent<ConsoleOutputWindowProps> = ({
+  width,
+  height,
+  onConsoleOutputDiv,
+}) => {
+  return (
+    <div style={{ position: 'absolute', width, height, overflow: 'auto' }} ref={onConsoleOutputDiv} />
+  )
 };
 
 type AnalysisROutputWindowProps = {
@@ -84,7 +128,7 @@ const AnalysisROutputWindow: FunctionComponent<AnalysisROutputWindowProps> = ({
   onOutputDiv,
 }) => {
   return (
-    <div style={{ width, height, overflow: "auto" }} ref={onOutputDiv}></div>
+    <div style={{ position: 'absolute', width, height, overflow: "auto" }} ref={onOutputDiv}></div>
   );
 };
 

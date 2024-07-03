@@ -12,7 +12,8 @@ type Props = {
   readOnly: boolean;
   width: number;
   height: number;
-  outputDiv: HTMLDivElement;
+  imageOutputDiv?: HTMLDivElement;
+  consoleOutputDiv?: HTMLDivElement;
 };
 
 let webR: WebR | null = null;
@@ -37,7 +38,8 @@ const AnalysisRFileEditor: FunctionComponent<Props> = ({
   readOnly,
   width,
   height,
-  outputDiv,
+  imageOutputDiv,
+  consoleOutputDiv
 }) => {
   const [status, setStatus] = useState<
     "idle" | "loading" | "running" | "completed" | "failed"
@@ -49,19 +51,22 @@ const AnalysisRFileEditor: FunctionComponent<Props> = ({
     if (editedFileContent !== fileContent) {
       throw new Error("Cannot run edited code");
     }
+    if (!imageOutputDiv) {
+      throw new Error("No image output div");
+    }
     setStatus("loading");
     try {
       const webR = await loadWebRInstance();
       const shelter = await new webR.Shelter();
       setStatus("running");
       const rCode = fileContent;
-      await runR(shelter, rCode, outputDiv);
+      await runR(shelter, rCode, imageOutputDiv, consoleOutputDiv);
       setStatus("completed");
     } catch (e) {
       console.error(e);
       setStatus("failed");
     }
-  }, [editedFileContent, fileContent, status, outputDiv]);
+  }, [editedFileContent, fileContent, status, imageOutputDiv, consoleOutputDiv]);
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     const ret: ToolbarItem[] = [];
     const runnable = fileContent === editedFileContent;
@@ -124,7 +129,8 @@ const AnalysisRFileEditor: FunctionComponent<Props> = ({
 const runR = async (
   shelter: Shelter,
   code: string,
-  outputDiv: HTMLDivElement,
+  imageOutputDiv: HTMLDivElement,
+  consoleOutputDiv: HTMLDivElement | undefined
 ) => {
   const captureOutputOptions: any = {
     withAutoprint: true,
@@ -143,21 +149,31 @@ const runR = async (
 
   try {
     // Clear the output div
-    outputDiv.innerHTML = "";
+    imageOutputDiv.innerHTML = "";
+    if (consoleOutputDiv) {
+      consoleOutputDiv.innerHTML = "";
+    }
 
     // Display the console outputs. Note that they will all appear before
     // the graphics regardless of the order in which they were generated. I
     // don't know how to fix this.
     for (const evt of result.output) {
       if (evt.type === "stdout") {
-        const textDiv = document.createElement("div");
-        textDiv.textContent = evt.data;
-        outputDiv.appendChild(textDiv);
+        console.log(evt.data);
+        const divElement = document.createElement("div");
+        divElement.style.color = "blue";
+        const preElement = document.createElement("pre");
+        divElement.appendChild(preElement);
+        preElement.textContent = evt.data;
+        consoleOutputDiv?.appendChild(divElement);
       } else if (evt.type === "stderr") {
-        const textDiv = document.createElement("div");
-        textDiv.textContent = evt.data;
-        textDiv.style.color = "red";
-        outputDiv.appendChild(textDiv);
+        console.error(evt.data);
+        const divElement = document.createElement("div");
+        divElement.style.color = "red";
+        const preElement = document.createElement("pre");
+        divElement.appendChild(preElement);
+        preElement.textContent = evt.data;
+        consoleOutputDiv?.appendChild(divElement);
       }
     }
 
@@ -173,7 +189,7 @@ const runR = async (
       ctx?.drawImage(img, 0, 0, img.width, img.height);
 
       // Append canvas to figure output area
-      outputDiv.appendChild(canvas);
+      imageOutputDiv.appendChild(canvas);
     });
   } finally {
     // Clean up the remaining code

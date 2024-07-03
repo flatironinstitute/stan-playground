@@ -13,6 +13,8 @@ x <- 0:(n-1)
 y <- (0:(n-1))^2 + runif(n)
 z <- list(1, 2, 'c')
 
+print("Creating data")
+
 data <- list(
   x = x,
   y = y,
@@ -27,6 +29,7 @@ const DataRPrototype: FunctionComponent<DataRPrototypeProps> = ({
   const [script, setScript] = useState<string>("");
   const [editedScript, setEditedScript] = useState<string>("");
   const [data, setData] = useState<any>(undefined);
+  const [consoleOutputDiv, setConsoleOutputDiv] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setScript(exampleScript);
@@ -50,10 +53,53 @@ const DataRPrototype: FunctionComponent<DataRPrototypeProps> = ({
         setEditedFileContent={setEditedScript}
         readOnly={false}
         setData={setData}
+        outputDiv={consoleOutputDiv || undefined}
       />
-      <DataROutputWindow width={0} height={0} data={data} />
+      <BottomView width={0} height={0} data={data} onConsoleOutputDiv={setConsoleOutputDiv} />
     </Splitter>
   );
+};
+
+type BottomViewProps = {
+  width: number;
+  height: number;
+  data: any;
+  onConsoleOutputDiv: (div: HTMLDivElement) => void;
+};
+
+const BottomView: FunctionComponent<BottomViewProps> = ({
+  width,
+  height,
+  data,
+  onConsoleOutputDiv,
+}) => {
+  return (
+    <Splitter
+      width={width}
+      height={height}
+      initialPosition={width / 2}
+      direction="horizontal"
+    >
+      <DataROutputWindow width={0} height={0} data={data} />
+      <ConsoleOutputWindow width={0} height={0} onConsoleOutputDiv={onConsoleOutputDiv} />
+    </Splitter>
+  );
+};
+
+type ConsoleOutputWindowProps = {
+  width: number;
+  height: number;
+  onConsoleOutputDiv: (div: HTMLDivElement) => void;
+};
+
+const ConsoleOutputWindow: FunctionComponent<ConsoleOutputWindowProps> = ({
+  width,
+  height,
+  onConsoleOutputDiv,
+}) => {
+  return (
+    <div style={{ position: 'absolute', width, height, overflow: 'auto' }} ref={onConsoleOutputDiv} />
+  )
 };
 
 type DataROutputWindowProps = {

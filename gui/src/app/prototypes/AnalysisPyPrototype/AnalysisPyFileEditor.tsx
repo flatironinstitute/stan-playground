@@ -19,7 +19,8 @@ type Props = {
   readOnly: boolean;
   width: number;
   height: number;
-  outputDiv?: HTMLDivElement | null;
+  imageOutputDiv?: HTMLDivElement | null;
+  consoleOutputDiv?: HTMLDivElement | null;
 };
 
 const AnalysisPyFileEditor: FunctionComponent<Props> = ({
@@ -31,7 +32,8 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
   readOnly,
   width,
   height,
-  outputDiv,
+  imageOutputDiv,
+  consoleOutputDiv
 }) => {
   const [status, setStatus] = useState<PydodideWorkerStatus>("idle");
 
@@ -49,7 +51,7 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
         const preElement = document.createElement("pre");
         divElement.appendChild(preElement);
         preElement.textContent = x;
-        outputDiv?.appendChild(divElement);
+        consoleOutputDiv?.appendChild(divElement);
       },
       onStderr: (x) => {
         console.error(x);
@@ -58,7 +60,7 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
         const preElement = document.createElement("pre");
         divElement.appendChild(preElement);
         preElement.textContent = x;
-        outputDiv?.appendChild(divElement);
+        consoleOutputDiv?.appendChild(divElement);
       },
       onStatus: (status) => {
         setStatus(status);
@@ -72,14 +74,14 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
 
         const divElement = document.createElement("div");
         divElement.appendChild(img);
-        outputDiv?.appendChild(divElement);
+        imageOutputDiv?.appendChild(divElement);
       },
     });
     setAnalysisPyWorker(worker);
     return () => {
       worker.destroy();
     };
-  }, [outputDiv]);
+  }, [consoleOutputDiv, imageOutputDiv]);
 
   const handleRun = useCallback(async () => {
     if (status === "running") {
@@ -91,11 +93,17 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
     if (!analysisPyWorker) {
       throw new Error("analysisPyWorker is not defined");
     }
+    if (consoleOutputDiv) {
+      consoleOutputDiv.innerHTML = "";
+    }
+    if (imageOutputDiv) {
+      imageOutputDiv.innerHTML = "";
+    }
     analysisPyWorker.run(fileContent);
-  }, [editedFileContent, fileContent, status, analysisPyWorker]);
+  }, [editedFileContent, fileContent, status, analysisPyWorker, consoleOutputDiv, imageOutputDiv]);
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     const ret: ToolbarItem[] = [];
-    const runnable = fileContent === editedFileContent && outputDiv;
+    const runnable = fileContent === editedFileContent && imageOutputDiv;
     if (runnable) {
       ret.push({
         type: "button",
@@ -106,7 +114,7 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
         color: "black",
       });
     }
-    if (!outputDiv) {
+    if (!imageOutputDiv) {
       ret.push({
         type: "text",
         label: "No output window",
@@ -140,7 +148,7 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
       });
     }
     return ret;
-  }, [fileContent, editedFileContent, handleRun, status, outputDiv]);
+  }, [fileContent, editedFileContent, handleRun, status, imageOutputDiv]);
 
   return (
     <TextEditor

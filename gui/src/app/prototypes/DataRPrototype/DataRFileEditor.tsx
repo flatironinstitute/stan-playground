@@ -13,6 +13,7 @@ type Props = {
   setData?: (data: any) => void;
   width: number;
   height: number;
+  outputDiv?: HTMLDivElement;
 };
 
 let webR: WebR | null = null;
@@ -38,6 +39,7 @@ const DataRFileEditor: FunctionComponent<Props> = ({
   readOnly,
   width,
   height,
+  outputDiv
 }) => {
   const [status, setStatus] = useState<
     "idle" | "loading" | "running" | "completed" | "failed"
@@ -49,28 +51,75 @@ const DataRFileEditor: FunctionComponent<Props> = ({
     if (editedFileContent !== fileContent) {
       throw new Error("Cannot run edited code");
     }
+    if (outputDiv) {
+      outputDiv.innerHTML = "";
+    }
     setStatus("loading");
     try {
       const webR = await loadWebRInstance();
+
       setStatus("running");
       const rCode =
+        `
+# Create a list to store printed statements
+print_log <- list()
+
+# Check if original print function is already saved
+if (!exists("sp_original_print")) {
+  # Save the original print function
+  sp_original_print <- print
+}
+
+# Override the print function
+print <- function(..., sep = " ", collapse = NULL) {
+  # Capture the printed output
+  printed_output <- paste(..., sep = sep, collapse = collapse)
+
+  # Append to the print log
+  print_log <<- c(print_log, printed_output)
+
+  # Call the original print function
+  sp_original_print(printed_output)
+}
+` +
         fileContent +
         "\n\n" +
         `
-# Convert the list to JSON format
-json_data <- jsonlite::toJSON(data, pretty = TRUE, auto_unbox = TRUE)
-json_data
+result <- list(data = data, print_log = print_log)
+json_result <- jsonlite::toJSON(result, pretty = TRUE, auto_unbox = TRUE)
+json_result
             `;
-      const result = await webR.evalRString(rCode);
-      if (setData) {
-        setData(JSON.parse(result));
+      const resultJson = await webR.evalRString(rCode);
+      console.log('--- resultJson', resultJson);
+      const result = JSON.parse(resultJson);
+
+      if ((setData) && result.data) {
+        setData(result.data);
+      }
+      if ((outputDiv) && result.print_log) {
+        result.print_log.forEach((x: string) => {
+          const divElement = document.createElement("div");
+          divElement.style.color = "blue";
+          const preElement = document.createElement("pre");
+          divElement.appendChild(preElement);
+          preElement.textContent = x;
+          outputDiv.appendChild(divElement);
+        });
       }
       setStatus("completed");
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      if (outputDiv) {
+        const divElement = document.createElement("div");
+        divElement.style.color = "red";
+        const preElement = document.createElement("pre");
+        divElement.appendChild(preElement);
+        preElement.textContent = e.toString();
+        outputDiv.appendChild(divElement);
+      }
       setStatus("failed");
     }
-  }, [editedFileContent, fileContent, status, setData]);
+  }, [editedFileContent, fileContent, status, setData, outputDiv]);
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     const ret: ToolbarItem[] = [];
     const runnable = fileContent === editedFileContent;

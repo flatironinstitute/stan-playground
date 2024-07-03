@@ -15,6 +15,8 @@ x = np.arange(n)
 y = np.arange(n) ** 2 + np.random.random(n)
 z = [1, 2, 'c']
 
+print("Creating data")
+
 data = {
     'x': x,
     'y': y,
@@ -29,6 +31,7 @@ const DataPyPrototype: FunctionComponent<DataPyPrototypeProps> = ({
   const [script, setScript] = useState<string>("");
   const [editedScript, setEditedScript] = useState<string>("");
   const [data, setData] = useState<any>(undefined);
+  const [consoleOutputDiv, setConsoleOutputDiv] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setScript(exampleScript);
@@ -52,10 +55,53 @@ const DataPyPrototype: FunctionComponent<DataPyPrototypeProps> = ({
         setEditedFileContent={setEditedScript}
         readOnly={false}
         setData={setData}
+        outputDiv={consoleOutputDiv || undefined}
       />
-      <DataPyOutputWindow width={0} height={0} data={data} />
+      <BottomView width={0} height={0} data={data} onConsoleOutputDiv={setConsoleOutputDiv} />
     </Splitter>
   );
+};
+
+type BottomViewProps = {
+  width: number;
+  height: number;
+  data: any;
+  onConsoleOutputDiv: (div: HTMLDivElement) => void;
+};
+
+const BottomView: FunctionComponent<BottomViewProps> = ({
+  width,
+  height,
+  data,
+  onConsoleOutputDiv,
+}) => {
+  return (
+    <Splitter
+      width={width}
+      height={height}
+      initialPosition={width / 2}
+      direction="horizontal"
+    >
+      <DataPyOutputWindow width={0} height={0} data={data} />
+      <ConsoleOutputWindow width={0} height={0} onConsoleOutputDiv={onConsoleOutputDiv} />
+    </Splitter>
+  );
+};
+
+type ConsoleOutputWindowProps = {
+  width: number;
+  height: number;
+  onConsoleOutputDiv: (div: HTMLDivElement) => void;
+};
+
+const ConsoleOutputWindow: FunctionComponent<ConsoleOutputWindowProps> = ({
+  width,
+  height,
+  onConsoleOutputDiv,
+}) => {
+  return (
+    <div style={{ position: 'absolute', width, height, overflow: 'auto' }} ref={onConsoleOutputDiv} />
+  )
 };
 
 type DataPyOutputWindowProps = {
