@@ -18,7 +18,7 @@ const loadPyodideInstance = async () => {
       pyodideWorkerMode === "data.py"
         ? ["numpy", "micropip"]
         : pyodideWorkerMode === "analysis.py"
-          ? ["numpy", "matplotlib"]
+          ? ["numpy", "matplotlib", "pandas"]
           : [];
     pyodide = await loadPyodide({
       indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.1/full",
@@ -55,7 +55,7 @@ self.onmessage = (e) => {
     }
     pyodideWorkerMode = message.mode;
   } else if (message.type === "run") {
-    run(message.code);
+    run(message.code, message.globalData);
   }
 };
 
@@ -89,7 +89,7 @@ const addImage = (image: any) => {
   sendMessageToMain({ type: "addImage", image });
 };
 
-const run = async (code: string) => {
+const run = async (code: string, globalData: { [key: string]: any }) => {
   if (!pyodideWorkerMode) {
     throw Error("pyodideWorkerMode is not defined");
   }
@@ -101,7 +101,7 @@ const run = async (code: string) => {
     const scriptPreamble = getScriptPreable(pyodideWorkerMode);
 
     // here's where we can pass in globals
-    const globals = pyodide.toPy({ _stan_playground: true });
+    const globals = pyodide.toPy({ _stan_playground: true, ...globalData });
     let script = scriptPreamble + "\n" + code;
 
     if (pyodideWorkerMode === "data.py") {

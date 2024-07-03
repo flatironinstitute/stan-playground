@@ -32,6 +32,7 @@
     "jszip": "^3.10.1",
     "monaco-editor": "^0.48.0",
     "plotly.js-cartesian-dist": "^2.33.0",
+    "pyodide": "^0.26.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",

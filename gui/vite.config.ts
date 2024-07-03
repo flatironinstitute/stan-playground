@@ -42,6 +42,6 @@ export default defineConfig({
     host: "127.0.0.1",
   },
   worker: {
-    format: 'es',
+    format: "es",
   },
 });

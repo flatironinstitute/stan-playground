@@ -21,6 +21,8 @@ type Props = {
   height: number;
   imageOutputDiv?: HTMLDivElement | null;
   consoleOutputDiv?: HTMLDivElement | null;
+  globalData?: { [key: string]: any }; // global variables available to the python script
+  scriptHeader?: string;
 };
 
 const AnalysisPyFileEditor: FunctionComponent<Props> = ({
@@ -33,7 +35,9 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
   width,
   height,
   imageOutputDiv,
-  consoleOutputDiv
+  consoleOutputDiv,
+  globalData,
+  scriptHeader,
 }) => {
   const [status, setStatus] = useState<PydodideWorkerStatus>("idle");
 
@@ -99,8 +103,20 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
     if (imageOutputDiv) {
       imageOutputDiv.innerHTML = "";
     }
-    analysisPyWorker.run(fileContent);
-  }, [editedFileContent, fileContent, status, analysisPyWorker, consoleOutputDiv, imageOutputDiv]);
+    const script = scriptHeader
+      ? scriptHeader + "\n" + fileContent
+      : fileContent;
+    analysisPyWorker.run(script, globalData || {});
+  }, [
+    editedFileContent,
+    fileContent,
+    status,
+    analysisPyWorker,
+    consoleOutputDiv,
+    imageOutputDiv,
+    globalData,
+    scriptHeader,
+  ]);
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     const ret: ToolbarItem[] = [];
     const runnable = fileContent === editedFileContent && imageOutputDiv;

@@ -1,19 +1,16 @@
 import {
-    FunctionComponent,
-    useCallback,
-    useContext,
-    useMemo
+  FunctionComponent,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
 } from "react";
-import {
-    ProjectContext,
-} from "../../../Project/ProjectContextProvider";
-import {
-    modelHasUnsavedDataFileChanges
-} from "../../../Project/ProjectDataModel";
+import { ProjectContext } from "../../../Project/ProjectContextProvider";
+import { modelHasUnsavedDataFileChanges } from "../../../Project/ProjectDataModel";
 import RunPanel from "../../../RunPanel/RunPanel";
 import { SamplingOpts } from "../../../StanSampler/StanSampler";
 import useStanSampler, {
-    useSamplerStatus,
+  useSamplerStatus,
 } from "../../../StanSampler/useStanSampler";
 import SamplerOutputView from "../../../SamplerOutputView/SamplerOutputView";
 import SamplingOptsPanel from "../../../SamplingOptsPanel/SamplingOptsPanel";
@@ -22,12 +19,14 @@ type SamplingWindowProps = {
   width: number;
   height: number;
   compiledMainJsUrl?: string;
+  onStanSampler: (sampler: any) => void; // todo: lift the state rather than having to use this callback
 };
 
 const SamplingWindow: FunctionComponent<SamplingWindowProps> = ({
   width,
   height,
   compiledMainJsUrl,
+  onStanSampler,
 }) => {
   const { data, update } = useContext(ProjectContext);
   const parsedData = useMemo(() => {
@@ -48,6 +47,9 @@ const SamplingWindow: FunctionComponent<SamplingWindowProps> = ({
   );
 
   const { sampler } = useStanSampler(compiledMainJsUrl);
+  useEffect(() => {
+    onStanSampler(sampler);
+  }, [sampler, onStanSampler]);
   const { status: samplerStatus } = useSamplerStatus(sampler);
   const isSampling = samplerStatus === "sampling";
   return (

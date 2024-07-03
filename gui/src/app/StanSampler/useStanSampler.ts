@@ -73,8 +73,7 @@ export const useSamplerOutput = (sampler: StanSampler | undefined) => {
       setComputeTimeSec(undefined);
       return;
     }
-    sampler.onStatusChanged(() => {
-      if (canceled) return;
+    const update = () => {
       if (sampler.status === "completed") {
         setDraws(sampler.draws);
         setParamNames(sampler.paramNames);
@@ -86,7 +85,12 @@ export const useSamplerOutput = (sampler: StanSampler | undefined) => {
         setNumChains(undefined);
         setComputeTimeSec(undefined);
       }
+    };
+    sampler.onStatusChanged(() => {
+      if (canceled) return;
+      update();
     });
+    update(); // initial update
     return () => {
       canceled = true;
     };

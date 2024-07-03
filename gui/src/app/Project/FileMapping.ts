@@ -43,7 +43,7 @@ export const ProjectFileMap: FileMapType = {
   samplingOpts: FileNames.SAMPLING,
   stanFileContent: FileNames.STANFILE,
   dataFileContent: FileNames.DATAFILE,
-  analysisPyFileContent: FileNames.ANALYSISPYFILE
+  analysisPyFileContent: FileNames.ANALYSISPYFILE,
 };
 
 // The FileRegistry is the 2-3 leg of the triangle: it maps the known file names

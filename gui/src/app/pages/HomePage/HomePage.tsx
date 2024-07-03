@@ -20,6 +20,7 @@ import SamplingWindow from "./SamplingWindow/SamplingWindow";
 import TopBar from "./TopBar";
 import TabWidget from "../../TabWidget/TabWidget";
 import AnalysisPyWindow from "./AnalysisPyWindow/AnalysisPyWindow";
+import StanSampler from "../../StanSampler/StanSampler";
 
 type Props = {
   width: number;
@@ -160,7 +161,7 @@ const tabs = [
     label: "Analysis (R)",
     title: "R analysis",
     closeable: false,
-  }
+  },
 ];
 
 const RightView: FunctionComponent<RightViewProps> = ({
@@ -169,6 +170,7 @@ const RightView: FunctionComponent<RightViewProps> = ({
   compiledMainJsUrl,
 }) => {
   const [currentTabId, setCurrentTabId] = useState("sampling");
+  const [stanSampler, setStanSampler] = useState<StanSampler | null>(null);
   return (
     <TabWidget
       width={width}
@@ -181,11 +183,14 @@ const RightView: FunctionComponent<RightViewProps> = ({
         width={width}
         height={height}
         compiledMainJsUrl={compiledMainJsUrl}
+        onStanSampler={setStanSampler} // todo: lift the state rather than having to use this callback
       />
-      <AnalysisPyWindow width={width} height={height} />
-      <div>
-        R Analysis not yet implemented
-      </div>
+      <AnalysisPyWindow
+        width={width}
+        height={height}
+        stanSampler={stanSampler}
+      />
+      <div>R Analysis not yet implemented</div>
     </TabWidget>
   );
 };
