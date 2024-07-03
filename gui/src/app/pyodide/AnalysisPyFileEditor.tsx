@@ -50,21 +50,11 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
     const worker = PyodideWorkerInterface.create("analysis.py", {
       onStdout: (x) => {
         console.log(x);
-        const divElement = document.createElement("div");
-        divElement.style.color = "blue";
-        const preElement = document.createElement("pre");
-        divElement.appendChild(preElement);
-        preElement.textContent = x;
-        consoleOutputDiv?.appendChild(divElement);
+        writeConsoleOutToDiv(consoleOutputDiv, x, "stdout");
       },
       onStderr: (x) => {
         console.error(x);
-        const divElement = document.createElement("div");
-        divElement.style.color = "red";
-        const preElement = document.createElement("pre");
-        divElement.appendChild(preElement);
-        preElement.textContent = x;
-        consoleOutputDiv?.appendChild(divElement);
+        writeConsoleOutToDiv(consoleOutputDiv, x, "stderr");
       },
       onStatus: (status) => {
         setStatus(status);
@@ -180,6 +170,24 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
       toolbarItems={toolbarItems}
     />
   );
+};
+
+type ConsoleOutType = "stdout" | "stderr";
+
+const writeConsoleOutToDiv = (
+  parentDiv: HTMLDivElement | null | undefined,
+  x: string,
+  type: ConsoleOutType,
+) => {
+  if (x === "") return;
+  if (parentDiv === null || parentDiv === undefined) return;
+  const styleClass = type === "stdout" ? "WorkerStdout" : "WorkerStderr";
+  const preElement = document.createElement("pre");
+  preElement.textContent = x;
+  const divElement = document.createElement("div");
+  divElement.className = styleClass;
+  divElement.appendChild(preElement);
+  parentDiv.appendChild(divElement);
 };
 
 export default AnalysisPyFileEditor;

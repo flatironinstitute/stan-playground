@@ -17,3 +17,11 @@ body {
   margin: 0px;
   font-size: 14px;
 }
+
+.WorkerStdout {
+  color: darkblue;
+}
+
+.WorkerStderr {
+  color: red;
+}
