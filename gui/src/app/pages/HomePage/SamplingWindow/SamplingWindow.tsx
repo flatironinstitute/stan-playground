@@ -2,19 +2,18 @@ import {
   FunctionComponent,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from "react";
 import { ProjectContext } from "../../../Project/ProjectContextProvider";
 import { modelHasUnsavedDataFileChanges } from "../../../Project/ProjectDataModel";
 import RunPanel from "../../../RunPanel/RunPanel";
+import SamplerOutputView from "../../../SamplerOutputView/SamplerOutputView";
+import SamplingOptsPanel from "../../../SamplingOptsPanel/SamplingOptsPanel";
 import StanSampler, { SamplingOpts } from "../../../StanSampler/StanSampler";
 import useStanSampler, {
   useSamplerStatus,
 } from "../../../StanSampler/useStanSampler";
-import SamplerOutputView from "../../../SamplerOutputView/SamplerOutputView";
-import SamplingOptsPanel from "../../../SamplingOptsPanel/SamplingOptsPanel";
 import TabWidget from "../../../TabWidget/TabWidget";
 import AnalysisPyWindow from "../AnalysisPyWindow/AnalysisPyWindow";
 
@@ -27,7 +26,7 @@ type SamplingWindowProps = {
 const SamplingWindow: FunctionComponent<SamplingWindowProps> = ({
   width,
   height,
-  compiledMainJsUrl
+  compiledMainJsUrl,
 }) => {
   const { data, update } = useContext(ProjectContext);
   const parsedData = useMemo(() => {
@@ -118,7 +117,7 @@ const samplingResultsTabs = [
     label: "Analysis (R)",
     title: "R analysis",
     closeable: false,
-  }
+  },
 ];
 
 type SamplingResultsAreaProps = {
@@ -142,7 +141,11 @@ const SamplingResultsArea: FunctionComponent<SamplingResultsAreaProps> = ({
       setCurrentTabId={setCurrentTabId}
     >
       <SamplerOutputView width={width} height={height} sampler={sampler} />
-      <AnalysisPyWindow width={width} height={height} stanSampler={sampler || null} />
+      <AnalysisPyWindow
+        width={width}
+        height={height}
+        stanSampler={sampler || null}
+      />
       <div>
         <div style={{ padding: 5 }}>R analysis not yet implemented</div>
       </div>
