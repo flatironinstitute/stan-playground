@@ -18,11 +18,13 @@ import {
 } from "../../Project/ProjectSerialization";
 import UploadFilesArea from "./UploadFilesArea";
 
-type ImportWindowProps = {
+type LoadProjectWindowProps = {
   onClose: () => void;
 };
 
-const ImportWindow: FunctionComponent<ImportWindowProps> = ({ onClose }) => {
+const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
+  onClose,
+}) => {
   const { update } = useContext(ProjectContext);
   const [errorText, setErrorText] = useState<string | null>(null);
   const [filesUploaded, setFilesUploaded] = useState<
@@ -105,7 +107,7 @@ const ImportWindow: FunctionComponent<ImportWindowProps> = ({ onClose }) => {
 
   return (
     <div>
-      <h3>Import project</h3>
+      <h3>Load project</h3>
       <div>
         You can upload:
         <ul>
@@ -132,13 +134,13 @@ const ImportWindow: FunctionComponent<ImportWindowProps> = ({ onClose }) => {
       {showReplaceProjectOptions && (
         <div>
           <button onClick={() => importUploadedFiles({ replaceProject: true })}>
-            Import into a NEW project
+            Load into a NEW project
           </button>
           &nbsp;
           <button
             onClick={() => importUploadedFiles({ replaceProject: false })}
           >
-            Import into EXISTING project
+            Load into EXISTING project
           </button>
         </div>
       )}
@@ -146,4 +148,4 @@ const ImportWindow: FunctionComponent<ImportWindowProps> = ({ onClose }) => {
   );
 };
 
-export default ImportWindow;
+export default LoadProjectWindow;
