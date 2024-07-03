@@ -1,8 +1,13 @@
 import { Octokit } from "@octokit/core";
 
+type SaveAsGitHubGistOpts = {
+  defaultDescription: string;
+  personalAccessToken: string;
+};
+
 const saveAsGitHubGist = async (
   files: { [key: string]: string },
-  o: { defaultDescription: string; personalAccessToken: string },
+  o: SaveAsGitHubGistOpts,
 ) => {
   const { defaultDescription, personalAccessToken } = o;
   const description = prompt(
@@ -15,19 +20,19 @@ const saveAsGitHubGist = async (
   const octokit = new Octokit({
     auth: personalAccessToken,
   });
-  const files2: { [key: string]: { content: string } } = {};
+  const filesForGistExport: { [key: string]: { content: string } } = {};
   for (const key in files) {
     // gists do not support empty files or whitespace-only files
     if (files[key].trim() === "") {
       console.warn(`File ${key} is empty or whitespace-only. Not saving.`);
     } else {
-      files2[key] = { content: files[key] };
+      filesForGistExport[key] = { content: files[key] };
     }
   }
   const r = await octokit.request("POST /gists", {
     description,
     public: true,
-    files: files2,
+    files: filesForGistExport,
     headers: {
       "X-GitHub-Api-Version": "2022-11-28",
     },
