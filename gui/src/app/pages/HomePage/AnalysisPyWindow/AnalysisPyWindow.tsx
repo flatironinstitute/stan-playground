@@ -58,7 +58,7 @@ const LeftPane: FunctionComponent<LeftPaneProps> = ({
     stanSampler || undefined,
   );
   const { spData, scriptHeader } = useMemo(() => {
-    if ((draws) && (numChains)) {
+    if (draws && numChains) {
       const numDrawsPerChain = draws[0].length / numChains;
       const chainIds: number[] = [];
       for (let i = 0; i < numChains; i++) {
@@ -72,10 +72,10 @@ const LeftPane: FunctionComponent<LeftPaneProps> = ({
             draws: transpose(draws),
             paramNames,
             numChains,
-            chainIds
+            chainIds,
           },
         },
-        scriptHeader: '',
+        scriptHeader: "",
       };
     } else {
       return {

@@ -35,7 +35,9 @@ const loadPyodideInstance = async () => {
       await micropip.install("stanio");
     }
     if (pyodideWorkerMode === "analysis.py") {
-      pyodide.FS.writeFile('sp_util.py', get_sp_util_content(), { encoding: 'utf-8' })
+      pyodide.FS.writeFile("sp_util.py", get_sp_util_content(), {
+        encoding: "utf-8",
+      });
     }
     return pyodide;
   } else {
@@ -128,7 +130,9 @@ const run = async (code: string, spData: any) => {
           setStatus("running");
         }
       }
-      pyodide.FS.writeFile('_sp_data.json', JSON.stringify(spData), { encoding: 'utf-8' })
+      pyodide.FS.writeFile("_sp_data.json", JSON.stringify(spData), {
+        encoding: "utf-8",
+      });
       pyodide.runPython(script, { globals });
       succeeded = true;
     } catch (e: any) {
@@ -272,5 +276,5 @@ def load_draws_v1():
   with open('_sp_data.json') as f:
     _sp_data = json.load(f)
   return _DrawsV1(_sp_data)
-`
-}
+`;
+};
