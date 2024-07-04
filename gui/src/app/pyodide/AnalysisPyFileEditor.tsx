@@ -21,7 +21,7 @@ type Props = {
   height: number;
   imageOutputDiv?: HTMLDivElement | null;
   consoleOutputDiv?: HTMLDivElement | null;
-  globalData?: { [key: string]: any }; // global variables available to the python script
+  spData?: { [key: string]: any }; // global variables available to the python script
   scriptHeader?: string;
 };
 
@@ -36,7 +36,7 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
   height,
   imageOutputDiv,
   consoleOutputDiv,
-  globalData,
+  spData,
   scriptHeader,
 }) => {
   const [status, setStatus] = useState<PydodideWorkerStatus>("idle");
@@ -96,7 +96,7 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
     const script = scriptHeader
       ? scriptHeader + "\n" + fileContent
       : fileContent;
-    analysisPyWorker.run(script, globalData || {});
+    analysisPyWorker.run(script, spData || {});
   }, [
     editedFileContent,
     fileContent,
@@ -104,7 +104,7 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
     analysisPyWorker,
     consoleOutputDiv,
     imageOutputDiv,
-    globalData,
+    spData,
     scriptHeader,
   ]);
   const toolbarItems: ToolbarItem[] = useMemo(() => {

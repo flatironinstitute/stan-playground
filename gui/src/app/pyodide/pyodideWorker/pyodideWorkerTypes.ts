@@ -8,7 +8,7 @@ export type MessageToPyodideWorker =
   | {
       type: "run";
       code: string;
-      globalData: { [key: string]: any };
+      spData: { [key: string]: any };
     };
 
 export const isMessageToPyodideWorker = (
@@ -20,7 +20,7 @@ export const isMessageToPyodideWorker = (
     return ["data.py", "analysis.py"].includes(x.mode);
   if (x.type === "run") {
     if (x.code === undefined) return false;
-    if (x.globalData === undefined) return false;
+    if (x.spData === undefined) return false;
     return true;
   }
   return false;

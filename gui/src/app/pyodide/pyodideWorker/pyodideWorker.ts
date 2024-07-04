@@ -34,6 +34,9 @@ const loadPyodideInstance = async () => {
       const micropip = pyodide.pyimport("micropip");
       await micropip.install("stanio");
     }
+    if (pyodideWorkerMode === "analysis.py") {
+      pyodide.FS.writeFile('sp_util.py', get_sp_util_content(), { encoding: 'utf-8' })
+    }
     return pyodide;
   } else {
     return pyodide;
@@ -55,7 +58,7 @@ self.onmessage = (e) => {
     }
     pyodideWorkerMode = message.mode;
   } else if (message.type === "run") {
-    run(message.code, message.globalData);
+    run(message.code, message.spData);
   }
 };
 
@@ -89,7 +92,7 @@ const addImage = (image: any) => {
   sendMessageToMain({ type: "addImage", image });
 };
 
-const run = async (code: string, globalData: { [key: string]: any }) => {
+const run = async (code: string, spData: any) => {
   if (!pyodideWorkerMode) {
     throw Error("pyodideWorkerMode is not defined");
   }
@@ -101,7 +104,7 @@ const run = async (code: string, globalData: { [key: string]: any }) => {
     const scriptPreamble = getScriptPreable(pyodideWorkerMode);
 
     // here's where we can pass in globals
-    const globals = pyodide.toPy({ _stan_playground: true, ...globalData });
+    const globals = pyodide.toPy({ _stan_playground: true });
     let script = scriptPreamble + "\n" + code;
 
     if (pyodideWorkerMode === "data.py") {
@@ -125,6 +128,7 @@ const run = async (code: string, globalData: { [key: string]: any }) => {
           setStatus("running");
         }
       }
+      pyodide.FS.writeFile('_sp_data.json', JSON.stringify(spData), { encoding: 'utf-8' })
       pyodide.runPython(script, { globals });
       succeeded = true;
     } catch (e: any) {
@@ -224,3 +228,49 @@ const isListOfStrings = (x: any): x is string[] => {
   if (!x) return false;
   return Array.isArray(x) && x.every((y) => typeof y === "string");
 };
+
+const get_sp_util_content = () => {
+  return `
+class _DrawsV1:
+  def __init__(self, sp_data):
+    if 'sampling' not in sp_data:
+      raise ValueError('sampling key not found in _sp_data')
+    sampling = sp_data['sampling']
+    self._draws = sampling['draws']
+    self._parameter_names = sampling['paramNames']
+    self._num_chains = sampling['numChains']
+    self._chain_ids = sampling['chainIds']
+  def get_dataframes(self):
+    import pandas as pd
+    dataframes = []
+    for chain_id in range(1, self._num_chains + 1):
+      chain_draws = []
+      for i in range(len(self._draws)):
+        if self._chain_ids[i] == chain_id:
+          chain_draws.append(self._draws[i])
+      df = pd.DataFrame(chain_draws, columns=self._parameter_names)
+      dataframes.append(df)
+    return dataframes
+  def get_dataframe_longform(self):
+    # The first column is the chain id
+    # The second column is the draw number
+    # The remaining columns are the parameter values
+    import pandas as pd
+    data = []
+    for chain_id in range(1, self._num_chains + 1):
+      chain_draws = []
+      for i in range(len(self._draws)):
+        if self._chain_ids[i] == chain_id:
+          chain_draws.append(self._draws[i])
+      for draw_index, draw in enumerate(chain_draws):
+        data.append([chain_id, draw_index + 1] + draw)
+    df = pd.DataFrame(data, columns=['chain', 'draw'] + self._parameter_names)
+    return df
+
+def load_draws_v1():
+  import json
+  with open('_sp_data.json') as f:
+    _sp_data = json.load(f)
+  return _DrawsV1(_sp_data)
+`
+}

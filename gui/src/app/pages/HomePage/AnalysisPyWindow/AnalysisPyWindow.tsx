@@ -57,21 +57,29 @@ const LeftPane: FunctionComponent<LeftPaneProps> = ({
   const { draws, paramNames, numChains } = useSamplerOutput(
     stanSampler || undefined,
   );
-  const { globalData, scriptHeader } = useMemo(() => {
-    if (draws) {
+  const { spData, scriptHeader } = useMemo(() => {
+    if ((draws) && (numChains)) {
+      const numDrawsPerChain = draws[0].length / numChains;
+      const chainIds: number[] = [];
+      for (let i = 0; i < numChains; i++) {
+        for (let j = 0; j < numDrawsPerChain; j++) {
+          chainIds.push(i + 1);
+        }
+      }
       return {
-        globalData: {
-          _sp_sampling: {
+        spData: {
+          sampling: {
             draws: transpose(draws),
             paramNames,
             numChains,
+            chainIds
           },
         },
-        scriptHeader: getScriptHeaderForNonemptyDraws(),
+        scriptHeader: '',
       };
     } else {
       return {
-        globalData: {},
+        spData: {},
         scriptHeader: getScriptHeaderForEmptyDraws(),
       };
     }
@@ -105,7 +113,7 @@ const LeftPane: FunctionComponent<LeftPaneProps> = ({
         consoleOutputDiv={consoleOutputDiv}
         imageOutputDiv={imageOutputDiv}
         readOnly={false}
-        globalData={globalData}
+        spData={spData}
         scriptHeader={scriptHeader}
       />
       <ConsoleOutputWindow
@@ -178,25 +186,6 @@ const RightPane: FunctionComponent<RightPaneProps> = ({
 const getScriptHeaderForEmptyDraws = () => {
   return `
 raise Exception("You must run the sampler before executing the analysis script.")
-`;
-  //   return `
-  // class _SPSampling:
-  //   def __init__(self):
-  //     self.draws = []
-  //     self.parameter_names = []
-  //     self.num_chains = 0
-  // sp_sampling = _SPSampling()
-  // `;
-};
-
-const getScriptHeaderForNonemptyDraws = () => {
-  return `
-class _SPSampling:
-  def __init__(self):
-    self.draws = _sp_sampling["draws"]
-    self.parameter_names = _sp_sampling["paramNames"]
-    self.num_chains = _sp_sampling["numChains"]
-sp_sampling = _SPSampling()
 `;
 };
 

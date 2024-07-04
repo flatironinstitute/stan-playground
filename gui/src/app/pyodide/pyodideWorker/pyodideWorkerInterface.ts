@@ -69,11 +69,11 @@ class PyodideWorkerInterface {
     worker.postMessage(msg);
     return new PyodideWorkerInterface(worker, mode);
   }
-  run(code: string, globalData: { [key: string]: any }) {
+  run(code: string, spData: { [key: string]: any }) {
     const msg: MessageToPyodideWorker = {
       type: "run",
       code,
-      globalData,
+      spData,
     };
     this._worker.postMessage(msg);
   }
