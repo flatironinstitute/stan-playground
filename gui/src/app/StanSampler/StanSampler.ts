@@ -110,10 +110,10 @@ class StanSampler {
     this.#samplingOpts = samplingOpts;
     this.#draws = [];
     this.#paramNames = [];
-    this.#worker.postMessage({ purpose: Requests.Sample, sampleConfig });
     this.#samplingStartTimeSec = Date.now() / 1000;
     this.#status = "sampling";
     this.#onStatusChangedCallbacks.forEach((cb) => cb());
+    this.#worker.postMessage({ purpose: Requests.Sample, sampleConfig });
   }
   onProgress(callback: (progress: Progress) => void) {
     this.#onProgressCallbacks.push(callback);
