@@ -1,4 +1,5 @@
 import type { SamplerParams } from "tinystan";
+import { defaultSamplingOpts, SamplingOpts } from "../Project/ProjectDataModel";
 import { Progress, Replies, Requests } from "./StanModelWorker";
 import StanWorkerUrl from "./StanModelWorker?worker&url";
 
@@ -9,33 +10,6 @@ export type StanSamplerStatus =
   | "sampling"
   | "completed"
   | "failed";
-
-export type SamplingOpts = {
-  num_chains: number;
-  num_warmup: number;
-  num_samples: number;
-  init_radius: number;
-  seed: number | undefined;
-};
-
-export const isSamplingOpts = (x: any): x is SamplingOpts => {
-  if (!x) return false;
-  if (typeof x !== "object") return false;
-  if (typeof x.num_chains !== "number") return false;
-  if (typeof x.num_warmup !== "number") return false;
-  if (typeof x.num_samples !== "number") return false;
-  if (typeof x.init_radius !== "number") return false;
-  if (x.seed !== undefined && typeof x.seed !== "number") return false;
-  return true;
-};
-
-export const defaultSamplingOpts: SamplingOpts = {
-  num_chains: 4,
-  num_warmup: 1000,
-  num_samples: 1000,
-  init_radius: 2.0,
-  seed: undefined,
-};
 
 class StanSampler {
   #worker: Worker | undefined;

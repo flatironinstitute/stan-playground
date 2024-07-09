@@ -1,14 +1,16 @@
-import { isSamplingOpts } from "../StanSampler/StanSampler";
+import loadFilesFromGist from "../gists/loadFilesFromGist";
+import { deepCopy } from "../util/deepCopy";
+import { tryFetch } from "../util/tryFetch";
 import { mapFileContentsToModel } from "./FileMapping";
 import {
   ProjectDataModel,
   initialDataModel,
+  parseSamplingOpts,
   persistStateToEphemera,
 } from "./ProjectDataModel";
 import { loadFromProjectFiles } from "./ProjectSerialization";
-import loadFilesFromGist from "../gists/loadFilesFromGist";
 
-enum QueryParamKeys {
+export enum QueryParamKeys {
   Project = "project",
   StanFile = "stan",
   DataFile = "data",
@@ -51,30 +53,6 @@ export const fromQueryParams = (searchParams: URLSearchParams) => {
 
 export const queryStringHasParameters = (query: QueryParams) => {
   return Object.values(query).some((v) => v !== null);
-};
-
-const tryFetch = async (url: string) => {
-  console.log("Fetching content from", url);
-  try {
-    const req = await fetch(url);
-    if (!req.ok) {
-      console.error(
-        "Failed to fetch from url",
-        url,
-        req.status,
-        req.statusText,
-      );
-      return undefined;
-    }
-    return await req.text();
-  } catch (err) {
-    console.error("Failed to fetch from url", url, err);
-    return undefined;
-  }
-};
-
-const deepCopy = (obj: any) => {
-  return JSON.parse(JSON.stringify(obj));
 };
 
 export const fetchRemoteProject = async (query: QueryParams) => {
@@ -134,12 +112,7 @@ export const fetchRemoteProject = async (query: QueryParams) => {
   const sampling_opts = await sampling_optsPromise;
   if (sampling_opts) {
     try {
-      const parsed = JSON.parse(sampling_opts);
-      if (isSamplingOpts(parsed)) {
-        data.samplingOpts = parsed;
-      } else {
-        console.error("Invalid sampling_opts in fetchRemoteProject", parsed);
-      }
+      data.samplingOpts = parseSamplingOpts(sampling_opts);
     } catch (err) {
       console.error("Failed to parse sampling_opts", err);
     }

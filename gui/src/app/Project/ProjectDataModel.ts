@@ -1,21 +1,69 @@
-import {
-  SamplingOpts,
-  defaultSamplingOpts,
-  isSamplingOpts,
-} from "../StanSampler/StanSampler";
-
 export enum ProjectKnownFiles {
   STANFILE = "stanFileContent",
   DATAFILE = "dataFileContent",
 }
+
+const baseObjectCheck = (x: any): boolean => {
+  return (x ?? false) && typeof x === "object";
+};
+
+export type SamplingOpts = {
+  num_chains: number;
+  num_warmup: number;
+  num_samples: number;
+  init_radius: number;
+  seed: number | undefined;
+};
+
+export const isSamplingOpts = (x: any): x is SamplingOpts => {
+  if (!baseObjectCheck(x)) return false;
+  if (typeof x.num_chains !== "number") return false;
+  if (typeof x.num_warmup !== "number") return false;
+  if (typeof x.num_samples !== "number") return false;
+  if (typeof x.init_radius !== "number") return false;
+  if (x.seed !== undefined && typeof x.seed !== "number") return false;
+  return true;
+};
+
+const validateSamplingOpts = (x: SamplingOpts): boolean => {
+  const naturalFields = [x.num_chains, x.num_samples, x.num_warmup];
+  const positiveFields = [x.num_chains, x.num_samples];
+  const nonnegativeFields = [x.num_warmup, x.init_radius];
+  if (naturalFields.some((f) => !Number.isInteger(f))) return false;
+  if (positiveFields.some((f) => f <= 0)) return false;
+  if (nonnegativeFields.some((f) => f < 0)) return false;
+  return true;
+};
+
+export const parseSamplingOpts = (x: string | undefined): SamplingOpts => {
+  const parsed = JSON.parse(x ?? "");
+  if (isSamplingOpts(parsed)) {
+    if (validateSamplingOpts(parsed)) return parsed;
+    console.error(
+      `Sampling_opts contains invalid values: ${JSON.stringify(parsed)}`,
+    );
+  } else {
+    console.error(
+      `Sampling_opts does not parse to sampling_opts object: ${JSON.stringify(parsed)}`,
+    );
+  }
+  throw new Error(`Invalid sampling opts ${JSON.stringify(parsed)}`);
+};
+
+export const defaultSamplingOpts: SamplingOpts = {
+  num_chains: 4,
+  num_warmup: 1000,
+  num_samples: 1000,
+  init_radius: 2.0,
+  seed: undefined,
+};
 
 type ProjectFiles = {
   [filetype in ProjectKnownFiles]: string;
 };
 
 const isProjectFiles = (x: any): x is ProjectFiles => {
-  if (!x) return false;
-  if (typeof x !== "object") return false;
+  if (!baseObjectCheck(x)) return false;
   for (const k of Object.values(ProjectKnownFiles)) {
     if (typeof x[k] !== "string") return false;
   }
@@ -27,8 +75,7 @@ type ProjectBase = ProjectFiles & {
 };
 
 const isProjectBase = (x: any): x is ProjectBase => {
-  if (!x) return false;
-  if (typeof x !== "object") return false;
+  if (!baseObjectCheck(x)) return false;
   if (!isSamplingOpts(x.samplingOpts)) return false;
   if (!isProjectFiles(x)) return false;
   return true;
@@ -39,8 +86,7 @@ type ProjectMetadata = {
 };
 
 export const isProjectMetaData = (x: any): x is ProjectMetadata => {
-  if (!x) return false;
-  if (typeof x !== "object") return false;
+  if (!baseObjectCheck(x)) return false;
   if (typeof x.title !== "string") return false;
   return true;
 };
@@ -63,8 +109,7 @@ export type ProjectDataModel = ProjectBase & {
 };
 
 export const isProjectDataModel = (x: any): x is ProjectDataModel => {
-  if (!x) return false;
-  if (typeof x !== "object") return false;
+  if (!baseObjectCheck(x)) return false;
   if (!isProjectMetaData(x.meta)) return false;
   if (!isProjectEphemeralData(x.ephemera)) return false;
   if (!isProjectBase(x)) return false;
@@ -116,4 +161,12 @@ export const stringifyField = (
   const value = data[field];
   if (typeof value === "string") return value;
   return JSON.stringify(value);
+};
+
+export const exportedForTesting = {
+  baseObjectCheck,
+  validateSamplingOpts,
+  isProjectFiles,
+  isProjectBase,
+  isProjectEphemeralData,
 };

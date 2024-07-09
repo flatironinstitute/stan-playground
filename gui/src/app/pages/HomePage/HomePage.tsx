@@ -10,9 +10,6 @@ import {
 } from "react";
 import DataFileEditor from "../../FileEditor/DataFileEditor";
 import StanFileEditor from "../../FileEditor/StanFileEditor";
-import RunPanel from "../../RunPanel/RunPanel";
-import SamplerOutputView from "../../SamplerOutputView/SamplerOutputView";
-import SamplingOptsPanel from "../../SamplingOptsPanel/SamplingOptsPanel";
 import ProjectContextProvider, {
   ProjectContext,
 } from "../../Project/ProjectContextProvider";
@@ -20,8 +17,11 @@ import {
   modelHasUnsavedChanges,
   modelHasUnsavedDataFileChanges,
   ProjectKnownFiles,
+  SamplingOpts,
 } from "../../Project/ProjectDataModel";
-import { SamplingOpts } from "../../StanSampler/StanSampler";
+import RunPanel from "../../RunPanel/RunPanel";
+import SamplerOutputView from "../../SamplerOutputView/SamplerOutputView";
+import SamplingOptsPanel from "../../SamplingOptsPanel/SamplingOptsPanel";
 import useStanSampler, {
   useSamplerStatus,
 } from "../../StanSampler/useStanSampler";
