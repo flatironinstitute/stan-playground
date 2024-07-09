@@ -65,7 +65,7 @@ self.onmessage = (e) => {
               m.stanVersion(),
           );
           self.postMessage({ purpose: Replies.ModelLoaded });
-        });
+        }, console.error);
       break;
     }
     case Requests.Sample: {

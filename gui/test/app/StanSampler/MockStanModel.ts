@@ -9,9 +9,17 @@ const mockedLoad = async (
 ) => {
   await new Promise((resolve) => setTimeout(resolve, 50));
 
+  if (_create === "fail") {
+    return Promise.reject(new Error("error for testing in load!"));
+  }
+
   const model = {
     stanVersion: vi.fn(() => "1.2.3"),
-    sample: vi.fn(() => {
+    sample: vi.fn(({ num_chains }) => {
+      if (num_chains === 999) {
+        throw new Error("error for testing in sample!");
+      }
+
       printCallback &&
         printCallback(`Chain [1] Iteration:  123 / 1000 [ 45%]  (Sampling)`);
       return {

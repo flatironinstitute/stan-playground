@@ -82,29 +82,14 @@ class StanSampler {
   sample(data: any, samplingOpts: SamplingOpts) {
     const refresh = calculateReasonableRefreshRate(samplingOpts);
     const sampleConfig: Partial<SamplerParams> = {
+      ...samplingOpts,
       data,
-      num_chains: samplingOpts.num_chains,
-      num_warmup: samplingOpts.num_warmup,
-      num_samples: samplingOpts.num_samples,
-      init_radius: samplingOpts.init_radius,
       seed: samplingOpts.seed !== undefined ? samplingOpts.seed : null,
       refresh,
     };
     if (!this.#worker) return;
-    if (this.#status === "") {
-      console.warn("Model not loaded yet");
-      return;
-    }
-    if (sampleConfig.num_chains === undefined) {
-      console.warn("Number of chains not specified");
-      return;
-    }
     if (this.#status === "sampling") {
       console.warn("Already sampling");
-      return;
-    }
-    if (this.#status === "loading") {
-      console.warn("Model not loaded yet");
       return;
     }
     this.#samplingOpts = samplingOpts;
