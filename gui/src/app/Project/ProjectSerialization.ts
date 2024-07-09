@@ -1,23 +1,23 @@
 import JSZip from "jszip";
 import { replaceSpacesWithUnderscores } from "../util/replaceSpaces";
 import {
-  ProjectDataModel,
-  ProjectKnownFiles,
-  getStringKnownFileKeys,
-  initialDataModel,
-  isProjectDataModel,
-  isProjectMetaData,
-  persistStateToEphemera,
-} from "./ProjectDataModel";
-import {
-  FieldsContentsMap,
-  FileNames,
-  FileRegistry,
-  ProjectFileMap,
-  mapFileContentsToModel,
-  mapModelToFileManifest,
+    FieldsContentsMap,
+    FileNames,
+    FileRegistry,
+    ProjectFileMap,
+    mapFileContentsToModel,
+    mapModelToFileManifest,
 } from "./FileMapping";
-import { isSamplingOpts } from "../StanSampler/StanSampler";
+import {
+    ProjectDataModel,
+    ProjectKnownFiles,
+    getStringKnownFileKeys,
+    initialDataModel,
+    isProjectDataModel,
+    isProjectMetaData,
+    parseSamplingOpts,
+    persistStateToEphemera,
+} from "./ProjectDataModel";
 
 export const serializeProjectToLocalStorage = (
   data: ProjectDataModel,
@@ -125,10 +125,7 @@ const loadSamplingOptsFromString = (
   json: string,
   clearExisting: boolean = false,
 ): ProjectDataModel => {
-  const newSampling = JSON.parse(json);
-  if (!isSamplingOpts(newSampling)) {
-    throw Error("Deserialized sampling opts are not valid");
-  }
+  const newSampling = parseSamplingOpts(json);
   const newSamplingOptsMember = clearExisting
     ? { ...newSampling }
     : { ...data.samplingOpts, ...newSampling };
