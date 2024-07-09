@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Box from "@mui/material/Box";
 import LinearProgress, {
-    LinearProgressProps,
+  LinearProgressProps,
 } from "@mui/material/LinearProgress";
 import Typography from "@mui/material/Typography";
 import { FunctionComponent, useCallback } from "react";
@@ -10,8 +10,8 @@ import { SamplingOpts } from "../Project/ProjectDataModel";
 import { Progress } from "../StanSampler/StanModelWorker";
 import StanSampler from "../StanSampler/StanSampler";
 import {
-    useSamplerProgress,
-    useSamplerStatus,
+  useSamplerProgress,
+  useSamplerStatus,
 } from "../StanSampler/useStanSampler";
 
 type RunPanelProps = {

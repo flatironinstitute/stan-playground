@@ -1,29 +1,29 @@
 import { Splitter } from "@fi-sci/splitter";
 import {
-    FunctionComponent,
-    useCallback,
-    useContext,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
+  FunctionComponent,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
 import DataFileEditor from "../../FileEditor/DataFileEditor";
 import StanFileEditor from "../../FileEditor/StanFileEditor";
 import ProjectContextProvider, {
-    ProjectContext,
+  ProjectContext,
 } from "../../Project/ProjectContextProvider";
 import {
-    modelHasUnsavedChanges,
-    modelHasUnsavedDataFileChanges,
-    ProjectKnownFiles,
-    SamplingOpts,
+  modelHasUnsavedChanges,
+  modelHasUnsavedDataFileChanges,
+  ProjectKnownFiles,
+  SamplingOpts,
 } from "../../Project/ProjectDataModel";
 import RunPanel from "../../RunPanel/RunPanel";
 import SamplerOutputView from "../../SamplerOutputView/SamplerOutputView";
 import SamplingOptsPanel from "../../SamplingOptsPanel/SamplingOptsPanel";
 import useStanSampler, {
-    useSamplerStatus,
+  useSamplerStatus,
 } from "../../StanSampler/useStanSampler";
 import LeftPanel from "./LeftPanel";
 import TopBar from "./TopBar";

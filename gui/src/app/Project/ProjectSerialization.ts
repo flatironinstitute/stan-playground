@@ -1,22 +1,22 @@
 import JSZip from "jszip";
 import { replaceSpacesWithUnderscores } from "../util/replaceSpaces";
 import {
-    FieldsContentsMap,
-    FileNames,
-    FileRegistry,
-    ProjectFileMap,
-    mapFileContentsToModel,
-    mapModelToFileManifest,
+  FieldsContentsMap,
+  FileNames,
+  FileRegistry,
+  ProjectFileMap,
+  mapFileContentsToModel,
+  mapModelToFileManifest,
 } from "./FileMapping";
 import {
-    ProjectDataModel,
-    ProjectKnownFiles,
-    getStringKnownFileKeys,
-    initialDataModel,
-    isProjectDataModel,
-    isProjectMetaData,
-    parseSamplingOpts,
-    persistStateToEphemera,
+  ProjectDataModel,
+  ProjectKnownFiles,
+  getStringKnownFileKeys,
+  initialDataModel,
+  isProjectDataModel,
+  isProjectMetaData,
+  parseSamplingOpts,
+  persistStateToEphemera,
 } from "./ProjectDataModel";
 
 export const serializeProjectToLocalStorage = (

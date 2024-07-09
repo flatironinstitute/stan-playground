@@ -1,14 +1,14 @@
-import { afterEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, describe, expect, test, vi } from "vitest";
 import {
-    fromQueryParams,
-    //   fetchRemoteProject,
-    QueryParamKeys,
-    queryStringHasParameters
-} from '../../../src/app/Project/ProjectQueryLoading';
+  fromQueryParams,
+  //   fetchRemoteProject,
+  QueryParamKeys,
+  queryStringHasParameters,
+} from "../../../src/app/Project/ProjectQueryLoading";
 
 class MockSearchParams {
-  keysDict: {[key: string]: string};
-  constructor(dict: {[key: string]: string}) {
+  keysDict: { [key: string]: string };
+  constructor(dict: { [key: string]: string }) {
     this.keysDict = dict;
   }
 
@@ -19,21 +19,20 @@ class MockSearchParams {
   get(field: string): string {
     return this.keysDict[field];
   }
-  
+
   set(field: string, value: string): void {
     this.keysDict[field] = value;
   }
 }
 
-const baseParams: {[key: string]: string} = { };
-baseParams[QueryParamKeys.Project] = 'my project';
-baseParams[QueryParamKeys.Title] = 'my title';
+const baseParams: { [key: string]: string } = {};
+baseParams[QueryParamKeys.Project] = "my project";
+baseParams[QueryParamKeys.Title] = "my title";
 
 const baseSearchParams = new MockSearchParams(baseParams);
 
-
 const mockedConsoleWarn = vi
-  .spyOn(console, 'warn')
+  .spyOn(console, "warn")
   .mockImplementation(() => undefined);
 
 afterEach(() => {
@@ -43,17 +42,24 @@ afterEach(() => {
 describe("Project query parameter processing", () => {
   describe("Query string object creation", () => {
     test("correctly populates provided query parameters", () => {
-      const parsedParams = fromQueryParams(baseSearchParams as unknown as URLSearchParams);
+      const parsedParams = fromQueryParams(
+        baseSearchParams as unknown as URLSearchParams,
+      );
       expect(parsedParams.data).toBeUndefined();
       expect(parsedParams.project).toEqual(baseParams[QueryParamKeys.Project]);
       expect(parsedParams.title).toEqual(baseParams[QueryParamKeys.Title]);
     });
 
     test("warns on unknown query parameter", () => {
-      const paramsWithBadParam = { ...baseParams, UNKNOWN: 'some value' };
+      const paramsWithBadParam = { ...baseParams, UNKNOWN: "some value" };
       const badSearchParams = new MockSearchParams(paramsWithBadParam);
-      const parsedParams = fromQueryParams(badSearchParams as unknown as URLSearchParams);
-      expect(mockedConsoleWarn).toHaveBeenCalledWith("Unknown query parameter", 'UNKNOWN');
+      const parsedParams = fromQueryParams(
+        badSearchParams as unknown as URLSearchParams,
+      );
+      expect(mockedConsoleWarn).toHaveBeenCalledWith(
+        "Unknown query parameter",
+        "UNKNOWN",
+      );
       expect(parsedParams.project).toEqual(baseParams[QueryParamKeys.Project]);
       expect(parsedParams.title).toEqual(baseParams[QueryParamKeys.Title]);
     });
@@ -66,7 +72,7 @@ describe("Project query parameter processing", () => {
     });
 
     test("Returns false if query object has no non-null elements", () => {
-      const emptyQuery: any = {}
+      const emptyQuery: any = {};
       expect(queryStringHasParameters(emptyQuery)).toEqual(false);
     });
   });

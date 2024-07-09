@@ -3,10 +3,10 @@ import { deepCopy } from "../util/deepCopy";
 import { tryFetch } from "../util/tryFetch";
 import { mapFileContentsToModel } from "./FileMapping";
 import {
-    ProjectDataModel,
-    initialDataModel,
-    parseSamplingOpts,
-    persistStateToEphemera,
+  ProjectDataModel,
+  initialDataModel,
+  parseSamplingOpts,
+  persistStateToEphemera,
 } from "./ProjectDataModel";
 import { loadFromProjectFiles } from "./ProjectSerialization";
 

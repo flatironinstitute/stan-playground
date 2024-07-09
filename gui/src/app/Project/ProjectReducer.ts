@@ -2,11 +2,11 @@ import { Reducer } from "react";
 import { Stanie } from "../exampleStanies/exampleStanies";
 import { FieldsContentsMap } from "./FileMapping";
 import {
-    defaultSamplingOpts,
-    initialDataModel,
-    ProjectDataModel,
-    ProjectKnownFiles,
-    SamplingOpts,
+  defaultSamplingOpts,
+  initialDataModel,
+  ProjectDataModel,
+  ProjectKnownFiles,
+  SamplingOpts,
 } from "./ProjectDataModel";
 import { loadFromProjectFiles } from "./ProjectSerialization";
 
