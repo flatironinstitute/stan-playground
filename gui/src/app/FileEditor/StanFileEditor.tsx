@@ -60,39 +60,55 @@ const StanFileEditor: FunctionComponent<Props> = ({
   ] = useState<string>("");
   const [compileMessage, setCompileMessage] = useState<string>("");
 
-  const handleCompile = useCallback(async () => {
-    setCompileStatus("compiling");
-    await new Promise((resolve) => setTimeout(resolve, 500)); // for effect
-    const onStatus = (msg: string) => {
-      setCompileMessage(msg);
-    };
-    const stanWasmServerUrl =
-      localStorage.getItem("stanWasmServerUrl") ||
-      "https://trom-stan-wasm-server.magland.org";
-    const { mainJsUrl } = await compileStanProgram(
-      stanWasmServerUrl,
-      fileContent,
-      onStatus,
-    );
+  const handleCompile = useCallback(
+    async () => {
+      const stanWasmServerUrl =
+          localStorage.getItem("stanWasmServerUrl") ||
+          "https://trom-stan-wasm-server.magland.org";
 
-    if (!mainJsUrl) {
-      setCompileStatus("failed");
-      return;
-    }
-    setCompiledUrl(mainJsUrl);
-    setCompileStatus("compiled");
-    setTheStanFileContentThasHasBeenCompiled(fileContent);
-
-    // record in local storage that we compiled this particular stan file
-    try {
       const key = getKeyNameForCompiledFile(stanWasmServerUrl, fileContent);
-      const value = JSON.stringify({ mainJsUrl });
-      localStorage.setItem(key, value);
-    } catch (e: any) {
-      console.error("Problem recording compiled file in local storage");
-      console.error(e);
-    }
-  }, [fileContent, setCompiledUrl]);
+      const savedCompiledFileUrl = localStorage.getItem(key);
+      setCompileStatus("compiling");
+      const savedCompiledFileExists = savedCompiledFileUrl ? await checkRemoteFileExists(savedCompiledFileUrl) : false;
+      await new Promise((resolve) => setTimeout(resolve, 500)); // for effect
+
+      let mainJsUrl: string
+      if (!savedCompiledFileExists) {
+        const onStatus = (msg: string) => {
+          setCompileMessage(msg);
+        };
+        const aa = await compileStanProgram(
+          stanWasmServerUrl,
+          fileContent,
+          onStatus,
+        );
+        mainJsUrl = aa.mainJsUrl || "";
+      }
+      else {
+        mainJsUrl = savedCompiledFileUrl || "";
+        setCompileMessage("compiled");
+      }
+
+      if (!mainJsUrl) {
+        setCompileStatus("failed");
+        return;
+      }
+      setCompiledUrl(mainJsUrl);
+      setCompileStatus("compiled");
+      setTheStanFileContentThasHasBeenCompiled(fileContent);
+
+      // record in local storage that we compiled this particular stan file
+      try {
+        const key = getKeyNameForCompiledFile(stanWasmServerUrl, fileContent);
+        const value = mainJsUrl;
+        localStorage.setItem(key, value);
+      } catch (e: any) {
+        console.error("Problem recording compiled file in local storage");
+        console.error(e);
+      }
+    },
+    [fileContent, setCompiledUrl],
+  );
 
   useEffect(() => {
     // if the compiled content is not the same as the current content,
@@ -117,9 +133,6 @@ const StanFileEditor: FunctionComponent<Props> = ({
     if (didInitialCompile) return;
     const stanWasmServerUrl = localStorage.getItem("stanWasmServerUrl") || "";
     if (!stanWasmServerUrl) return;
-    const key = getKeyNameForCompiledFile(stanWasmServerUrl, fileContent);
-    const value = localStorage.getItem(key);
-    if (!value) return;
     handleCompile();
     if (fileContent) {
       setDidInitialCompile(true);
@@ -267,6 +280,15 @@ const stringChecksum = (str: string) => {
     hash = hash & hash; // Convert to 32bit integer
   }
   return hash;
+};
+
+const checkRemoteFileExists = async (url: string) => {
+  try {
+    const response = await fetch(url, { method: "GET" });
+    return response.ok;
+  } catch (e) {
+    return false;
+  }
 };
 
 export default StanFileEditor;

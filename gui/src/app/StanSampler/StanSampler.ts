@@ -2,6 +2,7 @@ import type { SamplerParams } from "tinystan";
 import { defaultSamplingOpts, SamplingOpts } from "../Project/ProjectDataModel";
 import { Progress, Replies, Requests } from "./StanModelWorker";
 import StanWorkerUrl from "./StanModelWorker?worker&url";
+import { openDB } from "idb";
 
 export type StanSamplerStatus =
   | ""
@@ -22,16 +23,18 @@ class StanSampler {
   #paramNames: string[] = [];
   #samplingStartTimeSec: number = 0;
   #samplingOpts: SamplingOpts = defaultSamplingOpts; // the sampling options used in the last sample call
+  #samplingCacheKey: any | undefined = undefined;
+  #cacheHit: boolean = false;
 
-  private constructor(private compiledUrl: string) {
+  private constructor(private compiledUrl: string, private stanCode: string) {
     this._initialize();
   }
 
-  static __unsafe_create(compiledUrl: string): {
+  static __unsafe_create(compiledUrl: string, stanCode: string): {
     sampler: StanSampler;
     cleanup: () => void;
   } {
-    const sampler = new StanSampler(compiledUrl);
+    const sampler = new StanSampler(compiledUrl, stanCode);
     const cleanup = () => {
       sampler.#worker && sampler.#worker.terminate();
       sampler.#worker = undefined;
@@ -71,6 +74,13 @@ class StanSampler {
               Date.now() / 1000 - this.#samplingStartTimeSec;
             this.#status = "completed";
             this.#onStatusChangedCallbacks.forEach((cb) => cb());
+            if ((this.#samplingCacheKey) && (typeof this.#samplingOpts.seed === "number")) {
+              saveToSamplingCache(this.#samplingCacheKey, {
+                draws: this.#draws,
+                paramNames: this.#paramNames,
+                computeTimeSec: this.#computeTimeSec,
+              });
+            }
           }
           break;
         }
@@ -109,10 +119,27 @@ class StanSampler {
     this.#samplingOpts = samplingOpts;
     this.#draws = [];
     this.#paramNames = [];
-    this.#worker.postMessage({ purpose: Requests.Sample, sampleConfig });
     this.#samplingStartTimeSec = Date.now() / 1000;
     this.#status = "sampling";
-    this.#onStatusChangedCallbacks.forEach((cb) => cb());
+    this.#samplingCacheKey = {
+      stanCode: this.stanCode,
+      sampleConfig,
+    };
+    checkSamplingCache(this.#samplingCacheKey).then((cacheItem) => {
+      if (cacheItem) {
+        this.#status = "completed";
+        this.#draws = cacheItem.draws;
+        this.#paramNames = cacheItem.paramNames;
+        this.#computeTimeSec = cacheItem.computeTimeSec;
+        this.#onStatusChangedCallbacks.forEach((cb) => cb());
+        this.#cacheHit = true;
+        return;
+      }
+      this.#cacheHit = false;
+      if (!this.#worker) throw Error("Unexpected missing worker");
+      this.#worker.postMessage({ purpose: Requests.Sample, sampleConfig });
+      this.#onStatusChangedCallbacks.forEach((cb) => cb());
+    });
   }
   onProgress(callback: (progress: Progress) => void) {
     this.#onProgressCallbacks.push(callback);
@@ -147,6 +174,9 @@ class StanSampler {
   get samplingOpts() {
     return this.#samplingOpts;
   }
+  get cacheHit() {
+    return this.#cacheHit;
+  }
 }
 
 const calculateReasonableRefreshRate = (samplingOpts: SamplingOpts) => {
@@ -159,6 +189,92 @@ const calculateReasonableRefreshRate = (samplingOpts: SamplingOpts) => {
   const nearestMultipleOfTen = Math.round(onePercent / 10) * 10;
 
   return Math.max(10, nearestMultipleOfTen);
+};
+
+type SamplingCacheItem = {
+  draws: number[][];
+  paramNames: string[];
+  computeTimeSec: number;
+};
+
+const isSamplingCacheItem = (item: any): item is SamplingCacheItem => {
+  if (!item) return false;
+  if (typeof item !== "object") return false;
+  if (!Array.isArray(item.draws)) return false;
+  for (const draw of item.draws) {
+    if (!Array.isArray(draw)) return false;
+    for (const value of draw) {
+      if (typeof value !== "number") return false;
+    }
+  }
+  if (!Array.isArray(item.paramNames)) return false;
+  for (const name of item.paramNames) {
+    if (typeof name !== "string") return false;
+  }
+  if (typeof item.computeTimeSec !== "number") return false;
+  return true;
+};
+
+const dbPromise = openDB('samplingCacheDB', 1, {
+  upgrade(db) {
+    if (!db.objectStoreNames.contains('cache')) {
+      db.createObjectStore('cache', { keyPath: 'key' });
+    }
+  },
+});
+
+const saveToSamplingCache = async (key: any, value: SamplingCacheItem) => {
+  const keyString = await getSamplingCacheKeyString(key);
+  const valueString = JSON.stringify(value);
+  const db = await dbPromise;
+  const tx = db.transaction('cache', 'readwrite');
+  const store = tx.objectStore('cache');
+  store.put({ key: keyString, value: valueString });
+  await tx.done;
+}
+
+const checkSamplingCache = async (key: any) => {
+  const keyString = await getSamplingCacheKeyString(key);
+  const db = await dbPromise;
+  const tx = db.transaction('cache');
+  const store = tx.objectStore('cache');
+  const cachedItem = await store.get(keyString);
+  await tx.done;
+  if (!cachedItem) return null;
+  const value = JSON.parse(cachedItem.value);
+  if (!isSamplingCacheItem(value)) {
+    console.warn("Invalid cache item");
+    return null;
+  }
+  return value;
+}
+
+const getSamplingCacheKeyString = async (key: any) => {
+  const keyJson = jsonStringifyDeterministic(key);
+  const keySha1 = await sha1(keyJson);
+  return `sampling-cache-${keySha1}`;
+}
+
+const sha1 = async (str: string) => {
+  const buffer = new TextEncoder().encode(str);
+  const hashBuffer = await crypto.subtle.digest("SHA-1", buffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  return hashHex;
+}
+
+// Thanks: https://stackoverflow.com/questions/16167581/sort-object-properties-and-json-stringify
+export const jsonStringifyDeterministic = (
+  obj: any,
+  space: string | number | undefined = undefined,
+) => {
+  const allKeys: string[] = [];
+  JSON.stringify(obj, function (key, value) {
+    allKeys.push(key);
+    return value;
+  });
+  allKeys.sort();
+  return JSON.stringify(obj, allKeys, space);
 };
 
 export default StanSampler;

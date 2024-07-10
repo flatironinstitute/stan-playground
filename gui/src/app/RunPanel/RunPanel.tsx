@@ -77,7 +77,7 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
               />
             </div>
           )}
-          {runStatus === "completed" && <div>done sampling</div>}
+          {runStatus === "completed" && <div>done sampling{sampler.cacheHit ? " (from cache)" : ""}</div>}
           {runStatus === "failed" && (
             <div>
               failed: {errorMessage} (see browser console for more details)

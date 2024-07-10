@@ -252,7 +252,7 @@ const RightView: FunctionComponent<RightViewProps> = ({
     [update],
   );
 
-  const { sampler } = useStanSampler(compiledMainJsUrl);
+  const { sampler } = useStanSampler(compiledMainJsUrl, data.stanFileContent);
   const { status: samplerStatus } = useSamplerStatus(sampler);
   const isSampling = samplerStatus === "sampling";
   return (

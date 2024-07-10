@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import StanSampler, { StanSamplerStatus } from "./StanSampler";
 import { Progress } from "./StanModelWorker";
 
-const useStanSampler = (compiledMainJsUrl: string | undefined) => {
+const useStanSampler = (compiledMainJsUrl: string | undefined, stanCode: string) => {
   const [sampler, setSampler] = useState<StanSampler | undefined>(undefined);
   useEffect(() => {
     if (!compiledMainJsUrl) {
@@ -10,10 +10,10 @@ const useStanSampler = (compiledMainJsUrl: string | undefined) => {
       return;
     }
     const { sampler, cleanup: destructor } =
-      StanSampler.__unsafe_create(compiledMainJsUrl);
+      StanSampler.__unsafe_create(compiledMainJsUrl, stanCode);
     setSampler(sampler);
     return destructor;
-  }, [compiledMainJsUrl]);
+  }, [compiledMainJsUrl, stanCode]);
 
   return { sampler };
 };
