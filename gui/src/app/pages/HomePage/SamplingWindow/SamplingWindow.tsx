@@ -6,11 +6,11 @@ import {
   useState,
 } from "react";
 import { ProjectContext } from "../../../Project/ProjectContextProvider";
-import { modelHasUnsavedDataFileChanges } from "../../../Project/ProjectDataModel";
+import { SamplingOpts, modelHasUnsavedDataFileChanges } from "../../../Project/ProjectDataModel";
 import RunPanel from "../../../RunPanel/RunPanel";
 import SamplerOutputView from "../../../SamplerOutputView/SamplerOutputView";
 import SamplingOptsPanel from "../../../SamplingOptsPanel/SamplingOptsPanel";
-import StanSampler, { SamplingOpts } from "../../../StanSampler/StanSampler";
+import StanSampler from "../../../StanSampler/StanSampler";
 import useStanSampler, {
   useSamplerStatus,
 } from "../../../StanSampler/useStanSampler";

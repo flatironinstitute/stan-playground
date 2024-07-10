@@ -31,6 +31,9 @@ class DrawsObject:
         df = pd.DataFrame(data, columns=["chain", "draw"] + self._all_parameter_names)
         return df
 
+    def as_numpy(self):
+        return np.array(self._draws)
+
     def get(self, pname: str) -> np.ndarray:
         if pname in self._all_parameter_names:
             ind = self._all_parameter_names.index(pname)
