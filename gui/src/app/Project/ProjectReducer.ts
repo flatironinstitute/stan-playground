@@ -68,6 +68,7 @@ export const ProjectReducer = (
           ...s.ephemera,
           stanFileContent: a.stanie.stan,
           dataFileContent,
+          analysisPyFileContent: ""
         },
       };
     }

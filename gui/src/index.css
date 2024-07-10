@@ -22,6 +22,16 @@ body {
   color: darkblue;
 }
 
+.WorkerStdout pre {
+  margin: 0px;
+  padding: 1px;
+}
+
 .WorkerStderr {
   color: red;
+}
+
+.WorkerStderr pre {
+  margin: 0px;
+  padding: 1px;
 }
