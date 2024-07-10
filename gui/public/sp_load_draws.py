@@ -7,7 +7,7 @@ import numpy as np
 class DrawsObject:
     def __init__(self, sp_data):
         if "sampling" not in sp_data:
-            raise ValueError("sampling key not found in sp_data")
+            raise ValueError("Unexpected: sampling key not found in sp_data")
         sampling: dict = sp_data["sampling"]
         self._draws: List[List[float]] = sampling["draws"]
         self._all_parameter_names: List[str] = sampling["paramNames"]

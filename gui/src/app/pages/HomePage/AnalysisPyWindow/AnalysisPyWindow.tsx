@@ -45,6 +45,15 @@ type LeftPaneProps = {
   stanSampler: StanSampler | null;
 };
 
+export type GlobalDataForAnalysisPy = {
+  sampling?: {
+    draws: number[][];
+    paramNames: string[];
+    numChains: number;
+    chainIds: number[];
+  };
+};
+
 const LeftPane: FunctionComponent<LeftPaneProps> = ({
   width,
   height,
@@ -58,7 +67,7 @@ const LeftPane: FunctionComponent<LeftPaneProps> = ({
     stanSampler || undefined,
   );
   const { spData, scriptHeader } = useMemo(() => {
-    if (draws && numChains) {
+    if (draws && numChains && paramNames) {
       const numDrawsPerChain = draws[0].length / numChains;
       const chainIds: number[] = [];
       for (let i = 0; i < numChains; i++) {
@@ -66,20 +75,21 @@ const LeftPane: FunctionComponent<LeftPaneProps> = ({
           chainIds.push(i + 1);
         }
       }
-      return {
-        spData: {
-          sampling: {
-            draws: transpose(draws),
-            paramNames,
-            numChains,
-            chainIds,
-          },
+      const spData: GlobalDataForAnalysisPy = {
+        sampling: {
+          draws: transpose(draws),
+          paramNames,
+          numChains,
+          chainIds,
         },
+      }
+      return {
+        spData,
         scriptHeader: "",
-      };
+      }
     } else {
       return {
-        spData: {},
+        spData: {} as GlobalDataForAnalysisPy,
         scriptHeader: getScriptHeaderForEmptyDraws(),
       };
     }
