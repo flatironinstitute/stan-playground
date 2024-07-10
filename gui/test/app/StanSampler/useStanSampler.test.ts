@@ -58,10 +58,9 @@ const loadedSampler = async () => {
 };
 
 const rerenderableSampler = async () => {
-  const ret = renderHook(
-    (props: { url: string } | undefined) => useStanSampler(props?.url),
-    { initialProps: undefined },
-  );
+  const ret = renderHook((url: string | undefined) => useStanSampler(url), {
+    initialProps: undefined,
+  });
   const status = renderHook(
     (sampler: StanSampler | undefined) => useSamplerStatus(sampler),
     {
@@ -94,7 +93,7 @@ describe("useStanSampler", () => {
 
       expect(statusResult.current.status).toBe("");
 
-      rerender({ url: mockCompiledMainJsUrl });
+      rerender(mockCompiledMainJsUrl);
       rerenderStatus(result.current.sampler);
 
       expect(statusResult.current.status).toBe("loading");
@@ -113,7 +112,7 @@ describe("useStanSampler", () => {
 
       expect(statusResult.current.status).toBe("");
 
-      rerender({ url: erroringCompiledMainJsUrl });
+      rerender(erroringCompiledMainJsUrl);
       rerenderStatus(result.current.sampler);
 
       await waitFor(() => {
