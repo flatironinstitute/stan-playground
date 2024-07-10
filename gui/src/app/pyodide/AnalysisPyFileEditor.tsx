@@ -9,6 +9,7 @@ import { PlayArrow } from "@mui/icons-material";
 import TextEditor, { ToolbarItem } from "../FileEditor/TextEditor";
 import { PydodideWorkerStatus } from "./pyodideWorker/pyodideWorkerTypes";
 import PyodideWorkerInterface from "./pyodideWorker/pyodideWorkerInterface";
+import { GlobalDataForAnalysisPy } from "../pages/HomePage/AnalysisPyWindow/AnalysisPyWindow";
 
 type Props = {
   fileName: string;
@@ -21,7 +22,7 @@ type Props = {
   height: number;
   imageOutputDiv?: HTMLDivElement | null;
   consoleOutputDiv?: HTMLDivElement | null;
-  spData?: { [key: string]: any }; // global variables available to the python script
+  spData: GlobalDataForAnalysisPy
   scriptHeader?: string;
 };
 
@@ -109,7 +110,7 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
   ]);
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     const ret: ToolbarItem[] = [];
-    const runnable = fileContent === editedFileContent && imageOutputDiv;
+    const runnable = fileContent === editedFileContent && imageOutputDiv && spData.sampling
     if (runnable) {
       ret.push({
         type: "button",
@@ -118,6 +119,13 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
         icon: <PlayArrow />,
         onClick: handleRun,
         color: "black",
+      });
+    }
+    if (!spData.sampling) {
+      ret.push({
+        type: "text",
+        label: "Run sampler first",
+        color: "red",
       });
     }
     if (!imageOutputDiv) {
