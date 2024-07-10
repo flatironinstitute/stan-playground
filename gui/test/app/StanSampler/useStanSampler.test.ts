@@ -3,19 +3,22 @@
 import { expect, test, describe, vi, afterEach, onTestFinished } from "vitest";
 import "@vitest/web-worker";
 import { renderHook, waitFor, act } from "@testing-library/react";
+import mockedLoad, {
+  mockCompiledMainJsUrl,
+  erroringCompiledMainJsUrl,
+  erroringSamplingOpts,
+  mockedDraws,
+  mockedParamNames,
+  mockedProgress,
+} from "./MockStanModel";
+
 import useStanSampler, {
   useSamplerOutput,
   useSamplerProgress,
   useSamplerStatus,
 } from "../../../src/app/StanSampler/useStanSampler";
-import { defaultSamplingOpts } from "../../../src/app/StanSampler/StanSampler";
-
-import fakeURL from "./empty.js?url";
-import erroringURL from "./fail.js?url";
-const erroringSamplingOpts = {
-  ...defaultSamplingOpts,
-  num_chains: 999,
-};
+import { defaultSamplingOpts } from "../../../src/app/Project/ProjectDataModel";
+import type StanSampler from "../../../src/app/StanSampler/StanSampler";
 
 const mockedStdout = vi
   .spyOn(console, "log")
@@ -25,9 +28,8 @@ const mockedStderr = vi
   .mockImplementation(() => undefined);
 
 vi.mock("tinystan", async (importOriginal) => {
-  const mockedLoad = await import("./MockStanModel");
   const mod = await importOriginal<typeof import("tinystan")>();
-  mod.default.load = mockedLoad.default;
+  mod.default.load = mockedLoad;
   return mod;
 });
 
@@ -36,7 +38,7 @@ afterEach(() => {
 });
 
 const loadedSampler = async () => {
-  const ret = renderHook(() => useStanSampler(fakeURL));
+  const ret = renderHook(() => useStanSampler(mockCompiledMainJsUrl));
   const status = renderHook(() => useSamplerStatus(ret.result.current.sampler));
   await waitFor(() => {
     expect(status.result.current.status).toBe("loaded");
@@ -55,6 +57,21 @@ const loadedSampler = async () => {
   return [ret, status] as const;
 };
 
+const rerenderableSampler = async () => {
+  const ret = renderHook(
+    (props: { url: string } | undefined) => useStanSampler(props?.url),
+    { initialProps: undefined },
+  );
+  const status = renderHook(
+    (sampler: StanSampler | undefined) => useSamplerStatus(sampler),
+    {
+      initialProps: ret.result.current.sampler,
+    },
+  );
+
+  return [ret, status] as const;
+};
+
 describe("useStanSampler", () => {
   test("empty URL should return undefined", () => {
     const { result } = renderHook(() => useStanSampler(undefined));
@@ -63,31 +80,24 @@ describe("useStanSampler", () => {
   });
 
   test("other URLs are nonempty", async () => {
-    const { result } = renderHook(() => useStanSampler(fakeURL));
+    const { result } = renderHook(() => useStanSampler(mockCompiledMainJsUrl));
 
     expect(result.current.sampler).toBeDefined();
   });
 
   describe("useSamplerStatus", () => {
     test("loading changes status", async () => {
-      const { result, rerender } = renderHook(
-        (props: { url: string } | undefined) => useStanSampler(props?.url),
-        { initialProps: undefined },
-      );
-
-      const { result: statusResult, rerender: rerenderStatus } = renderHook(
-        (sampler) => useSamplerStatus(sampler),
-        { initialProps: result.current.sampler },
-      );
+      const [
+        { result, rerender },
+        { result: statusResult, rerender: rerenderStatus },
+      ] = await rerenderableSampler();
 
       expect(statusResult.current.status).toBe("");
 
-      rerender({ url: fakeURL });
+      rerender({ url: mockCompiledMainJsUrl });
       rerenderStatus(result.current.sampler);
 
-      await waitFor(() => {
-        expect(statusResult.current.status).toBe("loading");
-      });
+      expect(statusResult.current.status).toBe("loading");
 
       await waitFor(() => {
         expect(statusResult.current.status).toBe("loaded");
@@ -96,19 +106,14 @@ describe("useStanSampler", () => {
     });
 
     test("failing to load changes status", async () => {
-      const { result, rerender } = renderHook(
-        (props: { url: string } | undefined) => useStanSampler(props?.url),
-        { initialProps: undefined },
-      );
-
-      const { result: statusResult, rerender: rerenderStatus } = renderHook(
-        (sampler) => useSamplerStatus(sampler),
-        { initialProps: result.current.sampler },
-      );
+      const [
+        { result, rerender },
+        { result: statusResult, rerender: rerenderStatus },
+      ] = await rerenderableSampler();
 
       expect(statusResult.current.status).toBe("");
 
-      rerender({ url: erroringURL });
+      rerender({ url: erroringCompiledMainJsUrl });
       rerenderStatus(result.current.sampler);
 
       await waitFor(() => {
@@ -116,9 +121,7 @@ describe("useStanSampler", () => {
       });
 
       await waitFor(() => {
-        expect(mockedStderr).toHaveBeenCalledWith(
-          new Error("error for testing in load!"),
-        );
+        expect(mockedStderr).toHaveBeenCalledWith("error for testing in load!");
       });
 
       act(() => {
@@ -192,8 +195,7 @@ describe("useStanSampler", () => {
       });
 
       await waitFor(() => {
-        expect(progress.current).toBeDefined();
-        expect(progress.current?.iteration).toBe(123);
+        expect(progress.current).toEqual(mockedProgress);
       });
 
       expect(mockedStderr).not.toHaveBeenCalled();
@@ -226,12 +228,9 @@ describe("useStanSampler", () => {
       });
 
       await waitFor(() => {
-        expect(output.current.draws).toEqual([
-          [1, 2],
-          [3, 4],
-        ]);
-        expect(output.current.paramNames).toEqual(["a", "b"]);
-        expect(output.current.numChains).toBe(4);
+        expect(output.current.draws).toEqual(mockedDraws);
+        expect(output.current.paramNames).toEqual(mockedParamNames);
+        expect(output.current.numChains).toBe(defaultSamplingOpts.num_chains);
         expect(output.current.computeTimeSec).toBeDefined();
       });
 
