@@ -131,7 +131,7 @@ type ConsoleOutputWindowProps = {
   onDivElement: (div: HTMLDivElement) => void;
 };
 
-const ConsoleOutputWindow: FunctionComponent<ConsoleOutputWindowProps> = ({
+export const ConsoleOutputWindow: FunctionComponent<ConsoleOutputWindowProps> = ({
   width,
   height,
   onDivElement,

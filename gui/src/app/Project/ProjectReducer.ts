@@ -62,13 +62,17 @@ export const ProjectReducer = (
         stanFileContent: a.stanie.stan,
         dataFileContent,
         analysisPyFileContent: "",
+        dataPyFileContent: "",
+        dataRFileContent: "",
         samplingOpts: defaultSamplingOpts,
         meta: { ...s.meta, title: a.stanie.meta.title ?? "Untitled" },
         ephemera: {
           ...s.ephemera,
           stanFileContent: a.stanie.stan,
           dataFileContent,
-          analysisPyFileContent: ""
+          analysisPyFileContent: "",
+          dataPyFileContent: "",
+          dataRFileContent: "",
         },
       };
     }

@@ -13,6 +13,8 @@ import { ProjectKnownFiles, modelHasUnsavedChanges } from "../../Project/Project
 import LeftPanel from "./LeftPanel";
 import SamplingWindow from "./SamplingWindow/SamplingWindow";
 import TopBar from "./TopBar";
+import TabWidget from "../../TabWidget/TabWidget";
+import DataGenerationWindow from "./DataGenerationWindow/DataGenerationWindow";
 
 type Props = {
   width: number;
@@ -135,18 +137,44 @@ type RightViewProps = {
   compiledMainJsUrl: string;
 };
 
+const rightViewTabs = [
+  {
+    id: 'sampling',
+    label: 'Sampling',
+    closeable: false
+  },
+  {
+    id: 'data-generation',
+    label: 'Data Generation',
+    closeable: false
+  }
+]
+
 const RightView: FunctionComponent<RightViewProps> = ({
   width,
   height,
   compiledMainJsUrl,
 }) => {
+  const [currentTabId, setCurrentTabId] = useState('sampling');
   return (
-    <SamplingWindow
+    <TabWidget
       width={width}
       height={height}
-      compiledMainJsUrl={compiledMainJsUrl}
-    />
-  );
+      tabs={rightViewTabs}
+      currentTabId={currentTabId}
+      setCurrentTabId={setCurrentTabId}
+    >
+      <SamplingWindow
+        width={width}
+        height={height}
+        compiledMainJsUrl={compiledMainJsUrl}
+      />
+      <DataGenerationWindow
+        width={width}
+        height={height}
+      />
+    </TabWidget>
+  )
 };
 
 // the width of the left panel when it is expanded based on the overall width

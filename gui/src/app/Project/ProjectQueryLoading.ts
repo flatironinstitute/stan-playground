@@ -15,6 +15,8 @@ export enum QueryParamKeys {
   StanFile = "stan",
   DataFile = "data",
   AnalysisPyFile = "analysis_py",
+  DataPyFile = "data_py",
+  DataRFile = "data_r",
   SamplingOpts = "sampling_opts",
   Title = "title",
   SONumChains = "num_chains",
@@ -41,6 +43,8 @@ export const fromQueryParams = (searchParams: URLSearchParams) => {
     stan: searchParams.get(QueryParamKeys.StanFile),
     data: searchParams.get(QueryParamKeys.DataFile),
     analysis_py: searchParams.get(QueryParamKeys.AnalysisPyFile),
+    data_py: searchParams.get(QueryParamKeys.DataPyFile),
+    data_r: searchParams.get(QueryParamKeys.DataRFile),
     sampling_opts: searchParams.get(QueryParamKeys.SamplingOpts),
     title: searchParams.get(QueryParamKeys.Title),
     num_chains: searchParams.get(QueryParamKeys.SONumChains),
@@ -96,6 +100,12 @@ export const fetchRemoteProject = async (query: QueryParams) => {
   const analysisPyFilePromise = query["analysis_py"]
     ? tryFetch(query["analysis_py"])
     : Promise.resolve(data.analysisPyFileContent);
+  const dataPyFilePromise = query["data_py"]
+    ? tryFetch(query["data_py"])
+    : Promise.resolve(undefined);
+  const dataRFilePromise = query["data_r"]
+    ? tryFetch(query["data_r"])
+    : Promise.resolve(undefined);
   const sampling_optsPromise = query.sampling_opts
     ? tryFetch(query.sampling_opts)
     : Promise.resolve(undefined);
@@ -119,6 +129,20 @@ export const fetchRemoteProject = async (query: QueryParams) => {
     data.analysisPyFileContent = analysisPyFileContent;
   } else {
     data.analysisPyFileContent = `# Failed to load content from ${query["analysis_py"]}`;
+  }
+
+  const dataPyFileContent = await dataPyFilePromise;
+  if (dataPyFileContent !== undefined) {
+    data.dataPyFileContent = dataPyFileContent;
+  } else {
+    data.dataPyFileContent = `# Failed to load content from ${query["data_py"]}`;
+  }
+
+  const dataRFileContent = await dataRFilePromise;
+  if (dataRFileContent !== undefined) {
+    data.dataRFileContent = dataRFileContent;
+  } else {
+    data.dataRFileContent = `# Failed to load content from ${query["data_r"]}`;
   }
 
   const sampling_opts = await sampling_optsPromise;

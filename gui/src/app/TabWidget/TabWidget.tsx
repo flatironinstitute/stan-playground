@@ -102,7 +102,7 @@ const TabWidget: FunctionComponent<PropsWithChildren<Props>> = ({
           <div
             key={`child-${i}`}
             style={{
-              visibility: visible ? "visible" : "hidden",
+              visibility: visible ? undefined : "hidden",
               overflowY: "hidden",
               overflowX: "hidden",
               position: "absolute",

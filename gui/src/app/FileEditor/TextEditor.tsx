@@ -223,7 +223,7 @@ const TextEditor: FunctionComponent<Props> = ({
             {label}
           </span>
           &nbsp;&nbsp;&nbsp;
-          {!readOnly && (
+          {!readOnly && text !== editedText && (
             <SmallIconButton
               onClick={handleSave}
               icon={<Save />}

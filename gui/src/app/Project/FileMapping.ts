@@ -25,6 +25,8 @@ export enum FileNames {
   STANFILE = "main.stan",
   DATAFILE = "data.json",
   ANALYSISPYFILE = "analysis.py",
+  DATAPYFILE = "data.py",
+  DATARFile = "data.r",
 }
 
 // FileMapType enforces an exhaustive mapping from data-model fields to the
@@ -44,6 +46,8 @@ export const ProjectFileMap: FileMapType = {
   stanFileContent: FileNames.STANFILE,
   dataFileContent: FileNames.DATAFILE,
   analysisPyFileContent: FileNames.ANALYSISPYFILE,
+  dataPyFileContent: FileNames.DATAPYFILE,
+  dataRFileContent: FileNames.DATARFile,
 };
 
 // The FileRegistry is the 2-3 leg of the triangle: it maps the known file names
@@ -104,6 +108,14 @@ export const mapFileContentsToModel = (
       }
       case FileNames.ANALYSISPYFILE: {
         theMap.analysisPyFileContent = files[f];
+        break;
+      }
+      case FileNames.DATAPYFILE: {
+        theMap.dataPyFileContent = files[f];
+        break;
+      }
+      case FileNames.DATARFile: {
+        theMap.dataRFileContent = files[f];
         break;
       }
       case FileNames.SAMPLING: {
