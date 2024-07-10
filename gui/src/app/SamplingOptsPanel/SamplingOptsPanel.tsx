@@ -1,7 +1,7 @@
-import { FunctionComponent, useCallback } from "react";
-import { SamplingOpts, defaultSamplingOpts } from "../StanSampler/StanSampler";
 import { Hyperlink } from "@fi-sci/misc";
 import { Grid } from "@mui/material";
+import { FunctionComponent, useCallback } from "react";
+import { defaultSamplingOpts, SamplingOpts } from "../Project/ProjectDataModel";
 
 type SamplingOptsPanelProps = {
   samplingOpts: SamplingOpts;

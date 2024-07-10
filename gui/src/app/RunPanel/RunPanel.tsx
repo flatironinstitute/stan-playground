@@ -6,12 +6,13 @@ import LinearProgress, {
 import Typography from "@mui/material/Typography";
 import { FunctionComponent, useCallback } from "react";
 
-import StanSampler, { SamplingOpts } from "../StanSampler/StanSampler";
+import { SamplingOpts } from "../Project/ProjectDataModel";
+import { Progress } from "../StanSampler/StanModelWorker";
+import StanSampler from "../StanSampler/StanSampler";
 import {
   useSamplerProgress,
   useSamplerStatus,
 } from "../StanSampler/useStanSampler";
-import { Progress } from "../StanSampler/StanModelWorker";
 
 type RunPanelProps = {
   width: number;

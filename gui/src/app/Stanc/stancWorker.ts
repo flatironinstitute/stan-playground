@@ -18,7 +18,12 @@ try {
     // browser
     stanc = (globalThis as any).stanc;
   }
-  console.log("loaded stanc.js");
+  if (stanc) {
+    const stanc_version = stanc("", "", ["version"]).result;
+    console.log(`loaded stanc.js, version '${stanc_version}'`);
+  } else {
+    console.error("Failed to load stanc.js");
+  }
 } catch (e) {
   console.error("Failed to load stanc.js");
   console.error(e);

@@ -8,13 +8,8 @@ import {
 } from "react";
 import DataFileEditor from "../../FileEditor/DataFileEditor";
 import StanFileEditor from "../../FileEditor/StanFileEditor";
-import ProjectContextProvider, {
-  ProjectContext,
-} from "../../Project/ProjectContextProvider";
-import {
-  ProjectKnownFiles,
-  modelHasUnsavedChanges,
-} from "../../Project/ProjectDataModel";
+import ProjectContextProvider, { ProjectContext } from "../../Project/ProjectContextProvider";
+import { ProjectKnownFiles, modelHasUnsavedChanges } from "../../Project/ProjectDataModel";
 import LeftPanel from "./LeftPanel";
 import SamplingWindow from "./SamplingWindow/SamplingWindow";
 import TopBar from "./TopBar";
