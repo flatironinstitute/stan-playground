@@ -30,12 +30,13 @@ const parseProgress = (msg: string): Progress => {
   if (msg.startsWith("Iteration:")) {
     msg = "Chain [1] " + msg;
   }
+  msg = msg.replace(/\[|\]/g, "");
   const parts = msg.split(/\s+/);
-  const chain = parseInt(parts[1].slice(1, -1));
+  const chain = parseInt(parts[1]);
   const iteration = parseInt(parts[3]);
   const totalIterations = parseInt(parts[5]);
-  const percent = parseInt(parts[7].slice(0, -2));
-  const warmup = parts[8] === "(Warmup)";
+  const percent = parseInt(parts[6].slice(0, -1));
+  const warmup = parts[7] === "(Warmup)";
   return { chain, iteration, totalIterations, percent, warmup };
 };
 
@@ -64,7 +65,7 @@ self.onmessage = (e) => {
               m.stanVersion(),
           );
           self.postMessage({ purpose: Replies.ModelLoaded });
-        });
+        }, console.error);
       break;
     }
     case Requests.Sample: {
