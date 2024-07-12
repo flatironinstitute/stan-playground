@@ -19,7 +19,33 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    /* Imports */
+    "baseUrl": "./src",
+    "paths": {
+      "@SpComponents/*": [
+        /* This implies a certain reorganization/recollection process */
+        "app/components/*",
+        "app/FileEditor/*",
+        "app/RunPanel/*",
+        "app/SamplerOutputView/*",
+        "app/SamplingOptsPanel/*",
+        "app/TabWidget/*"
+      ],
+      "@SpCore/*": ["app/Project/*", "app/gists/*"],
+      /* We are playing a bit fast and loose with the distinction */
+      "@SpPages/*": ["app/pages/HomePage/*"],
+      "@SpStanc/*": [
+        "app/Stanc/*",
+        "app/CompilationServerConnectionControl/*",
+        "app/compileStanProgram/*"
+      ],
+      "@SpStanSampler/*": ["app/StanSampler/*"],
+      "@SpUtil/*": ["app/util/*"],
+      "@SpStanStats/*": ["app/util/stan_stats/*"],
+      "@SpExamples/*": ["app/exampleStanies/*"]
+    }
   },
   "include": ["src", "test"],
   "references": [{ "path": "./tsconfig.node.json" }]

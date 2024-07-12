@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 
-import { expect, test, describe, vi, afterEach } from "vitest";
-import "@vitest/web-worker";
+import useStanc from "@SpStanc/useStanc";
 import { act, renderHook, waitFor } from "@testing-library/react";
-import useStanc from "../../../src/app/Stanc/useStanc";
+import "@vitest/web-worker";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
 const mockedStdout = vi
   .spyOn(console, "log")

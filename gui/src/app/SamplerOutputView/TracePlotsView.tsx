@@ -1,6 +1,6 @@
+import SequencePlotWidget from "@SpComponents/SequencePlotWidget";
+import { chainColorForIndex } from "@SpComponents/chainColorList";
 import { FunctionComponent, useMemo, useState } from "react";
-import SequencePlotWidget from "./SequencePlotWidget";
-import { chainColorForIndex } from "./chainColorList";
 import ReactVisibilitySensor from "react-visibility-sensor";
 
 type TracePlotsViewProps = {

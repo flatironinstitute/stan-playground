@@ -1,5 +1,5 @@
+import LazyPlotlyPlot from "@SpComponents/LazyPlotlyPlot";
 import { FunctionComponent, useMemo } from "react";
-import LazyPlotlyPlot from "../components/LazyPlotlyPlot";
 
 export type PlotSequence = {
   label: string;

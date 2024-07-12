@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FunctionComponent } from "react";
-import CompilationServerConnectionControl from "../../CompilationServerConnectionControl/CompilationServerConnectionControl";
+import CompilationServerConnectionControl from "@SpStanc/CompilationServerConnectionControl";
 import { SmallIconButton } from "@fi-sci/misc";
 import { QuestionMark } from "@mui/icons-material";
 import { Toolbar } from "@mui/material";
+import { FunctionComponent } from "react";
 
 type TopBarProps = {
   title: string;

@@ -1,12 +1,12 @@
 import { vi } from "vitest";
 
+import { defaultSamplingOpts } from "@SpCore/ProjectDataModel";
 import type StanModel from "tinystan";
 import type { PrintCallback } from "tinystan";
-import { defaultSamplingOpts } from "../../../src/app/Project/ProjectDataModel";
 
 import fakeURL from "./empty.ts?url";
-import erroringURL from "./fail.ts?url";
 import failSentinel from "./fail.ts";
+import erroringURL from "./fail.ts?url";
 
 export const mockCompiledMainJsUrl = fakeURL;
 export const erroringCompiledMainJsUrl = erroringURL;

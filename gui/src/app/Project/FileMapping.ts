@@ -2,7 +2,7 @@ import {
   ProjectDataModel,
   ProjectPersistentDataModel,
   stringifyField,
-} from "./ProjectDataModel";
+} from "@SpCore/ProjectDataModel";
 
 // This code exists to provide rigorous definitions for the mappings between
 // the in-memory representation of a Stan Playground project (i.e. the

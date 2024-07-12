@@ -1,24 +1,24 @@
 // @vitest-environment jsdom
 
-import { expect, test, describe, vi, afterEach, onTestFinished } from "vitest";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import "@vitest/web-worker";
-import { renderHook, waitFor, act } from "@testing-library/react";
+import { afterEach, describe, expect, onTestFinished, test, vi } from "vitest";
 import mockedLoad, {
-  mockCompiledMainJsUrl,
   erroringCompiledMainJsUrl,
   erroringSamplingOpts,
+  mockCompiledMainJsUrl,
   mockedDraws,
   mockedParamNames,
   mockedProgress,
 } from "./MockStanModel";
 
+import { defaultSamplingOpts } from "@SpCore/ProjectDataModel";
+import type StanSampler from "@SpStanSampler/StanSampler";
 import useStanSampler, {
   useSamplerOutput,
   useSamplerProgress,
   useSamplerStatus,
-} from "../../../src/app/StanSampler/useStanSampler";
-import { defaultSamplingOpts } from "../../../src/app/Project/ProjectDataModel";
-import type StanSampler from "../../../src/app/StanSampler/StanSampler";
+} from "@SpStanSampler/useStanSampler";
 
 const mockedStdout = vi
   .spyOn(console, "log")

@@ -1,15 +1,15 @@
 import { SmallIconButton } from "@fi-sci/misc";
 import { Download } from "@mui/icons-material";
+import HistsView from "@SpComponents/HistsView";
+import SummaryView from "@SpComponents/SummaryView";
+import TabWidget from "@SpComponents/TabWidget";
+import TracePlotsView from "@SpComponents/TracePlotsView";
+import { SamplingOpts } from "@SpCore/ProjectDataModel";
+import StanSampler from "@SpStanSampler/StanSampler";
+import { useSamplerOutput } from "@SpStanSampler/useStanSampler";
+import { triggerDownload } from "@SpUtil/triggerDownload";
 import JSZip from "jszip";
 import { FunctionComponent, useCallback, useMemo, useState } from "react";
-import { SamplingOpts } from "../Project/ProjectDataModel";
-import StanSampler from "../StanSampler/StanSampler";
-import { useSamplerOutput } from "../StanSampler/useStanSampler";
-import TabWidget from "../TabWidget/TabWidget";
-import { triggerDownload } from "../util/triggerDownload";
-import HistsView from "./HistsView";
-import SummaryView from "./SummaryView";
-import TracePlotsView from "./TracePlotsView";
 
 type SamplerOutputViewProps = {
   width: number;

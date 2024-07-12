@@ -1,10 +1,10 @@
-import { afterEach, describe, expect, test, vi } from "vitest";
 import {
   fromQueryParams,
   //   fetchRemoteProject,
   QueryParamKeys,
   queryStringHasParameters,
-} from "../../../src/app/Project/ProjectQueryLoading";
+} from "@SpCore/ProjectQueryLoading";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
 class MockSearchParams {
   keysDict: { [key: string]: string };

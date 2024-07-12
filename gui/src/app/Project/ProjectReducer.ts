@@ -1,14 +1,14 @@
-import { Reducer } from "react";
-import { Stanie } from "../exampleStanies/exampleStanies";
-import { FieldsContentsMap } from "./FileMapping";
+import { FieldsContentsMap } from "@SpCore/FileMapping";
 import {
   defaultSamplingOpts,
   initialDataModel,
   ProjectDataModel,
   ProjectKnownFiles,
   SamplingOpts,
-} from "./ProjectDataModel";
-import { loadFromProjectFiles } from "./ProjectSerialization";
+} from "@SpCore/ProjectDataModel";
+import { loadFromProjectFiles } from "@SpCore/ProjectSerialization";
+import { Stanie } from "@SpExamples/exampleStanies";
+import { Reducer } from "react";
 
 export type ProjectReducerType = Reducer<
   ProjectDataModel,

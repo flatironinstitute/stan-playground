@@ -1,4 +1,3 @@
-import { afterEach, assert, describe, expect, test, vi } from "vitest";
 import {
   exportedForTesting,
   getStringKnownFileKeys,
@@ -12,7 +11,8 @@ import {
   ProjectKnownFiles,
   SamplingOpts,
   stringifyField,
-} from "../../../src/app/Project/ProjectDataModel";
+} from "@SpCore/ProjectDataModel";
+import { afterEach, assert, describe, expect, test, vi } from "vitest";
 
 const {
   baseObjectCheck,

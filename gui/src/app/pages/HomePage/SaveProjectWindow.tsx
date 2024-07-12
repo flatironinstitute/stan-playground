@@ -1,13 +1,10 @@
 import { FunctionComponent, useCallback, useContext, useState } from "react";
 
-import {
-  FileRegistry,
-  mapModelToFileManifest,
-} from "../../Project/FileMapping";
-import { ProjectContext } from "../../Project/ProjectContextProvider";
-import { serializeAsZip } from "../../Project/ProjectSerialization";
-import { triggerDownload } from "../../util/triggerDownload";
-import saveAsGitHubGist from "../../gists/saveAsGitHubGist";
+import { serializeAsZip } from "@SpCore//ProjectSerialization";
+import { FileRegistry, mapModelToFileManifest } from "@SpCore/FileMapping";
+import { ProjectContext } from "@SpCore/ProjectContextProvider";
+import saveAsGitHubGist from "@SpCore/saveAsGitHubGist";
+import { triggerDownload } from "@SpUtil/triggerDownload";
 
 type SaveProjectWindowProps = {
   onClose: () => void;
