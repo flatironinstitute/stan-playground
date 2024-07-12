@@ -4,8 +4,7 @@ import {
   fromQueryParams,
   queryStringHasParameters,
 } from "@SpCore/ProjectQueryLoading";
-import {
-  ProjectReducer,
+import ProjectReducer, {
   ProjectReducerAction,
   ProjectReducerType,
 } from "@SpCore/ProjectReducer";
