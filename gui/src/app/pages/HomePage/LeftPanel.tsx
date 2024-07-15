@@ -80,7 +80,9 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({
 
         {examplesStanies.map((stanie, i) => (
           <div key={i} style={{ margin: 5 }}>
-            <Link to={`?project=${stanie.link}`}>{stanie.name}</Link>
+            <Link replace to={`?project=${stanie.link}`}>
+              {stanie.name}
+            </Link>
           </div>
         ))}
         <hr />
