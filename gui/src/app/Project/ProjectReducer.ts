@@ -1,13 +1,11 @@
 import { FieldsContentsMap } from "@SpCore/FileMapping";
 import {
-  defaultSamplingOpts,
   initialDataModel,
   ProjectDataModel,
   ProjectKnownFiles,
   SamplingOpts,
 } from "@SpCore/ProjectDataModel";
 import { loadFromProjectFiles } from "@SpCore/ProjectSerialization";
-import { Stanie } from "@SpExamples/exampleStanies";
 import { Reducer } from "react";
 
 export type ProjectReducerType = Reducer<
@@ -16,10 +14,6 @@ export type ProjectReducerType = Reducer<
 >;
 
 export type ProjectReducerAction =
-  | {
-      type: "loadStanie";
-      stanie: Stanie;
-    }
   | {
       type: "loadFiles";
       files: Partial<FieldsContentsMap>;
@@ -55,21 +49,6 @@ export const ProjectReducer = (
   a: ProjectReducerAction,
 ) => {
   switch (a.type) {
-    case "loadStanie": {
-      const dataFileContent = JSON.stringify(a.stanie.data, null, 2);
-      return {
-        ...s,
-        stanFileContent: a.stanie.stan,
-        dataFileContent,
-        samplingOpts: defaultSamplingOpts,
-        meta: { ...s.meta, title: a.stanie.meta.title ?? "Untitled" },
-        ephemera: {
-          ...s.ephemera,
-          stanFileContent: a.stanie.stan,
-          dataFileContent,
-        },
-      };
-    }
     case "loadFiles": {
       try {
         return loadFromProjectFiles(s, a.files, a.clearExisting);

@@ -1,11 +1,11 @@
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
-import examplesStanies, { Stanie } from "@SpExamples/exampleStanies";
 import LoadProjectWindow from "@SpPages/LoadProjectWindow";
 import SaveProjectWindow from "@SpPages/SaveProjectWindow";
-import { Hyperlink, SmallIconButton } from "@fi-sci/misc";
+import { SmallIconButton } from "@fi-sci/misc";
 import ModalWindow, { useModalWindow } from "@fi-sci/modal-window";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
-import { FunctionComponent, useCallback, useContext } from "react";
+import { FunctionComponent, useContext } from "react";
+import { Link } from "react-router-dom";
 
 type LeftPanelProps = {
   width: number;
@@ -14,6 +14,17 @@ type LeftPanelProps = {
   collapsed: boolean;
   onSetCollapsed: (collapsed: boolean) => void;
 };
+
+const examplesStanies = [
+  {
+    name: "Linear regression",
+    link: "https://gist.github.com/WardBrian/93d12876923790f23d9c5cb481e8cd34",
+  },
+  {
+    name: "Disease transmission",
+    link: "https://gist.github.com/WardBrian/e47253bf29282d0eabf13616265d393e",
+  },
+];
 
 const LeftPanel: FunctionComponent<LeftPanelProps> = ({
   width,
@@ -24,14 +35,6 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({
 }) => {
   // note: this is close enough to pass in directly if we wish
   const { update } = useContext(ProjectContext);
-
-  const handleOpenExample = useCallback(
-    (stanie: Stanie) => () => {
-      update({ type: "loadStanie", stanie });
-    },
-    [update],
-  );
-
   const {
     visible: saveProjectVisible,
     handleOpen: saveProjectOpen,
@@ -74,11 +77,10 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({
       <div style={{ margin: 5 }}>
         <CollapseButton onClick={() => onSetCollapsed(true)} />
         <h3>Examples</h3>
+
         {examplesStanies.map((stanie, i) => (
           <div key={i} style={{ margin: 5 }}>
-            <Hyperlink onClick={handleOpenExample(stanie)}>
-              {stanie.meta.title}
-            </Hyperlink>
+            <Link to={`?project=${stanie.link}`}>{stanie.name}</Link>
           </div>
         ))}
         <hr />
