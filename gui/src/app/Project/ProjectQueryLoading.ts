@@ -1,5 +1,5 @@
 import { mapFileContentsToModel } from "@SpCore/FileMapping";
-import loadFilesFromGist from "@SpCore/loadFilesFromGist";
+import loadFilesFromGist from "@SpCore/gists/loadFilesFromGist";
 import {
   ProjectDataModel,
   initialDataModel,

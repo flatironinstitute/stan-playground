@@ -33,7 +33,8 @@
         "app/SamplingOptsPanel/*",
         "app/TabWidget/*"
       ],
-      "@SpCore/*": ["app/Project/*", "app/gists/*"],
+      "@SpCore/*": ["app/Project/*"],
+      "@SpCore/gists/*": ["app/gists/*"],
       /* We are playing a bit fast and loose with the distinction */
       "@SpPages/*": ["app/pages/HomePage/*"],
       "@SpStanc/*": [

@@ -3,7 +3,7 @@ import { FunctionComponent, useCallback, useContext, useState } from "react";
 import { serializeAsZip } from "@SpCore//ProjectSerialization";
 import { FileRegistry, mapModelToFileManifest } from "@SpCore/FileMapping";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
-import saveAsGitHubGist from "@SpCore/saveAsGitHubGist";
+import saveAsGitHubGist from "@SpCore/gists/saveAsGitHubGist";
 import { triggerDownload } from "@SpUtil/triggerDownload";
 
 type SaveProjectWindowProps = {
