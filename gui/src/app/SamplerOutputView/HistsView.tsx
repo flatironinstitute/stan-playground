@@ -1,5 +1,5 @@
+import SequenceHistogramWidget from "@SpComponents/SequenceHistogramWidget";
 import { FunctionComponent, useMemo } from "react";
-import SequenceHistogramWidget from "./SequenceHistogramWidget";
 
 type HistsViewProps = {
   width: number;

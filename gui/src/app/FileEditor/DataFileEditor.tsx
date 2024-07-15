@@ -1,5 +1,5 @@
+import TextEditor, { ToolbarItem } from "@SpComponents/TextEditor";
 import { FunctionComponent, useMemo } from "react";
-import TextEditor, { ToolbarItem } from "./TextEditor";
 
 type Props = {
   fileName: string;

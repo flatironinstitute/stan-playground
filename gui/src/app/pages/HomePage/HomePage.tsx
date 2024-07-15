@@ -1,4 +1,23 @@
 import { Splitter } from "@fi-sci/splitter";
+import DataFileEditor from "@SpComponents/DataFileEditor";
+import RunPanel from "@SpComponents/RunPanel";
+import SamplerOutputView from "@SpComponents/SamplerOutputView";
+import SamplingOptsPanel from "@SpComponents/SamplingOptsPanel";
+import StanFileEditor from "@SpComponents/StanFileEditor";
+import ProjectContextProvider, {
+  ProjectContext,
+} from "@SpCore/ProjectContextProvider";
+import {
+  modelHasUnsavedChanges,
+  modelHasUnsavedDataFileChanges,
+  ProjectKnownFiles,
+  SamplingOpts,
+} from "@SpCore/ProjectDataModel";
+import LeftPanel from "@SpPages/LeftPanel";
+import TopBar from "@SpPages/TopBar";
+import useStanSampler, {
+  useSamplerStatus,
+} from "@SpStanSampler/useStanSampler";
 import {
   FunctionComponent,
   useCallback,
@@ -8,25 +27,6 @@ import {
   useRef,
   useState,
 } from "react";
-import DataFileEditor from "../../FileEditor/DataFileEditor";
-import StanFileEditor from "../../FileEditor/StanFileEditor";
-import ProjectContextProvider, {
-  ProjectContext,
-} from "../../Project/ProjectContextProvider";
-import {
-  modelHasUnsavedChanges,
-  modelHasUnsavedDataFileChanges,
-  ProjectKnownFiles,
-  SamplingOpts,
-} from "../../Project/ProjectDataModel";
-import RunPanel from "../../RunPanel/RunPanel";
-import SamplerOutputView from "../../SamplerOutputView/SamplerOutputView";
-import SamplingOptsPanel from "../../SamplingOptsPanel/SamplingOptsPanel";
-import useStanSampler, {
-  useSamplerStatus,
-} from "../../StanSampler/useStanSampler";
-import LeftPanel from "./LeftPanel";
-import TopBar from "./TopBar";
 
 type Props = {
   width: number;

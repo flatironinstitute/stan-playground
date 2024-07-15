@@ -1,8 +1,12 @@
+import {
+  StancErrors,
+  StancReplyMessage,
+  StancWorkerRequests,
+} from "@SpStanc/Types";
 import { useCallback, useEffect, useState } from "react";
-import { StancReplyMessage, StancErrors, StancWorkerRequests } from "./Types";
 // https://vitejs.dev/guide/assets#importing-script-as-a-worker
 // https://vitejs.dev/guide/assets#importing-asset-as-url
-import stancWorkerURL from "./stancWorker?worker&url";
+import stancWorkerURL from "@SpStanc/stancWorker?worker&url";
 
 const useStanc = (
   modelName: string,

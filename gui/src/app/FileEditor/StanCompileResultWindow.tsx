@@ -1,7 +1,7 @@
+import { StancErrors } from "@SpStanc/Types";
+import { SmallIconButton } from "@fi-sci/misc";
 import { Close, Done } from "@mui/icons-material";
 import { FunctionComponent } from "react";
-import { StancErrors } from "../Stanc/Types";
-import { SmallIconButton } from "@fi-sci/misc";
 
 type Props = {
   width: number;

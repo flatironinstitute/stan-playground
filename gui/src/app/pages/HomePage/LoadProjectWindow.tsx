@@ -1,22 +1,19 @@
 import {
+  FieldsContentsMap,
+  FileNames,
+  FileRegistry,
+  mapFileContentsToModel,
+} from "@SpCore/FileMapping";
+import { ProjectContext } from "@SpCore/ProjectContextProvider";
+import { deserializeZipToFiles, parseFile } from "@SpCore/ProjectSerialization";
+import UploadFilesArea from "@SpPages/UploadFilesArea";
+import {
   FunctionComponent,
   useCallback,
   useContext,
   useEffect,
   useState,
 } from "react";
-import {
-  FieldsContentsMap,
-  FileNames,
-  FileRegistry,
-  mapFileContentsToModel,
-} from "../../Project/FileMapping";
-import { ProjectContext } from "../../Project/ProjectContextProvider";
-import {
-  deserializeZipToFiles,
-  parseFile,
-} from "../../Project/ProjectSerialization";
-import UploadFilesArea from "./UploadFilesArea";
 
 type LoadProjectWindowProps = {
   onClose: () => void;

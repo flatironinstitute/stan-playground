@@ -1,14 +1,14 @@
-import loadFilesFromGist from "../gists/loadFilesFromGist";
-import { deepCopy } from "../util/deepCopy";
-import { tryFetch } from "../util/tryFetch";
-import { mapFileContentsToModel } from "./FileMapping";
+import { mapFileContentsToModel } from "@SpCore/FileMapping";
+import loadFilesFromGist from "@SpCore/gists/loadFilesFromGist";
 import {
   ProjectDataModel,
   initialDataModel,
   parseSamplingOpts,
   persistStateToEphemera,
-} from "./ProjectDataModel";
-import { loadFromProjectFiles } from "./ProjectSerialization";
+} from "@SpCore/ProjectDataModel";
+import { loadFromProjectFiles } from "@SpCore/ProjectSerialization";
+import { deepCopy } from "@SpUtil/deepCopy";
+import { tryFetch } from "@SpUtil/tryFetch";
 
 export enum QueryParamKeys {
   Project = "project",

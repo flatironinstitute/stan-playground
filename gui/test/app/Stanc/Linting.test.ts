@@ -1,8 +1,5 @@
+import { exportedForTesting, stancErrorsToCodeMarkers } from "@SpStanc/Linting";
 import { assert, describe, expect, test } from "vitest";
-import {
-  exportedForTesting,
-  stancErrorsToCodeMarkers,
-} from "../../../src/app/Stanc/Linting";
 
 const { locationFromMessage, getWarningMessage, getErrorMessage } =
   exportedForTesting;

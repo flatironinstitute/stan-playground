@@ -10,7 +10,7 @@ https://github.com/stan-dev/stan/blob/develop/src/stan/analyze/mcmc/compute_pote
 import {
   transform as inPlaceFftTransform,
   inverseTransform as inPlaceInverseFftTransform,
-} from "./fft";
+} from "@SpStanStats/fft";
 
 /**
  * Computes the effective sample size (ESS) for the specified

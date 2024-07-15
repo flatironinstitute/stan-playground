@@ -1,7 +1,7 @@
+import { defaultSamplingOpts, SamplingOpts } from "@SpCore/ProjectDataModel";
+import { Progress, Replies, Requests } from "@SpStanSampler/StanModelWorker";
+import StanWorkerUrl from "@SpStanSampler/StanModelWorker?worker&url";
 import type { SamplerParams } from "tinystan";
-import { defaultSamplingOpts, SamplingOpts } from "../Project/ProjectDataModel";
-import { Progress, Replies, Requests } from "./StanModelWorker";
-import StanWorkerUrl from "./StanModelWorker?worker&url";
 
 export type StanSamplerStatus =
   | ""

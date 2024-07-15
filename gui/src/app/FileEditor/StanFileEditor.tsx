@@ -1,5 +1,10 @@
 import { Splitter } from "@fi-sci/splitter";
 import { AutoFixHigh, Cancel, Settings } from "@mui/icons-material";
+import StanCompileResultWindow from "@SpComponents/StanCompileResultWindow";
+import TextEditor, { ToolbarItem } from "@SpComponents/TextEditor";
+import compileStanProgram from "@SpStanc/compileStanProgram";
+import { stancErrorsToCodeMarkers } from "@SpStanc/Linting";
+import useStanc from "@SpStanc/useStanc";
 import {
   FunctionComponent,
   useCallback,
@@ -7,11 +12,6 @@ import {
   useMemo,
   useState,
 } from "react";
-import StanCompileResultWindow from "./StanCompileResultWindow";
-import useStanc from "../Stanc/useStanc";
-import TextEditor, { ToolbarItem } from "./TextEditor";
-import compileStanProgram from "../compileStanProgram/compileStanProgram";
-import { stancErrorsToCodeMarkers } from "../Stanc/Linting";
 
 type Props = {
   fileName: string;

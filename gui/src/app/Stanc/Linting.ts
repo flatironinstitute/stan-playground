@@ -1,4 +1,4 @@
-import { StancErrors } from "./Types";
+import { StancErrors } from "@SpStanc/Types";
 
 type Position = {
   startLineNumber: number;

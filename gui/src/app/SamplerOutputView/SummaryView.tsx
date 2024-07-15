@@ -1,9 +1,13 @@
-import { FunctionComponent, useMemo } from "react";
-import { computeMean, computePercentile, computeStdDev } from "./util";
 import {
   compute_effective_sample_size,
   compute_split_potential_scale_reduction,
-} from "./stan_stats/stan_stats";
+} from "@SpStanStats/stan_stats";
+import {
+  computeMean,
+  computePercentile,
+  computeStdDev,
+} from "@SpStanStats/summaryStats";
+import { FunctionComponent, useMemo } from "react";
 
 type SummaryViewProps = {
   width: number;
