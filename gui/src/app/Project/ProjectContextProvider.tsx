@@ -68,7 +68,11 @@ const ProjectContextProvider: FunctionComponent<
         // set title so that history is better preserved in the browser
         document.title = "Stan Playground - " + data.meta.title;
         // clear search parameters now that load is complete
+        // this creates a new history entry
         setSearchParams(new URLSearchParams());
+        // set the title again, making it clearer that this entry is not
+        // the one loaded from the query parameters
+        document.title = "Stan Playground - Editing " + data.meta.title;
       });
     } else {
       // load the saved state on first load

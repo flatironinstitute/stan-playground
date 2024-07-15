@@ -73,7 +73,7 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
   const topBarHeight = 22;
 
   useEffect(() => {
-    document.title = "Stan Playground - " + data.meta.title;
+    document.title = "Stan Playground - Editing " + data.meta.title;
   }, [data.meta.title]);
 
   return (
