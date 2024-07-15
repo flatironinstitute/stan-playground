@@ -1,4 +1,4 @@
-import { Splitter } from "@fi-sci/splitter";
+import ProjectContextProvider, { ProjectContext } from "@SpCore/ProjectContextProvider";
 import {
   FunctionComponent,
   useContext,
@@ -6,15 +6,15 @@ import {
   useRef,
   useState,
 } from "react";
-import DataFileEditor from "../../FileEditor/DataFileEditor";
-import StanFileEditor from "../../FileEditor/StanFileEditor";
-import ProjectContextProvider, { ProjectContext } from "../../Project/ProjectContextProvider";
-import { ProjectKnownFiles, modelHasUnsavedChanges } from "../../Project/ProjectDataModel";
-import LeftPanel from "./LeftPanel";
-import SamplingWindow from "./SamplingWindow/SamplingWindow";
 import TopBar from "./TopBar";
-import TabWidget from "../../TabWidget/TabWidget";
+import LeftPanel from "./LeftPanel";
+import { Splitter } from "@fi-sci/splitter";
+import { ProjectKnownFiles, modelHasUnsavedChanges } from "@SpCore/ProjectDataModel";
+import TabWidget from "@SpComponents/TabWidget";
+import SamplingWindow from "./SamplingWindow/SamplingWindow";
 import DataGenerationWindow from "./DataGenerationWindow/DataGenerationWindow";
+import StanFileEditor from "@SpComponents/StanFileEditor";
+import DataFileEditor from "@SpComponents/DataFileEditor";
 
 type Props = {
   width: number;

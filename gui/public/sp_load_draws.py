@@ -59,9 +59,5 @@ class DrawsObject:
         return pnames
 
 
-def sp_load_draws():
-    import json
-
-    with open("_sp_data.json") as f:
-        _sp_data = json.load(f)
-    return DrawsObject(_sp_data)
+def sp_load_draws(sp_data):
+    return DrawsObject(sp_data)

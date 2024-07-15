@@ -1,10 +1,10 @@
 import {
   StancFunction,
+  StancReplyMessage,
   StancRequestMessage,
   StancWorkerRequests,
-  StancReplyMessage,
-} from "./Types";
-import rawStancJS from "./stanc.js?raw"; // https://vitejs.dev/guide/assets#importing-asset-as-string
+} from "@SpStanc/Types";
+import rawStancJS from "@SpStanc/stanc.js?raw"; // https://vitejs.dev/guide/assets#importing-asset-as-string
 
 let stanc: undefined | StancFunction;
 try {

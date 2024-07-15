@@ -107,7 +107,7 @@ const run = async (code: string, spData: any) => {
     const scriptPreamble = getScriptPreable(pyodideWorkerMode);
 
     // here's where we can pass in globals
-    const globals = pyodide.toPy({ _stan_playground: true });
+    const globals = pyodide.toPy({ _stan_playground: true, sp_data: spData });
     let script = scriptPreamble + "\n" + code;
 
     if (pyodideWorkerMode === "data.py") {
@@ -131,9 +131,6 @@ const run = async (code: string, spData: any) => {
           setStatus("running");
         }
       }
-      pyodide.FS.writeFile("_sp_data.json", JSON.stringify(spData), {
-        encoding: "utf-8",
-      });
       pyodide.runPython(script, { globals });
       succeeded = true;
     } catch (e: any) {
@@ -225,7 +222,7 @@ def patch_matplotlib(SP_IMAGES):
 patch_matplotlib(SP_IMAGES)
 
 from sp_load_draws import sp_load_draws
-draws = sp_load_draws()
+draws = sp_load_draws(sp_data)
 `;
   } else {
     return "";

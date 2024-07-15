@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import TabWidgetTabBar from "@SpComponents/TabWidgetTabBar";
 import {
   FunctionComponent,
   PropsWithChildren,
@@ -7,7 +8,6 @@ import {
   useMemo,
   useState,
 } from "react";
-import TabWidgetTabBar from "./TabWidgetTabBar";
 
 type Props = {
   tabs: {

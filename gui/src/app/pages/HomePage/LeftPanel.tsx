@@ -1,11 +1,11 @@
+import { ProjectContext } from "@SpCore/ProjectContextProvider";
+import examplesStanies, { Stanie } from "@SpExamples/exampleStanies";
+import LoadProjectWindow from "@SpPages/LoadProjectWindow";
+import SaveProjectWindow from "@SpPages/SaveProjectWindow";
 import { Hyperlink, SmallIconButton } from "@fi-sci/misc";
 import ModalWindow, { useModalWindow } from "@fi-sci/modal-window";
-import { FunctionComponent, useCallback, useContext } from "react";
-import examplesStanies, { Stanie } from "../../exampleStanies/exampleStanies";
-import { ProjectContext } from "../../Project/ProjectContextProvider";
-import SaveProjectWindow from "./SaveProjectWindow";
-import LoadProjectWindow from "./LoadProjectWindow";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
+import { FunctionComponent, useCallback, useContext } from "react";
 
 type LeftPanelProps = {
   width: number;
