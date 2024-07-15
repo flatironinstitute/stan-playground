@@ -1,4 +1,3 @@
-import { afterEach, describe, expect, test, vi } from "vitest";
 import {
   defaultSamplingOpts,
   getStringKnownFileKeys,
@@ -6,11 +5,10 @@ import {
   ProjectDataModel,
   ProjectKnownFiles,
   SamplingOpts,
-} from "../../../src/app/Project/ProjectDataModel";
-import ProjectReducer, {
-  ProjectReducerAction,
-} from "../../../src/app/Project/ProjectReducer";
-import exampleStanies from "../../../src/app/exampleStanies/exampleStanies";
+} from "@SpCore/ProjectDataModel";
+import ProjectReducer, { ProjectReducerAction } from "@SpCore/ProjectReducer";
+import exampleStanies from "@SpExamples/exampleStanies";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
 const mockedConsoleError = vi
   .spyOn(console, "error")
@@ -22,16 +20,11 @@ const hoistedMocks = vi.hoisted(() => {
   };
 });
 
-vi.mock(
-  "../../../src/app/Project/ProjectSerialization",
-  async (importOriginal) => {
-    const base =
-      await importOriginal<
-        typeof import("../../../src/app/Project/ProjectSerialization")
-      >();
-    return { ...base, loadFromProjectFiles: hoistedMocks.mockedLoad };
-  },
-);
+vi.mock("@SpCore/ProjectSerialization", async (importOriginal) => {
+  const base =
+    await importOriginal<typeof import("@SpCore/ProjectSerialization")>();
+  return { ...base, loadFromProjectFiles: hoistedMocks.mockedLoad };
+});
 
 afterEach(() => {
   mockedConsoleError.mockClear();
