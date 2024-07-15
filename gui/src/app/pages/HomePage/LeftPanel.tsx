@@ -5,6 +5,7 @@ import { SmallIconButton } from "@fi-sci/misc";
 import ModalWindow, { useModalWindow } from "@fi-sci/modal-window";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { FunctionComponent, useContext } from "react";
+import { Link } from "react-router-dom";
 
 type LeftPanelProps = {
   width: number;
@@ -79,9 +80,7 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({
 
         {examplesStanies.map((stanie, i) => (
           <div key={i} style={{ margin: 5 }}>
-            <a href={`?project=${stanie.link}`} rel="noreferrer">
-              {stanie.name}
-            </a>
+            <Link to={`?project=${stanie.link}`}>{stanie.name}</Link>
           </div>
         ))}
         <hr />
