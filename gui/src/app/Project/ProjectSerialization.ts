@@ -1,5 +1,3 @@
-import JSZip from "jszip";
-import { replaceSpacesWithUnderscores } from "../util/replaceSpaces";
 import {
   FieldsContentsMap,
   FileNames,
@@ -7,7 +5,7 @@ import {
   ProjectFileMap,
   mapFileContentsToModel,
   mapModelToFileManifest,
-} from "./FileMapping";
+} from "@SpCore/FileMapping";
 import {
   ProjectDataModel,
   ProjectKnownFiles,
@@ -17,7 +15,9 @@ import {
   isProjectMetaData,
   parseSamplingOpts,
   persistStateToEphemera,
-} from "./ProjectDataModel";
+} from "@SpCore/ProjectDataModel";
+import { replaceSpacesWithUnderscores } from "@SpUtil/replaceSpaces";
+import JSZip from "jszip";
 
 export const serializeProjectToLocalStorage = (
   data: ProjectDataModel,

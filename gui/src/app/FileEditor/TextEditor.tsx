@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Hyperlink, SmallIconButton } from "@fi-sci/misc";
 import { Editor } from "@monaco-editor/react";
 import { Refresh, Save } from "@mui/icons-material";
+import { highlightJsData } from "@SpComponents/stanLang";
+import { CodeMarker } from "@SpStanc/Linting";
 import { editor } from "monaco-editor";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import {
@@ -10,9 +13,6 @@ import {
   useEffect,
   useState,
 } from "react";
-import { highlightJsData } from "./stanLang";
-import { Hyperlink, SmallIconButton } from "@fi-sci/misc";
-import { CodeMarker } from "../Stanc/Linting";
 
 type Monaco = typeof monaco;
 

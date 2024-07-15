@@ -1,7 +1,7 @@
 import { useWindowDimensions } from "@fi-sci/misc";
+import HomePage from "@SpPages/HomePage";
 import { FunctionComponent } from "react";
 import StatusBar, { statusBarHeight } from "./StatusBar";
-import HomePage from "./pages/HomePage/HomePage";
 
 type Props = {
   // none

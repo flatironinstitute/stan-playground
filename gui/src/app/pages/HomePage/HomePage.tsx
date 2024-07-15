@@ -1,18 +1,12 @@
-import { Splitter } from "@fi-sci/splitter";
-import {
-  FunctionComponent,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import DataFileEditor from "../../FileEditor/DataFileEditor";
-import StanFileEditor from "../../FileEditor/StanFileEditor";
-import ProjectContextProvider, { ProjectContext } from "../../Project/ProjectContextProvider";
-import { ProjectKnownFiles, modelHasUnsavedChanges } from "../../Project/ProjectDataModel";
-import LeftPanel from "./LeftPanel";
-import SamplingWindow from "./SamplingWindow/SamplingWindow";
+import ProjectContextProvider, { ProjectContext } from "@SpCore/ProjectContextProvider";
+import { FunctionComponent, useContext, useEffect, useRef, useState } from "react";
 import TopBar from "./TopBar";
+import LeftPanel from "./LeftPanel";
+import { Splitter } from "@fi-sci/splitter";
+import SamplingWindow from "./SamplingWindow/SamplingWindow";
+import StanFileEditor from "@SpComponents/StanFileEditor";
+import { ProjectKnownFiles, modelHasUnsavedChanges } from "@SpCore/ProjectDataModel";
+import DataFileEditor from "@SpComponents/DataFileEditor";
 
 type Props = {
   width: number;

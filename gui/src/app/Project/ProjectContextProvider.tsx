@@ -1,3 +1,18 @@
+import { initialDataModel, ProjectDataModel } from "@SpCore/ProjectDataModel";
+import {
+  fetchRemoteProject,
+  fromQueryParams,
+  queryStringHasParameters,
+} from "@SpCore/ProjectQueryLoading";
+import {
+  ProjectReducer,
+  ProjectReducerAction,
+  ProjectReducerType,
+} from "@SpCore/ProjectReducer";
+import {
+  deserializeProjectFromLocalStorage,
+  serializeProjectToLocalStorage,
+} from "@SpCore/ProjectSerialization";
 import {
   createContext,
   FunctionComponent,
@@ -6,21 +21,6 @@ import {
   useReducer,
 } from "react";
 import { useSearchParams } from "react-router-dom";
-import { initialDataModel, ProjectDataModel } from "./ProjectDataModel";
-import {
-  fetchRemoteProject,
-  fromQueryParams,
-  queryStringHasParameters,
-} from "./ProjectQueryLoading";
-import {
-  ProjectReducer,
-  ProjectReducerAction,
-  ProjectReducerType,
-} from "./ProjectReducer";
-import {
-  deserializeProjectFromLocalStorage,
-  serializeProjectToLocalStorage,
-} from "./ProjectSerialization";
 
 type ProjectContextType = {
   data: ProjectDataModel;
