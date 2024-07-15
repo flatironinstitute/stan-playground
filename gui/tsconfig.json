@@ -44,8 +44,7 @@
       ],
       "@SpStanSampler/*": ["app/StanSampler/*"],
       "@SpUtil/*": ["app/util/*"],
-      "@SpStanStats/*": ["app/util/stan_stats/*"],
-      "@SpExamples/*": ["app/exampleStanies/*"]
+      "@SpStanStats/*": ["app/util/stan_stats/*"]
     }
   },
   "include": ["src", "test"],
