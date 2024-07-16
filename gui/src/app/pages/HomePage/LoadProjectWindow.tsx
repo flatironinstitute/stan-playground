@@ -116,7 +116,7 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
           <li>An individual data.json file</li>
         </ul>
       </div>
-      <div style={{ color: "red" }}>{errorText}</div>
+      <div className="ErrorText">{errorText}</div>
       {!filesUploaded ? (
         <div>
           <UploadFilesArea height={300} onUpload={setFilesUploaded} />

@@ -31,16 +31,8 @@ const UploadFilesArea: FunctionComponent<UploadFilesAreaProps> = ({
   );
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
   return (
-    <div style={{ height, border: "1px solid black", padding: 10 }}>
-      <div
-        {...getRootProps()}
-        style={{
-          height: "100%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
+    <div className="FileDropAreaWrapper" style={{ height }}>
+      <div {...getRootProps()} className="FileDropAreaInner">
         <input {...getInputProps()} />
         {isDragActive ? (
           <p>Drop the files here ...</p>

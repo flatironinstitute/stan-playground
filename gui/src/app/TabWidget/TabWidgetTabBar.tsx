@@ -44,13 +44,11 @@ const TabWidgetTabBar: FunctionComponent<Props> = ({
           label={
             <span>
               {tab.icon ? (
-                <span style={{ marginRight: 4 }}>{tab.icon}</span>
+                <span className="TabBarIcon">{tab.icon}</span>
               ) : (
                 <span />
               )}
-              <span style={{ textTransform: "none", fontSize: 14 }}>
-                {tab.label}
-              </span>
+              <span className="TabBarLabel">{tab.label}</span>
               &nbsp;&nbsp;
               {tab.closeable && onCloseTab && (
                 <span

@@ -48,16 +48,8 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({
 
   if (collapsed) {
     return (
-      <div
-        style={{
-          position: "absolute",
-          width,
-          height,
-          backgroundColor: "lightgray",
-          overflowY: "auto",
-        }}
-      >
-        <div style={{ margin: 5 }}>
+      <div className="LeftMenu" style={{ width, height }}>
+        <div className="LeftMenuContentWrapper">
           <ExpandButton onClick={() => onSetCollapsed(false)} />
         </div>
       </div>
@@ -65,21 +57,13 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({
   }
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        width,
-        height,
-        backgroundColor: "lightgray",
-        overflowY: "auto",
-      }}
-    >
-      <div style={{ margin: 5 }}>
+    <div className="LeftMenu" style={{ width, height }}>
+      <div className="LeftMenuContentWrapper">
         <CollapseButton onClick={() => onSetCollapsed(true)} />
         <h3>Examples</h3>
 
         {examplesStanies.map((stanie, i) => (
-          <div key={i} style={{ margin: 5 }}>
+          <div key={i} className="LeftMenuContentWrapper">
             <Link replace to={`?project=${stanie.link}`}>
               {stanie.name}
             </Link>
