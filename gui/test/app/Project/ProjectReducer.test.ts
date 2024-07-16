@@ -1,5 +1,4 @@
 import {
-  defaultSamplingOpts,
   getStringKnownFileKeys,
   initialDataModel,
   ProjectDataModel,
@@ -7,7 +6,6 @@ import {
   SamplingOpts,
 } from "@SpCore/ProjectDataModel";
 import ProjectReducer, { ProjectReducerAction } from "@SpCore/ProjectReducer";
-import exampleStanies from "@SpExamples/exampleStanies";
 import { afterEach, describe, expect, test, vi } from "vitest";
 
 const mockedConsoleError = vi
@@ -47,35 +45,6 @@ const ephemeralFiles = {
 };
 
 describe("Project reducer", () => {
-  describe("Loading example Stan project", () => {
-    // This will be a little brittle, since the example is only defined as
-    // data in another file.
-    const example = exampleStanies[0];
-    const loadExampleAction: ProjectReducerAction = {
-      type: "loadStanie",
-      stanie: example,
-    };
-    const dataFileContent = JSON.stringify(example.data, null, 2);
-
-    test("Loads example Stan project", () => {
-      const result = ProjectReducer(fakeEmptyProjectData, loadExampleAction);
-      expect(result.stanFileContent).toEqual(example.stan);
-      expect(result.dataFileContent).toEqual(dataFileContent);
-      expect(result.samplingOpts).toEqual(defaultSamplingOpts);
-      expect(result.meta).toEqual(example.meta);
-      expect(result.ephemera).toEqual({
-        stanFileContent: example.stan,
-        dataFileContent,
-      });
-    });
-
-    test("Sets loaded project title to 'Untitled' if missing", () => {
-      const load = { ...loadExampleAction, stanie: { ...example, meta: {} } };
-      const result = ProjectReducer(fakeEmptyProjectData, load);
-      expect(result.meta.title).toBe("Untitled");
-    });
-  });
-
   describe("Loading project from files", () => {
     const mockFiles = { stanFileContent: "stan file stuff" };
     const loadAction: ProjectReducerAction = {
