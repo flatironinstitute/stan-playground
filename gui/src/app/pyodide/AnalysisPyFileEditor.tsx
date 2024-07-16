@@ -62,6 +62,7 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
         const imageUrl = `data:image/png;base64,${b64}`;
 
         const img = document.createElement("img");
+        img.style.width = "100%";
         img.src = imageUrl;
 
         const divElement = document.createElement("div");
