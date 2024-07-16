@@ -49,11 +49,9 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
   useEffect(() => {
     const worker = PyodideWorkerInterface.create({
       onStdout: (x) => {
-        console.log(x);
         writeConsoleOutToDiv(consoleOutputDiv, x, "stdout");
       },
       onStderr: (x) => {
-        console.error(x);
         writeConsoleOutToDiv(consoleOutputDiv, x, "stderr");
       },
       onStatus: (status) => {

@@ -38,13 +38,13 @@ class PyodideWorkerInterface {
         callbacks.onStderr(msg.data);
       } else if (msg.type === "setData") {
         if (!callbacks.onData) {
-          console.error("onData callback is required for data.py mode");
+          console.error("onData callback is required for data production");
           return;
         }
         callbacks.onData(msg.data);
       } else if (msg.type === "addImage") {
         if (!callbacks.onImage) {
-          console.error("onImage callback is required for analysis.py mode");
+          console.error("onImage callback is required for plotting");
           return;
         }
         callbacks.onImage(msg.image);

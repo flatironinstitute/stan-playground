@@ -1,10 +1,15 @@
 # Used in pyodideWorker for running analysis.py
 
-from typing import List, TypedDict
+from typing import TYPE_CHECKING, List, TypedDict
 
 import numpy as np
 import pandas as pd
 import stanio
+
+# We don't import this unconditionaly because
+# we only install it when the user's script needs it
+if TYPE_CHECKING:
+    from arviz import InferenceData
 
 
 class SpData(TypedDict):
@@ -34,6 +39,7 @@ class DrawsObject:
         Methods:
         - as_dataframe(): return a pandas DataFrame of the draws.
         - as_numpy(): return a numpy array indexed by (chain, draw, parameter)
+        - as_arviz(): return an arviz InferenceData object
         - get(pname: str): return a numpy array of the parameter values for the given parameter name"""
 
     def as_dataframe(self) -> pd.DataFrame:
@@ -59,6 +65,13 @@ class DrawsObject:
         if pname not in self._params:
             raise ValueError(f"Parameter {pname} not found")
         return self._params[pname].extract_reshape(self._draws)
+
+    def to_arviz(self) -> "InferenceData":
+        import arviz as az
+
+        return az.from_dict(
+            posterior={pname: self.get(pname) for pname in self.parameter_names},
+        )
 
     @property
     def parameter_names(self) -> List[str]:

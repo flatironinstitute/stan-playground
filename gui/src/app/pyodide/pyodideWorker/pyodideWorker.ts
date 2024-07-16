@@ -46,8 +46,6 @@ const loadPyodideInstance = async () => {
       packages: ["numpy", "micropip", "pandas"],
     });
     setStatus("installing");
-    const micropip = pyodide.pyimport("micropip");
-    await micropip.install("stanio");
 
     pyodide.FS.writeFile("sp_load_draws.py", spDrawsScript, {
       encoding: "utf-8",
@@ -97,12 +95,21 @@ const run = async (
 
     let succeeded = false;
     try {
-      if (script.includes("arviz")) {
-        await pyodide.loadPackage("micropip");
-        const microPip = pyodide.pyimport("micropip");
-        await microPip.install("arviz<0.18");
+      const packageFutures = [];
+      const micropip = pyodide.pyimport("micropip");
+
+      if (spPySettings.showsPlots) {
+        packageFutures.push(pyodide.loadPackage("matplotlib"));
+
+        if (script.includes("arviz")) {
+          packageFutures.push(micropip.install("arviz<0.18"));
+        }
       }
-      await pyodide.loadPackagesFromImports(script);
+      packageFutures.push(micropip.install("stanio"));
+      packageFutures.push(pyodide.loadPackagesFromImports(script));
+      for (const f of packageFutures) {
+        await f;
+      }
 
       setStatus("running");
       pyodide.runPython(script, { globals });
@@ -137,7 +144,11 @@ const getScriptParts = (
 from sp_patch_matplotlib import patch_matplotlib
 patch_matplotlib(_SP_ADD_IMAGE)
 `;
-    // todo: should we also automatically call plt.show()?
+
+    postamble += `
+import matplotlib.pyplot as plt
+plt.show()
+`;
   }
 
   if (spData) {
