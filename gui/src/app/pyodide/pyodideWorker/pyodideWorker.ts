@@ -9,6 +9,30 @@ import spMPLScript from "./sp_patch_matplotlib.py?raw";
 
 let pyodide: PyodideInterface | null = null;
 
+const sendMessageToMain = (message: MessageFromPyodideWorker) => {
+  self.postMessage(message);
+};
+
+const sendStdout = (data: string) => {
+  sendMessageToMain({ type: "stdout", data });
+};
+
+const sendStderr = (data: string) => {
+  sendMessageToMain({ type: "stderr", data });
+};
+
+const setStatus = (status: PyodideWorkerStatus) => {
+  sendMessageToMain({ type: "setStatus", status });
+};
+
+const setData = (data: any) => {
+  sendMessageToMain({ type: "setData", data });
+};
+
+const addImage = (image: any) => {
+  sendMessageToMain({ type: "addImage", image });
+};
+
 const loadPyodideInstance = async () => {
   if (pyodide === null) {
     pyodide = await loadPyodide({
@@ -43,30 +67,6 @@ self.onmessage = async (e) => {
   await run(message.code, message.spData, message.spRunSettings);
 };
 
-const sendMessageToMain = (message: MessageFromPyodideWorker) => {
-  self.postMessage(message);
-};
-
-const sendStdout = (data: string) => {
-  sendMessageToMain({ type: "stdout", data });
-};
-
-const sendStderr = (data: string) => {
-  sendMessageToMain({ type: "stderr", data });
-};
-
-const setStatus = (status: PyodideWorkerStatus) => {
-  sendMessageToMain({ type: "setStatus", status });
-};
-
-const setData = (data: any) => {
-  sendMessageToMain({ type: "setData", data });
-};
-
-const addImage = (image: any) => {
-  sendMessageToMain({ type: "addImage", image });
-};
-
 const run = async (
   code: string,
   spData: Record<string, any> | undefined,
@@ -81,10 +81,17 @@ const run = async (
       spData,
     );
 
-    const globals = pyodide.toPy({
+    const globalsJS: { [key: string]: any } = {
       _stan_playground: true,
-      _SP_DATA_IN: spData,
-    });
+    };
+    if (spData) {
+      globalsJS._SP_DATA_IN = spData;
+    }
+    if (spPySettings.showsPlots) {
+      globalsJS._SP_ADD_IMAGE = addImage;
+    }
+
+    const globals = pyodide.toPy(globalsJS);
 
     const script = scriptPreamble + "\n" + code + "\n" + scriptPostamble;
 
@@ -105,15 +112,6 @@ const run = async (
       sendStderr(e.toString());
     }
 
-    if (spPySettings.showsPlots) {
-      const images = globals.get("_SP_IMAGES").toJs();
-      if (!isListOfStrings(images)) {
-        throw new Error("Expected SP_IMAGES to be a list of strings");
-      }
-      for (const image of images) {
-        addImage(image);
-      }
-    }
     if (spPySettings.producesData) {
       const data = JSON.parse(globals.get("_SP_DATA").toJs());
       setData(data);
@@ -137,9 +135,9 @@ const getScriptParts = (
   if (spPySettings.showsPlots) {
     preamble += `
 from sp_patch_matplotlib import patch_matplotlib
-_SP_IMAGES = []
-patch_matplotlib(_SP_IMAGES)
+patch_matplotlib(_SP_ADD_IMAGE)
 `;
+    // todo: should we also automatically call plt.show()?
   }
 
   if (spData) {
@@ -161,9 +159,4 @@ _SP_DATA = stanio.dump_stan_json(data)
   }
 
   return [preamble, postamble];
-};
-
-const isListOfStrings = (x: any): x is string[] => {
-  if (!x) return false;
-  return Array.isArray(x) && x.every((y) => typeof y === "string");
 };

@@ -2,10 +2,10 @@
 # replace show() with a function that base64 encodes the image and then stashes it for us
 
 
-from typing import List
+from typing import Callable
 
 
-def patch_matplotlib(image_list: List[str]) -> None:
+def patch_matplotlib(post_image: Callable[[str], None]) -> None:
     import os
 
     os.environ["MPLBACKEND"] = "AGG"
@@ -21,7 +21,8 @@ def patch_matplotlib(image_list: List[str]) -> None:
         matplotlib.pyplot.savefig(buf, format="png")
         buf.seek(0)
         # encode to a base64 str
-        image_list.append(base64.b64encode(buf.read()).decode("utf-8"))
+        str_image = base64.b64encode(buf.read()).decode("utf-8")
+        post_image(str_image)
         matplotlib.pyplot.clf()
 
     matplotlib.pyplot.show = show
