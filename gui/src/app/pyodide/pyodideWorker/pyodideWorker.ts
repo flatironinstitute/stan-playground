@@ -145,6 +145,7 @@ _SP_IMAGES = []
     preamble += `
 from sp_load_draws import sp_load_draws
 draws = sp_load_draws(_SP_DATA_IN)
+del _SP_DATA_IN
 `;
   }
 
