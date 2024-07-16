@@ -39,8 +39,8 @@ const CompilationServerConnectionControl: FunctionComponent<
         : "custom";
   return (
     <span>
-      <span style={{ fontSize: 12 }}>
-        <span style={{ color: isConnected ? "lightgreen" : "pink" }}>
+      <span className="CompilationServerConnectionPane">
+        <span className={isConnected ? "connected" : "disconnected"}>
           <SmallIconButton
             icon={isConnected ? <Check /> : <Cancel />}
             onClick={openDialog}
@@ -122,9 +122,9 @@ const ConfigureCompilationServerDialog: FunctionComponent<
       <hr />
       <div>
         {isConnected ? (
-          <span style={{ color: "green" }}>Connected</span>
+          <span className="connected">Connected</span>
         ) : (
-          <span style={{ color: "red" }}>Not connected</span>
+          <span className="disconnected">Not connected</span>
         )}
         &nbsp;
         <Hyperlink onClick={onRetry}>retry</Hyperlink>
@@ -171,6 +171,7 @@ const ConfigureCompilationServerDialog: FunctionComponent<
         <br />
 
         <input
+          // This one isn't honoring a class-based style for some reason
           style={{ width: 500 }}
           disabled={choice !== "custom"}
           type="text"

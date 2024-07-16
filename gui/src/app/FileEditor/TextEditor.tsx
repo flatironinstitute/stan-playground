@@ -201,27 +201,19 @@ const TextEditor: FunctionComponent<Props> = ({
   const toolbarHeight = 25;
   return (
     <div
-      style={{ position: "absolute", width, height, overflow: "hidden" }}
+      className="AbsoluteHidden"
+      style={{ width, height }}
       onKeyDown={handleKeyDown}
     >
       <NotSelectable>
         <div
+          className="EditorMenuBar"
           style={{
-            position: "absolute",
-            paddingLeft: 20,
-            paddingTop: 3,
             width: width,
             height: toolbarHeight,
-            backgroundColor: "lightgray",
-            overflow: "hidden",
           }}
         >
-          <span
-            // drop it down a bit
-            style={{ position: "relative", top: 1 }}
-          >
-            {label}
-          </span>
+          <span className="EditorTitle">{label}</span>
           &nbsp;&nbsp;&nbsp;
           {!readOnly && (
             <SmallIconButton
@@ -233,11 +225,9 @@ const TextEditor: FunctionComponent<Props> = ({
             />
           )}
           &nbsp;&nbsp;&nbsp;
-          {editedText !== text && (
-            <span style={{ color: "#a33", fontSize: 12 }}>edited</span>
-          )}
+          {editedText !== text && <span className="EditedText">edited</span>}
           &nbsp;&nbsp;&nbsp;
-          {readOnly && <span style={{ color: "gray" }}>read only</span>}
+          {readOnly && <span className="ReadOnlyText">read only</span>}
           &nbsp;&nbsp;&nbsp;
           {onReload && (
             <LowerABit numPixels={2}>
@@ -254,8 +244,8 @@ const TextEditor: FunctionComponent<Props> = ({
         </div>
       </NotSelectable>
       <div
+        className="EditorWrapper"
         style={{
-          position: "absolute",
           top: toolbarHeight,
           width,
           height: height - toolbarHeight,
@@ -340,6 +330,7 @@ const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
   }
 };
 
+// TODO: Consider whether to change this
 const LowerABit: FunctionComponent<
   PropsWithChildren<{ numPixels: number }>
 > = ({ children, numPixels }) => {
@@ -349,7 +340,7 @@ const LowerABit: FunctionComponent<
 };
 
 const NotSelectable: FunctionComponent<PropsWithChildren> = ({ children }) => {
-  return <div style={{ userSelect: "none" }}>{children}</div>;
+  return <div className="NotSelectable">{children}</div>;
 };
 
 export default TextEditor;

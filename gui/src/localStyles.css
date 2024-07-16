@@ -1,73 +1,320 @@
-.unitEntryBase {
-  padding-right: 13px;
-  padding-top: 10px;
+/* General */
+
+.ErrorText {
+  color: red;
 }
 
-.unselectedUnitEntry {
-  border: 1px transparent solid;
-  font-weight: normal;
-  color: black;
-  background-color: white;
+.Absolute {
+  position: absolute;
 }
 
-.selectedUnitEntry {
-  border: 1px solid blue;
-  font-weight: bold;
-  color: black;
-  background-color: #b5d1ff;
-}
-
-.unitIdsColumnLabelStyle {
-  min-width: 200px;
-  font-weight: bold;
-  padding: 7px 5px 7px 5px;
-}
-
-.unitLabelsStyle {
-  padding-right: 3px;
-  color: #333333;
-}
-
-.plotUnitLabel {
-  text-align: left;
-  margin-left: 20px;
-  margin-top: 5px;
-  font-weight: bold;
-}
-
-/* .plotWrapperStyle {
-    min-height: 228px;
-    min-width: 206px;
-} */
-
-.plotWrapperButtonParent {
-  display: inline-block;
-}
-
-.plotWrapperStyleButton {
-  padding-top: 50px;
-}
-
-.plotUnselectedStyle {
-  border: 3px solid rgb(202, 224, 231);
-}
-
-.plotSelectedStyle {
-  border: 3px solid #9999ff;
-  background-color: white;
-}
-.plotUnselectableStyle {
-  border: 3px solid transparent;
-}
-
-.plotCurrentStyle {
-  border: 3px solid blue;
-  background-color: white;
-}
-
-.plotLabelStyle {
-  font-weight: bold;
-  text-align: center;
+.AbsoluteHidden {
+  position: absolute;
   overflow: hidden;
-  white-space: nowrap;
+}
+
+/* Compilation server connection mgmt */
+.connected {
+  color: green;
+}
+
+.disconnected {
+  color: red;
+}
+
+.CompilationServerConnectionPane {
+  font-size: 12px;
+}
+
+.CompilationServerConnectionPane .connected {
+  color: lightgreen;
+}
+
+.CompilationServerConnectionPane .disconnected {
+  color: pink;
+}
+
+/* Compilation Results (StanCompileResultWindow) */
+.CompileErrorsPane {
+  color: red;
+  padding: 0px;
+  overflow: auto;
+}
+
+.ErrorWarningMessage {
+  font-family: "courier";
+  font-size: 13px;
+}
+
+.CompileWarningsPane {
+  color: blue;
+  padding: 0px;
+  overflow: auto;
+}
+
+.CompilationDone {
+  color: green;
+}
+
+/* Main window */
+.MainWindow {
+  position: absolute;
+  overflow: hidden;
+}
+
+.MainWindowContent {
+  position: absolute;
+  top: 0px;
+  overflow: hidden;
+}
+
+.MainWindowStatusBar {
+  position: absolute;
+  bottom: 0px;
+  background-color: #eee;
+  overflow: hidden;
+}
+
+/* Home Page */
+.MainHomePage {
+  position: absolute;
+  overflow: hidden;
+}
+
+/* NOTE: These should be combined with the existing single-element-class CSS for the elements;
+I haven't done this because those currently live in separate other files... */
+.TopBarPosition {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  overflow: hidden;
+}
+
+.LeftMenuPanelPosition {
+  position: absolute;
+  left: 0px;
+  overflow: auto;
+}
+
+.MainAreaPosition {
+  position: absolute;
+  overflow: hidden;
+}
+
+.RunPanelPosition {
+  top: 0px;
+}
+
+/* Main window status bar */
+
+div.StatusBar {
+  font-size: 12px;
+  padding-top: 3px;
+  padding-left: 5px;
+}
+
+.StatusBar span {
+  position: absolute;
+  right: 5px;
+  color: gray;
+}
+
+.StatusBarItem {
+  padding-left: 10px;
+}
+
+/* Main Window toolbar/TopBar */
+/* !important is not great style, but required to get the Toolbar
+to render its content text properly--needs to trump some of the
+built-in styling.
+I'd feel worse about it except it's what we're already doing already
+with a style tag.
+Anyway, need to revisit. */
+.TopBar {
+  min-height: 20px !important;
+}
+
+.TopBarSpacer {
+  margin-left: auto;
+}
+
+/* Left menu bar */
+.LeftMenu {
+  position: absolute;
+  background-color: lightgray;
+  overflow-y: auto;
+}
+
+.LeftMenuContentWrapper {
+  margin: 5px;
+}
+
+/* File Upload */
+.FileDropAreaWrapper {
+  border: 1px solid black;
+  padding: 10px;
+}
+
+.FileDropAreaInner {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Text Editors ------ */
+
+.EditorMenuBar {
+  position: absolute;
+  padding-left: 20px;
+  padding-top: 3px;
+  background-color: lightgray;
+  overflow: hidden;
+}
+
+span.EditorTitle {
+  position: relative;
+  top: 1px;
+}
+
+.EditedText {
+  color: #a33;
+  font-size: 12px;
+}
+
+.ReadOnlyText {
+  color: gray;
+}
+
+.EditorWrapper {
+  position: absolute;
+}
+
+.NotSelectable {
+  user-select: none;
+}
+
+.StanEditorDefaultText {
+  padding: 20px;
+}
+
+/* Sampling section ---- */
+/* Run-Sampling */
+.RunPanel {
+  position: absolute;
+  overflow-y: auto;
+}
+
+.RunPanelPadded {
+  padding: 5px;
+}
+
+.SamplingProgress {
+  width: 45%;
+}
+
+/* Summary View */
+.SummaryViewWrapper {
+  position: absolute;
+  overflow-y: auto;
+}
+
+/* Draws */
+
+.DrawsTable {
+  position: absolute;
+  overflow: auto;
+}
+
+.DrawAbbreviationToggle {
+  background: white;
+  padding: 5px;
+}
+
+/* Histograms */
+
+.HistogramsWrapper {
+  position: absolute;
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.SequenceHistogram {
+  position: relative;
+}
+
+/* Trace Plots */
+.TracePlotsView {
+  position: absolute;
+  overflow-y: auto;
+}
+
+.SqeuencePlot {
+  position: relative;
+}
+
+.SequencePlotChild {
+  position: relative;
+}
+
+.SequencePlotPadding {
+  height: 4px;
+}
+
+.TracePlotExpandComponent {
+  height: 25px;
+  padding-top: 5px;
+  padding-left: 5px;
+  cursor: pointer;
+  background-color: lightgray;
+}
+
+/* Sampling Opts ------ */
+.SamplingOptsWrapper {
+  padding: 10px;
+}
+
+.SamplingOptsSpacer {
+  position: relative;
+  height: 5px;
+}
+
+.SamplingOptsNumberEditBox {
+  width: 4em;
+}
+
+/* Tab Widget etc ------ */
+
+.TabWidget {
+  position: absolute;
+  overflow: hidden;
+}
+
+.TabWidget-bar {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+}
+
+.TabBarIcon {
+  margin-right: 4px;
+}
+
+.TabBarLabel {
+  text-transform: none;
+  font-size: 14px;
+}
+
+.TabBody {
+  overflow-y: hidden;
+  overflow-x: hidden;
+  position: absolute;
+  left: 0px;
+  background: white;
+}
+
+/* Save/Load Project ------ */
+.GistExplainer {
+  max-width: 800px;
 }

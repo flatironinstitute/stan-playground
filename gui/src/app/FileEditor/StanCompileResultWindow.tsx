@@ -19,12 +19,10 @@ const StanCompileResultWindow: FunctionComponent<Props> = ({
   let content: any;
   if (stancErrors.errors && stancErrors.errors.length > 0) {
     content = (
-      <div
-        style={{ width, height, color: "red", padding: 0, overflow: "auto" }}
-      >
+      <div className="CompileErrorsPane" style={{ width, height }}>
         <h3>Errors</h3>
         {stancErrors.errors.slice(1).map((error, i) => (
-          <div key={i} style={{ font: "courier", fontSize: 13 }}>
+          <div key={i} className="ErrorWarningMessage">
             <pre>{error}</pre>
           </div>
         ))}
@@ -32,12 +30,10 @@ const StanCompileResultWindow: FunctionComponent<Props> = ({
     );
   } else if (stancErrors.warnings && stancErrors.warnings.length > 0) {
     content = (
-      <div
-        style={{ width, height, color: "blue", padding: 0, overflow: "auto" }}
-      >
+      <div className="CompileWarningsPane" style={{ width, height }}>
         <h3>Warnings</h3>
         {stancErrors.warnings.map((warning, i) => (
-          <div key={i} style={{ font: "courier", fontSize: 13 }}>
+          <div key={i} className="ErrorWarningMessage">
             <pre>{warning}</pre>
           </div>
         ))}
@@ -45,7 +41,7 @@ const StanCompileResultWindow: FunctionComponent<Props> = ({
     );
   } else {
     content = (
-      <div style={{ color: "green" }}>
+      <div className="CompilationDone">
         <Done />
       </div>
     );

@@ -21,7 +21,7 @@ const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
   return (
     <div>
       <h3>Save this project</h3>
-      <table className="table1" style={{ maxWidth: 500 }}>
+      <table className="project-summary-table">
         <tbody>
           <tr>
             <td>Title</td>
@@ -121,7 +121,7 @@ const GistExportView: FunctionComponent<GistExportViewProps> = ({
   }, [gitHubPersonalAccessToken, fileManifest, title]);
 
   return (
-    <div style={{ maxWidth: 800 }}>
+    <div className="GistExplainer">
       <h3>Save to GitHub Gist</h3>
       <p>
         In order to save this project as a GitHub Gist, you will need to provide
@@ -147,7 +147,7 @@ const GistExportView: FunctionComponent<GistExportViewProps> = ({
         application,&nbsp; so you should store it securely in a text file for
         future use.
       </p>
-      <table className="table1" style={{ maxWidth: 500 }}>
+      <table className="project-summary-table">
         <tbody>
           <tr>
             <td>GitHub Personal Access Token</td>

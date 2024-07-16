@@ -122,7 +122,7 @@ const SummaryView: FunctionComponent<SummaryViewProps> = ({
   }, [draws, paramNames, drawChainIds, computeTimeSec]);
 
   return (
-    <div style={{ position: "absolute", width, height, overflowY: "auto" }}>
+    <div className="SummaryViewWrapper" style={{ width, height }}>
       <table className="scientific-table">
         <thead>
           <tr>

@@ -14,9 +14,9 @@ type TopBarProps = {
 const TopBar: FunctionComponent<TopBarProps> = ({ title }) => {
   return (
     <div>
-      <Toolbar style={{ minHeight: 20 }}>
+      <Toolbar className="TopBar">
         Stan Playground - {title}
-        <span style={{ marginLeft: "auto" }} />
+        <span className="TopBarSpacer" />
         <CompilationServerConnectionControl />
         <span>
           <SmallIconButton

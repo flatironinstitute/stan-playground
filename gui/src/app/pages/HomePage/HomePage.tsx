@@ -77,29 +77,19 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
   }, [data.meta.title]);
 
   return (
-    <div style={{ position: "absolute", width, height, overflow: "hidden" }}>
+    <div className="MainHomePage" style={{ width, height }}>
       <div
-        className="top-bar"
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          width,
-          height: topBarHeight,
-          overflow: "hidden",
-        }}
+        className="top-bar TopBarPosition"
+        style={{ width, height: topBarHeight }}
       >
         <TopBar title={data.meta.title} width={width} height={topBarHeight} />
       </div>
       <div
-        className="left-panel"
+        className="left-panel LeftMenuPanelPosition"
         style={{
-          position: "absolute",
-          left: 0,
           top: topBarHeight + 2,
           width: leftPanelWidth,
           height: height - topBarHeight - 2,
-          overflow: "auto",
         }}
       >
         <LeftPanel
@@ -111,14 +101,12 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
         />
       </div>
       <div
-        className="main-area"
+        className="main-area MainAreaPosition"
         style={{
-          position: "absolute",
           left: leftPanelWidth,
           top: topBarHeight + 2,
           width: width - leftPanelWidth,
           height: height - topBarHeight - 2,
-          overflow: "hidden",
         }}
       >
         <Splitter
@@ -256,10 +244,10 @@ const RightView: FunctionComponent<RightViewProps> = ({
   const { status: samplerStatus } = useSamplerStatus(sampler);
   const isSampling = samplerStatus === "sampling";
   return (
-    <div style={{ position: "absolute", width, height }}>
+    <div className="Absolute" style={{ width, height }}>
       <div
+        className="Absolute"
         style={{
-          position: "absolute",
           width: samplingOptsPanelWidth,
           height: samplingOptsPanelHeight,
         }}
@@ -270,11 +258,10 @@ const RightView: FunctionComponent<RightViewProps> = ({
         />
       </div>
       <div
+        className="Absolute RunPanelPosition"
         style={{
-          position: "absolute",
           left: samplingOptsPanelWidth,
           width: width - samplingOptsPanelWidth,
-          top: 0,
           height: samplingOptsPanelHeight,
         }}
       >
@@ -288,8 +275,8 @@ const RightView: FunctionComponent<RightViewProps> = ({
         />
       </div>
       <div
+        className="Absolute"
         style={{
-          position: "absolute",
           width,
           top: samplingOptsPanelHeight,
           height: height - samplingOptsPanelHeight,

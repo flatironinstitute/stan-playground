@@ -61,11 +61,11 @@ export const useCustomStatusBarElements = () => {
 const StatusBar: FunctionComponent<Props> = () => {
   const { customStatusBarElements } = useCustomStatusBarElements();
   return (
-    <div style={{ fontSize: 12, paddingTop: 3, paddingLeft: 5 }}>
+    <div className="StatusBar">
       {/* The following is flush right */}
-      <span style={{ position: "absolute", right: 5, color: "gray" }}>
+      <span>
         {Object.keys(customStatusBarElements || {}).map((key) => (
-          <span key={key} style={{ paddingLeft: 10 }}>
+          <span key={key} className="StatusBarItem">
             {(customStatusBarElements || {})[key]}
           </span>
         ))}

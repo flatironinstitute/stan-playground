@@ -1,25 +1,26 @@
-.table1 {
+.project-summary-table {
   border-collapse: collapse;
   width: 100%;
   text-align: left;
   color: #333;
   font-family: "Roboto", sans-serif;
+  max-width: 500px;
 }
 
-.table1 td {
+.project-summary-table td {
   border: 1px solid #dfcece;
   padding: 3px;
 }
 
-.table1 tr:nth-child(even) {
+.project-summary-table tr:nth-child(even) {
   background-color: #f2f2f2;
 }
 
-.table1 tr:hover {
+.project-summary-table tr:hover {
   background-color: #ddd;
 }
 
-.table1 td:first-child {
+.project-summary-table td:first-child {
   font-weight: bold;
 }
 
