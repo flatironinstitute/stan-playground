@@ -7,7 +7,7 @@ import {
 } from "react";
 import { PlayArrow } from "@mui/icons-material";
 import TextEditor, { ToolbarItem } from "../FileEditor/TextEditor";
-import { PydodideWorkerStatus } from "./pyodideWorker/pyodideWorkerTypes";
+import { PyodideWorkerStatus } from "./pyodideWorker/pyodideWorkerTypes";
 import PyodideWorkerInterface from "./pyodideWorker/pyodideWorkerInterface";
 import { GlobalDataForAnalysisPy } from "../pages/HomePage/AnalysisPyWindow/AnalysisPyWindow";
 
@@ -22,7 +22,7 @@ type Props = {
   height: number;
   imageOutputDiv?: HTMLDivElement | null;
   consoleOutputDiv?: HTMLDivElement | null;
-  spData: GlobalDataForAnalysisPy
+  spData: GlobalDataForAnalysisPy | undefined;
   scriptHeader?: string;
 };
 
@@ -38,9 +38,8 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
   imageOutputDiv,
   consoleOutputDiv,
   spData,
-  scriptHeader,
 }) => {
-  const [status, setStatus] = useState<PydodideWorkerStatus>("idle");
+  const [status, setStatus] = useState<PyodideWorkerStatus>("idle");
 
   const [analysisPyWorker, setAnalysisPyWorker] = useState<
     PyodideWorkerInterface | undefined
@@ -48,7 +47,7 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
 
   // worker creation
   useEffect(() => {
-    const worker = PyodideWorkerInterface.create("analysis.py", {
+    const worker = PyodideWorkerInterface.create({
       onStdout: (x) => {
         console.log(x);
         writeConsoleOutToDiv(consoleOutputDiv, x, "stdout");
@@ -78,6 +77,9 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
     };
   }, [consoleOutputDiv, imageOutputDiv]);
 
+  const hasData = useMemo(() => {
+    return spData !== undefined;
+  }, [spData]);
   const handleRun = useCallback(async () => {
     if (status === "running") {
       return;
@@ -94,10 +96,10 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
     if (imageOutputDiv) {
       imageOutputDiv.innerHTML = "";
     }
-    const script = scriptHeader
-      ? scriptHeader + "\n" + fileContent
-      : fileContent;
-    analysisPyWorker.run(script, spData || {});
+    analysisPyWorker.run(fileContent, spData, {
+      showsPlots: true,
+      producesData: false,
+    });
   }, [
     editedFileContent,
     fileContent,
@@ -106,11 +108,11 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
     consoleOutputDiv,
     imageOutputDiv,
     spData,
-    scriptHeader,
   ]);
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     const ret: ToolbarItem[] = [];
-    const runnable = fileContent === editedFileContent && imageOutputDiv && spData.sampling
+    const runnable =
+      fileContent === editedFileContent && imageOutputDiv && hasData;
     if (runnable) {
       ret.push({
         type: "button",
@@ -121,7 +123,7 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
         color: "black",
       });
     }
-    if (!spData.sampling) {
+    if (!hasData) {
       ret.push({
         type: "text",
         label: "Run sampler first",
@@ -143,6 +145,9 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
     } else if (status === "running") {
       label = "Running...";
       color = "blue";
+    } else if (status === "installing") {
+      label = "Installing packages...";
+      color = "blue";
     } else if (status === "completed") {
       label = "Completed";
       color = "green";
@@ -162,7 +167,14 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
       });
     }
     return ret;
-  }, [fileContent, editedFileContent, handleRun, status, imageOutputDiv]);
+  }, [
+    fileContent,
+    editedFileContent,
+    imageOutputDiv,
+    hasData,
+    status,
+    handleRun,
+  ]);
 
   return (
     <TextEditor

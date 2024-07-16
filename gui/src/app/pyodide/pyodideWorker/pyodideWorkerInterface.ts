@@ -3,36 +3,28 @@
 import pyodideWorkerURL from "./pyodideWorker?worker&url";
 import {
   MessageToPyodideWorker,
-  PydodideWorkerStatus,
-  PyodideWorkerMode,
+  PyodideWorkerStatus,
   isMessageFromPyodideWorker,
+  PyodideRunSettings,
 } from "./pyodideWorkerTypes";
 
+// todo make custom hook
 class PyodideWorkerInterface {
-  constructor(
-    private _worker: Worker,
-    private _mode: PyodideWorkerMode,
-  ) {
+  constructor(private _worker: Worker) {
     // do not call this directly, use create() instead
   }
-  static create(
-    mode: PyodideWorkerMode,
-    callbacks: {
-      onStdout: (data: string) => void;
-      onStderr: (data: string) => void;
-      onStatus: (status: PydodideWorkerStatus) => void;
-      onData?: (data: any) => void;
-      onImage?: (image: string) => void;
-    },
-  ) {
+  static create(callbacks: {
+    onStdout: (data: string) => void;
+    onStderr: (data: string) => void;
+    onStatus: (status: PyodideWorkerStatus) => void;
+    onData?: (data: any) => void;
+    onImage?: (image: string) => void;
+  }) {
     const worker = new Worker(pyodideWorkerURL, {
-      name: "pyodideWorker_" + mode,
+      name: "pyodideWorker",
       type: "module",
     });
-    const msg: MessageToPyodideWorker = {
-      type: "setPyodideWorkerMode",
-      mode,
-    };
+
     worker.onmessage = (e: MessageEvent) => {
       const msg = e.data;
       if (!isMessageFromPyodideWorker(msg)) {
@@ -45,20 +37,12 @@ class PyodideWorkerInterface {
       } else if (msg.type === "stderr") {
         callbacks.onStderr(msg.data);
       } else if (msg.type === "setData") {
-        if (mode !== "data.py") {
-          console.error("setData is only supported in data.py mode");
-          return;
-        }
         if (!callbacks.onData) {
           console.error("onData callback is required for data.py mode");
           return;
         }
         callbacks.onData(msg.data);
       } else if (msg.type === "addImage") {
-        if (mode !== "analysis.py") {
-          console.error("addImage is only supported in analysis.py mode");
-          return;
-        }
         if (!callbacks.onImage) {
           console.error("onImage callback is required for analysis.py mode");
           return;
@@ -66,20 +50,24 @@ class PyodideWorkerInterface {
         callbacks.onImage(msg.image);
       }
     };
-    worker.postMessage(msg);
-    return new PyodideWorkerInterface(worker, mode);
+    return new PyodideWorkerInterface(worker);
   }
-  run(code: string, spData: { [key: string]: any }) {
+  run(
+    code: string,
+    spData: Record<string, any> | undefined,
+    spRunSettings: PyodideRunSettings,
+  ) {
     const msg: MessageToPyodideWorker = {
       type: "run",
       code,
       spData,
+      spRunSettings,
     };
     this._worker.postMessage(msg);
   }
 
   destroy() {
-    console.log(`terminating ${this._mode} worker`);
+    console.log(`terminating pyodide worker`);
     this._worker.terminate();
   }
 }
