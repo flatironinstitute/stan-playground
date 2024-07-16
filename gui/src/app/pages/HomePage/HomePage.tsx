@@ -1,11 +1,22 @@
-import ProjectContextProvider, { ProjectContext } from "@SpCore/ProjectContextProvider";
-import { FunctionComponent, useContext, useEffect, useRef, useState } from "react";
+import ProjectContextProvider, {
+  ProjectContext,
+} from "@SpCore/ProjectContextProvider";
+import {
+  FunctionComponent,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import TopBar from "./TopBar";
 import LeftPanel from "./LeftPanel";
 import { Splitter } from "@fi-sci/splitter";
 import SamplingWindow from "./SamplingWindow/SamplingWindow";
 import StanFileEditor from "@SpComponents/StanFileEditor";
-import { ProjectKnownFiles, modelHasUnsavedChanges } from "@SpCore/ProjectDataModel";
+import {
+  ProjectKnownFiles,
+  modelHasUnsavedChanges,
+} from "@SpCore/ProjectDataModel";
 import DataFileEditor from "@SpComponents/DataFileEditor";
 
 type Props = {
@@ -53,7 +64,7 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
   const topBarHeight = 22;
 
   useEffect(() => {
-    document.title = "Stan Playground - " + data.meta.title;
+    document.title = "Stan Playground - Editing " + data.meta.title;
   }, [data.meta.title]);
 
   return (

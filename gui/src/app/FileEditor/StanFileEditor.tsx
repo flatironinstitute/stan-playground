@@ -245,7 +245,9 @@ const StanFileEditor: FunctionComponent<Props> = ({
           onClose={() => setSyntaxWindowVisible(false)}
         />
       ) : (
-        <div style={{ padding: 20 }}>Select an example from the left panel</div>
+        <div style={{ padding: 20 }}>
+          Begin editing or select an example from the left panel
+        </div>
       )}
     </Splitter>
   );
