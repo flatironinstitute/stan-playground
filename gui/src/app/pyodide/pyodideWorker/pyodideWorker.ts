@@ -138,6 +138,7 @@ const getScriptParts = (
     preamble += `
 from sp_patch_matplotlib import patch_matplotlib
 _SP_IMAGES = []
+patch_matplotlib(_SP_IMAGES)
 `;
   }
 
