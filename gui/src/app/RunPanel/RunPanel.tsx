@@ -9,15 +9,13 @@ import { FunctionComponent, useCallback } from "react";
 import { SamplingOpts } from "@SpCore/ProjectDataModel";
 import { Progress } from "@SpStanSampler/StanModelWorker";
 import StanSampler from "@SpStanSampler/StanSampler";
-import {
-  useSamplerProgress,
-  useSamplerStatus,
-} from "@SpStanSampler/useStanSampler";
+import { StanRun } from "@SpStanSampler/useStanSampler";
 
 type RunPanelProps = {
   width: number;
   height: number;
   sampler?: StanSampler;
+  latestRun: StanRun;
   data: any | undefined;
   dataIsSaved: boolean;
   samplingOpts: SamplingOpts;
@@ -27,12 +25,12 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
   width,
   height,
   sampler,
+  latestRun,
   data,
   dataIsSaved,
   samplingOpts,
 }) => {
-  const { status: runStatus, errorMessage } = useSamplerStatus(sampler);
-  const progress = useSamplerProgress(sampler);
+  const { status: runStatus, errorMessage, progress } = latestRun;
 
   const handleRun = useCallback(async () => {
     if (!sampler) return;

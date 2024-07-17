@@ -1,7 +1,9 @@
-import { defaultSamplingOpts, SamplingOpts } from "@SpCore/ProjectDataModel";
-import { Progress, Replies, Requests } from "@SpStanSampler/StanModelWorker";
+import { SamplingOpts } from "@SpCore/ProjectDataModel";
+import { Replies, Requests } from "@SpStanSampler/StanModelWorker";
 import StanWorkerUrl from "@SpStanSampler/StanModelWorker?worker&url";
+import React from "react";
 import type { SamplerParams } from "tinystan";
+import { type StanRunAction } from "./useStanSampler";
 
 export type StanSamplerStatus =
   | ""
@@ -13,25 +15,23 @@ export type StanSamplerStatus =
 
 class StanSampler {
   #worker: Worker | undefined;
-  #status: StanSamplerStatus = "";
-  #errorMessage: string = "";
-  #onProgressCallbacks: ((progress: Progress) => void)[] = [];
-  #onStatusChangedCallbacks: (() => void)[] = [];
-  #draws: number[][] = [];
-  #computeTimeSec: number | undefined = undefined;
-  #paramNames: string[] = [];
   #samplingStartTimeSec: number = 0;
-  #samplingOpts: SamplingOpts = defaultSamplingOpts; // the sampling options used in the last sample call
 
-  private constructor(private compiledUrl: string) {
+  private constructor(
+    private compiledUrl: string,
+    private update: React.Dispatch<StanRunAction>,
+  ) {
     this._initialize();
   }
 
-  static __unsafe_create(compiledUrl: string): {
+  static __unsafe_create(
+    compiledUrl: string,
+    update: React.Dispatch<StanRunAction>,
+  ): {
     sampler: StanSampler;
     cleanup: () => void;
   } {
-    const sampler = new StanSampler(compiledUrl);
+    const sampler = new StanSampler(compiledUrl, update);
     const cleanup = () => {
       console.log("terminating model worker");
       sampler.#worker && sampler.#worker.terminate();
@@ -45,40 +45,43 @@ class StanSampler {
       name: "tinystan worker",
       type: "module",
     });
-    this.#status = "loading";
+
+    this.update({ type: "clear" });
+
     this.#worker.onmessage = (e) => {
       const purpose: Replies = e.data.purpose;
       switch (purpose) {
         case Replies.Progress: {
-          this.#onProgressCallbacks.forEach((callback) =>
-            callback(e.data.report),
-          );
+          this.update({ type: "progressUpdate", progress: e.data.report });
           break;
         }
         case Replies.ModelLoaded: {
-          this.#status = "loaded";
-          this.#onStatusChangedCallbacks.forEach((cb) => cb());
+          this.update({ type: "statusUpdate", status: "loaded" });
           break;
         }
         case Replies.StanReturn: {
           if (e.data.error) {
-            this.#errorMessage = e.data.error;
-            this.#status = "failed";
-            this.#onStatusChangedCallbacks.forEach((cb) => cb());
+            this.update({
+              type: "statusUpdate",
+              status: "failed",
+              errorMessage: e.data.error,
+            });
           } else {
-            this.#draws = e.data.draws;
-            this.#paramNames = e.data.paramNames;
-            this.#computeTimeSec =
-              Date.now() / 1000 - this.#samplingStartTimeSec;
-            this.#status = "completed";
-            this.#onStatusChangedCallbacks.forEach((cb) => cb());
+            this.update({
+              type: "samplerReturn",
+              draws: e.data.draws,
+              paramNames: e.data.paramNames,
+              computeTimeSec: Date.now() / 1000 - this.#samplingStartTimeSec,
+            });
           }
           break;
         }
       }
     };
+    this.update({ type: "statusUpdate", status: "loading" });
     this.#worker.postMessage({ purpose: Requests.Load, url: this.compiledUrl });
   }
+
   sample(data: any, samplingOpts: SamplingOpts) {
     const refresh = calculateReasonableRefreshRate(samplingOpts);
     const sampleConfig: Partial<SamplerParams> = {
@@ -87,51 +90,17 @@ class StanSampler {
       seed: samplingOpts.seed !== undefined ? samplingOpts.seed : null,
       refresh,
     };
-    if (!this.#worker) return;
-    if (this.#status === "sampling") {
-      console.warn("Already sampling");
-      return;
-    }
-    this.#samplingOpts = samplingOpts;
-    this.#draws = [];
-    this.#paramNames = [];
+    if (!this.#worker) throw new Error("model worker is undefined");
+
+    this.update({ type: "startSampling", samplingOpts });
+
     this.#samplingStartTimeSec = Date.now() / 1000;
-    this.#status = "sampling";
-    this.#onStatusChangedCallbacks.forEach((cb) => cb());
     this.#worker.postMessage({ purpose: Requests.Sample, sampleConfig });
   }
-  onProgress(callback: (progress: Progress) => void) {
-    this.#onProgressCallbacks.push(callback);
-  }
-  onStatusChanged(callback: () => void) {
-    this.#onStatusChangedCallbacks.push(callback);
-  }
+
   cancel() {
-    if (this.#status === "sampling") {
-      this.#worker && this.#worker.terminate();
-      this.#status = "";
-      this._initialize();
-    } else {
-      console.warn("Nothing to cancel");
-    }
-  }
-  get draws() {
-    return this.#draws;
-  }
-  get paramNames() {
-    return this.#paramNames;
-  }
-  get status() {
-    return this.#status;
-  }
-  get errorMessage() {
-    return this.#errorMessage;
-  }
-  get computeTimeSec() {
-    return this.#computeTimeSec;
-  }
-  get samplingOpts() {
-    return this.#samplingOpts;
+    this.#worker?.terminate();
+    this._initialize();
   }
 }
 
