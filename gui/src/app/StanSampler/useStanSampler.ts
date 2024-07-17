@@ -1,13 +1,15 @@
-import { defaultSamplingOpts, SamplingOpts } from "@SpCore/ProjectDataModel";
-import { Progress } from "@SpStanSampler/StanModelWorker";
-import StanSampler, { StanSamplerStatus } from "@SpStanSampler/StanSampler";
+import { type SamplingOpts } from "@SpCore/ProjectDataModel";
+import { type Progress } from "@SpStanSampler/StanModelWorker";
+import StanSampler, {
+  type StanSamplerStatus,
+} from "@SpStanSampler/StanSampler";
 import { useEffect, useReducer, useState } from "react";
 
 export type StanRun = {
   status: StanSamplerStatus;
   errorMessage: string;
   progress?: Progress;
-  samplingOpts: SamplingOpts;
+  samplingOpts?: SamplingOpts;
   draws?: number[][];
   paramNames?: string[];
   computeTimeSec?: number;
@@ -16,7 +18,6 @@ export type StanRun = {
 const initialStanRun: StanRun = {
   status: "",
   errorMessage: "",
-  samplingOpts: defaultSamplingOpts,
 };
 
 export type StanRunAction =

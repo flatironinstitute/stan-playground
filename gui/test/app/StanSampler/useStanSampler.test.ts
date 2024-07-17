@@ -2,7 +2,7 @@
 
 import { act, renderHook, waitFor } from "@testing-library/react";
 import "@vitest/web-worker";
-import { afterEach, describe, expect, onTestFinished, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import mockedLoad, {
   erroringCompiledMainJsUrl,
   erroringSamplingOpts,
@@ -217,7 +217,7 @@ describe("useStanSampler", () => {
       expect(result.current.latestRun.draws).toBeUndefined();
       expect(result.current.latestRun.paramNames).toBeUndefined();
       expect(result.current.latestRun.computeTimeSec).toBeUndefined();
-      expect(result.current.latestRun.samplingOpts).toBe(defaultSamplingOpts);
+      expect(result.current.latestRun.samplingOpts).toBeUndefined();
 
       const testingSamplingOpts = {
         ...defaultSamplingOpts,

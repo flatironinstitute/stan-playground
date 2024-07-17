@@ -21,19 +21,17 @@ const SamplerOutputView: FunctionComponent<SamplerOutputViewProps> = ({
   height,
   latestRun,
 }) => {
-  const { draws, paramNames, computeTimeSec } = latestRun;
-  const numChains = latestRun.samplingOpts.num_chains;
+  const { draws, paramNames, computeTimeSec, samplingOpts } = latestRun;
 
-  if (!draws || !paramNames || !numChains) return <span />;
+  if (!draws || !paramNames || !samplingOpts) return <span />;
   return (
     <DrawsDisplay
       width={width}
       height={height}
       draws={draws}
       paramNames={paramNames}
-      numChains={numChains}
       computeTimeSec={computeTimeSec}
-      samplingOpts={latestRun.samplingOpts}
+      samplingOpts={samplingOpts}
     />
   );
 };
@@ -42,10 +40,9 @@ type DrawsDisplayProps = {
   width: number;
   height: number;
   draws: number[][];
-  numChains: number;
   paramNames: string[];
   computeTimeSec: number | undefined;
-  samplingOpts: SamplingOpts; // for including in exported zip
+  samplingOpts: SamplingOpts;
 };
 
 const tabs = [
@@ -80,11 +77,12 @@ const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({
   height,
   draws,
   paramNames,
-  numChains,
   computeTimeSec,
   samplingOpts,
 }) => {
   const [currentTabId, setCurrentTabId] = useState("summary");
+
+  const numChains = samplingOpts.num_chains;
 
   const drawChainIds = useMemo(() => {
     return [...new Array(draws[0].length).keys()].map(
