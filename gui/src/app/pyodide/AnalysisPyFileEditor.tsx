@@ -96,6 +96,7 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
       imageOutputDiv.innerHTML = "";
     }
     analysisPyWorker.run(fileContent, spData, {
+      loadsDraws: true,
       showsPlots: true,
       producesData: false,
     });
@@ -193,7 +194,7 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
 
 type ConsoleOutType = "stdout" | "stderr";
 
-const writeConsoleOutToDiv = (
+export const writeConsoleOutToDiv = (
   parentDiv: HTMLDivElement | null | undefined,
   x: string,
   type: ConsoleOutType,

@@ -102,10 +102,10 @@ export const fetchRemoteProject = async (query: QueryParams) => {
     : Promise.resolve(data.analysisPyFileContent);
   const dataPyFilePromise = query["data_py"]
     ? tryFetch(query["data_py"])
-    : Promise.resolve(undefined);
+    : Promise.resolve(data.dataPyFileContent);
   const dataRFilePromise = query["data_r"]
     ? tryFetch(query["data_r"])
-    : Promise.resolve(undefined);
+    : Promise.resolve(data.dataRFileContent);
   const sampling_optsPromise = query.sampling_opts
     ? tryFetch(query.sampling_opts)
     : Promise.resolve(undefined);

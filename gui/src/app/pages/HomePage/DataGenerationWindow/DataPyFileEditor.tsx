@@ -1,3 +1,8 @@
+import TextEditor, { ToolbarItem } from "@SpComponents/TextEditor";
+import { Help, PlayArrow } from "@mui/icons-material";
+import { writeConsoleOutToDiv } from "app/pyodide/AnalysisPyFileEditor";
+import PyodideWorkerInterface from "app/pyodide/pyodideWorker/pyodideWorkerInterface";
+import { PyodideWorkerStatus } from "app/pyodide/pyodideWorker/pyodideWorkerTypes";
 import {
   FunctionComponent,
   useCallback,
@@ -5,10 +10,6 @@ import {
   useMemo,
   useState,
 } from "react";
-import { Help, PlayArrow } from "@mui/icons-material";
-import { PydodideWorkerStatus } from "../../../pyodide/pyodideWorker/pyodideWorkerTypes";
-import PyodideWorkerInterface from "../../../pyodide/pyodideWorker/pyodideWorkerInterface";
-import TextEditor, { ToolbarItem } from "../../../FileEditor/TextEditor";
 
 type Props = {
   fileName: string;
@@ -35,7 +36,7 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
   height,
   outputDiv,
 }) => {
-  const [status, setStatus] = useState<PydodideWorkerStatus>("idle");
+  const [status, setStatus] = useState<PyodideWorkerStatus>("idle");
 
   const [dataPyWorker, setDataPyWorker] = useState<
     PyodideWorkerInterface | undefined
@@ -43,24 +44,13 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
 
   // worker creation
   useEffect(() => {
-    const worker = PyodideWorkerInterface.create("data.py", {
+    const worker = PyodideWorkerInterface.create({
       onStdout: (x) => {
-        console.log(x);
-        const divElement = document.createElement("div");
-        divElement.style.color = "blue";
-        const preElement = document.createElement("pre");
-        divElement.appendChild(preElement);
-        preElement.textContent = x;
-        outputDiv?.appendChild(divElement);
+        writeConsoleOutToDiv(outputDiv, x, "stdout");
       },
       onStderr: (x) => {
         console.error(x);
-        const divElement = document.createElement("div");
-        divElement.style.color = "red";
-        const preElement = document.createElement("pre");
-        divElement.appendChild(preElement);
-        preElement.textContent = x;
-        outputDiv?.appendChild(divElement);
+        writeConsoleOutToDiv(outputDiv, x, "stderr");
       },
       onStatus: (status) => {
         setStatus(status);
@@ -86,7 +76,11 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
     if (outputDiv) {
       outputDiv.innerHTML = "";
     }
-    dataPyWorker.run(fileContent, {});
+    dataPyWorker.run(fileContent, {}, {
+      loadsDraws: false,
+      showsPlots: false,
+      producesData: true
+    });
   }, [editedFileContent, fileContent, status, dataPyWorker, outputDiv]);
 
   const handleHelp = useCallback(() => {
@@ -141,7 +135,7 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
       });
     }
     return ret;
-  }, [fileContent, editedFileContent, handleRun, status]);
+  }, [fileContent, editedFileContent, handleRun, status, handleHelp]);
 
   return (
     <TextEditor

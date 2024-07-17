@@ -1,4 +1,5 @@
 export type PyodideRunSettings = {
+  loadsDraws: boolean;
   showsPlots: boolean;
   producesData: boolean;
 };

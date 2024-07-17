@@ -75,8 +75,7 @@ const run = async (
     const pyodide = await loadPyodideInstance();
 
     const [scriptPreamble, scriptPostamble] = getScriptParts(
-      spPySettings,
-      spData,
+      spPySettings
     );
 
     const globalsJS: { [key: string]: any } = {
@@ -120,8 +119,14 @@ const run = async (
     }
 
     if (spPySettings.producesData) {
-      const data = JSON.parse(globals.get("_SP_DATA").toJs());
-      setData(data);
+      const spDataGlobal = globals.get("_SP_DATA");
+      if (spDataGlobal) {
+        const data = JSON.parse(spDataGlobal);
+        setData(data);
+      }
+      else {
+        console.warn("Not setting data because _SP_DATA is not defined");
+      }
     }
 
     setStatus(succeeded ? "completed" : "failed");
@@ -134,7 +139,6 @@ const run = async (
 
 const getScriptParts = (
   spPySettings: PyodideRunSettings,
-  spData: any,
 ): string[] => {
   let preamble = "";
   let postamble = "";
@@ -151,7 +155,7 @@ plt.show()
 `;
   }
 
-  if (spData) {
+  if (spPySettings.loadsDraws) {
     preamble += `
 from sp_load_draws import sp_load_draws
 draws = sp_load_draws(_SP_DATA_IN)
