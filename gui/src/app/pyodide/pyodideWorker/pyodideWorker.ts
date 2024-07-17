@@ -60,6 +60,8 @@ const loadPyodideInstance = async () => {
   }
 };
 
+console.log("pyodide worker loaded");
+
 self.onmessage = async (e) => {
   const message = e.data;
   await run(message.code, message.spData, message.spRunSettings);

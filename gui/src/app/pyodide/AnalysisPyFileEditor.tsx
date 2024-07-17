@@ -1,15 +1,9 @@
-import {
-  FunctionComponent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { FunctionComponent, useCallback, useMemo, useState } from "react";
 import { PlayArrow } from "@mui/icons-material";
 import TextEditor, { ToolbarItem } from "../FileEditor/TextEditor";
 import { PyodideWorkerStatus } from "./pyodideWorker/pyodideWorkerTypes";
-import PyodideWorkerInterface from "./pyodideWorker/pyodideWorkerInterface";
 import { GlobalDataForAnalysisPy } from "../pages/HomePage/AnalysisPyWindow/AnalysisPyWindow";
+import usePyodideWorker from "./pyodideWorker/usePyodideWorker";
 
 type Props = {
   fileName: string;
@@ -41,24 +35,13 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
 }) => {
   const [status, setStatus] = useState<PyodideWorkerStatus>("idle");
 
-  const [analysisPyWorker, setAnalysisPyWorker] = useState<
-    PyodideWorkerInterface | undefined
-  >(undefined);
-
-  // worker creation
-  useEffect(() => {
-    const worker = PyodideWorkerInterface.create({
-      onStdout: (x) => {
-        writeConsoleOutToDiv(consoleOutputDiv, x, "stdout");
-      },
-      onStderr: (x) => {
-        writeConsoleOutToDiv(consoleOutputDiv, x, "stderr");
-      },
-      onStatus: (status) => {
-        setStatus(status);
-      },
-      onImage: (image) => {
-        const b64 = image;
+  const callbacks = useMemo(
+    () => ({
+      onStdout: (x: string) =>
+        writeConsoleOutToDiv(consoleOutputDiv, x, "stdout"),
+      onStderr: (x: string) =>
+        writeConsoleOutToDiv(consoleOutputDiv, x, "stderr"),
+      onImage: (b64: string) => {
         const imageUrl = `data:image/png;base64,${b64}`;
 
         const img = document.createElement("img");
@@ -69,33 +52,34 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
         divElement.appendChild(img);
         imageOutputDiv?.appendChild(divElement);
       },
-    });
-    setAnalysisPyWorker(worker);
-    return () => {
-      worker.destroy();
-    };
-  }, [consoleOutputDiv, imageOutputDiv]);
+      onStatus: (status: PyodideWorkerStatus) => {
+        setStatus(status);
+      },
+    }),
+    [consoleOutputDiv, imageOutputDiv],
+  );
+
+  const { run } = usePyodideWorker(callbacks);
 
   const hasData = useMemo(() => {
     return spData !== undefined;
   }, [spData]);
-  const handleRun = useCallback(async () => {
+
+  const handleRun = useCallback(() => {
     if (status === "running") {
       return;
     }
     if (editedFileContent !== fileContent) {
       throw new Error("Cannot run edited code");
     }
-    if (!analysisPyWorker) {
-      throw new Error("analysisPyWorker is not defined");
-    }
+
     if (consoleOutputDiv) {
       consoleOutputDiv.innerHTML = "";
     }
     if (imageOutputDiv) {
       imageOutputDiv.innerHTML = "";
     }
-    analysisPyWorker.run(fileContent, spData, {
+    run(fileContent, spData, {
       loadsDraws: true,
       showsPlots: true,
       producesData: false,
@@ -104,7 +88,7 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
     editedFileContent,
     fileContent,
     status,
-    analysisPyWorker,
+    run,
     consoleOutputDiv,
     imageOutputDiv,
     spData,

@@ -1,14 +1,8 @@
 import TextEditor, { ToolbarItem } from "@SpComponents/TextEditor";
 import { writeConsoleOutToDiv } from "app/pyodide/AnalysisPyFileEditor";
-import PyodideWorkerInterface from "app/pyodide/pyodideWorker/pyodideWorkerInterface";
 import { PyodideWorkerStatus } from "app/pyodide/pyodideWorker/pyodideWorkerTypes";
-import {
-  FunctionComponent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import usePyodideWorker from "app/pyodide/pyodideWorker/usePyodideWorker";
+import { FunctionComponent, useCallback, useMemo, useState } from "react";
 import getDataGenerationToolbarItems from "./getDataGenerationToolbarItems";
 
 type Props = {
@@ -38,30 +32,19 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
 }) => {
   const [status, setStatus] = useState<PyodideWorkerStatus>("idle");
 
-  const [dataPyWorker, setDataPyWorker] = useState<
-    PyodideWorkerInterface | undefined
-  >(undefined);
-
-  // worker creation
-  useEffect(() => {
-    const worker = PyodideWorkerInterface.create({
-      onStdout: (x) => {
-        writeConsoleOutToDiv(outputDiv, x, "stdout");
-      },
-      onStderr: (x) => {
-        console.error(x);
-        writeConsoleOutToDiv(outputDiv, x, "stderr");
-      },
-      onStatus: (status) => {
+  const callbacks = useMemo(
+    () => ({
+      onStdout: (x: string) => writeConsoleOutToDiv(outputDiv, x, "stdout"),
+      onStderr: (x: string) => writeConsoleOutToDiv(outputDiv, x, "stderr"),
+      onStatus: (status: PyodideWorkerStatus) => {
         setStatus(status);
       },
       onData: setData,
-    });
-    setDataPyWorker(worker);
-    return () => {
-      worker.destroy();
-    };
-  }, [setData, outputDiv]);
+    }),
+    [outputDiv, setData],
+  );
+
+  const { run } = usePyodideWorker(callbacks);
 
   const handleRun = useCallback(async () => {
     if (status === "running") {
@@ -70,13 +53,10 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
     if (editedFileContent !== fileContent) {
       throw new Error("Cannot run edited code");
     }
-    if (!dataPyWorker) {
-      throw new Error("dataPyWorker is not defined");
-    }
     if (outputDiv) {
       outputDiv.innerHTML = "";
     }
-    dataPyWorker.run(
+    run(
       fileContent,
       {},
       {
@@ -85,7 +65,7 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
         producesData: true,
       },
     );
-  }, [editedFileContent, fileContent, status, dataPyWorker, outputDiv]);
+  }, [editedFileContent, fileContent, status, run, outputDiv]);
 
   const handleHelp = useCallback(() => {
     alert(
