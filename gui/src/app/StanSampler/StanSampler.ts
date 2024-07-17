@@ -1,7 +1,6 @@
 import { SamplingOpts } from "@SpCore/ProjectDataModel";
 import { Replies, Requests } from "@SpStanSampler/StanModelWorker";
 import StanWorkerUrl from "@SpStanSampler/StanModelWorker?worker&url";
-import React from "react";
 import type { SamplerParams } from "tinystan";
 import { type StanRunAction } from "./useStanSampler";
 
@@ -13,24 +12,26 @@ export type StanSamplerStatus =
   | "completed"
   | "failed";
 
+type StanSamplerAndCleanup = {
+  sampler: StanSampler;
+  cleanup: () => void;
+};
+
 class StanSampler {
   #worker: Worker | undefined;
   #samplingStartTimeSec: number = 0;
 
   private constructor(
     private compiledUrl: string,
-    private update: React.Dispatch<StanRunAction>,
+    private update: (action: StanRunAction) => void,
   ) {
     this._initialize();
   }
 
   static __unsafe_create(
     compiledUrl: string,
-    update: React.Dispatch<StanRunAction>,
-  ): {
-    sampler: StanSampler;
-    cleanup: () => void;
-  } {
+    update: (action: StanRunAction) => void,
+  ): StanSamplerAndCleanup {
     const sampler = new StanSampler(compiledUrl, update);
     const cleanup = () => {
       console.log("terminating model worker");

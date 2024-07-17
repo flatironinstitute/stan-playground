@@ -52,14 +52,11 @@ export const StanRunReducer = (
     case "progressUpdate":
       return { ...state, progress: action.progress };
     case "statusUpdate":
-      if (action.errorMessage) {
-        return {
-          ...state,
-          status: action.status,
-          errorMessage: action.errorMessage,
-        };
-      }
-      return { ...state, status: action.status };
+      return {
+        ...state,
+        status: action.status,
+        errorMessage: action.errorMessage ?? state.errorMessage,
+      };
     case "startSampling":
       return {
         status: "sampling",
