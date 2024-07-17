@@ -1,5 +1,4 @@
 import TextEditor, { ToolbarItem } from "@SpComponents/TextEditor";
-import { Help, PlayArrow } from "@mui/icons-material";
 import { writeConsoleOutToDiv } from "app/pyodide/AnalysisPyFileEditor";
 import PyodideWorkerInterface from "app/pyodide/pyodideWorker/pyodideWorkerInterface";
 import { PyodideWorkerStatus } from "app/pyodide/pyodideWorker/pyodideWorkerTypes";
@@ -10,6 +9,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import getDataGenerationToolbarItems from "./getDataGenerationToolbarItems";
 
 type Props = {
   fileName: string;
@@ -76,11 +76,15 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
     if (outputDiv) {
       outputDiv.innerHTML = "";
     }
-    dataPyWorker.run(fileContent, {}, {
-      loadsDraws: false,
-      showsPlots: false,
-      producesData: true
-    });
+    dataPyWorker.run(
+      fileContent,
+      {},
+      {
+        loadsDraws: false,
+        showsPlots: false,
+        producesData: true,
+      },
+    );
   }, [editedFileContent, fileContent, status, dataPyWorker, outputDiv]);
 
   const handleHelp = useCallback(() => {
@@ -89,53 +93,16 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
     );
   }, []);
 
-  const toolbarItems: ToolbarItem[] = useMemo(() => {
-    const ret: ToolbarItem[] = [];
-    const runnable = fileContent === editedFileContent;
-    ret.push({
-      type: "button",
-      tooltip: "Help",
-      icon: <Help />,
-      onClick: handleHelp,
-    });
-    if (runnable) {
-      ret.push({
-        type: "button",
-        tooltip: "Run code to generate data",
-        label: "Run",
-        icon: <PlayArrow />,
-        onClick: handleRun,
-        color: "black",
-      });
-    }
-    let label: string;
-    let color: string;
-    if (status === "loading") {
-      label = "Loading pyodide...";
-      color = "blue";
-    } else if (status === "running") {
-      label = "Running...";
-      color = "blue";
-    } else if (status === "completed") {
-      label = "Completed";
-      color = "green";
-    } else if (status === "failed") {
-      label = "Failed";
-      color = "red";
-    } else {
-      label = "";
-      color = "black";
-    }
-
-    if (label) {
-      ret.push({
-        type: "text",
-        label,
-        color,
-      });
-    }
-    return ret;
-  }, [fileContent, editedFileContent, handleRun, status, handleHelp]);
+  const toolbarItems: ToolbarItem[] = useMemo(
+    () =>
+      getDataGenerationToolbarItems({
+        status,
+        runnable: fileContent === editedFileContent,
+        onRun: handleRun,
+        onHelp: handleHelp,
+      }),
+    [fileContent, editedFileContent, handleRun, status, handleHelp],
+  );
 
   return (
     <TextEditor

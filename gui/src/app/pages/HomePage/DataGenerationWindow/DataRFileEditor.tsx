@@ -1,7 +1,7 @@
 import { FunctionComponent, useCallback, useMemo, useState } from "react";
-import { Help, PlayArrow } from "@mui/icons-material";
 import { WebR } from "webr";
 import TextEditor, { ToolbarItem } from "../../../FileEditor/TextEditor";
+import getDataGenerationToolbarItems from "./getDataGenerationToolbarItems";
 
 type Props = {
   fileName: string;
@@ -90,7 +90,6 @@ json_result <- jsonlite::toJSON(result, pretty = TRUE, auto_unbox = TRUE)
 json_result
             `;
       const resultJson = await webR.evalRString(rCode);
-      console.log("--- resultJson", resultJson);
       const result = JSON.parse(resultJson);
 
       if (setData && result.data) {
@@ -127,52 +126,16 @@ json_result
     );
   }, []);
 
-  const toolbarItems: ToolbarItem[] = useMemo(() => {
-    const ret: ToolbarItem[] = [];
-    const runnable = fileContent === editedFileContent;
-    ret.push({
-      type: "button",
-      tooltip: "Help",
-      icon: <Help />,
-      onClick: handleHelp,
-    });
-    if (runnable) {
-      ret.push({
-        type: "button",
-        tooltip: "Run code to generate data",
-        label: "Run",
-        icon: <PlayArrow />,
-        onClick: handleRun,
-        color: "black",
-      });
-    }
-    let label: string;
-    let color: string;
-    if (status === "loading") {
-      label = "Loading webr...";
-      color = "blue";
-    } else if (status === "running") {
-      label = "Running...";
-      color = "blue";
-    } else if (status === "completed") {
-      label = "Completed";
-      color = "green";
-    } else if (status === "failed") {
-      label = "Failed";
-      color = "red";
-    } else {
-      label = "";
-      color = "black";
-    }
-    if (label) {
-      ret.push({
-        type: "text",
-        label,
-        color,
-      });
-    }
-    return ret;
-  }, [fileContent, editedFileContent, handleRun, status]);
+  const toolbarItems: ToolbarItem[] = useMemo(
+    () =>
+      getDataGenerationToolbarItems({
+        status,
+        runnable: fileContent === editedFileContent,
+        onRun: handleRun,
+        onHelp: handleHelp,
+      }),
+    [fileContent, editedFileContent, handleRun, status, handleHelp],
+  );
 
   return (
     <TextEditor

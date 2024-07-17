@@ -1,9 +1,20 @@
-import ProjectContextProvider, { ProjectContext } from "@SpCore/ProjectContextProvider";
-import { FunctionComponent, useContext, useEffect, useRef, useState } from "react";
+import ProjectContextProvider, {
+  ProjectContext,
+} from "@SpCore/ProjectContextProvider";
+import {
+  FunctionComponent,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import TopBar from "./TopBar";
 import LeftPanel from "./LeftPanel";
 import { Splitter } from "@fi-sci/splitter";
-import { ProjectKnownFiles, modelHasUnsavedChanges } from "@SpCore/ProjectDataModel";
+import {
+  ProjectKnownFiles,
+  modelHasUnsavedChanges,
+} from "@SpCore/ProjectDataModel";
 import TabWidget from "@SpComponents/TabWidget";
 import SamplingWindow from "./SamplingWindow/SamplingWindow";
 import DataGenerationWindow from "./DataGenerationWindow/DataGenerationWindow";
@@ -133,23 +144,23 @@ type RightViewProps = {
 
 const rightViewTabs = [
   {
-    id: 'sampling',
-    label: 'Sampling',
-    closeable: false
+    id: "sampling",
+    label: "Sampling",
+    closeable: false,
   },
   {
-    id: 'data-generation',
-    label: 'Data Generation',
-    closeable: false
-  }
-]
+    id: "data-generation",
+    label: "Data Generation",
+    closeable: false,
+  },
+];
 
 const RightView: FunctionComponent<RightViewProps> = ({
   width,
   height,
   compiledMainJsUrl,
 }) => {
-  const [currentTabId, setCurrentTabId] = useState('sampling');
+  const [currentTabId, setCurrentTabId] = useState("sampling");
   return (
     <TabWidget
       width={width}
@@ -163,12 +174,9 @@ const RightView: FunctionComponent<RightViewProps> = ({
         height={height}
         compiledMainJsUrl={compiledMainJsUrl}
       />
-      <DataGenerationWindow
-        width={width}
-        height={height}
-      />
+      <DataGenerationWindow width={width} height={height} />
     </TabWidget>
-  )
+  );
 };
 
 // the width of the left panel when it is expanded based on the overall width

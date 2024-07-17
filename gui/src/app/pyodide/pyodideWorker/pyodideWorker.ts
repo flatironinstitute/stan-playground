@@ -74,9 +74,7 @@ const run = async (
   try {
     const pyodide = await loadPyodideInstance();
 
-    const [scriptPreamble, scriptPostamble] = getScriptParts(
-      spPySettings
-    );
+    const [scriptPreamble, scriptPostamble] = getScriptParts(spPySettings);
 
     const globalsJS: { [key: string]: any } = {
       _stan_playground: true,
@@ -123,8 +121,7 @@ const run = async (
       if (spDataGlobal) {
         const data = JSON.parse(spDataGlobal);
         setData(data);
-      }
-      else {
+      } else {
         console.warn("Not setting data because _SP_DATA is not defined");
       }
     }
@@ -137,9 +134,7 @@ const run = async (
   }
 };
 
-const getScriptParts = (
-  spPySettings: PyodideRunSettings,
-): string[] => {
+const getScriptParts = (spPySettings: PyodideRunSettings): string[] => {
   let preamble = "";
   let postamble = "";
 

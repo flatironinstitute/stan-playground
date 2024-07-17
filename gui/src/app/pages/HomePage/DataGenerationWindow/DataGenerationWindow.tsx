@@ -40,7 +40,12 @@ const DataGenerationWindow: FunctionComponent<DataGenerationWindowProps> = ({
       currentTabId={currentTabId}
       setCurrentTabId={setCurrentTabId}
     >
-      <DataGenerationChildWindow key="python" width={0} height={0} language="python" />
+      <DataGenerationChildWindow
+        key="python"
+        width={0}
+        height={0}
+        language="python"
+      />
       <DataGenerationChildWindow key="r" width={0} height={0} language="r" />
     </TabWidget>
   );
@@ -82,19 +87,31 @@ const DataGenerationChildWindow: FunctionComponent<
         width={0}
         height={0}
         fileName={language === "python" ? "data.py" : "data.r"}
-        fileContent={language === 'python' ? data.dataPyFileContent : data.dataRFileContent}
+        fileContent={
+          language === "python" ? data.dataPyFileContent : data.dataRFileContent
+        }
         onSaveContent={() => {
           update({
             type: "commitFile",
-            filename: language === 'python' ? ProjectKnownFiles.DATAPYFILE : ProjectKnownFiles.DATARFILE,
+            filename:
+              language === "python"
+                ? ProjectKnownFiles.DATAPYFILE
+                : ProjectKnownFiles.DATARFILE,
           });
         }}
-        editedFileContent={language === 'python' ? data.ephemera.dataPyFileContent : data.ephemera.dataRFileContent}
+        editedFileContent={
+          language === "python"
+            ? data.ephemera.dataPyFileContent
+            : data.ephemera.dataRFileContent
+        }
         setEditedFileContent={(content) => {
           update({
             type: "editFile",
             content,
-            filename: language === 'python' ? ProjectKnownFiles.DATAPYFILE : ProjectKnownFiles.DATARFILE,
+            filename:
+              language === "python"
+                ? ProjectKnownFiles.DATAPYFILE
+                : ProjectKnownFiles.DATARFILE,
           });
         }}
         readOnly={false}

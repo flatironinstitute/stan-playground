@@ -120,11 +120,9 @@ type ConsoleOutputWindowProps = {
   onDivElement: (div: HTMLDivElement) => void;
 };
 
-export const ConsoleOutputWindow: FunctionComponent<ConsoleOutputWindowProps> = ({
-  width,
-  height,
-  onDivElement,
-}) => {
+export const ConsoleOutputWindow: FunctionComponent<
+  ConsoleOutputWindowProps
+> = ({ width, height, onDivElement }) => {
   return (
     <div
       style={{ position: "absolute", width, height, overflowY: "auto" }}
