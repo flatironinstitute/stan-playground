@@ -17,6 +17,7 @@ const AnalysisPyWindow: FunctionComponent<AnalysisPyWindowProps> = ({
   height,
   stanSampler,
 }) => {
+  // TODO make useRef
   const [imageOutputDiv, setImageOutputDiv] = useState<HTMLDivElement | null>(
     null,
   );
@@ -57,6 +58,7 @@ const LeftPane: FunctionComponent<LeftPaneProps> = ({
   imageOutputDiv,
   stanSampler,
 }) => {
+  // TODO make useRef
   const [consoleOutputDiv, setConsoleOutputDiv] =
     useState<HTMLDivElement | null>(null);
   const { data, update } = useContext(ProjectContext);

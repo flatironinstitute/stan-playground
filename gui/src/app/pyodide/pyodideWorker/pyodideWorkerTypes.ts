@@ -1,7 +1,7 @@
-export type PyodideRunSettings = {
+export type PyodideRunSettings = Partial<{
   showsPlots: boolean;
   producesData: boolean;
-};
+}>;
 
 export type MessageToPyodideWorker = {
   type: "run";
