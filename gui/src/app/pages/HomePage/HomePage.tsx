@@ -15,9 +15,7 @@ import {
 } from "@SpCore/ProjectDataModel";
 import LeftPanel from "@SpPages/LeftPanel";
 import TopBar from "@SpPages/TopBar";
-import useStanSampler, {
-  useSamplerStatus,
-} from "@SpStanSampler/useStanSampler";
+import useStanSampler from "@SpStanSampler/useStanSampler";
 import {
   FunctionComponent,
   useCallback,
@@ -240,9 +238,8 @@ const RightView: FunctionComponent<RightViewProps> = ({
     [update],
   );
 
-  const { sampler } = useStanSampler(compiledMainJsUrl);
-  const { status: samplerStatus } = useSamplerStatus(sampler);
-  const isSampling = samplerStatus === "sampling";
+  const { sampler, latestRun } = useStanSampler(compiledMainJsUrl);
+  const isSampling = latestRun.status === "sampling";
   return (
     <div className="Absolute" style={{ width, height }}>
       <div
@@ -269,6 +266,7 @@ const RightView: FunctionComponent<RightViewProps> = ({
           width={width}
           height={samplingOptsPanelHeight}
           sampler={sampler}
+          latestRun={latestRun}
           data={parsedData}
           dataIsSaved={!modelHasUnsavedDataFileChanges(data)}
           samplingOpts={data.samplingOpts}
@@ -282,13 +280,11 @@ const RightView: FunctionComponent<RightViewProps> = ({
           height: height - samplingOptsPanelHeight,
         }}
       >
-        {sampler && (
-          <SamplerOutputView
-            width={width}
-            height={height - samplingOptsPanelHeight}
-            sampler={sampler}
-          />
-        )}
+        <SamplerOutputView
+          width={width}
+          height={height - samplingOptsPanelHeight}
+          latestRun={latestRun}
+        />
       </div>
     </div>
   );
