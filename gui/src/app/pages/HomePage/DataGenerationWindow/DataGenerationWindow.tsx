@@ -6,6 +6,7 @@ import { ProjectContext } from "../../../Project/ProjectContextProvider";
 import { ProjectKnownFiles } from "../../../Project/ProjectDataModel";
 import { ConsoleOutputWindow } from "../AnalysisPyWindow/AnalysisPyWindow";
 import DataRFileEditor from "./DataRFileEditor";
+import { writeConsoleOutToDiv } from "app/pyodide/AnalysisPyFileEditor";
 
 type DataGenerationWindowProps = {
   width: number;
@@ -71,8 +72,10 @@ const DataGenerationChildWindow: FunctionComponent<
         filename: ProjectKnownFiles.DATAFILE,
       });
       update({ type: "commitFile", filename: ProjectKnownFiles.DATAFILE });
+      // Use "stan-playground" prefix to distinguish from console output of the running code
+      writeConsoleOutToDiv(consoleOutputDiv, "[stan-playground] Data updated", "stdout");
     },
-    [update],
+    [update, consoleOutputDiv],
   );
   const EditorComponent =
     language === "python" ? DataPyFileEditor : DataRFileEditor;
