@@ -73,7 +73,11 @@ const DataGenerationChildWindow: FunctionComponent<
       });
       update({ type: "commitFile", filename: ProjectKnownFiles.DATAFILE });
       // Use "stan-playground" prefix to distinguish from console output of the running code
-      writeConsoleOutToDiv(consoleOutputDiv, "[stan-playground] Data updated", "stdout");
+      writeConsoleOutToDiv(
+        consoleOutputDiv,
+        "[stan-playground] Data updated",
+        "stdout",
+      );
     },
     [update, consoleOutputDiv],
   );

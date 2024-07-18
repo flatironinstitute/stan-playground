@@ -247,5 +247,4 @@ const LeftView: FunctionComponent<LeftViewProps> = ({
   );
 };
 
-
 export default HomePage;
