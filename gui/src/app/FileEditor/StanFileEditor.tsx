@@ -245,7 +245,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
           onClose={() => setSyntaxWindowVisible(false)}
         />
       ) : (
-        <div style={{ padding: 20 }}>
+        <div className="StanEditorDefaultText">
           Begin editing or select an example from the left panel
         </div>
       )}

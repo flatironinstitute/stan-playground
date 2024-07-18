@@ -53,10 +53,10 @@ const SamplingWindow: FunctionComponent<SamplingWindowProps> = ({
   const { status: samplerStatus } = useSamplerStatus(sampler);
   const isSampling = samplerStatus === "sampling";
   return (
-    <div style={{ position: "absolute", width, height }}>
+    <div className="Absolute" style={{ width, height }}>
       <div
+        className="Absolute"
         style={{
-          position: "absolute",
           width: samplingOptsPanelWidth,
           height: samplingOptsPanelHeight,
         }}
@@ -67,11 +67,10 @@ const SamplingWindow: FunctionComponent<SamplingWindowProps> = ({
         />
       </div>
       <div
+        className="Absolute RunPanelPosition"
         style={{
-          position: "absolute",
           left: samplingOptsPanelWidth,
           width: width - samplingOptsPanelWidth,
-          top: 0,
           height: samplingOptsPanelHeight,
         }}
       >
@@ -85,8 +84,8 @@ const SamplingWindow: FunctionComponent<SamplingWindowProps> = ({
         />
       </div>
       <div
+        className="Absolute"
         style={{
-          position: "absolute",
           width,
           top: samplingOptsPanelHeight,
           height: height - samplingOptsPanelHeight,

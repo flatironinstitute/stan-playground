@@ -70,21 +70,17 @@ const TabWidget: FunctionComponent<PropsWithChildren<Props>> = ({
   return (
     <div
       style={{
-        position: "absolute",
         left: hMargin,
         top: vMargin,
         width: W,
         height: H,
-        overflow: "hidden",
       }}
       className="TabWidget"
     >
       <div
         key="tabwidget-bar"
+        className="TabWidget-bar"
         style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
           width: W,
           height: tabBarHeight,
         }}
@@ -101,16 +97,12 @@ const TabWidget: FunctionComponent<PropsWithChildren<Props>> = ({
         return (
           <div
             key={`child-${i}`}
+            className="TabBody"
             style={{
               visibility: visible ? undefined : "hidden",
-              overflowY: "hidden",
-              overflowX: "hidden",
-              position: "absolute",
-              left: 0,
               top: tabBarHeight,
               width: W,
               height: H,
-              background: "white",
             }}
           >
             {(visible || hasBeenVisible.includes(i)) && (

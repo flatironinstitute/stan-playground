@@ -69,7 +69,7 @@ const SequencePlotWidget: FunctionComponent<Props> = ({
     [width, height, variableName, shapes],
   );
   return (
-    <div style={{ position: "relative", width, height }}>
+    <div className="SequencePlot" style={{ width, height }}>
       <LazyPlotlyPlot data={data} layout={layout} />
     </div>
   );

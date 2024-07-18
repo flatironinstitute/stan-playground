@@ -70,29 +70,19 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
   }, [data.meta.title]);
 
   return (
-    <div style={{ position: "absolute", width, height, overflow: "hidden" }}>
+    <div className="MainHomePage" style={{ width, height }}>
       <div
-        className="top-bar"
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          width,
-          height: topBarHeight,
-          overflow: "hidden",
-        }}
+        className="top-bar TopBarPosition"
+        style={{ width, height: topBarHeight }}
       >
         <TopBar title={data.meta.title} width={width} height={topBarHeight} />
       </div>
       <div
-        className="left-panel"
+        className="left-panel LeftMenuPanelPosition"
         style={{
-          position: "absolute",
-          left: 0,
           top: topBarHeight + 2,
           width: leftPanelWidth,
           height: height - topBarHeight - 2,
-          overflow: "auto",
         }}
       >
         <LeftPanel
@@ -104,14 +94,12 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
         />
       </div>
       <div
-        className="main-area"
+        className="main-area MainAreaPosition"
         style={{
-          position: "absolute",
           left: leftPanelWidth,
           top: topBarHeight + 2,
           width: width - leftPanelWidth,
           height: height - topBarHeight - 2,
-          overflow: "hidden",
         }}
       >
         <Splitter
@@ -258,5 +246,6 @@ const LeftView: FunctionComponent<LeftViewProps> = ({
     </Splitter>
   );
 };
+
 
 export default HomePage;

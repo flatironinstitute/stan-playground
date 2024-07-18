@@ -34,7 +34,7 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({
     setSamplingOpts && setSamplingOpts(defaultSamplingOpts);
   }, [setSamplingOpts]);
   return (
-    <div style={{ padding: 10 }}>
+    <div className="SamplingOptsWrapper">
       <Grid container spacing={sp1}>
         <Grid
           container
@@ -165,7 +165,7 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({
           </Grid>
         </Grid>
       </Grid>
-      <div style={{ position: "relative", height: 5 }} />
+      <div className="SamplingOptsSpacer" />
       <div>
         <Hyperlink onClick={handleReset} color="gray">
           reset
@@ -219,7 +219,7 @@ const NumberEdit: FunctionComponent<NumberEditProps> = ({
       min={min}
       max={max}
       readOnly={readOnly}
-      style={{ width: "4em" }}
+      className="SamplingOptsNumberEditBox"
     />
   );
 };

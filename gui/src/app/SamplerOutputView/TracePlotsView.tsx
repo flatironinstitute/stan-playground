@@ -20,7 +20,7 @@ const TracePlotsView: FunctionComponent<TracePlotsViewProps> = ({
 }) => {
   const plotHeight = Math.max(150, Math.min(400, height / 2));
   return (
-    <div style={{ position: "absolute", width, height, overflowY: "auto" }}>
+    <div className="TracePlotsView" style={{ width, height }}>
       {paramNames.map((paramName, i) => (
         <SequencePlot
           key={paramName}
@@ -72,7 +72,7 @@ const SequencePlot: FunctionComponent<SequencePlotProps> = ({
           drawChainIds={drawChainIds}
         />
       )}
-      <div style={{ height: 4 }} />
+      <div className="SequencePlotPadding" />
     </div>
   );
 };
@@ -101,7 +101,7 @@ const SequencePlotChild: FunctionComponent<SequencePlotProps> = ({
     );
   }, [draws, columnIndex, drawChainIds]);
   return (
-    <div style={{ position: "relative", width, height }}>
+    <div className="SequencePlotChild" style={{ width, height }}>
       <ReactVisibilitySensor partialVisibility>
         {({ isVisible }: { isVisible: boolean }) => {
           if (!isVisible) return <div>...</div>;
@@ -134,14 +134,8 @@ const ExpandComponent: FunctionComponent<ExpandComponentProps> = ({
 }) => {
   return (
     <div
-      style={{
-        width,
-        height: 25,
-        paddingTop: 5,
-        paddingLeft: 5,
-        cursor: "pointer",
-        backgroundColor: "lightgray",
-      }}
+      className="TracePlotExpandComponent"
+      style={{ width }}
       onClick={() => setExpanded(!expanded)}
     >
       {expanded ? "▼" : "▶"}&nbsp;

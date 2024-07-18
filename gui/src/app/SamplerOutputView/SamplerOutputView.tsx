@@ -201,7 +201,7 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
     URL.revokeObjectURL(url);
   }, [draws, paramNames, drawChainIds, samplingOpts]);
   return (
-    <div style={{ position: "absolute", width, height, overflow: "auto" }}>
+    <div className="DrawsTable" style={{ width, height }}>
       <div>
         <SmallIconButton
           icon={<Download />}
@@ -239,7 +239,7 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
       </table>
       {abbreviatedToNumRows !== undefined &&
         abbreviatedToNumRows < draws[0].length && (
-          <div style={{ background: "white", padding: 5 }}>
+          <div className="DrawAbbreviationToggle">
             <button
               onClick={() => {
                 setAbbreviatedToNumRows((x) => (x || 0) + 300);
