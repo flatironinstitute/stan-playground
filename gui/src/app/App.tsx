@@ -1,4 +1,3 @@
-import { useReducer } from "react";
 import { BrowserRouter } from "react-router-dom";
 import MainWindow from "./MainWindow";
 
