@@ -5,15 +5,11 @@ type Props = {
   histData: number[];
   title: string;
   variableName: string;
-  width: number;
-  height: number;
 };
 
 const SequenceHistogramWidget: FunctionComponent<Props> = ({
   histData,
   title,
-  width,
-  height,
   variableName,
 }) => {
   const data = useMemo(
@@ -28,12 +24,10 @@ const SequenceHistogramWidget: FunctionComponent<Props> = ({
     [histData],
   );
   return (
-    <div className="SequenceHistogram" style={{ width, height }}>
+    <div className="SequenceHistogram">
       <LazyPlotlyPlot
         data={[data]}
         layout={{
-          width: width,
-          height,
           title: { text: title, font: { size: 12 } },
           xaxis: { title: variableName },
           yaxis: { title: "Count" },

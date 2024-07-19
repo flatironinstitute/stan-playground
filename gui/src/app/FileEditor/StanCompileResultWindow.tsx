@@ -4,22 +4,18 @@ import { Close, Done } from "@mui/icons-material";
 import { FunctionComponent } from "react";
 
 type Props = {
-  width: number;
-  height: number;
   stancErrors: StancErrors;
   onClose?: () => void;
 };
 
 const StanCompileResultWindow: FunctionComponent<Props> = ({
-  width,
-  height,
   stancErrors,
   onClose,
 }) => {
   let content: any;
   if (stancErrors.errors && stancErrors.errors.length > 0) {
     content = (
-      <div className="CompileErrorsPane" style={{ width, height }}>
+      <div className="CompileErrorsPane">
         <h3>Errors</h3>
         {stancErrors.errors.slice(1).map((error, i) => (
           <div key={i} className="ErrorWarningMessage">
@@ -30,7 +26,7 @@ const StanCompileResultWindow: FunctionComponent<Props> = ({
     );
   } else if (stancErrors.warnings && stancErrors.warnings.length > 0) {
     content = (
-      <div className="CompileWarningsPane" style={{ width, height }}>
+      <div className="CompileWarningsPane">
         <h3>Warnings</h3>
         {stancErrors.warnings.map((warning, i) => (
           <div key={i} className="ErrorWarningMessage">
@@ -48,10 +44,8 @@ const StanCompileResultWindow: FunctionComponent<Props> = ({
   }
 
   return (
-    <div style={{ width, height, overflow: "auto" }}>
-      <div>
-        <SmallIconButton icon={<Close />} onClick={onClose} />
-      </div>
+    <div className="ErrorsWindow">
+      <SmallIconButton icon={<Close />} onClick={onClose} />
       {content}
     </div>
   );

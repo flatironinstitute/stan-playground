@@ -5,6 +5,7 @@ import { FileRegistry, mapModelToFileManifest } from "@SpCore/FileMapping";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import saveAsGitHubGist from "@SpCore/gists/saveAsGitHubGist";
 import { triggerDownload } from "@SpUtil/triggerDownload";
+import Button from "@mui/material/Button";
 
 type SaveProjectWindowProps = {
   onClose: () => void;
@@ -45,7 +46,7 @@ const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
       <div>&nbsp;</div>
       {!exportingToGist && (
         <div>
-          <button
+          <Button
             onClick={async () => {
               serializeAsZip(data).then(([zipBlob, name]) =>
                 triggerDownload(zipBlob, `SP-${name}.zip`, onClose),
@@ -53,15 +54,15 @@ const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
             }}
           >
             Save to .zip file
-          </button>
+          </Button>
           &nbsp;
-          <button
+          <Button
             onClick={() => {
               setExportingToGist(true);
             }}
           >
             Save to GitHub Gist
-          </button>
+          </Button>
         </div>
       )}
       {exportingToGist && (
@@ -164,11 +165,11 @@ const GistExportView: FunctionComponent<GistExportViewProps> = ({
       <div>&nbsp;</div>
       {!gistUrl && (
         <div>
-          <button onClick={handleExport} disabled={!gitHubPersonalAccessToken}>
+          <Button onClick={handleExport} disabled={!gitHubPersonalAccessToken}>
             Save to GitHub Gist
-          </button>
+          </Button>
           &nbsp;
-          <button onClick={onClose}>Cancel</button>
+          <Button onClick={onClose}>Cancel</Button>
         </div>
       )}
       {gistUrl && (
@@ -193,7 +194,7 @@ const GistExportView: FunctionComponent<GistExportViewProps> = ({
             </a>
             <br />
           </p>
-          <button onClick={onClose}>Close</button>
+          <Button onClick={onClose}>Close</Button>
         </div>
       )}
     </div>

@@ -1,18 +1,19 @@
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import LoadProjectWindow from "@SpPages/LoadProjectWindow";
 import SaveProjectWindow from "@SpPages/SaveProjectWindow";
-import { SmallIconButton } from "@fi-sci/misc";
 import ModalWindow, { useModalWindow } from "@fi-sci/modal-window";
-import { ChevronLeft, ChevronRight } from "@mui/icons-material";
+import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
+import Drawer from "@mui/material/Drawer";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import Toolbar from "@mui/material/Toolbar";
 import { FunctionComponent, useContext } from "react";
 import { Link } from "react-router-dom";
 
 type LeftPanelProps = {
-  width: number;
-  height: number;
   hasUnsavedChanges: boolean;
   collapsed: boolean;
-  onSetCollapsed: (collapsed: boolean) => void;
 };
 
 const examplesStanies = [
@@ -26,12 +27,11 @@ const examplesStanies = [
   },
 ];
 
+export const drawerWidth = 240;
+
 const LeftPanel: FunctionComponent<LeftPanelProps> = ({
-  width,
-  height,
   hasUnsavedChanges,
   collapsed,
-  onSetCollapsed,
 }) => {
   // note: this is close enough to pass in directly if we wish
   const { update } = useContext(ProjectContext);
@@ -46,43 +46,57 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({
     handleClose: loadProjectClose,
   } = useModalWindow();
 
-  if (collapsed) {
-    return (
-      <div className="LeftMenu" style={{ width, height }}>
-        <div className="LeftMenuContentWrapper">
-          <ExpandButton onClick={() => onSetCollapsed(false)} />
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="LeftMenu" style={{ width, height }}>
-      <div className="LeftMenuContentWrapper">
-        <CollapseButton onClick={() => onSetCollapsed(true)} />
-        <h3>Examples</h3>
+    <Drawer
+      open={!collapsed}
+      variant="persistent"
+      sx={{
+        width: drawerWidth,
+        flexShrink: 0,
+        "& .MuiDrawer-paper": {
+          width: drawerWidth,
+          boxSizing: "border-box",
+        },
+      }}
+    >
+      {/* For spacing purposes */}
+      <Toolbar />
 
-        {examplesStanies.map((stanie, i) => (
-          <div key={i} className="LeftMenuContentWrapper">
-            <Link replace to={`?project=${stanie.link}`}>
-              {stanie.name}
-            </Link>
-          </div>
-        ))}
-        <hr />
-        <div>
-          <button onClick={loadProjectOpen} disabled={hasUnsavedChanges}>
-            Load project
-          </button>
-          &nbsp;
-          <button onClick={saveProjectOpen} disabled={hasUnsavedChanges}>
-            Save project
-          </button>
+      <h3>Examples</h3>
+
+      {examplesStanies.map((stanie, i) => (
+        <div key={i} className="LeftMenuContentWrapper">
+          <Link replace to={`?project=${stanie.link}`}>
+            {stanie.name}
+          </Link>
         </div>
-        <div>&nbsp;</div>
-        <div>
+      ))}
+      <Divider />
+      <List>
+        <ListItem>
+          <Button
+            variant="outlined"
+            onClick={loadProjectOpen}
+            disabled={hasUnsavedChanges}
+          >
+            Load project
+          </Button>
+        </ListItem>
+
+        <ListItem>
+          <Button
+            variant="outlined"
+            onClick={saveProjectOpen}
+            disabled={hasUnsavedChanges}
+          >
+            Save project
+          </Button>
+        </ListItem>
+        <ListItem>
           {/* This will probably be removed or replaced in the future. It's just for convenience during development. */}
-          <button
+          <Button
+            variant="outlined"
+            color="error"
             onClick={() => {
               const ok = window.confirm(
                 "Are you sure you want to clear all data in the editors?",
@@ -92,36 +106,16 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({
             }}
           >
             Clear all
-          </button>
-        </div>
-      </div>
+          </Button>
+        </ListItem>
+      </List>
       <ModalWindow visible={loadProjectVisible} onClose={loadProjectClose}>
         <LoadProjectWindow onClose={loadProjectClose} />
       </ModalWindow>
       <ModalWindow visible={saveProjectVisible} onClose={saveProjectClose}>
         <SaveProjectWindow onClose={saveProjectClose} />
       </ModalWindow>
-    </div>
-  );
-};
-
-const ExpandButton: FunctionComponent<{ onClick: () => void }> = ({
-  onClick,
-}) => {
-  return (
-    <SmallIconButton icon={<ChevronRight />} onClick={onClick} title="Expand" />
-  );
-};
-
-const CollapseButton: FunctionComponent<{ onClick: () => void }> = ({
-  onClick,
-}) => {
-  return (
-    <SmallIconButton
-      icon={<ChevronLeft />}
-      onClick={onClick}
-      title="Collapse"
-    />
+    </Drawer>
   );
 };
 

@@ -10,10 +10,9 @@ import { SamplingOpts } from "@SpCore/ProjectDataModel";
 import { Progress } from "@SpStanSampler/StanModelWorker";
 import StanSampler from "@SpStanSampler/StanSampler";
 import { StanRun } from "@SpStanSampler/useStanSampler";
+import Button from "@mui/material/Button";
 
 type RunPanelProps = {
-  width: number;
-  height: number;
   sampler?: StanSampler;
   latestRun: StanRun;
   data: any | undefined;
@@ -22,8 +21,6 @@ type RunPanelProps = {
 };
 
 const RunPanel: FunctionComponent<RunPanelProps> = ({
-  width,
-  height,
   sampler,
   latestRun,
   data,
@@ -49,20 +46,27 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
     return <div className="RunPanelPadded">Data not saved</div>;
   }
   return (
-    <div className="RunPanel" style={{ width, height }}>
+    <div className="RunPanel">
       <div className="RunPanelPadded">
         <div>
-          <button
+          <Button
+            variant="contained"
+            color="success"
             onClick={handleRun}
             disabled={runStatus === "sampling" || runStatus === "loading"}
           >
             run sampling
-          </button>
+          </Button>
           &nbsp;
           {runStatus === "sampling" && (
-            <button onClick={cancelRun} disabled={runStatus !== "sampling"}>
+            <Button
+              color="error"
+              variant="outlined"
+              onClick={cancelRun}
+              disabled={runStatus !== "sampling"}
+            >
               cancel
-            </button>
+            </Button>
           )}
           <hr />
           {runStatus === "loading" && <div>Loading compiled Stan model...</div>}

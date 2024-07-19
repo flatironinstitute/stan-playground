@@ -1,6 +1,7 @@
 import { Hyperlink, SmallIconButton } from "@fi-sci/misc";
 import { default as ModalWindow, useModalWindow } from "@fi-sci/modal-window";
 import { Cancel, Check } from "@mui/icons-material";
+import Button from "@mui/material/Button";
 import { FunctionComponent, useCallback, useEffect, useState } from "react";
 
 type CompilationServerConnectionControlProps = {
@@ -200,7 +201,7 @@ const ConfigureCompilationServerDialog: FunctionComponent<
           </div>
         )}
         <hr />
-        <button onClick={() => closeDialog()}>Close</button>
+        <Button onClick={() => closeDialog()}>Close</Button>
       </div>
     </div>
   );

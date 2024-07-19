@@ -1,5 +1,5 @@
 import { Hyperlink } from "@fi-sci/misc";
-import { Grid } from "@mui/material";
+import Grid from "@mui/material/Grid";
 import { defaultSamplingOpts, SamplingOpts } from "@SpCore/ProjectDataModel";
 import { FunctionComponent, useCallback } from "react";
 
