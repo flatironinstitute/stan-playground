@@ -44,7 +44,7 @@ interface TabPanelProps {
   value: number;
 }
 
-function CustomTabPanel(props: TabPanelProps) {
+const CustomTabPanel = (props: TabPanelProps) => {
   const { children, value, index, ...other } = props;
 
   return (
@@ -59,6 +59,6 @@ function CustomTabPanel(props: TabPanelProps) {
       {value === index && <>{children}</>}
     </div>
   );
-}
+};
 
 export default TabWidget;

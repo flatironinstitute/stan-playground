@@ -1,4 +1,5 @@
 import { AutoFixHigh, Cancel, Settings } from "@mui/icons-material";
+import { useMediaQuery } from "@mui/material";
 import { SplitDirection, Splitter } from "@SpComponents/Splitter";
 import StanCompileResultWindow from "@SpComponents/StanCompileResultWindow";
 import TextEditor, { ToolbarItem } from "@SpComponents/TextEditor";
@@ -122,7 +123,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
     }
   }, [fileContent, handleCompile, didInitialCompile]);
 
-  const showLabelsOnButtons = 0 > 700;
+  const showLabelsOnButtons = useMediaQuery("(min-width:600px)");
   const [syntaxWindowVisible, setSyntaxWindowVisible] = useState(false);
 
   const toolbarItems: ToolbarItem[] = useMemo(() => {
@@ -209,24 +210,24 @@ const StanFileEditor: FunctionComponent<Props> = ({
 
   const isCompiling = compileStatus === "compiling";
 
-  const window =
-    syntaxWindowVisible || !editedFileContent ? (
-      editedFileContent ? (
-        <StanCompileResultWindow
-          stancErrors={stancErrors}
-          onClose={() => setSyntaxWindowVisible(false)}
-        />
-      ) : (
-        <div className="StanEditorDefaultText">
-          Begin editing or select an example from the left panel
-        </div>
-      )
-    ) : (
-      <></>
-    );
+  const messagePaneNeeded = syntaxWindowVisible || !editedFileContent;
 
-  const initialSizes =
-    syntaxWindowVisible || !editedFileContent ? [60, 40] : [100, 0];
+  const window = messagePaneNeeded ? (
+    editedFileContent ? (
+      <StanCompileResultWindow
+        stancErrors={stancErrors}
+        onClose={() => setSyntaxWindowVisible(false)}
+      />
+    ) : (
+      <div className="StanEditorDefaultText">
+        Begin editing or select an example from the left panel
+      </div>
+    )
+  ) : (
+    <></>
+  );
+
+  const initialSizes = messagePaneNeeded ? [60, 40] : [100, 0];
 
   return (
     <Splitter direction={SplitDirection.Vertical} initialSizes={initialSizes}>

@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Hyperlink, SmallIconButton } from "@fi-sci/misc";
+import { SmallIconButton } from "@fi-sci/misc";
 import { Editor } from "@monaco-editor/react";
-import { Refresh, Save } from "@mui/icons-material";
+import { Save } from "@mui/icons-material";
+import Link from "@mui/material/Link";
 import { highlightJsData } from "@SpComponents/stanLang";
 import { CodeMarker } from "@SpStanc/Linting";
 import { editor } from "monaco-editor";
@@ -25,7 +26,6 @@ type Props = {
   language: string;
   readOnly?: boolean;
   wordWrap?: boolean;
-  onReload?: () => void;
   toolbarItems?: ToolbarItem[];
   label: string;
   codeMarkers?: CodeMarker[];
@@ -54,7 +54,6 @@ const TextEditor: FunctionComponent<Props> = ({
   onSetEditedText,
   readOnly,
   wordWrap,
-  onReload,
   toolbarItems,
   language,
   label,
@@ -214,12 +213,6 @@ const TextEditor: FunctionComponent<Props> = ({
           &nbsp;&nbsp;&nbsp;
           {readOnly && <span className="ReadOnlyText">read only</span>}
           &nbsp;&nbsp;&nbsp;
-          {onReload && (
-            <Hyperlink onClick={onReload} color="black">
-              <Refresh style={{ fontSize: 14 }} />
-            </Hyperlink>
-          )}
-          &nbsp;&nbsp;&nbsp;
           {toolbarItems &&
             toolbarItems.map((item, i) => (
               <ToolbarItemComponent key={i} item={item} />
@@ -284,9 +277,14 @@ const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
       }
       return (
         <span>
-          <Hyperlink onClick={onClick} color={color || "gray"}>
+          <Link
+            onClick={onClick}
+            color={color || "gray"}
+            component="button"
+            underline="none"
+          >
             {label}
-          </Hyperlink>
+          </Link>
           &nbsp;&nbsp;&nbsp;
         </span>
       );

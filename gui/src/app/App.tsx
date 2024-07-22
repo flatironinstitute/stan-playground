@@ -1,10 +1,15 @@
 import { BrowserRouter } from "react-router-dom";
-import MainWindow from "./MainWindow";
+import ProjectContextProvider from "@SpCore/ProjectContextProvider";
+import HomePage from "@SpPages/HomePage";
 
 function App() {
   return (
     <BrowserRouter>
-      <MainWindow />
+      <div className="MainWindow">
+        <ProjectContextProvider>
+          <HomePage />
+        </ProjectContextProvider>
+      </div>
     </BrowserRouter>
   );
 }

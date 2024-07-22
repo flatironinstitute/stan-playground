@@ -58,42 +58,14 @@
   overflow: hidden;
 }
 
-.MainWindowStatusBar {
-  bottom: 0px;
-  background-color: #eee;
-  overflow: hidden;
-}
-
-/* Main window status bar */
-
-div.StatusBar {
-  font-size: 12px;
-  padding-top: 3px;
-  padding-left: 5px;
-}
-
-.StatusBar span {
-  right: 5px;
-  color: gray;
-}
-
-.StatusBarItem {
-  padding-left: 10px;
-}
-
 /* Main Window toolbar/TopBar */
 
 .TopBarSpacer {
   margin-left: auto;
 }
 
-/* Left menu bar */
-.LeftMenu {
-  background-color: lightgray;
-  overflow-y: auto;
-}
-
-.LeftMenuContentWrapper {
+/* Sidebar */
+.SidebarContentWrapper {
   margin: 5px;
 }
 

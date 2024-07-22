@@ -1,4 +1,4 @@
-import { Hyperlink } from "@fi-sci/misc";
+import { Link } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { defaultSamplingOpts, SamplingOpts } from "@SpCore/ProjectDataModel";
 import { FunctionComponent, useCallback } from "react";
@@ -167,9 +167,14 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({
       </Grid>
       <div className="SamplingOptsSpacer" />
       <div>
-        <Hyperlink onClick={handleReset} color="gray">
+        <Link
+          onClick={handleReset}
+          underline="hover"
+          component="button"
+          color="gray"
+        >
           reset
-        </Hyperlink>
+        </Link>
       </div>
     </div>
   );

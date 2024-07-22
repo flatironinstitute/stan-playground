@@ -16,7 +16,7 @@ import {
   ProjectKnownFiles,
   SamplingOpts,
 } from "@SpCore/ProjectDataModel";
-import LeftPanel, { drawerWidth } from "@SpPages/LeftPanel";
+import Sidebar, { drawerWidth } from "@SpPages/Sidebar";
 import TopBar from "@SpPages/TopBar";
 import useStanSampler from "@SpStanSampler/useStanSampler";
 import {
@@ -62,7 +62,7 @@ const HomePage: FunctionComponent<Props> = () => {
     <Box display="flex" flexDirection="column" height="100%">
       <TopBar title={data.meta.title} onSetCollapsed={setLeftPanelCollapsed} />
 
-      <LeftPanel
+      <Sidebar
         collapsed={leftPanelCollapsed}
         hasUnsavedChanges={modelHasUnsavedChanges(data)}
       />

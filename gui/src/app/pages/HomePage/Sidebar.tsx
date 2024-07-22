@@ -11,12 +11,12 @@ import Toolbar from "@mui/material/Toolbar";
 import { FunctionComponent, useContext } from "react";
 import { Link } from "react-router-dom";
 
-type LeftPanelProps = {
+type Sidebar = {
   hasUnsavedChanges: boolean;
   collapsed: boolean;
 };
 
-const examplesStanies = [
+const exampleLinks = [
   {
     name: "Linear regression",
     link: "https://gist.github.com/WardBrian/93d12876923790f23d9c5cb481e8cd34",
@@ -29,7 +29,7 @@ const examplesStanies = [
 
 export const drawerWidth = 240;
 
-const LeftPanel: FunctionComponent<LeftPanelProps> = ({
+const Sidebar: FunctionComponent<Sidebar> = ({
   hasUnsavedChanges,
   collapsed,
 }) => {
@@ -64,10 +64,10 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({
 
       <h3>Examples</h3>
 
-      {examplesStanies.map((stanie, i) => (
-        <div key={i} className="LeftMenuContentWrapper">
-          <Link replace to={`?project=${stanie.link}`}>
-            {stanie.name}
+      {exampleLinks.map((example, i) => (
+        <div key={i} className="SidebarContentWrapper">
+          <Link replace to={`?project=${example.link}`}>
+            {example.name}
           </Link>
         </div>
       ))}
@@ -119,4 +119,4 @@ const LeftPanel: FunctionComponent<LeftPanelProps> = ({
   );
 };
 
-export default LeftPanel;
+export default Sidebar;
