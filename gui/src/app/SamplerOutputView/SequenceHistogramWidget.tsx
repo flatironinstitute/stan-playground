@@ -28,7 +28,7 @@ const SequenceHistogramWidget: FunctionComponent<Props> = ({
     [histData],
   );
   return (
-    <div style={{ position: "relative", width, height }}>
+    <div className="SequenceHistogram" style={{ width, height }}>
       <LazyPlotlyPlot
         data={[data]}
         layout={{

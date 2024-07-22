@@ -11,18 +11,12 @@ const MainWindow: FunctionComponent<Props> = () => {
   const { width, height } = useWindowDimensions();
   const H = height - statusBarHeight;
   return (
-    <div
-      className="MainWindow"
-      style={{ position: "absolute", width, height, overflow: "hidden" }}
-    >
+    <div className="MainWindow" style={{ width, height }}>
       <div
         className="MainWindowContent"
         style={{
-          position: "absolute",
-          top: 0,
           width,
           height: H,
-          overflow: "hidden",
         }}
       >
         <HomePage width={width} height={H} />
@@ -31,12 +25,8 @@ const MainWindow: FunctionComponent<Props> = () => {
         <div
           className="MainWindowStatusBar"
           style={{
-            position: "absolute",
-            bottom: 0,
             width,
             height: statusBarHeight,
-            backgroundColor: "#eee",
-            overflow: "hidden",
           }}
         >
           <StatusBar width={width} height={statusBarHeight} />

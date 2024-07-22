@@ -23,16 +23,7 @@ const HistsView: FunctionComponent<HistsViewProps> = ({
     return [...names, ...namesWithSuffix];
   }, [paramNames]);
   return (
-    <div
-      style={{
-        position: "absolute",
-        width,
-        height,
-        overflowY: "auto",
-        display: "flex",
-        flexWrap: "wrap",
-      }}
-    >
+    <div className="HistogramsWrapper" style={{ width, height }}>
       {paramNamesResorted.map((paramName) => (
         <SequenceHist
           key={paramName}

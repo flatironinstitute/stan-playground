@@ -11,12 +11,14 @@ import {
 import TopBar from "./TopBar";
 import LeftPanel from "./LeftPanel";
 import { Splitter } from "@fi-sci/splitter";
-import SamplingWindow from "./SamplingWindow/SamplingWindow";
-import StanFileEditor from "@SpComponents/StanFileEditor";
 import {
   ProjectKnownFiles,
   modelHasUnsavedChanges,
 } from "@SpCore/ProjectDataModel";
+import TabWidget from "@SpComponents/TabWidget";
+import SamplingWindow from "./SamplingWindow/SamplingWindow";
+import DataGenerationWindow from "./DataGenerationWindow/DataGenerationWindow";
+import StanFileEditor from "@SpComponents/StanFileEditor";
 import DataFileEditor from "@SpComponents/DataFileEditor";
 
 type Props = {
@@ -68,29 +70,19 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
   }, [data.meta.title]);
 
   return (
-    <div style={{ position: "absolute", width, height, overflow: "hidden" }}>
+    <div className="MainHomePage" style={{ width, height }}>
       <div
-        className="top-bar"
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          width,
-          height: topBarHeight,
-          overflow: "hidden",
-        }}
+        className="top-bar TopBarPosition"
+        style={{ width, height: topBarHeight }}
       >
         <TopBar title={data.meta.title} width={width} height={topBarHeight} />
       </div>
       <div
-        className="left-panel"
+        className="left-panel LeftMenuPanelPosition"
         style={{
-          position: "absolute",
-          left: 0,
           top: topBarHeight + 2,
           width: leftPanelWidth,
           height: height - topBarHeight - 2,
-          overflow: "auto",
         }}
       >
         <LeftPanel
@@ -102,14 +94,12 @@ const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
         />
       </div>
       <div
-        className="main-area"
+        className="main-area MainAreaPosition"
         style={{
-          position: "absolute",
           left: leftPanelWidth,
           top: topBarHeight + 2,
           width: width - leftPanelWidth,
           height: height - topBarHeight - 2,
-          overflow: "hidden",
         }}
       >
         <Splitter
@@ -140,17 +130,40 @@ type RightViewProps = {
   compiledMainJsUrl: string;
 };
 
+const rightViewTabs = [
+  {
+    id: "sampling",
+    label: "Sampling",
+    closeable: false,
+  },
+  {
+    id: "data-generation",
+    label: "Data Generation",
+    closeable: false,
+  },
+];
+
 const RightView: FunctionComponent<RightViewProps> = ({
   width,
   height,
   compiledMainJsUrl,
 }) => {
+  const [currentTabId, setCurrentTabId] = useState("sampling");
   return (
-    <SamplingWindow
+    <TabWidget
       width={width}
       height={height}
-      compiledMainJsUrl={compiledMainJsUrl}
-    />
+      tabs={rightViewTabs}
+      currentTabId={currentTabId}
+      setCurrentTabId={setCurrentTabId}
+    >
+      <SamplingWindow
+        width={width}
+        height={height}
+        compiledMainJsUrl={compiledMainJsUrl}
+      />
+      <DataGenerationWindow width={width} height={height} />
+    </TabWidget>
   );
 };
 

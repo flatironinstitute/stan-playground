@@ -17,6 +17,7 @@ const AnalysisPyWindow: FunctionComponent<AnalysisPyWindowProps> = ({
   height,
   stanSampler,
 }) => {
+  // TODO make useRef
   const [imageOutputDiv, setImageOutputDiv] = useState<HTMLDivElement | null>(
     null,
   );
@@ -46,12 +47,9 @@ type LeftPaneProps = {
 };
 
 export type GlobalDataForAnalysisPy = {
-  sampling?: {
-    draws: number[][];
-    paramNames: string[];
-    numChains: number;
-    chainIds: number[];
-  };
+  draws: number[][];
+  paramNames: string[];
+  numChains: number;
 };
 
 const LeftPane: FunctionComponent<LeftPaneProps> = ({
@@ -60,38 +58,22 @@ const LeftPane: FunctionComponent<LeftPaneProps> = ({
   imageOutputDiv,
   stanSampler,
 }) => {
+  // TODO make useRef
   const [consoleOutputDiv, setConsoleOutputDiv] =
     useState<HTMLDivElement | null>(null);
   const { data, update } = useContext(ProjectContext);
   const { draws, paramNames, numChains } = useSamplerOutput(
     stanSampler || undefined,
   );
-  const { spData, scriptHeader } = useMemo(() => {
+  const spData = useMemo(() => {
     if (draws && numChains && paramNames) {
-      const numDrawsPerChain = draws[0].length / numChains;
-      const chainIds: number[] = [];
-      for (let i = 0; i < numChains; i++) {
-        for (let j = 0; j < numDrawsPerChain; j++) {
-          chainIds.push(i + 1);
-        }
-      }
-      const spData: GlobalDataForAnalysisPy = {
-        sampling: {
-          draws: transpose(draws),
-          paramNames,
-          numChains,
-          chainIds,
-        },
-      }
       return {
-        spData,
-        scriptHeader: "",
-      }
-    } else {
-      return {
-        spData: {} as GlobalDataForAnalysisPy,
-        scriptHeader: getScriptHeaderForEmptyDraws(),
+        draws,
+        paramNames,
+        numChains,
       };
+    } else {
+      return undefined;
     }
   }, [draws, paramNames, numChains]);
   return (
@@ -124,7 +106,6 @@ const LeftPane: FunctionComponent<LeftPaneProps> = ({
         imageOutputDiv={imageOutputDiv}
         readOnly={false}
         spData={spData}
-        scriptHeader={scriptHeader}
       />
       <ConsoleOutputWindow
         width={0}
@@ -141,11 +122,9 @@ type ConsoleOutputWindowProps = {
   onDivElement: (div: HTMLDivElement) => void;
 };
 
-const ConsoleOutputWindow: FunctionComponent<ConsoleOutputWindowProps> = ({
-  width,
-  height,
-  onDivElement,
-}) => {
+export const ConsoleOutputWindow: FunctionComponent<
+  ConsoleOutputWindowProps
+> = ({ width, height, onDivElement }) => {
   return (
     <div
       style={{ position: "absolute", width, height, overflowY: "auto" }}
@@ -191,16 +170,6 @@ const RightPane: FunctionComponent<RightPaneProps> = ({
       onDivElement={onImageOutputDiv}
     />
   );
-};
-
-const getScriptHeaderForEmptyDraws = () => {
-  return `
-raise Exception("You must run the sampler before executing the analysis script.")
-`;
-};
-
-const transpose = (matrix: number[][]) => {
-  return matrix[0].map((_, colIndex) => matrix.map((row) => row[colIndex]));
 };
 
 export default AnalysisPyWindow;

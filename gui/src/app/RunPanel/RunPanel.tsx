@@ -45,14 +45,14 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
   }, [sampler]);
 
   if (!sampler)
-    return <div style={{ padding: 5 }}>Stan model not compiled</div>;
+    return <div className="RunPanelPadded">Stan model not compiled</div>;
 
   if (!dataIsSaved) {
-    return <div style={{ padding: 5 }}>Data not saved</div>;
+    return <div className="RunPanelPadded">Data not saved</div>;
   }
   return (
-    <div style={{ position: "absolute", width, height, overflowY: "auto" }}>
-      <div style={{ padding: 5 }}>
+    <div className="RunPanel" style={{ width, height }}>
+      <div className="RunPanelPadded">
         <div>
           <button
             onClick={handleRun}
@@ -104,7 +104,7 @@ const SamplingProgressComponent: FunctionComponent<
     100;
   return (
     <>
-      <div style={{ width: "45%" }}>
+      <div className="SamplingProgress">
         <LinearProgressWithLabel
           sx={{
             height: 10,

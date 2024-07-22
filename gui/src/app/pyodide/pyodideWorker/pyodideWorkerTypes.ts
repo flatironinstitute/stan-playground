@@ -1,26 +1,25 @@
-export type PyodideWorkerMode = "data.py" | "analysis.py";
+export type PyodideRunSettings = Partial<{
+  loadsDraws: boolean;
+  showsPlots: boolean;
+  producesData: boolean;
+}>;
 
-export type MessageToPyodideWorker =
-  | {
-      type: "setPyodideWorkerMode";
-      mode: PyodideWorkerMode;
-    }
-  | {
-      type: "run";
-      code: string;
-      spData: { [key: string]: any };
-    };
+export type MessageToPyodideWorker = {
+  type: "run";
+  code: string;
+  spData: Record<string, any> | undefined;
+  spRunSettings: PyodideRunSettings;
+};
 
 export const isMessageToPyodideWorker = (
   x: any,
 ): x is MessageToPyodideWorker => {
   if (!x) return false;
   if (typeof x !== "object") return false;
-  if (x.type === "setPyodideWorkerMode")
-    return ["data.py", "analysis.py"].includes(x.mode);
   if (x.type === "run") {
     if (x.code === undefined) return false;
     if (x.spData === undefined) return false;
+    if (x.spRunSettings === undefined) return false;
     return true;
   }
   return false;
@@ -33,14 +32,14 @@ export type MessageFromPyodideWorker =
     }
   | {
       type: "setStatus";
-      status: PydodideWorkerStatus;
+      status: PyodideWorkerStatus;
     }
   | {
-      type: "setData"; // for data.py mode
+      type: "setData";
       data: any;
     }
   | {
-      type: "addImage"; // for analysis.py mode
+      type: "addImage";
       image: any;
     };
 
@@ -57,13 +56,21 @@ export const isMessageFromPyodideWorker = (
   return false;
 };
 
-export type PydodideWorkerStatus =
+export type PyodideWorkerStatus =
   | "idle"
   | "loading"
+  | "installing"
   | "running"
   | "completed"
   | "failed";
 
-export const isPydodideWorkerStatus = (x: any): x is PydodideWorkerStatus => {
-  return ["idle", "loading", "running", "completed", "failed"].includes(x);
+export const isPydodideWorkerStatus = (x: any): x is PyodideWorkerStatus => {
+  return [
+    "idle",
+    "loading",
+    "installing",
+    "running",
+    "completed",
+    "failed",
+  ].includes(x);
 };

@@ -2,6 +2,8 @@ export enum ProjectKnownFiles {
   STANFILE = "stanFileContent",
   DATAFILE = "dataFileContent",
   ANALYSISPYFILE = "analysisPyFileContent",
+  DATAPYFILE = "dataPyFileContent",
+  DATARFILE = "dataRFileContent",
 }
 
 const baseObjectCheck = (x: any): boolean => {
@@ -125,10 +127,14 @@ export const initialDataModel: ProjectDataModel = {
     stanFileContent: "",
     dataFileContent: "",
     analysisPyFileContent: "",
+    dataPyFileContent: "",
+    dataRFileContent: "",
   },
   stanFileContent: "",
   dataFileContent: "",
   analysisPyFileContent: "",
+  dataPyFileContent: "",
+  dataRFileContent: "",
   samplingOpts: defaultSamplingOpts,
 };
 

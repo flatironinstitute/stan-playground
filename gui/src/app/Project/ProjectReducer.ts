@@ -44,10 +44,7 @@ export type ProjectReducerAction =
       type: "clear";
     };
 
-export const ProjectReducer = (
-  s: ProjectDataModel,
-  a: ProjectReducerAction,
-) => {
+const ProjectReducer = (s: ProjectDataModel, a: ProjectReducerAction) => {
   switch (a.type) {
     case "loadFiles": {
       try {
@@ -85,3 +82,5 @@ export const ProjectReducer = (
     }
   }
 };
+
+export default ProjectReducer;
