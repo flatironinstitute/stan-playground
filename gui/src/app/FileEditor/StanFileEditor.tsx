@@ -156,7 +156,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
 
     // auto format
     if (!readOnly) {
-      if (editedFileContent !== undefined) {
+      if (editedFileContent) {
         ret.push({
           type: "button",
           icon: <AutoFixHigh />,
@@ -167,7 +167,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
         });
       }
     }
-    if (editedFileContent === fileContent) {
+    if (editedFileContent && editedFileContent === fileContent) {
       if (compileStatus !== "compiling") {
         if (validSyntax) {
           ret.push({

@@ -270,7 +270,7 @@ const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
     } else {
       if (!onClick) {
         return (
-          <span style={{ color: color || "gray" }}>
+          <span style={{ color: color || "gray" }} title={label}>
             {label}&nbsp;&nbsp;&nbsp;
           </span>
         );
@@ -291,7 +291,7 @@ const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
     }
   } else if (item.type === "text") {
     return (
-      <span style={{ color: item.color || "gray" }}>
+      <span style={{ color: item.color || "gray" }} title={item.label}>
         {item.label}&nbsp;&nbsp;&nbsp;
       </span>
     );
