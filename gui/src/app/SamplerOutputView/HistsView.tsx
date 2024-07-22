@@ -1,4 +1,4 @@
-import Grid from "@mui/material/Grid";
+import ResponsiveGrid from "@SpComponents/ResponsiveGrid";
 import SequenceHistogramWidget from "@SpComponents/SequenceHistogramWidget";
 import { FunctionComponent, useMemo } from "react";
 
@@ -19,17 +19,16 @@ const HistsView: FunctionComponent<HistsViewProps> = ({
     return [...names, ...namesWithSuffix];
   }, [paramNames]);
   return (
-    <Grid container spacing={2}>
+    <ResponsiveGrid>
       {paramNamesResorted.map((paramName) => (
-        <Grid item sm={12} lg={4} key={paramName}>
-          <SequenceHistogramWidget
-            histData={draws[paramNames.indexOf(paramName)]}
-            title={paramName}
-            variableName={paramName}
-          />
-        </Grid>
+        <SequenceHistogramWidget
+          key={paramName}
+          histData={draws[paramNames.indexOf(paramName)]}
+          title={paramName}
+          variableName={paramName}
+        />
       ))}
-    </Grid>
+    </ResponsiveGrid>
   );
 };
 

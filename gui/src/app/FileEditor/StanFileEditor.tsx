@@ -1,5 +1,5 @@
 import { AutoFixHigh, Cancel, Settings } from "@mui/icons-material";
-import { useMediaQuery } from "@mui/material";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { SplitDirection, Splitter } from "@SpComponents/Splitter";
 import StanCompileResultWindow from "@SpComponents/StanCompileResultWindow";
 import TextEditor, { ToolbarItem } from "@SpComponents/TextEditor";
