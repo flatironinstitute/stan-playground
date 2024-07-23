@@ -95,16 +95,7 @@ type ConsoleOutputWindowProps = {
 export const ConsoleOutputWindow: FunctionComponent<
   ConsoleOutputWindowProps
 > = ({ consoleRef }) => {
-  return (
-    <div
-      style={{
-        width: "100%",
-        height: "100%",
-        overflowY: "auto",
-      }}
-      ref={consoleRef}
-    />
-  );
+  return <div className="ConsoleOutputArea" ref={consoleRef} />;
 };
 
 type ImageOutputWindowProps = {
@@ -114,16 +105,7 @@ type ImageOutputWindowProps = {
 const ImageOutputWindow: FunctionComponent<ImageOutputWindowProps> = ({
   imagesRef,
 }) => {
-  return (
-    <div
-      style={{
-        height: "100%",
-        width: "100%",
-        overflowY: "auto",
-      }}
-      ref={imagesRef}
-    />
-  );
+  return <div className="ImageOutputArea" ref={imagesRef} />;
 };
 
 export default AnalysisPyWindow;
