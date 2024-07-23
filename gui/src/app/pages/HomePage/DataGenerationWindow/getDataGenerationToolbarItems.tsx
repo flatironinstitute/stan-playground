@@ -1,6 +1,6 @@
 import { ToolbarItem } from "@SpComponents/TextEditor";
+import { PyodideWorkerStatus } from "@SpPyodide/pyodideWorker/pyodideWorkerTypes";
 import { Help, PlayArrow } from "@mui/icons-material";
-import { PyodideWorkerStatus } from "app/pyodide/pyodideWorker/pyodideWorkerTypes";
 
 const getDataGenerationToolbarItems = (o: {
   status: PyodideWorkerStatus;

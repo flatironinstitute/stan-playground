@@ -1,7 +1,4 @@
 import TextEditor, { ToolbarItem } from "@SpComponents/TextEditor";
-import { writeConsoleOutToDiv } from "app/pyodide/AnalysisPyFileEditor";
-import { PyodideWorkerStatus } from "app/pyodide/pyodideWorker/pyodideWorkerTypes";
-import usePyodideWorker from "app/pyodide/pyodideWorker/usePyodideWorker";
 import {
   FunctionComponent,
   RefObject,
@@ -10,6 +7,9 @@ import {
   useState,
 } from "react";
 import getDataGenerationToolbarItems from "./getDataGenerationToolbarItems";
+import { PyodideWorkerStatus } from "@SpPyodide/pyodideWorker/pyodideWorkerTypes";
+import { writeConsoleOutToDiv } from "@SpPyodide/AnalysisPyFileEditor";
+import usePyodideWorker from "@SpPyodide/pyodideWorker/usePyodideWorker";
 
 type Props = {
   fileName: string;
