@@ -1,6 +1,6 @@
 import { FunctionComponent, useCallback, useContext, useState } from "react";
 
-import { serializeAsZip } from "@SpCore//ProjectSerialization";
+import { serializeAsZip } from "@SpCore/ProjectSerialization";
 import { FileRegistry, mapModelToFileManifest } from "@SpCore/FileMapping";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import saveAsGitHubGist from "@SpCore/gists/saveAsGitHubGist";
@@ -35,12 +35,15 @@ const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
               />
             </td>
           </tr>
-          {Object.entries(fileManifest).map(([name, content], i) => (
-            <tr key={i}>
-              <td>{name}</td>
-              <td>{content.length} bytes</td>
-            </tr>
-          ))}
+          {Object.entries(fileManifest).map(
+            ([name, content], i) =>
+              content.trim() !== "" && (
+                <tr key={i}>
+                  <td>{name}</td>
+                  <td>{content.length} bytes</td>
+                </tr>
+              ),
+          )}
         </tbody>
       </table>
       <div>&nbsp;</div>
