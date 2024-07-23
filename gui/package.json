@@ -39,7 +39,6 @@
     "react-plotly.js": "^2.6.0",
     "react-router-dom": "^6.17.0",
     "react-use-measure": "^2.1.1",
-    "react-visibility-sensor": "^5.1.1",
     "tinystan": "^0.0.2",
     "webr": "^0.4.0"
   },
