@@ -69,7 +69,7 @@ const TextEditor: FunctionComponent<Props> = ({
   // worked okay until I navigated away and then back to the editors
   // and then everything was blank, and I couldn't figure out what
   // was causing this. But I think this method is more flexible anyway
-  // is it gives us access to the editor instance.
+  // as it gives us access to the editor instance.
   const [editorInstance, setEditor] = useState<
     editor.IStandaloneCodeEditor | undefined
   >(undefined);

@@ -8,31 +8,6 @@ import spDrawsScript from "./sp_load_draws.py?raw";
 import spMPLScript from "./sp_patch_matplotlib.py?raw";
 
 let pyodide: PyodideInterface | null = null;
-
-const sendMessageToMain = (message: MessageFromPyodideWorker) => {
-  self.postMessage(message);
-};
-
-const sendStdout = (data: string) => {
-  sendMessageToMain({ type: "stdout", data });
-};
-
-const sendStderr = (data: string) => {
-  sendMessageToMain({ type: "stderr", data });
-};
-
-const setStatus = (status: PyodideWorkerStatus) => {
-  sendMessageToMain({ type: "setStatus", status });
-};
-
-const setData = (data: any) => {
-  sendMessageToMain({ type: "setData", data });
-};
-
-const addImage = (image: any) => {
-  sendMessageToMain({ type: "addImage", image });
-};
-
 const loadPyodideInstance = async () => {
   if (pyodide === null) {
     pyodide = await loadPyodide({
@@ -58,6 +33,30 @@ const loadPyodideInstance = async () => {
   } else {
     return pyodide;
   }
+};
+
+const sendMessageToMain = (message: MessageFromPyodideWorker) => {
+  self.postMessage(message);
+};
+
+const sendStdout = (data: string) => {
+  sendMessageToMain({ type: "stdout", data });
+};
+
+const sendStderr = (data: string) => {
+  sendMessageToMain({ type: "stderr", data });
+};
+
+const setStatus = (status: PyodideWorkerStatus) => {
+  sendMessageToMain({ type: "setStatus", status });
+};
+
+const setData = (data: any) => {
+  sendMessageToMain({ type: "setData", data });
+};
+
+const addImage = (image: any) => {
+  sendMessageToMain({ type: "addImage", image });
 };
 
 console.log("pyodide worker loaded");

@@ -16,15 +16,12 @@ export type MessageToPyodideWorker = {
 export const isMessageToPyodideWorker = (
   x: any,
 ): x is MessageToPyodideWorker => {
-  if (!x) return false;
   if (!baseObjectCheck(x)) return false;
-  if (x.type === "run") {
-    if (x.code === undefined) return false;
-    if (x.spData === undefined) return false;
-    if (x.spRunSettings === undefined) return false;
-    return true;
-  }
-  return false;
+  if (x.type !== "run") return false;
+  if (x.code === undefined) return false;
+  if (x.spData === undefined) return false;
+  if (x.spRunSettings === undefined) return false;
+  return true;
 };
 
 export type MessageFromPyodideWorker =
@@ -48,7 +45,6 @@ export type MessageFromPyodideWorker =
 export const isMessageFromPyodideWorker = (
   x: any,
 ): x is MessageFromPyodideWorker => {
-  if (!x) return false;
   if (!baseObjectCheck(x)) return false;
   if (x.type === "stdout") return x.data !== undefined;
   if (x.type === "stderr") return x.data !== undefined;
