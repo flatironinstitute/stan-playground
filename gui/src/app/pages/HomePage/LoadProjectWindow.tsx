@@ -1,3 +1,4 @@
+import Button from "@mui/material/Button";
 import {
   FieldsContentsMap,
   FileNames,
@@ -130,15 +131,15 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
       )}
       {showReplaceProjectOptions && (
         <div>
-          <button onClick={() => importUploadedFiles({ replaceProject: true })}>
+          <Button onClick={() => importUploadedFiles({ replaceProject: true })}>
             Load into a NEW project
-          </button>
+          </Button>
           &nbsp;
-          <button
+          <Button
             onClick={() => importUploadedFiles({ replaceProject: false })}
           >
             Load into EXISTING project
-          </button>
+          </Button>
         </div>
       )}
     </div>

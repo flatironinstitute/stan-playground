@@ -11,16 +11,12 @@ type Props = {
   plotSequences: PlotSequence[];
   variableName: string;
   highlightDrawRange?: [number, number];
-  width: number;
-  height: number;
 };
 
 const SequencePlotWidget: FunctionComponent<Props> = ({
   plotSequences,
   variableName,
   highlightDrawRange,
-  width,
-  height,
 }) => {
   const shapes = useMemo(
     () =>
@@ -53,8 +49,6 @@ const SequencePlotWidget: FunctionComponent<Props> = ({
   );
   const layout = useMemo(
     () => ({
-      width: width,
-      height,
       title: "",
       yaxis: { title: variableName },
       xaxis: { title: "draw" },
@@ -66,10 +60,10 @@ const SequencePlotWidget: FunctionComponent<Props> = ({
       },
       showlegend: false,
     }),
-    [width, height, variableName, shapes],
+    [variableName, shapes],
   );
   return (
-    <div className="SequencePlot" style={{ width, height }}>
+    <div className="SequencePlot">
       <LazyPlotlyPlot data={data} layout={layout} />
     </div>
   );

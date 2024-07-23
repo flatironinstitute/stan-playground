@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Hyperlink, SmallIconButton } from "@fi-sci/misc";
+import { SmallIconButton } from "@fi-sci/misc";
 import { Editor } from "@monaco-editor/react";
-import { Refresh, Save } from "@mui/icons-material";
+import { Save } from "@mui/icons-material";
+import Link from "@mui/material/Link";
 import { highlightJsData } from "@SpComponents/stanLang";
 import { CodeMarker } from "@SpStanc/Linting";
 import { editor } from "monaco-editor";
@@ -25,11 +26,8 @@ type Props = {
   language: string;
   readOnly?: boolean;
   wordWrap?: boolean;
-  onReload?: () => void;
   toolbarItems?: ToolbarItem[];
   label: string;
-  width: number;
-  height: number;
   codeMarkers?: CodeMarker[];
 };
 
@@ -56,12 +54,9 @@ const TextEditor: FunctionComponent<Props> = ({
   onSetEditedText,
   readOnly,
   wordWrap,
-  onReload,
   toolbarItems,
   language,
   label,
-  width,
-  height,
   codeMarkers,
 }) => {
   const handleChange = useCallback(
@@ -198,21 +193,10 @@ const TextEditor: FunctionComponent<Props> = ({
     [handleSave, readOnly],
   );
 
-  const toolbarHeight = 25;
   return (
-    <div
-      className="AbsoluteHidden"
-      style={{ width, height }}
-      onKeyDown={handleKeyDown}
-    >
+    <div className="EditorWithToolbar" onKeyDown={handleKeyDown}>
       <NotSelectable>
-        <div
-          className="EditorMenuBar"
-          style={{
-            width: width,
-            height: toolbarHeight,
-          }}
-        >
+        <div className="EditorMenuBar">
           <span className="EditorTitle">{label}</span>
           &nbsp;&nbsp;&nbsp;
           {!readOnly && (
@@ -229,42 +213,23 @@ const TextEditor: FunctionComponent<Props> = ({
           &nbsp;&nbsp;&nbsp;
           {readOnly && <span className="ReadOnlyText">read only</span>}
           &nbsp;&nbsp;&nbsp;
-          {onReload && (
-            <LowerABit numPixels={2}>
-              <Hyperlink onClick={onReload} color="black">
-                <Refresh style={{ fontSize: 14 }} />
-              </Hyperlink>
-            </LowerABit>
-          )}
-          &nbsp;&nbsp;&nbsp;
           {toolbarItems &&
             toolbarItems.map((item, i) => (
               <ToolbarItemComponent key={i} item={item} />
             ))}
         </div>
       </NotSelectable>
-      <div
-        className="EditorWrapper"
-        style={{
-          top: toolbarHeight,
-          width,
-          height: height - toolbarHeight,
+      <Editor
+        defaultLanguage={language}
+        onChange={handleChange}
+        onMount={handleEditorDidMount}
+        options={{
+          readOnly,
+          domReadOnly: readOnly,
+          wordWrap: wordWrap ? "on" : "off",
+          theme: "vs-stan", // unfortunately we cannot do this on a per-editor basis - it's a global setting
         }}
-      >
-        <Editor
-          width={width}
-          height={height - toolbarHeight}
-          defaultLanguage={language}
-          onChange={handleChange}
-          onMount={handleEditorDidMount}
-          options={{
-            readOnly,
-            domReadOnly: readOnly,
-            wordWrap: wordWrap ? "on" : "off",
-            theme: "vs-stan", // unfortunately we cannot do this on a per-editor basis - it's a global setting
-          }}
-        />
-      </div>
+      />
     </div>
   );
 };
@@ -305,38 +270,34 @@ const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
     } else {
       if (!onClick) {
         return (
-          <span style={{ color: color || "gray" }}>
+          <span style={{ color: color || "gray" }} title={label}>
             {label}&nbsp;&nbsp;&nbsp;
           </span>
         );
       }
       return (
         <span>
-          <Hyperlink onClick={onClick} color={color || "gray"}>
+          <Link
+            onClick={onClick}
+            color={color || "gray"}
+            component="button"
+            underline="none"
+          >
             {label}
-          </Hyperlink>
+          </Link>
           &nbsp;&nbsp;&nbsp;
         </span>
       );
     }
   } else if (item.type === "text") {
     return (
-      <span style={{ color: item.color || "gray" }}>
+      <span style={{ color: item.color || "gray" }} title={item.label}>
         {item.label}&nbsp;&nbsp;&nbsp;
       </span>
     );
   } else {
     return <span>unknown toolbar item type</span>;
   }
-};
-
-// TODO: Consider whether to change this
-const LowerABit: FunctionComponent<
-  PropsWithChildren<{ numPixels: number }>
-> = ({ children, numPixels }) => {
-  return (
-    <span style={{ position: "relative", top: numPixels }}>{children}</span>
-  );
 };
 
 const NotSelectable: FunctionComponent<PropsWithChildren> = ({ children }) => {

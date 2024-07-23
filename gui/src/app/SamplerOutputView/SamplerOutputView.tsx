@@ -3,22 +3,19 @@ import { Download } from "@mui/icons-material";
 import HistsView from "@SpComponents/HistsView";
 import SummaryView from "@SpComponents/SummaryView";
 import TabWidget from "@SpComponents/TabWidget";
-import TracePlotsView from "@SpComponents/TracePlotsView";
 import { SamplingOpts } from "@SpCore/ProjectDataModel";
 import { StanRun } from "@SpStanSampler/useStanSampler";
 import { triggerDownload } from "@SpUtil/triggerDownload";
 import JSZip from "jszip";
 import { FunctionComponent, useCallback, useMemo, useState } from "react";
+import TracePlotsView from "./TracePlotsView";
+import Button from "@mui/material/Button";
 
 type SamplerOutputViewProps = {
-  width: number;
-  height: number;
   latestRun: StanRun;
 };
 
 const SamplerOutputView: FunctionComponent<SamplerOutputViewProps> = ({
-  width,
-  height,
   latestRun,
 }) => {
   const { draws, paramNames, computeTimeSec, samplingOpts } = latestRun;
@@ -26,8 +23,6 @@ const SamplerOutputView: FunctionComponent<SamplerOutputViewProps> = ({
   if (!draws || !paramNames || !samplingOpts) return <span />;
   return (
     <DrawsDisplay
-      width={width}
-      height={height}
       draws={draws}
       paramNames={paramNames}
       computeTimeSec={computeTimeSec}
@@ -37,51 +32,18 @@ const SamplerOutputView: FunctionComponent<SamplerOutputViewProps> = ({
 };
 
 type DrawsDisplayProps = {
-  width: number;
-  height: number;
   draws: number[][];
   paramNames: string[];
   computeTimeSec: number | undefined;
   samplingOpts: SamplingOpts;
 };
 
-const tabs = [
-  {
-    id: "summary",
-    label: "Summary",
-    title: "Summary view",
-    closeable: false,
-  },
-  {
-    id: "draws",
-    label: "Draws",
-    title: "Draws view",
-    closeable: false,
-  },
-  {
-    id: "hists",
-    label: "Histograms",
-    title: "Histograms view",
-    closeable: false,
-  },
-  {
-    id: "traceplots",
-    label: "Trace Plots",
-    title: "Trace Plots view",
-    closeable: false,
-  },
-];
-
 const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({
-  width,
-  height,
   draws,
   paramNames,
   computeTimeSec,
   samplingOpts,
 }) => {
-  const [currentTabId, setCurrentTabId] = useState("summary");
-
   const numChains = samplingOpts.num_chains;
 
   const drawChainIds = useMemo(() => {
@@ -98,24 +60,14 @@ const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({
   }, [draws, numChains]);
 
   return (
-    <TabWidget
-      width={width}
-      height={height}
-      tabs={tabs}
-      currentTabId={currentTabId}
-      setCurrentTabId={setCurrentTabId}
-    >
+    <TabWidget labels={["Summary", "Draws", "Histograms", "Trace plots"]}>
       <SummaryView
-        width={0}
-        height={0}
         draws={draws}
         paramNames={paramNames}
         drawChainIds={drawChainIds}
         computeTimeSec={computeTimeSec}
       />
       <DrawsView
-        width={0}
-        height={0}
         draws={draws}
         paramNames={paramNames}
         drawChainIds={drawChainIds}
@@ -123,15 +75,11 @@ const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({
         samplingOpts={samplingOpts}
       />
       <HistsView
-        width={0}
-        height={0}
         draws={draws}
         paramNames={paramNames}
         drawChainIds={drawChainIds}
       />
       <TracePlotsView
-        width={0}
-        height={0}
         draws={draws}
         paramNames={paramNames}
         drawChainIds={drawChainIds}
@@ -141,8 +89,6 @@ const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({
 };
 
 type DrawsViewProps = {
-  width: number;
-  height: number;
   draws: number[][];
   paramNames: string[];
   drawChainIds: number[];
@@ -151,8 +97,6 @@ type DrawsViewProps = {
 };
 
 const DrawsView: FunctionComponent<DrawsViewProps> = ({
-  width,
-  height,
   draws,
   paramNames,
   drawChainIds,
@@ -197,7 +141,7 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
     URL.revokeObjectURL(url);
   }, [draws, paramNames, drawChainIds, samplingOpts]);
   return (
-    <div className="DrawsTable" style={{ width, height }}>
+    <div className="DrawsTable">
       <div>
         <SmallIconButton
           icon={<Download />}
@@ -236,13 +180,13 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
       {abbreviatedToNumRows !== undefined &&
         abbreviatedToNumRows < draws[0].length && (
           <div className="DrawAbbreviationToggle">
-            <button
+            <Button
               onClick={() => {
                 setAbbreviatedToNumRows((x) => (x || 0) + 300);
               }}
             >
               Show more
-            </button>
+            </Button>
           </div>
         )}
     </div>

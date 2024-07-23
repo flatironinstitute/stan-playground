@@ -1,6 +1,8 @@
-import { Hyperlink, SmallIconButton } from "@fi-sci/misc";
+import { SmallIconButton } from "@fi-sci/misc";
 import { default as ModalWindow, useModalWindow } from "@fi-sci/modal-window";
 import { Cancel, Check } from "@mui/icons-material";
+import Button from "@mui/material/Button";
+import Link from "@mui/material/Link";
 import { FunctionComponent, useCallback, useEffect, useState } from "react";
 
 type CompilationServerConnectionControlProps = {
@@ -47,10 +49,15 @@ const CompilationServerConnectionControl: FunctionComponent<
           />
         </span>
         &nbsp;
-        <Hyperlink color="white" onClick={openDialog}>
+        <Link
+          onClick={openDialog}
+          color="white"
+          underline="none"
+          component="button"
+        >
           {isConnected ? "connected to " : "not connected to "}
           {serverLabel}
-        </Hyperlink>
+        </Link>
         &nbsp;&nbsp;
       </span>
       <ModalWindow visible={dialogVisible} onClose={closeDialog}>
@@ -127,7 +134,9 @@ const ConfigureCompilationServerDialog: FunctionComponent<
           <span className="disconnected">Not connected</span>
         )}
         &nbsp;
-        <Hyperlink onClick={onRetry}>retry</Hyperlink>
+        <Link onClick={onRetry} component="button" underline="none">
+          retry
+        </Link>
       </div>
       <hr />
       <div>
@@ -200,7 +209,7 @@ const ConfigureCompilationServerDialog: FunctionComponent<
           </div>
         )}
         <hr />
-        <button onClick={() => closeDialog()}>Close</button>
+        <Button onClick={() => closeDialog()}>Close</Button>
       </div>
     </div>
   );

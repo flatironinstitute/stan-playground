@@ -9,8 +9,6 @@ type Props = {
   setEditedFileContent: (text: string) => void;
   onDeleteFile?: () => void;
   readOnly: boolean;
-  width: number;
-  height: number;
 };
 
 const DataFileEditor: FunctionComponent<Props> = ({
@@ -20,8 +18,6 @@ const DataFileEditor: FunctionComponent<Props> = ({
   editedFileContent,
   setEditedFileContent,
   readOnly,
-  width,
-  height,
 }) => {
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     const ret: ToolbarItem[] = [];
@@ -30,8 +26,6 @@ const DataFileEditor: FunctionComponent<Props> = ({
 
   return (
     <TextEditor
-      width={width}
-      height={height}
       language="json"
       label={fileName}
       text={fileContent}
