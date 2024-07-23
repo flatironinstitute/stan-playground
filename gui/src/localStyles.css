@@ -4,15 +4,6 @@
   color: red;
 }
 
-.Absolute {
-  position: absolute;
-}
-
-.AbsoluteHidden {
-  position: absolute;
-  overflow: hidden;
-}
-
 /* Compilation server connection mgmt */
 .connected {
   color: green;
@@ -35,10 +26,15 @@
 }
 
 /* Compilation Results (StanCompileResultWindow) */
+.ErrorsWindow {
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+}
+
 .CompileErrorsPane {
   color: red;
   padding: 0px;
-  overflow: auto;
 }
 
 .ErrorWarningMessage {
@@ -49,7 +45,6 @@
 .CompileWarningsPane {
   color: blue;
   padding: 0px;
-  overflow: auto;
 }
 
 .CompilationDone {
@@ -58,94 +53,19 @@
 
 /* Main window */
 .MainWindow {
-  position: absolute;
+  height: 100vh;
+  width: 100%;
   overflow: hidden;
-}
-
-.MainWindowContent {
-  position: absolute;
-  top: 0px;
-  overflow: hidden;
-}
-
-.MainWindowStatusBar {
-  position: absolute;
-  bottom: 0px;
-  background-color: #eee;
-  overflow: hidden;
-}
-
-/* Home Page */
-.MainHomePage {
-  position: absolute;
-  overflow: hidden;
-}
-
-/* NOTE: These should be combined with the existing single-element-class CSS for the elements;
-I haven't done this because those currently live in separate other files... */
-.TopBarPosition {
-  position: absolute;
-  left: 0px;
-  top: 0px;
-  overflow: hidden;
-}
-
-.LeftMenuPanelPosition {
-  position: absolute;
-  left: 0px;
-  overflow: auto;
-}
-
-.MainAreaPosition {
-  position: absolute;
-  overflow: hidden;
-}
-
-.RunPanelPosition {
-  top: 0px;
-}
-
-/* Main window status bar */
-
-div.StatusBar {
-  font-size: 12px;
-  padding-top: 3px;
-  padding-left: 5px;
-}
-
-.StatusBar span {
-  position: absolute;
-  right: 5px;
-  color: gray;
-}
-
-.StatusBarItem {
-  padding-left: 10px;
 }
 
 /* Main Window toolbar/TopBar */
-/* !important is not great style, but required to get the Toolbar
-to render its content text properly--needs to trump some of the
-built-in styling.
-I'd feel worse about it except it's what we're already doing already
-with a style tag.
-Anyway, need to revisit. */
-.TopBar {
-  min-height: 20px !important;
-}
 
 .TopBarSpacer {
   margin-left: auto;
 }
 
-/* Left menu bar */
-.LeftMenu {
-  position: absolute;
-  background-color: lightgray;
-  overflow-y: auto;
-}
-
-.LeftMenuContentWrapper {
+/* Sidebar */
+.SidebarContentWrapper {
   margin: 5px;
 }
 
@@ -165,16 +85,18 @@ Anyway, need to revisit. */
 /* Text Editors ------ */
 
 .EditorMenuBar {
-  position: absolute;
-  padding-left: 20px;
-  padding-top: 3px;
   background-color: lightgray;
-  overflow: hidden;
+  height: 25px;
+}
+
+.EditorWithToolbar {
+  height: calc(100% - 25px);
 }
 
 span.EditorTitle {
   position: relative;
   top: 1px;
+  padding-left: 5px;
 }
 
 .EditedText {
@@ -184,10 +106,6 @@ span.EditorTitle {
 
 .ReadOnlyText {
   color: gray;
-}
-
-.EditorWrapper {
-  position: absolute;
 }
 
 .NotSelectable {
@@ -201,7 +119,6 @@ span.EditorTitle {
 /* Sampling section ---- */
 /* Run-Sampling */
 .RunPanel {
-  position: absolute;
   overflow-y: auto;
 }
 
@@ -210,20 +127,16 @@ span.EditorTitle {
 }
 
 .SamplingProgress {
-  width: 45%;
+  width: 85%;
 }
 
 /* Summary View */
 .SummaryViewWrapper {
-  position: absolute;
-  overflow-y: auto;
 }
 
 /* Draws */
 
 .DrawsTable {
-  position: absolute;
-  overflow: auto;
 }
 
 .DrawAbbreviationToggle {
@@ -231,27 +144,8 @@ span.EditorTitle {
   padding: 5px;
 }
 
-/* Histograms */
-
-.HistogramsWrapper {
-  position: absolute;
-  overflow-y: auto;
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.SequenceHistogram {
-  position: relative;
-}
-
 /* Trace Plots */
 .TracePlotsView {
-  position: absolute;
-  overflow-y: auto;
-}
-
-.SqeuencePlot {
-  position: relative;
 }
 
 .SequencePlotChild {
@@ -263,9 +157,6 @@ span.EditorTitle {
 }
 
 .TracePlotExpandComponent {
-  height: 25px;
-  padding-top: 5px;
-  padding-left: 5px;
   cursor: pointer;
   background-color: lightgray;
 }
@@ -282,36 +173,6 @@ span.EditorTitle {
 
 .SamplingOptsNumberEditBox {
   width: 4em;
-}
-
-/* Tab Widget etc ------ */
-
-.TabWidget {
-  position: absolute;
-  overflow: hidden;
-}
-
-.TabWidget-bar {
-  position: absolute;
-  left: 0px;
-  top: 0px;
-}
-
-.TabBarIcon {
-  margin-right: 4px;
-}
-
-.TabBarLabel {
-  text-transform: none;
-  font-size: 14px;
-}
-
-.TabBody {
-  overflow-y: hidden;
-  overflow-x: hidden;
-  position: absolute;
-  left: 0px;
-  background: white;
 }
 
 /* Save/Load Project ------ */

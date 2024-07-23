@@ -1,6 +1,24 @@
-import ProjectContextProvider, {
-  ProjectContext,
-} from "@SpCore/ProjectContextProvider";
+import Box from "@mui/material/Box";
+import Divider from "@mui/material/Divider";
+import Grid from "@mui/material/Grid";
+import styled from "@mui/material/styles/styled";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import DataFileEditor from "@SpComponents/DataFileEditor";
+import RunPanel from "@SpComponents/RunPanel";
+import SamplerOutputView from "@SpComponents/SamplerOutputView";
+import SamplingOptsPanel from "@SpComponents/SamplingOptsPanel";
+import { GutterTheme, SplitDirection, Splitter } from "@SpComponents/Splitter";
+import StanFileEditor from "@SpComponents/StanFileEditor";
+import { ProjectContext } from "@SpCore/ProjectContextProvider";
+import {
+  modelHasUnsavedChanges,
+  modelHasUnsavedDataFileChanges,
+  ProjectKnownFiles,
+  SamplingOpts,
+} from "@SpCore/ProjectDataModel";
+import Sidebar, { drawerWidth } from "@SpPages/Sidebar";
+import TopBar from "@SpPages/TopBar";
+import useStanSampler from "@SpStanSampler/useStanSampler";
 import {
   FunctionComponent,
   useContext,
@@ -8,125 +26,63 @@ import {
   useRef,
   useState,
 } from "react";
-import TopBar from "./TopBar";
-import LeftPanel from "./LeftPanel";
-import { Splitter } from "@fi-sci/splitter";
-import {
-  ProjectKnownFiles,
-  modelHasUnsavedChanges,
-} from "@SpCore/ProjectDataModel";
 import TabWidget from "@SpComponents/TabWidget";
 import SamplingWindow from "./SamplingWindow/SamplingWindow";
 import DataGenerationWindow from "./DataGenerationWindow/DataGenerationWindow";
-import StanFileEditor from "@SpComponents/StanFileEditor";
-import DataFileEditor from "@SpComponents/DataFileEditor";
 
 type Props = {
-  width: number;
-  height: number;
+  //
 };
 
-const HomePage: FunctionComponent<Props> = ({ width, height }) => {
-  // NOTE: We should probably move the ProjectContextProvider up to the App or MainWindow
-  // component; however this will wait on routing refactor since I don't want to add the `route`
-  // item in those contexts in this PR
-  return (
-    <ProjectContextProvider>
-      <HomePageChild width={width} height={height} />
-    </ProjectContextProvider>
-  );
-};
-
-const HomePageChild: FunctionComponent<Props> = ({ width, height }) => {
+const HomePage: FunctionComponent<Props> = () => {
   const { data } = useContext(ProjectContext);
 
   const [compiledMainJsUrl, setCompiledMainJsUrl] = useState<string>("");
 
-  const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(
-    determineShouldBeInitiallyCollapsed(width),
-  );
-  const expandedLeftPanelWidth = determineLeftPanelWidth(width); // what the width would be if expanded
-  const leftPanelWidth = leftPanelCollapsed ? 20 : expandedLeftPanelWidth; // the actual width
+  const smallScreen = useMediaQuery("(max-width:600px)");
+
+  const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(smallScreen);
 
   // We automatically collapse the panel if user has resized the window to be
   // too small but we only want to do this right when we cross the threshold,
   // not every time we resize by a pixel. Similar for expanding the panel when
   // we cross the threshold in the other direction.
-  const lastShouldBeCollapsed = useRef(
-    determineShouldBeInitiallyCollapsed(width),
-  );
+  const lastShouldBeCollapsed = useRef(smallScreen);
   useEffect(() => {
-    const shouldBeCollapsed = determineShouldBeInitiallyCollapsed(width);
-    if (shouldBeCollapsed !== lastShouldBeCollapsed.current) {
-      lastShouldBeCollapsed.current = shouldBeCollapsed;
-      setLeftPanelCollapsed(shouldBeCollapsed);
+    if (smallScreen !== lastShouldBeCollapsed.current) {
+      lastShouldBeCollapsed.current = smallScreen;
+      setLeftPanelCollapsed(smallScreen);
     }
-  }, [width]);
-
-  const topBarHeight = 22;
+  }, [smallScreen]);
 
   useEffect(() => {
     document.title = "Stan Playground - Editing " + data.meta.title;
   }, [data.meta.title]);
 
   return (
-    <div className="MainHomePage" style={{ width, height }}>
-      <div
-        className="top-bar TopBarPosition"
-        style={{ width, height: topBarHeight }}
-      >
-        <TopBar title={data.meta.title} width={width} height={topBarHeight} />
-      </div>
-      <div
-        className="left-panel LeftMenuPanelPosition"
-        style={{
-          top: topBarHeight + 2,
-          width: leftPanelWidth,
-          height: height - topBarHeight - 2,
-        }}
-      >
-        <LeftPanel
-          collapsed={leftPanelCollapsed}
-          onSetCollapsed={setLeftPanelCollapsed}
-          width={leftPanelWidth}
-          height={height - topBarHeight - 2}
-          hasUnsavedChanges={modelHasUnsavedChanges(data)}
-        />
-      </div>
-      <div
-        className="main-area MainAreaPosition"
-        style={{
-          left: leftPanelWidth,
-          top: topBarHeight + 2,
-          width: width - leftPanelWidth,
-          height: height - topBarHeight - 2,
-        }}
-      >
+    <Box display="flex" flexDirection="column" height="100%">
+      <TopBar title={data.meta.title} onSetCollapsed={setLeftPanelCollapsed} />
+
+      <Sidebar
+        collapsed={leftPanelCollapsed}
+        hasUnsavedChanges={modelHasUnsavedChanges(data)}
+      />
+
+      <MovingBox open={leftPanelCollapsed} flex="1" minHeight="0">
         <Splitter
-          width={width - leftPanelWidth}
-          height={height - topBarHeight - 2}
-          direction="horizontal"
-          initialPosition={Math.min(800, (width - leftPanelWidth) / 2)}
+          minWidths={[80, 120]}
+          direction={SplitDirection.Horizontal}
+          gutterTheme={GutterTheme.Light}
         >
-          <LeftView
-            width={0}
-            height={0}
-            setCompiledMainJsUrl={setCompiledMainJsUrl}
-          />
-          <RightView
-            width={0}
-            height={0}
-            compiledMainJsUrl={compiledMainJsUrl}
-          />
+          <LeftView setCompiledMainJsUrl={setCompiledMainJsUrl} />
+          <RightView compiledMainJsUrl={compiledMainJsUrl} />
         </Splitter>
-      </div>
-    </div>
+      </MovingBox>
+    </Box>
   );
 };
 
 type RightViewProps = {
-  width: number;
-  height: number;
   compiledMainJsUrl: string;
 };
 
@@ -181,27 +137,19 @@ const determineShouldBeInitiallyCollapsed = (width: number) => {
 };
 
 type LeftViewProps = {
-  width: number;
-  height: number;
   setCompiledMainJsUrl: (url: string) => void;
 };
 
 const LeftView: FunctionComponent<LeftViewProps> = ({
-  width,
-  height,
   setCompiledMainJsUrl,
 }) => {
   const { data, update } = useContext(ProjectContext);
   return (
     <Splitter
-      direction="vertical"
-      width={width}
-      height={height}
-      initialPosition={(2 * height) / 3}
+      direction={SplitDirection.Vertical}
+      gutterTheme={GutterTheme.Light}
     >
       <StanFileEditor
-        width={0}
-        height={0}
         fileName="main.stan"
         fileContent={data.stanFileContent}
         // this could be made more ergonomic?
@@ -223,8 +171,6 @@ const LeftView: FunctionComponent<LeftViewProps> = ({
         setCompiledUrl={setCompiledMainJsUrl}
       />
       <DataFileEditor
-        width={0}
-        height={0}
         fileName="data.json"
         fileContent={data.dataFileContent}
         onSaveContent={() =>
@@ -246,5 +192,26 @@ const LeftView: FunctionComponent<LeftViewProps> = ({
     </Splitter>
   );
 };
+
+// adapted from https://mui.com/material-ui/react-drawer/#persistent-drawer
+const MovingBox = styled(Box, {
+  shouldForwardProp: (prop) => prop !== "open",
+})<{
+  open?: boolean;
+}>(({ theme, open }) => ({
+  flexGrow: 1,
+  transition: theme.transitions.create("padding", {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  paddingLeft: `${drawerWidth}px`,
+  ...(open && {
+    transition: theme.transitions.create("padding", {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    paddingLeft: 0,
+  }),
+}));
 
 export default HomePage;

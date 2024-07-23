@@ -14,21 +14,17 @@ import RunPanel from "../../../RunPanel/RunPanel";
 import SamplerOutputView from "../../../SamplerOutputView/SamplerOutputView";
 import SamplingOptsPanel from "../../../SamplingOptsPanel/SamplingOptsPanel";
 import StanSampler from "../../../StanSampler/StanSampler";
-import useStanSampler, {
-  useSamplerStatus,
-} from "../../../StanSampler/useStanSampler";
-import TabWidget from "../../../TabWidget/TabWidget";
+import useStanSampler from "../../../StanSampler/useStanSampler";
 import AnalysisPyWindow from "../AnalysisPyWindow/AnalysisPyWindow";
+import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid";
+import Divider from "@mui/material/Divider";
 
 type SamplingWindowProps = {
-  width: number;
-  height: number;
   compiledMainJsUrl?: string;
 };
 
 const SamplingWindow: FunctionComponent<SamplingWindowProps> = ({
-  width,
-  height,
   compiledMainJsUrl,
 }) => {
   const { data, update } = useContext(ProjectContext);
@@ -39,8 +35,6 @@ const SamplingWindow: FunctionComponent<SamplingWindowProps> = ({
       return undefined;
     }
   }, [data.dataFileContent]);
-  const samplingOptsPanelHeight = 160;
-  const samplingOptsPanelWidth = Math.min(180, width / 2);
 
   const setSamplingOpts = useCallback(
     (opts: SamplingOpts) => {
@@ -49,55 +43,32 @@ const SamplingWindow: FunctionComponent<SamplingWindowProps> = ({
     [update],
   );
 
-  const { sampler } = useStanSampler(compiledMainJsUrl);
-  const { status: samplerStatus } = useSamplerStatus(sampler);
-  const isSampling = samplerStatus === "sampling";
+  const { sampler, latestRun } = useStanSampler(compiledMainJsUrl);
+  const isSampling = latestRun.status === "sampling";
   return (
-    <div className="Absolute" style={{ width, height }}>
-      <div
-        className="Absolute"
-        style={{
-          width: samplingOptsPanelWidth,
-          height: samplingOptsPanelHeight,
-        }}
-      >
-        <SamplingOptsPanel
-          samplingOpts={data.samplingOpts}
-          setSamplingOpts={!isSampling ? setSamplingOpts : undefined}
-        />
-      </div>
-      <div
-        className="Absolute RunPanelPosition"
-        style={{
-          left: samplingOptsPanelWidth,
-          width: width - samplingOptsPanelWidth,
-          height: samplingOptsPanelHeight,
-        }}
-      >
-        <RunPanel
-          width={width}
-          height={samplingOptsPanelHeight}
-          sampler={sampler}
-          data={parsedData}
-          dataIsSaved={!modelHasUnsavedDataFileChanges(data)}
-          samplingOpts={data.samplingOpts}
-        />
-      </div>
-      <div
-        className="Absolute"
-        style={{
-          width,
-          top: samplingOptsPanelHeight,
-          height: height - samplingOptsPanelHeight,
-        }}
-      >
-        <SamplingResultsArea
-          width={width}
-          height={height - samplingOptsPanelHeight}
-          sampler={sampler}
-        />
-      </div>
-    </div>
+    <Box height="100%" display="flex" flexDirection="column">
+      <Grid container>
+        <Grid item xs={12} sm={4}>
+          <SamplingOptsPanel
+            samplingOpts={data.samplingOpts}
+            setSamplingOpts={!isSampling ? setSamplingOpts : undefined}
+          />
+        </Grid>
+        <Grid item xs={12} sm>
+          <RunPanel
+            sampler={sampler}
+            latestRun={latestRun}
+            data={parsedData}
+            dataIsSaved={!modelHasUnsavedDataFileChanges(data)}
+            samplingOpts={data.samplingOpts}
+          />
+        </Grid>
+      </Grid>
+      <Divider />
+      <Box flex="1" overflow="hidden">
+        <SamplerOutputView latestRun={latestRun} />
+      </Box>
+    </Box>
   );
 };
 

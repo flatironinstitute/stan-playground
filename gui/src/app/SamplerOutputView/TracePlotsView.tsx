@@ -4,28 +4,21 @@ import { FunctionComponent, useMemo, useState } from "react";
 import ReactVisibilitySensor from "react-visibility-sensor";
 
 type TracePlotsViewProps = {
-  width: number;
-  height: number;
   draws: number[][];
   paramNames: string[];
   drawChainIds: number[];
 };
 
 const TracePlotsView: FunctionComponent<TracePlotsViewProps> = ({
-  width,
-  height,
   draws,
   paramNames,
   drawChainIds,
 }) => {
-  const plotHeight = Math.max(150, Math.min(400, height / 2));
   return (
-    <div className="TracePlotsView" style={{ width, height }}>
+    <div className="TracePlotsView">
       {paramNames.map((paramName, i) => (
         <SequencePlot
           key={paramName}
-          width={width - 40}
-          height={plotHeight}
           variableName={paramName}
           columnIndex={i}
           draws={draws}
@@ -37,8 +30,6 @@ const TracePlotsView: FunctionComponent<TracePlotsViewProps> = ({
 };
 
 type SequencePlotProps = {
-  width: number;
-  height: number;
   variableName: string;
   draws: number[][];
   columnIndex: number;
@@ -46,8 +37,6 @@ type SequencePlotProps = {
 };
 
 const SequencePlot: FunctionComponent<SequencePlotProps> = ({
-  width,
-  height,
   variableName,
   draws,
   columnIndex,
@@ -57,15 +46,12 @@ const SequencePlot: FunctionComponent<SequencePlotProps> = ({
   return (
     <div>
       <ExpandComponent
-        width={width}
         expanded={expanded}
         setExpanded={setExpanded}
         label={variableName}
       />
       {expanded && (
         <SequencePlotChild
-          width={width}
-          height={height}
           variableName={variableName}
           draws={draws}
           columnIndex={columnIndex}
@@ -78,8 +64,6 @@ const SequencePlot: FunctionComponent<SequencePlotProps> = ({
 };
 
 const SequencePlotChild: FunctionComponent<SequencePlotProps> = ({
-  width,
-  height,
   variableName,
   draws,
   columnIndex,
@@ -101,14 +85,12 @@ const SequencePlotChild: FunctionComponent<SequencePlotProps> = ({
     );
   }, [draws, columnIndex, drawChainIds]);
   return (
-    <div className="SequencePlotChild" style={{ width, height }}>
+    <div className="SequencePlotChild">
       <ReactVisibilitySensor partialVisibility>
         {({ isVisible }: { isVisible: boolean }) => {
           if (!isVisible) return <div>...</div>;
           return (
             <SequencePlotWidget
-              width={width}
-              height={height}
               variableName={variableName}
               plotSequences={plotSequences}
             />
@@ -120,14 +102,12 @@ const SequencePlotChild: FunctionComponent<SequencePlotProps> = ({
 };
 
 type ExpandComponentProps = {
-  width: number;
   expanded: boolean;
   setExpanded: (expanded: boolean) => void;
   label: string;
 };
 
 const ExpandComponent: FunctionComponent<ExpandComponentProps> = ({
-  width,
   expanded,
   setExpanded,
   label,
@@ -135,7 +115,6 @@ const ExpandComponent: FunctionComponent<ExpandComponentProps> = ({
   return (
     <div
       className="TracePlotExpandComponent"
-      style={{ width }}
       onClick={() => setExpanded(!expanded)}
     >
       {expanded ? "▼" : "▶"}&nbsp;

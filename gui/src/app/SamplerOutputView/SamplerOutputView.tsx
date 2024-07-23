@@ -3,90 +3,48 @@ import { Download } from "@mui/icons-material";
 import HistsView from "@SpComponents/HistsView";
 import SummaryView from "@SpComponents/SummaryView";
 import TabWidget from "@SpComponents/TabWidget";
-import TracePlotsView from "@SpComponents/TracePlotsView";
 import { SamplingOpts } from "@SpCore/ProjectDataModel";
-import StanSampler from "@SpStanSampler/StanSampler";
-import { useSamplerOutput } from "@SpStanSampler/useStanSampler";
+import { StanRun } from "@SpStanSampler/useStanSampler";
 import { triggerDownload } from "@SpUtil/triggerDownload";
 import JSZip from "jszip";
 import { FunctionComponent, useCallback, useMemo, useState } from "react";
+import TracePlotsView from "./TracePlotsView";
+import Button from "@mui/material/Button";
 
 type SamplerOutputViewProps = {
-  width: number;
-  height: number;
-  sampler: StanSampler | undefined;
+  latestRun: StanRun;
 };
 
 const SamplerOutputView: FunctionComponent<SamplerOutputViewProps> = ({
-  width,
-  height,
-  sampler,
+  latestRun,
 }) => {
-  const { draws, paramNames, numChains, computeTimeSec } =
-    useSamplerOutput(sampler);
+  const { draws, paramNames, computeTimeSec, samplingOpts } = latestRun;
 
-  if (!draws || !paramNames || !numChains) return <span />;
-  if (!sampler) return <span>No sampler</span>;
+  if (!draws || !paramNames || !samplingOpts) return <span />;
   return (
     <DrawsDisplay
-      width={width}
-      height={height}
       draws={draws}
       paramNames={paramNames}
-      numChains={numChains}
       computeTimeSec={computeTimeSec}
-      samplingOpts={sampler.samplingOpts}
+      samplingOpts={samplingOpts}
     />
   );
 };
 
 type DrawsDisplayProps = {
-  width: number;
-  height: number;
   draws: number[][];
-  numChains: number;
   paramNames: string[];
   computeTimeSec: number | undefined;
-  samplingOpts: SamplingOpts; // for including in exported zip
+  samplingOpts: SamplingOpts;
 };
 
-const tabs = [
-  {
-    id: "summary",
-    label: "Summary",
-    title: "Summary view",
-    closeable: false,
-  },
-  {
-    id: "draws",
-    label: "Draws",
-    title: "Draws view",
-    closeable: false,
-  },
-  {
-    id: "hists",
-    label: "Histograms",
-    title: "Histograms view",
-    closeable: false,
-  },
-  {
-    id: "traceplots",
-    label: "Trace Plots",
-    title: "Trace Plots view",
-    closeable: false,
-  },
-];
-
 const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({
-  width,
-  height,
   draws,
   paramNames,
-  numChains,
   computeTimeSec,
   samplingOpts,
 }) => {
-  const [currentTabId, setCurrentTabId] = useState("summary");
+  const numChains = samplingOpts.num_chains;
 
   const drawChainIds = useMemo(() => {
     return [...new Array(draws[0].length).keys()].map(
@@ -102,24 +60,14 @@ const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({
   }, [draws, numChains]);
 
   return (
-    <TabWidget
-      width={width}
-      height={height}
-      tabs={tabs}
-      currentTabId={currentTabId}
-      setCurrentTabId={setCurrentTabId}
-    >
+    <TabWidget labels={["Summary", "Draws", "Histograms", "Trace plots"]}>
       <SummaryView
-        width={0}
-        height={0}
         draws={draws}
         paramNames={paramNames}
         drawChainIds={drawChainIds}
         computeTimeSec={computeTimeSec}
       />
       <DrawsView
-        width={0}
-        height={0}
         draws={draws}
         paramNames={paramNames}
         drawChainIds={drawChainIds}
@@ -127,15 +75,11 @@ const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({
         samplingOpts={samplingOpts}
       />
       <HistsView
-        width={0}
-        height={0}
         draws={draws}
         paramNames={paramNames}
         drawChainIds={drawChainIds}
       />
       <TracePlotsView
-        width={0}
-        height={0}
         draws={draws}
         paramNames={paramNames}
         drawChainIds={drawChainIds}
@@ -145,8 +89,6 @@ const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({
 };
 
 type DrawsViewProps = {
-  width: number;
-  height: number;
   draws: number[][];
   paramNames: string[];
   drawChainIds: number[];
@@ -155,8 +97,6 @@ type DrawsViewProps = {
 };
 
 const DrawsView: FunctionComponent<DrawsViewProps> = ({
-  width,
-  height,
   draws,
   paramNames,
   drawChainIds,
@@ -201,7 +141,7 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
     URL.revokeObjectURL(url);
   }, [draws, paramNames, drawChainIds, samplingOpts]);
   return (
-    <div className="DrawsTable" style={{ width, height }}>
+    <div className="DrawsTable">
       <div>
         <SmallIconButton
           icon={<Download />}
@@ -240,13 +180,13 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
       {abbreviatedToNumRows !== undefined &&
         abbreviatedToNumRows < draws[0].length && (
           <div className="DrawAbbreviationToggle">
-            <button
+            <Button
               onClick={() => {
                 setAbbreviatedToNumRows((x) => (x || 0) + 300);
               }}
             >
               Show more
-            </button>
+            </Button>
           </div>
         )}
     </div>

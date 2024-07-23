@@ -9,30 +9,25 @@ import { FunctionComponent, useCallback } from "react";
 import { SamplingOpts } from "@SpCore/ProjectDataModel";
 import { Progress } from "@SpStanSampler/StanModelWorker";
 import StanSampler from "@SpStanSampler/StanSampler";
-import {
-  useSamplerProgress,
-  useSamplerStatus,
-} from "@SpStanSampler/useStanSampler";
+import { StanRun } from "@SpStanSampler/useStanSampler";
+import Button from "@mui/material/Button";
 
 type RunPanelProps = {
-  width: number;
-  height: number;
   sampler?: StanSampler;
+  latestRun: StanRun;
   data: any | undefined;
   dataIsSaved: boolean;
   samplingOpts: SamplingOpts;
 };
 
 const RunPanel: FunctionComponent<RunPanelProps> = ({
-  width,
-  height,
   sampler,
+  latestRun,
   data,
   dataIsSaved,
   samplingOpts,
 }) => {
-  const { status: runStatus, errorMessage } = useSamplerStatus(sampler);
-  const progress = useSamplerProgress(sampler);
+  const { status: runStatus, errorMessage, progress } = latestRun;
 
   const handleRun = useCallback(async () => {
     if (!sampler) return;
@@ -51,20 +46,27 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
     return <div className="RunPanelPadded">Data not saved</div>;
   }
   return (
-    <div className="RunPanel" style={{ width, height }}>
+    <div className="RunPanel">
       <div className="RunPanelPadded">
         <div>
-          <button
+          <Button
+            variant="contained"
+            color="success"
             onClick={handleRun}
             disabled={runStatus === "sampling" || runStatus === "loading"}
           >
             run sampling
-          </button>
+          </Button>
           &nbsp;
           {runStatus === "sampling" && (
-            <button onClick={cancelRun} disabled={runStatus !== "sampling"}>
+            <Button
+              color="error"
+              variant="outlined"
+              onClick={cancelRun}
+              disabled={runStatus !== "sampling"}
+            >
               cancel
-            </button>
+            </Button>
           )}
           <hr />
           {runStatus === "loading" && <div>Loading compiled Stan model...</div>}

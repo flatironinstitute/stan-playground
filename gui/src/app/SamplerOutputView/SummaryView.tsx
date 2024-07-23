@@ -10,8 +10,6 @@ import {
 import { FunctionComponent, useMemo } from "react";
 
 type SummaryViewProps = {
-  width: number;
-  height: number;
   draws: number[][];
   paramNames: string[];
   drawChainIds: number[];
@@ -75,8 +73,6 @@ type TableRow = {
 };
 
 const SummaryView: FunctionComponent<SummaryViewProps> = ({
-  width,
-  height,
   draws,
   paramNames,
   drawChainIds,
@@ -122,7 +118,7 @@ const SummaryView: FunctionComponent<SummaryViewProps> = ({
   }, [draws, paramNames, drawChainIds, computeTimeSec]);
 
   return (
-    <div className="SummaryViewWrapper" style={{ width, height }}>
+    <div className="SummaryViewWrapper">
       <table className="scientific-table">
         <thead>
           <tr>

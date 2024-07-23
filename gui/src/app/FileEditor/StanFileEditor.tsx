@@ -1,5 +1,6 @@
-import { Splitter } from "@fi-sci/splitter";
 import { AutoFixHigh, Cancel, Settings } from "@mui/icons-material";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { SplitDirection, Splitter } from "@SpComponents/Splitter";
 import StanCompileResultWindow from "@SpComponents/StanCompileResultWindow";
 import TextEditor, { ToolbarItem } from "@SpComponents/TextEditor";
 import compileStanProgram from "@SpStanc/compileStanProgram";
@@ -21,8 +22,6 @@ type Props = {
   setEditedFileContent: (text: string) => void;
   onDeleteFile?: () => void;
   readOnly: boolean;
-  width: number;
-  height: number;
   setCompiledUrl: (s: string) => void;
 };
 
@@ -35,8 +34,6 @@ const StanFileEditor: FunctionComponent<Props> = ({
   editedFileContent,
   setEditedFileContent,
   readOnly,
-  width,
-  height,
   setCompiledUrl,
 }) => {
   const { stancErrors, requestFormat } = useStanc(
@@ -126,7 +123,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
     }
   }, [fileContent, handleCompile, didInitialCompile]);
 
-  const showLabelsOnButtons = width > 700;
+  const showLabelsOnButtons = useMediaQuery("(min-width:600px)");
   const [syntaxWindowVisible, setSyntaxWindowVisible] = useState(false);
 
   const toolbarItems: ToolbarItem[] = useMemo(() => {
@@ -141,7 +138,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
         color: "darkred",
         tooltip: "Syntax error in Stan file",
         onClick: () => {
-          setSyntaxWindowVisible(true);
+          setSyntaxWindowVisible((v) => !v);
         },
       });
     } else if (hasWarnings && !!editedFileContent) {
@@ -152,14 +149,14 @@ const StanFileEditor: FunctionComponent<Props> = ({
         color: "blue",
         tooltip: "Syntax warning in Stan file",
         onClick: () => {
-          setSyntaxWindowVisible(true);
+          setSyntaxWindowVisible((v) => !v);
         },
       });
     }
 
     // auto format
     if (!readOnly) {
-      if (editedFileContent !== undefined) {
+      if (editedFileContent) {
         ret.push({
           type: "button",
           icon: <AutoFixHigh />,
@@ -170,7 +167,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
         });
       }
     }
-    if (editedFileContent === fileContent) {
+    if (editedFileContent && editedFileContent === fileContent) {
       if (compileStatus !== "compiling") {
         if (validSyntax) {
           ret.push({
@@ -213,19 +210,28 @@ const StanFileEditor: FunctionComponent<Props> = ({
 
   const isCompiling = compileStatus === "compiling";
 
-  const compileResultsHeight = Math.min(300, height / 3);
+  const messagePaneNeeded = syntaxWindowVisible || !editedFileContent;
+
+  const window = messagePaneNeeded ? (
+    editedFileContent ? (
+      <StanCompileResultWindow
+        stancErrors={stancErrors}
+        onClose={() => setSyntaxWindowVisible(false)}
+      />
+    ) : (
+      <div className="StanEditorDefaultText">
+        Begin editing or select an example from the left panel
+      </div>
+    )
+  ) : (
+    <></>
+  );
+
+  const initialSizes = messagePaneNeeded ? [60, 40] : [100, 0];
 
   return (
-    <Splitter
-      width={width}
-      height={height}
-      initialPosition={height - compileResultsHeight}
-      direction="vertical"
-      hideSecondChild={!(!editedFileContent || syntaxWindowVisible)}
-    >
+    <Splitter direction={SplitDirection.Vertical} initialSizes={initialSizes}>
       <TextEditor
-        width={0}
-        height={0}
         // language="stan"
         language="stan"
         label={fileName}
@@ -237,18 +243,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
         toolbarItems={toolbarItems}
         codeMarkers={stancErrorsToCodeMarkers(stancErrors)}
       />
-      {editedFileContent ? (
-        <StanCompileResultWindow
-          width={0}
-          height={0}
-          stancErrors={stancErrors}
-          onClose={() => setSyntaxWindowVisible(false)}
-        />
-      ) : (
-        <div className="StanEditorDefaultText">
-          Begin editing or select an example from the left panel
-        </div>
-      )}
+      {window}
     </Splitter>
   );
 };
