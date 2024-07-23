@@ -6,10 +6,10 @@ import {
   useState,
 } from "react";
 import { PlayArrow } from "@mui/icons-material";
-import usePyodideWorker from "./pyodideWorker/usePyodideWorker";
 import { PyodideWorkerStatus } from "./pyodideWorker/pyodideWorkerTypes";
+import { GlobalDataForAnalysisPy } from "../pages/HomePage/AnalysisPyWindow/AnalysisPyWindow";
+import usePyodideWorker from "./pyodideWorker/usePyodideWorker";
 import TextEditor, { ToolbarItem } from "@SpComponents/TextEditor";
-import { GlobalDataForAnalysisPy } from "@SpPages/AnalysisPyWindow/AnalysisPyWindow";
 
 type Props = {
   fileName: string;
