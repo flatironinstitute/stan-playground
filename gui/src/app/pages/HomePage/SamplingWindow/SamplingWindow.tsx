@@ -1,18 +1,19 @@
 import { FunctionComponent, useCallback, useContext, useMemo } from "react";
+
+import AnalysisPyWindow from "../AnalysisPyWindow/AnalysisPyWindow";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Divider from "@mui/material/Divider";
 import TabWidget from "@SpComponents/TabWidget";
-import useStanSampler, { StanRun } from "@SpStanSampler/useStanSampler";
-import SamplingOptsPanel from "@SpComponents/SamplingOptsPanel";
-import RunPanel from "@SpComponents/RunPanel";
-import {
-  SamplingOpts,
-  modelHasUnsavedDataFileChanges,
-} from "@SpCore/ProjectDataModel";
-import SamplerOutputView from "@SpComponents/SamplerOutputView";
-import AnalysisPyWindow from "@SpPages/AnalysisPyWindow/AnalysisPyWindow";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
+import {
+  modelHasUnsavedDataFileChanges,
+  SamplingOpts,
+} from "@SpCore/ProjectDataModel";
+import useStanSampler, { StanRun } from "@SpStanSampler/useStanSampler";
+import RunPanel from "@SpComponents/RunPanel";
+import SamplingOptsPanel from "@SpComponents/SamplingOptsPanel";
+import SamplerOutputView from "@SpComponents/SamplerOutputView";
 
 type SamplingWindowProps = {
   compiledMainJsUrl?: string;
