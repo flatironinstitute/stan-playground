@@ -2,6 +2,7 @@ import {
   FunctionComponent,
   RefObject,
   useContext,
+  useEffect,
   useMemo,
   useRef,
 } from "react";
@@ -19,6 +20,12 @@ const AnalysisPyWindow: FunctionComponent<AnalysisPyWindowProps> = ({
   latestRun,
 }) => {
   const imagesRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (imagesRef.current) {
+      imagesRef.current.innerHTML = "";
+    }
+  }, [latestRun.draws]);
 
   return (
     <Splitter>
@@ -44,6 +51,12 @@ const LeftPane: FunctionComponent<LeftPaneProps> = ({
   latestRun,
 }) => {
   const consoleRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (consoleRef.current) {
+      consoleRef.current.innerHTML = "";
+    }
+  }, [latestRun.draws]);
 
   const { data, update } = useContext(ProjectContext);
   const { draws, paramNames, samplingOpts } = latestRun;
