@@ -12,8 +12,6 @@ type Props = {
   editedFileContent: string;
   setEditedFileContent: (text: string) => void;
   readOnly: boolean;
-  width: number;
-  height: number;
   imageOutputDiv?: HTMLDivElement | null;
   consoleOutputDiv?: HTMLDivElement | null;
   spData: GlobalDataForAnalysisPy | undefined;
@@ -27,8 +25,6 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
   editedFileContent,
   setEditedFileContent,
   readOnly,
-  width,
-  height,
   imageOutputDiv,
   consoleOutputDiv,
   spData,
@@ -162,8 +158,6 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
 
   return (
     <TextEditor
-      width={width}
-      height={height}
       language="python"
       label={fileName}
       text={fileContent}

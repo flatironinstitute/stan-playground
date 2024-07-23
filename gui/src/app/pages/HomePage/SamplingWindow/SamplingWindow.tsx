@@ -1,10 +1,4 @@
-import {
-  FunctionComponent,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from "react";
+import { FunctionComponent, useCallback, useContext, useMemo } from "react";
 import { ProjectContext } from "../../../Project/ProjectContextProvider";
 import {
   SamplingOpts,
@@ -13,12 +7,12 @@ import {
 import RunPanel from "../../../RunPanel/RunPanel";
 import SamplerOutputView from "../../../SamplerOutputView/SamplerOutputView";
 import SamplingOptsPanel from "../../../SamplingOptsPanel/SamplingOptsPanel";
-import StanSampler from "../../../StanSampler/StanSampler";
-import useStanSampler from "../../../StanSampler/useStanSampler";
+import useStanSampler, { StanRun } from "../../../StanSampler/useStanSampler";
 import AnalysisPyWindow from "../AnalysisPyWindow/AnalysisPyWindow";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Divider from "@mui/material/Divider";
+import TabWidget from "@SpComponents/TabWidget";
 
 type SamplingWindowProps = {
   compiledMainJsUrl?: string;
@@ -66,59 +60,24 @@ const SamplingWindow: FunctionComponent<SamplingWindowProps> = ({
       </Grid>
       <Divider />
       <Box flex="1" overflow="hidden">
-        <SamplerOutputView latestRun={latestRun} />
+        <SamplingResultsArea latestRun={latestRun} />
       </Box>
     </Box>
   );
 };
 
-const samplingResultsTabs = [
-  {
-    id: "output",
-    label: "Output",
-    title: "View the output of the sampler",
-    closeable: false,
-  },
-  {
-    id: "analysis.py",
-    label: "Analysis (Py)",
-    title: "Python analysis",
-    closeable: false,
-  },
-  {
-    id: "analysis.r",
-    label: "Analysis (R)",
-    title: "R analysis",
-    closeable: false,
-  },
-];
-
 type SamplingResultsAreaProps = {
-  width: number;
-  height: number;
-  sampler: StanSampler | undefined;
+  latestRun: StanRun;
 };
 
 const SamplingResultsArea: FunctionComponent<SamplingResultsAreaProps> = ({
-  width,
-  height,
-  sampler,
+  latestRun,
 }) => {
-  const [currentTabId, setCurrentTabId] = useState("output");
   return (
-    <TabWidget
-      width={width}
-      height={height}
-      tabs={samplingResultsTabs}
-      currentTabId={currentTabId}
-      setCurrentTabId={setCurrentTabId}
-    >
-      <SamplerOutputView width={width} height={height} sampler={sampler} />
-      <AnalysisPyWindow
-        width={width}
-        height={height}
-        stanSampler={sampler || null}
-      />
+    <TabWidget labels={["Output", "Analysis (Py)", "Analysis (R)"]}>
+      <SamplerOutputView latestRun={latestRun} />
+
+      <AnalysisPyWindow latestRun={latestRun} />
       <div>
         <div style={{ padding: 5 }}>R analysis not yet implemented</div>
       </div>

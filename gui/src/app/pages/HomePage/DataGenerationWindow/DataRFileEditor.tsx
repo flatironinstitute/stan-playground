@@ -11,8 +11,6 @@ type Props = {
   setEditedFileContent: (text: string) => void;
   readOnly: boolean;
   setData?: (data: any) => void;
-  width: number;
-  height: number;
   outputDiv?: HTMLDivElement | null;
 };
 
@@ -37,8 +35,6 @@ const DataRFileEditor: FunctionComponent<Props> = ({
   setEditedFileContent,
   setData,
   readOnly,
-  width,
-  height,
   outputDiv,
 }) => {
   const [status, setStatus] = useState<
@@ -139,8 +135,6 @@ json_result
 
   return (
     <TextEditor
-      width={width}
-      height={height}
       language="r"
       label={fileName}
       text={fileContent}

@@ -1,49 +1,32 @@
-import { Splitter } from "@fi-sci/splitter";
 import { FunctionComponent, useContext, useMemo, useState } from "react";
 import { ProjectContext } from "../../../Project/ProjectContextProvider";
 import { ProjectKnownFiles } from "../../../Project/ProjectDataModel";
-import StanSampler from "../../../StanSampler/StanSampler";
-import { useSamplerOutput } from "../../../StanSampler/useStanSampler";
 import AnalysisPyFileEditor from "../../../pyodide/AnalysisPyFileEditor";
+import { SplitDirection, Splitter } from "@SpComponents/Splitter";
+import { StanRun } from "@SpStanSampler/useStanSampler";
 
 type AnalysisPyWindowProps = {
-  width: number;
-  height: number;
-  stanSampler: StanSampler | null;
+  latestRun: StanRun;
 };
 
 const AnalysisPyWindow: FunctionComponent<AnalysisPyWindowProps> = ({
-  width,
-  height,
-  stanSampler,
+  latestRun,
 }) => {
   // TODO make useRef
   const [imageOutputDiv, setImageOutputDiv] = useState<HTMLDivElement | null>(
     null,
   );
   return (
-    <Splitter
-      direction="horizontal"
-      width={width}
-      height={height}
-      initialPosition={width / 2}
-    >
-      <LeftPane
-        width={0}
-        height={0}
-        imageOutputDiv={imageOutputDiv}
-        stanSampler={stanSampler}
-      />
-      <RightPane width={0} height={0} onImageOutputDiv={setImageOutputDiv} />
+    <Splitter>
+      <LeftPane imageOutputDiv={imageOutputDiv} latestRun={latestRun} />
+      <ImageOutputWindow onDivElement={setImageOutputDiv} />
     </Splitter>
   );
 };
 
 type LeftPaneProps = {
-  width: number;
-  height: number;
   imageOutputDiv: HTMLDivElement | null;
-  stanSampler: StanSampler | null;
+  latestRun: StanRun;
 };
 
 export type GlobalDataForAnalysisPy = {
@@ -53,18 +36,15 @@ export type GlobalDataForAnalysisPy = {
 };
 
 const LeftPane: FunctionComponent<LeftPaneProps> = ({
-  width,
-  height,
   imageOutputDiv,
-  stanSampler,
+  latestRun,
 }) => {
   // TODO make useRef
   const [consoleOutputDiv, setConsoleOutputDiv] =
     useState<HTMLDivElement | null>(null);
   const { data, update } = useContext(ProjectContext);
-  const { draws, paramNames, numChains } = useSamplerOutput(
-    stanSampler || undefined,
-  );
+  const { draws, paramNames, samplingOpts } = latestRun;
+  const numChains = samplingOpts?.num_chains;
   const spData = useMemo(() => {
     if (draws && numChains && paramNames) {
       return {
@@ -77,15 +57,8 @@ const LeftPane: FunctionComponent<LeftPaneProps> = ({
     }
   }, [draws, paramNames, numChains]);
   return (
-    <Splitter
-      direction="vertical"
-      width={width}
-      height={height}
-      initialPosition={(3 * height) / 5}
-    >
+    <Splitter direction={SplitDirection.Vertical} initialSizes={[60, 40]}>
       <AnalysisPyFileEditor
-        width={0}
-        height={0}
         fileName="analysis.py"
         fileContent={data.analysisPyFileContent}
         editedFileContent={data.ephemera.analysisPyFileContent}
@@ -107,67 +80,45 @@ const LeftPane: FunctionComponent<LeftPaneProps> = ({
         readOnly={false}
         spData={spData}
       />
-      <ConsoleOutputWindow
-        width={0}
-        height={0}
-        onDivElement={setConsoleOutputDiv}
-      />
+      <ConsoleOutputWindow onDivElement={setConsoleOutputDiv} />
     </Splitter>
   );
 };
 
 type ConsoleOutputWindowProps = {
-  width: number;
-  height: number;
   onDivElement: (div: HTMLDivElement) => void;
 };
 
 export const ConsoleOutputWindow: FunctionComponent<
   ConsoleOutputWindowProps
-> = ({ width, height, onDivElement }) => {
+> = ({ onDivElement }) => {
   return (
     <div
-      style={{ position: "absolute", width, height, overflowY: "auto" }}
+      style={{
+        width: "100%",
+        height: "100%",
+        overflowY: "auto",
+      }}
       ref={onDivElement}
     />
   );
 };
 
 type ImageOutputWindowProps = {
-  width: number;
-  height: number;
   onDivElement: (div: HTMLDivElement) => void;
 };
 
 const ImageOutputWindow: FunctionComponent<ImageOutputWindowProps> = ({
-  width,
-  height,
   onDivElement,
 }) => {
   return (
     <div
-      style={{ position: "absolute", width, height, overflowY: "auto" }}
+      style={{
+        height: "100%",
+        width: "100%",
+        overflowY: "auto",
+      }}
       ref={onDivElement}
-    />
-  );
-};
-
-type RightPaneProps = {
-  width: number;
-  height: number;
-  onImageOutputDiv: (div: HTMLDivElement) => void;
-};
-
-const RightPane: FunctionComponent<RightPaneProps> = ({
-  width,
-  height,
-  onImageOutputDiv,
-}) => {
-  return (
-    <ImageOutputWindow
-      width={width}
-      height={height}
-      onDivElement={onImageOutputDiv}
     />
   );
 };

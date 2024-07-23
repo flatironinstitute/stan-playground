@@ -13,8 +13,6 @@ type Props = {
   setEditedFileContent: (text: string) => void;
   readOnly: boolean;
   setData?: (data: any) => void;
-  width: number;
-  height: number;
   outputDiv?: HTMLDivElement | null;
 };
 
@@ -26,8 +24,6 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
   setEditedFileContent,
   setData,
   readOnly,
-  width,
-  height,
   outputDiv,
 }) => {
   const [status, setStatus] = useState<PyodideWorkerStatus>("idle");
@@ -86,8 +82,6 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
 
   return (
     <TextEditor
-      width={width}
-      height={height}
       language="python"
       label={fileName}
       text={fileContent}

@@ -1,24 +1,16 @@
 import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
-import Grid from "@mui/material/Grid";
 import styled from "@mui/material/styles/styled";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import DataFileEditor from "@SpComponents/DataFileEditor";
-import RunPanel from "@SpComponents/RunPanel";
-import SamplerOutputView from "@SpComponents/SamplerOutputView";
-import SamplingOptsPanel from "@SpComponents/SamplingOptsPanel";
 import { GutterTheme, SplitDirection, Splitter } from "@SpComponents/Splitter";
 import StanFileEditor from "@SpComponents/StanFileEditor";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import {
   modelHasUnsavedChanges,
-  modelHasUnsavedDataFileChanges,
   ProjectKnownFiles,
-  SamplingOpts,
 } from "@SpCore/ProjectDataModel";
 import Sidebar, { drawerWidth } from "@SpPages/Sidebar";
 import TopBar from "@SpPages/TopBar";
-import useStanSampler from "@SpStanSampler/useStanSampler";
 import {
   FunctionComponent,
   useContext,
@@ -86,54 +78,15 @@ type RightViewProps = {
   compiledMainJsUrl: string;
 };
 
-const rightViewTabs = [
-  {
-    id: "sampling",
-    label: "Sampling",
-    closeable: false,
-  },
-  {
-    id: "data-generation",
-    label: "Data Generation",
-    closeable: false,
-  },
-];
-
 const RightView: FunctionComponent<RightViewProps> = ({
-  width,
-  height,
   compiledMainJsUrl,
 }) => {
-  const [currentTabId, setCurrentTabId] = useState("sampling");
   return (
-    <TabWidget
-      width={width}
-      height={height}
-      tabs={rightViewTabs}
-      currentTabId={currentTabId}
-      setCurrentTabId={setCurrentTabId}
-    >
-      <SamplingWindow
-        width={width}
-        height={height}
-        compiledMainJsUrl={compiledMainJsUrl}
-      />
-      <DataGenerationWindow width={width} height={height} />
+    <TabWidget labels={["Sampling", "Data Generation"]}>
+      <SamplingWindow compiledMainJsUrl={compiledMainJsUrl} />
+      <DataGenerationWindow />
     </TabWidget>
   );
-};
-
-// the width of the left panel when it is expanded based on the overall width
-const determineLeftPanelWidth = (width: number) => {
-  const minWidth = 150;
-  const maxWidth = 250;
-  return Math.min(maxWidth, Math.max(minWidth, width / 4));
-};
-
-// whether the left panel should be collapsed initially based on the overall
-// width
-const determineShouldBeInitiallyCollapsed = (width: number) => {
-  return width < 800;
 };
 
 type LeftViewProps = {

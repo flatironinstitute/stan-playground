@@ -86,6 +86,7 @@ const SequencePlotChild: FunctionComponent<SequencePlotProps> = ({
   }, [draws, columnIndex, drawChainIds]);
   return (
     <div className="SequencePlotChild">
+      {/* TODO this is raising deprecation warnings */}
       <ReactVisibilitySensor partialVisibility>
         {({ isVisible }: { isVisible: boolean }) => {
           if (!isVisible) return <div>...</div>;

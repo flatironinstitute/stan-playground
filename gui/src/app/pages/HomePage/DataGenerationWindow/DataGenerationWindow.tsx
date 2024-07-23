@@ -1,66 +1,37 @@
 import { FunctionComponent, useCallback, useContext, useState } from "react";
-import TabWidget from "../../../TabWidget/TabWidget";
-import { Splitter } from "@fi-sci/splitter";
 import DataPyFileEditor from "./DataPyFileEditor";
 import { ProjectContext } from "../../../Project/ProjectContextProvider";
 import { ProjectKnownFiles } from "../../../Project/ProjectDataModel";
 import { ConsoleOutputWindow } from "../AnalysisPyWindow/AnalysisPyWindow";
 import DataRFileEditor from "./DataRFileEditor";
 import { writeConsoleOutToDiv } from "app/pyodide/AnalysisPyFileEditor";
+import { SplitDirection, Splitter } from "@SpComponents/Splitter";
+import TabWidget from "@SpComponents/TabWidget";
 
 type DataGenerationWindowProps = {
-  width: number;
-  height: number;
+  // empty
 };
 
 type Language = "python" | "r";
 
-const tabs = [
-  {
-    id: "python",
-    label: "Python",
-    closeable: false,
-  },
-  {
-    id: "r",
-    label: "R",
-    closeable: false,
-  },
-];
-
-const DataGenerationWindow: FunctionComponent<DataGenerationWindowProps> = ({
-  width,
-  height,
-}) => {
-  const [currentTabId, setCurrentTabId] = useState<string>("python");
+const DataGenerationWindow: FunctionComponent<
+  DataGenerationWindowProps
+> = () => {
   return (
-    <TabWidget
-      width={width}
-      height={height}
-      tabs={tabs}
-      currentTabId={currentTabId}
-      setCurrentTabId={setCurrentTabId}
-    >
-      <DataGenerationChildWindow
-        key="python"
-        width={0}
-        height={0}
-        language="python"
-      />
-      <DataGenerationChildWindow key="r" width={0} height={0} language="r" />
+    <TabWidget labels={["Python", "R"]}>
+      <DataGenerationChildWindow language="python" />
+      <DataGenerationChildWindow language="r" />
     </TabWidget>
   );
 };
 
 type DataGenerationChildWindowProps = {
-  width: number;
-  height: number;
   language: Language;
 };
 
 const DataGenerationChildWindow: FunctionComponent<
   DataGenerationChildWindowProps
-> = ({ width, height, language }) => {
+> = ({ language }) => {
   const { data, update } = useContext(ProjectContext);
   const [consoleOutputDiv, setConsoleOutputDiv] =
     useState<HTMLDivElement | null>(null);
@@ -84,15 +55,8 @@ const DataGenerationChildWindow: FunctionComponent<
   const EditorComponent =
     language === "python" ? DataPyFileEditor : DataRFileEditor;
   return (
-    <Splitter
-      width={width}
-      height={height}
-      direction="vertical"
-      initialPosition={(3 * height) / 4}
-    >
+    <Splitter direction={SplitDirection.Vertical} initialSizes={[75, 25]}>
       <EditorComponent
-        width={0}
-        height={0}
         fileName={language === "python" ? "data.py" : "data.r"}
         fileContent={
           language === "python" ? data.dataPyFileContent : data.dataRFileContent
@@ -125,11 +89,7 @@ const DataGenerationChildWindow: FunctionComponent<
         setData={handleSetData}
         outputDiv={consoleOutputDiv}
       />
-      <ConsoleOutputWindow
-        width={0}
-        height={0}
-        onDivElement={setConsoleOutputDiv}
-      />
+      <ConsoleOutputWindow onDivElement={setConsoleOutputDiv} />
     </Splitter>
   );
 };
