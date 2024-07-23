@@ -1,6 +1,8 @@
 // from: https://github.com/highlightjs/highlight.js/blob/main/src/languages/stan.js
 
-export function highlightJsData() {
+import { Monaco } from "@monaco-editor/react";
+
+const highlightJsData = () => {
   const BLOCKS = [
     "functions",
     "model",
@@ -417,4 +419,71 @@ export function highlightJsData() {
     RANGE_CONSTRAINTS,
     TYPES,
   };
-}
+};
+
+const monacoAddStanLang = (monacoInstance: Monaco) => {
+  console.log("monaco loaded! Setting up stan language");
+
+  monacoInstance.editor.defineTheme("vs-stan", {
+    base: "vs-dark",
+    inherit: true,
+    rules: [
+      { token: "stanblock", foreground: "#C9A969", fontStyle: "bold" }, // seems like underscores in tokens are not allowed! (took me a while to figure this out)
+      { token: "stanstatement", foreground: "#A8EEF7" },
+      { token: "standistribution", foreground: "#9999FF" },
+      { token: "stanfunction", foreground: "ffffaa" },
+      { token: "stanrangeconstraint", foreground: "#D48331" },
+      { token: "stanoperator", foreground: "#A8EEF7" },
+      { token: "stantype", foreground: "#BD9BF8" },
+      { token: "identifier", foreground: "#DDDDDD" },
+      { token: "number", foreground: "#D48331" },
+      { token: "string", foreground: "55ff55" },
+    ],
+    colors: {},
+  });
+
+  // use cpp as a base language and then add stan keywords
+  const cppDef = monacoInstance.languages
+    .getLanguages()
+    .filter((l) => l.id === "cpp")[0];
+
+  if (cppDef) {
+    (cppDef as any).loader().then((loaded: any) => {
+      const cppLang = loaded.language;
+      const hjd = highlightJsData();
+      const stanLang = { ...cppLang };
+      stanLang.tokenizer = { ...cppLang.tokenizer };
+      stanLang.tokenizer.root = [...cppLang.tokenizer.root];
+      // stanLang.keywords = [...hjd.BLOCKS, ...hjd.STATEMENTS, ...hjd.DISTRIBUTIONS, ...hjd.FUNCTIONS, ...hjd.RANGE_CONSTRAINTS, ...hjd.TYPES]
+      stanLang.keywords = [];
+      stanLang.stan_blocks = hjd.BLOCKS;
+      stanLang.stan_statements = hjd.STATEMENTS;
+      stanLang.stan_distributions = hjd.DISTRIBUTIONS;
+      stanLang.stan_functions = hjd.FUNCTIONS;
+      stanLang.stan_range_constraints = hjd.RANGE_CONSTRAINTS;
+      stanLang.stan_types = hjd.TYPES;
+      stanLang.tokenizer.root = [
+        [
+          /[a-zA-Z_]\w*/,
+          {
+            cases: {
+              "@stan_blocks": "stanblock",
+              "@stan_statements": "stanstatement",
+              "@stan_distributions": "standistribution",
+              "@stan_functions": "stanfunction",
+              "@stan_range_constraints": "stanrangeconstraint",
+              "@stan_types": "stantype",
+              "@default": "identifier",
+            },
+          },
+        ],
+        [/~|:|\+=|=|<|>/, "stanoperator"],
+        ...stanLang.tokenizer.root,
+      ];
+      monacoInstance.languages.register({ id: "stan" });
+      monacoInstance.languages.setMonarchTokensProvider("stan", stanLang);
+    });
+  }
+};
+
+export default monacoAddStanLang;
