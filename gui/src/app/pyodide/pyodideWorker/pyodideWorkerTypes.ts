@@ -50,7 +50,7 @@ export const isMessageFromPyodideWorker = (
   if (typeof x !== "object") return false;
   if (x.type === "stdout") return x.data !== undefined;
   if (x.type === "stderr") return x.data !== undefined;
-  if (x.type === "setStatus") return isPydodideWorkerStatus(x.status);
+  if (x.type === "setStatus") return isPyodideWorkerStatus(x.status);
   if (x.type === "setData") return x.data !== undefined;
   if (x.type === "addImage") return x.image !== undefined;
   return false;
@@ -64,7 +64,7 @@ export type PyodideWorkerStatus =
   | "completed"
   | "failed";
 
-export const isPydodideWorkerStatus = (x: any): x is PyodideWorkerStatus => {
+export const isPyodideWorkerStatus = (x: any): x is PyodideWorkerStatus => {
   return [
     "idle",
     "loading",

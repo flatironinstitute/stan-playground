@@ -6,8 +6,8 @@ import {
   useState,
 } from "react";
 import { WebR } from "webr";
-import TextEditor, { ToolbarItem } from "../../../FileEditor/TextEditor";
 import getDataGenerationToolbarItems from "./getDataGenerationToolbarItems";
+import TextEditor, { ToolbarItem } from "@SpComponents/TextEditor";
 
 type Props = {
   fileName: string;

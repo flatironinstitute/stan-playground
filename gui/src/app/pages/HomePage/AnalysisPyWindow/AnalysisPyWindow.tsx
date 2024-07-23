@@ -5,11 +5,11 @@ import {
   useMemo,
   useRef,
 } from "react";
-import { ProjectContext } from "../../../Project/ProjectContextProvider";
-import { ProjectKnownFiles } from "../../../Project/ProjectDataModel";
-import AnalysisPyFileEditor from "../../../pyodide/AnalysisPyFileEditor";
 import { SplitDirection, Splitter } from "@SpComponents/Splitter";
 import { StanRun } from "@SpStanSampler/useStanSampler";
+import { ProjectContext } from "@SpCore/ProjectContextProvider";
+import AnalysisPyFileEditor from "@SpPyodide/AnalysisPyFileEditor";
+import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
 
 type AnalysisPyWindowProps = {
   latestRun: StanRun;
