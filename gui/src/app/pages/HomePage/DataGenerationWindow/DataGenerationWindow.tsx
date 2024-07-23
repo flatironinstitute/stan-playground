@@ -1,4 +1,4 @@
-import { FunctionComponent, useCallback, useContext, useState } from "react";
+import { FunctionComponent, useCallback, useContext, useRef } from "react";
 import DataPyFileEditor from "./DataPyFileEditor";
 import { ProjectContext } from "../../../Project/ProjectContextProvider";
 import { ProjectKnownFiles } from "../../../Project/ProjectDataModel";
@@ -33,8 +33,9 @@ const DataGenerationChildWindow: FunctionComponent<
   DataGenerationChildWindowProps
 > = ({ language }) => {
   const { data, update } = useContext(ProjectContext);
-  const [consoleOutputDiv, setConsoleOutputDiv] =
-    useState<HTMLDivElement | null>(null);
+
+  const consoleRef = useRef<HTMLDivElement | null>(null);
+
   const handleSetData = useCallback(
     (data: any) => {
       update({
@@ -45,12 +46,12 @@ const DataGenerationChildWindow: FunctionComponent<
       update({ type: "commitFile", filename: ProjectKnownFiles.DATAFILE });
       // Use "stan-playground" prefix to distinguish from console output of the running code
       writeConsoleOutToDiv(
-        consoleOutputDiv,
+        consoleRef,
         "[stan-playground] Data updated",
         "stdout",
       );
     },
-    [update, consoleOutputDiv],
+    [update, consoleRef],
   );
   const EditorComponent =
     language === "python" ? DataPyFileEditor : DataRFileEditor;
@@ -87,9 +88,9 @@ const DataGenerationChildWindow: FunctionComponent<
         }}
         readOnly={false}
         setData={handleSetData}
-        outputDiv={consoleOutputDiv}
+        outputDiv={consoleRef}
       />
-      <ConsoleOutputWindow onDivElement={setConsoleOutputDiv} />
+      <ConsoleOutputWindow consoleRef={consoleRef} />
     </Splitter>
   );
 };

@@ -1,4 +1,10 @@
-import { FunctionComponent, useCallback, useMemo, useState } from "react";
+import {
+  FunctionComponent,
+  RefObject,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import { WebR } from "webr";
 import TextEditor, { ToolbarItem } from "../../../FileEditor/TextEditor";
 import getDataGenerationToolbarItems from "./getDataGenerationToolbarItems";
@@ -11,7 +17,7 @@ type Props = {
   setEditedFileContent: (text: string) => void;
   readOnly: boolean;
   setData?: (data: any) => void;
-  outputDiv?: HTMLDivElement | null;
+  outputDiv: RefObject<HTMLDivElement>;
 };
 
 let webR: WebR | null = null;
@@ -47,8 +53,8 @@ const DataRFileEditor: FunctionComponent<Props> = ({
     if (editedFileContent !== fileContent) {
       throw new Error("Cannot run edited code");
     }
-    if (outputDiv) {
-      outputDiv.innerHTML = "";
+    if (outputDiv.current) {
+      outputDiv.current.innerHTML = "";
     }
     setStatus("loading");
     try {
@@ -91,26 +97,26 @@ json_result
       if (setData && result.data) {
         setData(result.data);
       }
-      if (outputDiv && result.print_log) {
+      if (outputDiv.current && result.print_log) {
         result.print_log.forEach((x: string) => {
           const divElement = document.createElement("div");
           divElement.style.color = "blue";
           const preElement = document.createElement("pre");
           divElement.appendChild(preElement);
           preElement.textContent = x;
-          outputDiv.appendChild(divElement);
+          outputDiv.current?.appendChild(divElement);
         });
       }
       setStatus("completed");
     } catch (e: any) {
       console.error(e);
-      if (outputDiv) {
+      if (outputDiv.current) {
         const divElement = document.createElement("div");
         divElement.style.color = "red";
         const preElement = document.createElement("pre");
         divElement.appendChild(preElement);
         preElement.textContent = e.toString();
-        outputDiv.appendChild(divElement);
+        outputDiv.current.appendChild(divElement);
       }
       setStatus("failed");
     }

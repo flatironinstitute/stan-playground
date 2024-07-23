@@ -1,4 +1,10 @@
-import { FunctionComponent, useContext, useMemo, useState } from "react";
+import {
+  FunctionComponent,
+  RefObject,
+  useContext,
+  useMemo,
+  useRef,
+} from "react";
 import { ProjectContext } from "../../../Project/ProjectContextProvider";
 import { ProjectKnownFiles } from "../../../Project/ProjectDataModel";
 import AnalysisPyFileEditor from "../../../pyodide/AnalysisPyFileEditor";
@@ -12,20 +18,18 @@ type AnalysisPyWindowProps = {
 const AnalysisPyWindow: FunctionComponent<AnalysisPyWindowProps> = ({
   latestRun,
 }) => {
-  // TODO make useRef
-  const [imageOutputDiv, setImageOutputDiv] = useState<HTMLDivElement | null>(
-    null,
-  );
+  const imagesRef = useRef<HTMLDivElement | null>(null);
+
   return (
     <Splitter>
-      <LeftPane imageOutputDiv={imageOutputDiv} latestRun={latestRun} />
-      <ImageOutputWindow onDivElement={setImageOutputDiv} />
+      <LeftPane imagesRef={imagesRef} latestRun={latestRun} />
+      <ImageOutputWindow imagesRef={imagesRef} />
     </Splitter>
   );
 };
 
 type LeftPaneProps = {
-  imageOutputDiv: HTMLDivElement | null;
+  imagesRef: RefObject<HTMLDivElement>;
   latestRun: StanRun;
 };
 
@@ -36,12 +40,11 @@ export type GlobalDataForAnalysisPy = {
 };
 
 const LeftPane: FunctionComponent<LeftPaneProps> = ({
-  imageOutputDiv,
+  imagesRef,
   latestRun,
 }) => {
-  // TODO make useRef
-  const [consoleOutputDiv, setConsoleOutputDiv] =
-    useState<HTMLDivElement | null>(null);
+  const consoleRef = useRef<HTMLDivElement | null>(null);
+
   const { data, update } = useContext(ProjectContext);
   const { draws, paramNames, samplingOpts } = latestRun;
   const numChains = samplingOpts?.num_chains;
@@ -75,23 +78,23 @@ const LeftPane: FunctionComponent<LeftPaneProps> = ({
             filename: ProjectKnownFiles.ANALYSISPYFILE,
           });
         }}
-        consoleOutputDiv={consoleOutputDiv}
-        imageOutputDiv={imageOutputDiv}
+        consoleRef={consoleRef}
+        imagesRef={imagesRef}
         readOnly={false}
         spData={spData}
       />
-      <ConsoleOutputWindow onDivElement={setConsoleOutputDiv} />
+      <ConsoleOutputWindow consoleRef={consoleRef} />
     </Splitter>
   );
 };
 
 type ConsoleOutputWindowProps = {
-  onDivElement: (div: HTMLDivElement) => void;
+  consoleRef: RefObject<HTMLDivElement>;
 };
 
 export const ConsoleOutputWindow: FunctionComponent<
   ConsoleOutputWindowProps
-> = ({ onDivElement }) => {
+> = ({ consoleRef }) => {
   return (
     <div
       style={{
@@ -99,17 +102,17 @@ export const ConsoleOutputWindow: FunctionComponent<
         height: "100%",
         overflowY: "auto",
       }}
-      ref={onDivElement}
+      ref={consoleRef}
     />
   );
 };
 
 type ImageOutputWindowProps = {
-  onDivElement: (div: HTMLDivElement) => void;
+  imagesRef: RefObject<HTMLDivElement>;
 };
 
 const ImageOutputWindow: FunctionComponent<ImageOutputWindowProps> = ({
-  onDivElement,
+  imagesRef,
 }) => {
   return (
     <div
@@ -118,7 +121,7 @@ const ImageOutputWindow: FunctionComponent<ImageOutputWindowProps> = ({
         width: "100%",
         overflowY: "auto",
       }}
-      ref={onDivElement}
+      ref={imagesRef}
     />
   );
 };

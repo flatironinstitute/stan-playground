@@ -2,7 +2,13 @@ import TextEditor, { ToolbarItem } from "@SpComponents/TextEditor";
 import { writeConsoleOutToDiv } from "app/pyodide/AnalysisPyFileEditor";
 import { PyodideWorkerStatus } from "app/pyodide/pyodideWorker/pyodideWorkerTypes";
 import usePyodideWorker from "app/pyodide/pyodideWorker/usePyodideWorker";
-import { FunctionComponent, useCallback, useMemo, useState } from "react";
+import {
+  FunctionComponent,
+  RefObject,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import getDataGenerationToolbarItems from "./getDataGenerationToolbarItems";
 
 type Props = {
@@ -13,7 +19,7 @@ type Props = {
   setEditedFileContent: (text: string) => void;
   readOnly: boolean;
   setData?: (data: any) => void;
-  outputDiv?: HTMLDivElement | null;
+  outputDiv: RefObject<HTMLDivElement>;
 };
 
 const DataPyFileEditor: FunctionComponent<Props> = ({
@@ -49,8 +55,8 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
     if (editedFileContent !== fileContent) {
       throw new Error("Cannot run edited code");
     }
-    if (outputDiv) {
-      outputDiv.innerHTML = "";
+    if (outputDiv.current) {
+      outputDiv.current.innerHTML = "";
     }
     run(
       fileContent,

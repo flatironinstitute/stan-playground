@@ -1,4 +1,10 @@
-import { FunctionComponent, useCallback, useMemo, useState } from "react";
+import {
+  FunctionComponent,
+  RefObject,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import { PlayArrow } from "@mui/icons-material";
 import TextEditor, { ToolbarItem } from "../FileEditor/TextEditor";
 import { PyodideWorkerStatus } from "./pyodideWorker/pyodideWorkerTypes";
@@ -12,8 +18,8 @@ type Props = {
   editedFileContent: string;
   setEditedFileContent: (text: string) => void;
   readOnly: boolean;
-  imageOutputDiv?: HTMLDivElement | null;
-  consoleOutputDiv?: HTMLDivElement | null;
+  imagesRef: RefObject<HTMLDivElement>;
+  consoleRef: RefObject<HTMLDivElement>;
   spData: GlobalDataForAnalysisPy | undefined;
   scriptHeader?: string;
 };
@@ -25,18 +31,16 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
   editedFileContent,
   setEditedFileContent,
   readOnly,
-  imageOutputDiv,
-  consoleOutputDiv,
+  imagesRef,
+  consoleRef,
   spData,
 }) => {
   const [status, setStatus] = useState<PyodideWorkerStatus>("idle");
 
   const callbacks = useMemo(
     () => ({
-      onStdout: (x: string) =>
-        writeConsoleOutToDiv(consoleOutputDiv, x, "stdout"),
-      onStderr: (x: string) =>
-        writeConsoleOutToDiv(consoleOutputDiv, x, "stderr"),
+      onStdout: (x: string) => writeConsoleOutToDiv(consoleRef, x, "stdout"),
+      onStderr: (x: string) => writeConsoleOutToDiv(consoleRef, x, "stderr"),
       onImage: (b64: string) => {
         const imageUrl = `data:image/png;base64,${b64}`;
 
@@ -46,13 +50,13 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
 
         const divElement = document.createElement("div");
         divElement.appendChild(img);
-        imageOutputDiv?.appendChild(divElement);
+        imagesRef.current?.appendChild(divElement);
       },
       onStatus: (status: PyodideWorkerStatus) => {
         setStatus(status);
       },
     }),
-    [consoleOutputDiv, imageOutputDiv],
+    [consoleRef, imagesRef],
   );
 
   const { run } = usePyodideWorker(callbacks);
@@ -69,11 +73,11 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
       throw new Error("Cannot run edited code");
     }
 
-    if (consoleOutputDiv) {
-      consoleOutputDiv.innerHTML = "";
+    if (consoleRef.current) {
+      consoleRef.current.innerHTML = "";
     }
-    if (imageOutputDiv) {
-      imageOutputDiv.innerHTML = "";
+    if (imagesRef.current) {
+      imagesRef.current.innerHTML = "";
     }
     run(fileContent, spData, {
       loadsDraws: true,
@@ -81,18 +85,18 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
       producesData: false,
     });
   }, [
+    status,
     editedFileContent,
     fileContent,
-    status,
+    consoleRef,
+    imagesRef,
     run,
-    consoleOutputDiv,
-    imageOutputDiv,
     spData,
   ]);
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     const ret: ToolbarItem[] = [];
     const runnable =
-      fileContent === editedFileContent && imageOutputDiv && hasData;
+      fileContent === editedFileContent && imagesRef.current && hasData;
     if (runnable) {
       ret.push({
         type: "button",
@@ -110,7 +114,7 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
         color: "red",
       });
     }
-    if (!imageOutputDiv) {
+    if (!imagesRef.current) {
       ret.push({
         type: "text",
         label: "No output window",
@@ -147,14 +151,7 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
       });
     }
     return ret;
-  }, [
-    fileContent,
-    editedFileContent,
-    imageOutputDiv,
-    hasData,
-    status,
-    handleRun,
-  ]);
+  }, [fileContent, editedFileContent, imagesRef, hasData, status, handleRun]);
 
   return (
     <TextEditor
@@ -173,19 +170,19 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
 type ConsoleOutType = "stdout" | "stderr";
 
 export const writeConsoleOutToDiv = (
-  parentDiv: HTMLDivElement | null | undefined,
+  parentDiv: RefObject<HTMLDivElement>,
   x: string,
   type: ConsoleOutType,
 ) => {
   if (x === "") return;
-  if (parentDiv === null || parentDiv === undefined) return;
+  if (!parentDiv.current) return;
   const styleClass = type === "stdout" ? "WorkerStdout" : "WorkerStderr";
   const preElement = document.createElement("pre");
   preElement.textContent = x;
   const divElement = document.createElement("div");
   divElement.className = styleClass;
   divElement.appendChild(preElement);
-  parentDiv.appendChild(divElement);
+  parentDiv.current.appendChild(divElement);
 };
 
 export default AnalysisPyFileEditor;
