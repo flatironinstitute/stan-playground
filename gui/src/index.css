@@ -3,3 +3,21 @@ body {
   font-family: "Arial", sans-serif;
   min-height: 100vh;
 }
+
+.WorkerStdout {
+  color: darkblue;
+}
+
+.WorkerStdout pre {
+  margin: 0px;
+  padding: 1px;
+}
+
+.WorkerStderr {
+  color: red;
+}
+
+.WorkerStderr pre {
+  margin: 0px;
+  padding: 1px;
+}

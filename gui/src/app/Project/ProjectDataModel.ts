@@ -1,11 +1,12 @@
+import baseObjectCheck from "@SpUtil/baseObjectCheck";
+
 export enum ProjectKnownFiles {
   STANFILE = "stanFileContent",
   DATAFILE = "dataFileContent",
+  ANALYSISPYFILE = "analysisPyFileContent",
+  DATAPYFILE = "dataPyFileContent",
+  DATARFILE = "dataRFileContent",
 }
-
-const baseObjectCheck = (x: any): boolean => {
-  return (x ?? false) && typeof x === "object";
-};
 
 export type SamplingOpts = {
   num_chains: number;
@@ -123,9 +124,15 @@ export const initialDataModel: ProjectDataModel = {
   ephemera: {
     stanFileContent: "",
     dataFileContent: "",
+    analysisPyFileContent: "",
+    dataPyFileContent: "",
+    dataRFileContent: "",
   },
   stanFileContent: "",
   dataFileContent: "",
+  analysisPyFileContent: "",
+  dataPyFileContent: "",
+  dataRFileContent: "",
   samplingOpts: defaultSamplingOpts,
 };
 

@@ -1,33 +1,26 @@
 import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
-import Grid from "@mui/material/Grid";
 import styled from "@mui/material/styles/styled";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import DataFileEditor from "@SpComponents/DataFileEditor";
-import RunPanel from "@SpComponents/RunPanel";
-import SamplerOutputView from "@SpComponents/SamplerOutputView";
-import SamplingOptsPanel from "@SpComponents/SamplingOptsPanel";
 import { GutterTheme, SplitDirection, Splitter } from "@SpComponents/Splitter";
 import StanFileEditor from "@SpComponents/StanFileEditor";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import {
   modelHasUnsavedChanges,
-  modelHasUnsavedDataFileChanges,
   ProjectKnownFiles,
-  SamplingOpts,
 } from "@SpCore/ProjectDataModel";
 import Sidebar, { drawerWidth } from "@SpPages/Sidebar";
 import TopBar from "@SpPages/TopBar";
-import useStanSampler from "@SpStanSampler/useStanSampler";
 import {
   FunctionComponent,
-  useCallback,
   useContext,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
+import TabWidget from "@SpComponents/TabWidget";
+import SamplingWindow from "./SamplingWindow/SamplingWindow";
+import DataGenerationWindow from "./DataGenerationWindow/DataGenerationWindow";
 
 type Props = {
   //
@@ -78,6 +71,21 @@ const HomePage: FunctionComponent<Props> = () => {
         </Splitter>
       </MovingBox>
     </Box>
+  );
+};
+
+type RightViewProps = {
+  compiledMainJsUrl: string;
+};
+
+const RightView: FunctionComponent<RightViewProps> = ({
+  compiledMainJsUrl,
+}) => {
+  return (
+    <TabWidget labels={["Sampling", "Data Generation"]}>
+      <SamplingWindow compiledMainJsUrl={compiledMainJsUrl} />
+      <DataGenerationWindow />
+    </TabWidget>
   );
 };
 
@@ -135,58 +143,6 @@ const LeftView: FunctionComponent<LeftViewProps> = ({
         readOnly={false}
       />
     </Splitter>
-  );
-};
-
-type RightViewProps = {
-  compiledMainJsUrl?: string;
-};
-
-const RightView: FunctionComponent<RightViewProps> = ({
-  compiledMainJsUrl,
-}) => {
-  const { data, update } = useContext(ProjectContext);
-  const parsedData = useMemo(() => {
-    try {
-      return JSON.parse(data.dataFileContent);
-    } catch (e) {
-      return undefined;
-    }
-  }, [data.dataFileContent]);
-
-  const setSamplingOpts = useCallback(
-    (opts: SamplingOpts) => {
-      update({ type: "setSamplingOpts", opts });
-    },
-    [update],
-  );
-
-  const { sampler, latestRun } = useStanSampler(compiledMainJsUrl);
-  const isSampling = latestRun.status === "sampling";
-  return (
-    <Box height="100%" display="flex" flexDirection="column">
-      <Grid container>
-        <Grid item xs={12} sm={4}>
-          <SamplingOptsPanel
-            samplingOpts={data.samplingOpts}
-            setSamplingOpts={!isSampling ? setSamplingOpts : undefined}
-          />
-        </Grid>
-        <Grid item xs={12} sm>
-          <RunPanel
-            sampler={sampler}
-            latestRun={latestRun}
-            data={parsedData}
-            dataIsSaved={!modelHasUnsavedDataFileChanges(data)}
-            samplingOpts={data.samplingOpts}
-          />
-        </Grid>
-      </Grid>
-      <Divider />
-      <Box flex="1" overflow="hidden">
-        <SamplerOutputView latestRun={latestRun} />
-      </Box>
-    </Box>
   );
 };
 

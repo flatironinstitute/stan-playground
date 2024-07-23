@@ -1,7 +1,10 @@
 import SequencePlotWidget from "@SpComponents/SequencePlotWidget";
 import { chainColorForIndex } from "@SpComponents/chainColorList";
-import { FunctionComponent, useMemo, useState } from "react";
-import ReactVisibilitySensor from "react-visibility-sensor";
+import { ArrowDropDown } from "@mui/icons-material";
+import Accordion from "@mui/material/Accordion";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import { FunctionComponent, useMemo } from "react";
 
 type TracePlotsViewProps = {
   draws: number[][];
@@ -42,24 +45,20 @@ const SequencePlot: FunctionComponent<SequencePlotProps> = ({
   columnIndex,
   drawChainIds,
 }) => {
-  const [expanded, setExpanded] = useState<boolean>(false);
   return (
-    <div>
-      <ExpandComponent
-        expanded={expanded}
-        setExpanded={setExpanded}
-        label={variableName}
-      />
-      {expanded && (
+    <Accordion slotProps={{ transition: { unmountOnExit: true } }}>
+      <AccordionSummary expandIcon={<ArrowDropDown />}>
+        {variableName}
+      </AccordionSummary>
+      <AccordionDetails>
         <SequencePlotChild
           variableName={variableName}
           draws={draws}
           columnIndex={columnIndex}
           drawChainIds={drawChainIds}
         />
-      )}
-      <div className="SequencePlotPadding" />
-    </div>
+      </AccordionDetails>
+    </Accordion>
   );
 };
 
@@ -86,39 +85,10 @@ const SequencePlotChild: FunctionComponent<SequencePlotProps> = ({
   }, [draws, columnIndex, drawChainIds]);
   return (
     <div className="SequencePlotChild">
-      <ReactVisibilitySensor partialVisibility>
-        {({ isVisible }: { isVisible: boolean }) => {
-          if (!isVisible) return <div>...</div>;
-          return (
-            <SequencePlotWidget
-              variableName={variableName}
-              plotSequences={plotSequences}
-            />
-          );
-        }}
-      </ReactVisibilitySensor>
-    </div>
-  );
-};
-
-type ExpandComponentProps = {
-  expanded: boolean;
-  setExpanded: (expanded: boolean) => void;
-  label: string;
-};
-
-const ExpandComponent: FunctionComponent<ExpandComponentProps> = ({
-  expanded,
-  setExpanded,
-  label,
-}) => {
-  return (
-    <div
-      className="TracePlotExpandComponent"
-      onClick={() => setExpanded(!expanded)}
-    >
-      {expanded ? "▼" : "▶"}&nbsp;
-      <span>{label}</span>
+      <SequencePlotWidget
+        variableName={variableName}
+        plotSequences={plotSequences}
+      />
     </div>
   );
 };

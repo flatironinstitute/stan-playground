@@ -32,14 +32,15 @@
     "jszip": "^3.10.1",
     "monaco-editor": "^0.48.0",
     "plotly.js-cartesian-dist": "^2.33.0",
+    "pyodide": "^0.26.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
     "react-plotly.js": "^2.6.0",
     "react-router-dom": "^6.17.0",
     "react-use-measure": "^2.1.1",
-    "react-visibility-sensor": "^5.1.1",
-    "tinystan": "^0.0.2"
+    "tinystan": "^0.0.2",
+    "webr": "^0.4.0"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.1.0",

@@ -179,3 +179,16 @@ span.EditorTitle {
 .GistExplainer {
   max-width: 800px;
 }
+
+/* Pyodide/WebR -------- */
+.ConsoleOutputArea {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.ImageOutputArea {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
