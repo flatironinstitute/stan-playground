@@ -1,3 +1,5 @@
+import baseObjectCheck from "@SpUtil/baseObjectCheck";
+
 export enum ProjectKnownFiles {
   STANFILE = "stanFileContent",
   DATAFILE = "dataFileContent",
@@ -5,10 +7,6 @@ export enum ProjectKnownFiles {
   DATAPYFILE = "dataPyFileContent",
   DATARFILE = "dataRFileContent",
 }
-
-const baseObjectCheck = (x: any): boolean => {
-  return (x ?? false) && typeof x === "object";
-};
 
 export type SamplingOpts = {
   num_chains: number;

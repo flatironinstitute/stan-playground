@@ -1,3 +1,5 @@
+import baseObjectCheck from "@SpUtil/baseObjectCheck";
+
 export type PyodideRunSettings = Partial<{
   loadsDraws: boolean;
   showsPlots: boolean;
@@ -15,7 +17,7 @@ export const isMessageToPyodideWorker = (
   x: any,
 ): x is MessageToPyodideWorker => {
   if (!x) return false;
-  if (typeof x !== "object") return false;
+  if (!baseObjectCheck(x)) return false;
   if (x.type === "run") {
     if (x.code === undefined) return false;
     if (x.spData === undefined) return false;
@@ -47,7 +49,7 @@ export const isMessageFromPyodideWorker = (
   x: any,
 ): x is MessageFromPyodideWorker => {
   if (!x) return false;
-  if (typeof x !== "object") return false;
+  if (!baseObjectCheck(x)) return false;
   if (x.type === "stdout") return x.data !== undefined;
   if (x.type === "stderr") return x.data !== undefined;
   if (x.type === "setStatus") return isPyodideWorkerStatus(x.status);
