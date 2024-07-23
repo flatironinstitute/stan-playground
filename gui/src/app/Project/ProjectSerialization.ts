@@ -60,7 +60,9 @@ export const serializeAsZip = async (
     throw new Error("Error creating folder in zip file");
   }
   Object.entries(fileManifest).forEach(([name, content]) => {
-    folder.file(name, content);
+    if (content.trim() !== "") {
+      folder.file(name, content);
+    }
   });
   const zipBlob = await zip.generateAsync({ type: "blob" });
 
