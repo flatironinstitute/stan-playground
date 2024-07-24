@@ -59,10 +59,10 @@ const LeftPane: FunctionComponent<LeftPaneProps> = ({
   }, [latestRun.draws]);
 
   const { data, update } = useContext(ProjectContext);
-  const { draws, paramNames, samplingOpts } = latestRun;
+  const { draws, paramNames, samplingOpts, status } = latestRun;
   const numChains = samplingOpts?.num_chains;
   const spData = useMemo(() => {
-    if (draws && numChains && paramNames) {
+    if (status === "completed" && draws && numChains && paramNames) {
       return {
         draws,
         paramNames,
@@ -71,7 +71,7 @@ const LeftPane: FunctionComponent<LeftPaneProps> = ({
     } else {
       return undefined;
     }
-  }, [draws, paramNames, numChains]);
+  }, [status, draws, numChains, paramNames]);
   return (
     <Splitter direction={SplitDirection.Vertical} initialSizes={[60, 40]}>
       <AnalysisPyFileEditor

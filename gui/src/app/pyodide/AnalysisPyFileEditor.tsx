@@ -2,6 +2,7 @@ import {
   FunctionComponent,
   RefObject,
   useCallback,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -64,6 +65,10 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
   const hasData = useMemo(() => {
     return spData !== undefined;
   }, [spData]);
+
+  useEffect(() => {
+    setStatus("idle");
+  }, [spData, fileContent]);
 
   const handleRun = useCallback(() => {
     if (status === "running") {
