@@ -18,16 +18,14 @@ const TabWidget: FunctionComponent<TabWidgetProps> = ({ labels, children }) => {
   const [tabsThatHaveBeenViewed, setTabsThatHaveBeenViewed] = useState<
     number[]
   >([]);
-  useEffect(() => {
+
+  const handleChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabsThatHaveBeenViewed((prev) => {
-      if (!prev.includes(index)) {
-        return [...prev, index];
+      if (!prev.includes(newValue)) {
+        return [...prev, newValue];
       }
       return prev;
     });
-  }, [index]);
-
-  const handleChange = (_: React.SyntheticEvent, newValue: number) => {
     setIndex(newValue);
   };
 
@@ -44,7 +42,7 @@ const TabWidget: FunctionComponent<TabWidgetProps> = ({ labels, children }) => {
             key={i}
             value={index}
             index={i}
-            tabsThatHaveBeenViewed={tabsThatHaveBeenViewed}
+            mounted={tabsThatHaveBeenViewed.includes(i)}
           >
             {child}
           </CustomTabPanel>
@@ -57,12 +55,12 @@ const TabWidget: FunctionComponent<TabWidgetProps> = ({ labels, children }) => {
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
-  tabsThatHaveBeenViewed: number[];
+  mounted: boolean;
   value: number;
 }
 
 const CustomTabPanel = (props: TabPanelProps) => {
-  const { children, value, index, tabsThatHaveBeenViewed, ...other } = props;
+  const { children, value, index, mounted, ...other } = props;
 
   return (
     <div
@@ -73,9 +71,7 @@ const CustomTabPanel = (props: TabPanelProps) => {
       style={{ height: "100%", width: "100%" }}
       {...other}
     >
-      {(value === index || tabsThatHaveBeenViewed.includes(index)) && (
-        <>{children}</>
-      )}
+      {(value === index || mounted) && <>{children}</>}
     </div>
   );
 };
