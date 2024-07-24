@@ -5,9 +5,10 @@ import {
   useMemo,
   useState,
 } from "react";
-import { WebR } from "webr";
+import { RString, WebR } from "webr";
 import getDataGenerationToolbarItems from "./getDataGenerationToolbarItems";
 import TextEditor, { ToolbarItem } from "@SpComponents/TextEditor";
+import { writeConsoleOutToDiv } from "@SpPyodide/AnalysisPyFileEditor";
 
 type Props = {
   fileName: string;
@@ -60,32 +61,14 @@ const DataRFileEditor: FunctionComponent<Props> = ({
     try {
       const webR = await loadWebRInstance();
 
+      const shelter = await new webR.Shelter();
+
       setStatus("running");
       const rCode =
         `
 # redirect install.packages to webr's version
 webr::shim_install()
-
-# Create a list to store printed statements
-print_log <- list()
-
-# Check if original print function is already saved
-if (!exists("sp_original_print")) {
-  # Save the original print function
-  sp_original_print <- print
-}
-
-# Override the print function
-print <- function(..., sep = " ", collapse = NULL) {
-  # Capture the printed output
-  printed_output <- paste(..., sep = sep, collapse = collapse)
-
-  # Append to the print log
-  print_log <<- c(print_log, printed_output)
-
-  # Call the original print function
-  sp_original_print(printed_output)
-}
+\n\n
 ` +
         fileContent +
         "\n\n" +
@@ -93,37 +76,29 @@ print <- function(..., sep = " ", collapse = NULL) {
 if (typeof(data) != "list") {
   stop("[stan-playground] data must be a list")
 }
-result <- list(data = data, print_log = print_log)
-json_result <- jsonlite::toJSON(result, pretty = TRUE, auto_unbox = TRUE)
-json_result
+.SP_DATA <- jsonlite::toJSON(data, pretty = TRUE, auto_unbox = TRUE)
+.SP_DATA
             `;
-      const resultJson = await webR.evalRString(rCode);
-      const result = JSON.parse(resultJson);
 
-      if (setData && result.data) {
-        setData(result.data);
-      }
-      if (outputDiv.current && result.print_log) {
-        result.print_log.forEach((x: string) => {
-          const divElement = document.createElement("div");
-          divElement.style.color = "blue";
-          const preElement = document.createElement("pre");
-          divElement.appendChild(preElement);
-          preElement.textContent = x;
-          outputDiv.current?.appendChild(divElement);
+      try {
+        const ret = await shelter.captureR(rCode);
+        ret.output.forEach(({ type, data }) => {
+          if (type === "stdout" || type === "stderr") {
+            writeConsoleOutToDiv(outputDiv, data, type);
+          }
         });
+
+        const result = JSON.parse(await (ret.result as RString).toString());
+        if (setData) {
+          setData(result);
+        }
+      } finally {
+        shelter.purge();
       }
       setStatus("completed");
     } catch (e: any) {
       console.error(e);
-      if (outputDiv.current) {
-        const divElement = document.createElement("div");
-        divElement.style.color = "red";
-        const preElement = document.createElement("pre");
-        divElement.appendChild(preElement);
-        preElement.textContent = e.toString();
-        outputDiv.current.appendChild(divElement);
-      }
+      writeConsoleOutToDiv(outputDiv, e.toString(), "stderr");
       setStatus("failed");
     }
   }, [editedFileContent, fileContent, status, setData, outputDiv]);
