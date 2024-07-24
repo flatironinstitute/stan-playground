@@ -21,6 +21,7 @@ import {
 import TabWidget from "@SpComponents/TabWidget";
 import SamplingWindow from "./SamplingWindow/SamplingWindow";
 import DataGenerationWindow from "./DataGenerationWindow/DataGenerationWindow";
+import { FileNames } from "@SpCore/FileMapping";
 
 type Props = {
   //
@@ -103,7 +104,7 @@ const LeftView: FunctionComponent<LeftViewProps> = ({
       gutterTheme={GutterTheme.Light}
     >
       <StanFileEditor
-        fileName="main.stan"
+        fileName={FileNames.STANFILE}
         fileContent={data.stanFileContent}
         // this could be made more ergonomic?
         onSaveContent={() =>
@@ -124,7 +125,7 @@ const LeftView: FunctionComponent<LeftViewProps> = ({
         setCompiledUrl={setCompiledMainJsUrl}
       />
       <DataFileEditor
-        fileName="data.json"
+        fileName={FileNames.DATAFILE}
         fileContent={data.dataFileContent}
         onSaveContent={() =>
           update({

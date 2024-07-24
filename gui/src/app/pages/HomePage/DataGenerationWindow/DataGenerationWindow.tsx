@@ -7,6 +7,7 @@ import { SplitDirection, Splitter } from "@SpComponents/Splitter";
 import TabWidget from "@SpComponents/TabWidget";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
+import { FileNames } from "@SpCore/FileMapping";
 
 type DataGenerationWindowProps = {
   // empty
@@ -58,7 +59,9 @@ const DataGenerationChildWindow: FunctionComponent<
   return (
     <Splitter direction={SplitDirection.Vertical} initialSizes={[75, 25]}>
       <EditorComponent
-        fileName={language === "python" ? "data.py" : "data.r"}
+        fileName={
+          language === "python" ? FileNames.DATAPYFILE : FileNames.DATARFILE
+        }
         fileContent={
           language === "python" ? data.dataPyFileContent : data.dataRFileContent
         }
