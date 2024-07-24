@@ -1,4 +1,5 @@
 import {
+  defaultSamplingOpts,
   exportedForTesting,
   getStringKnownFileKeys,
   isProjectDataModel,
@@ -135,20 +136,40 @@ describe("Sampling options parsing", () => {
     const invalidOpts = { ...validOpts, num_samples: -4 };
     const valid = JSON.stringify(validOpts);
     const invalid = JSON.stringify(invalidOpts);
-    const wrongType = JSON.stringify({ type: "something" });
+    const wrongType = JSON.stringify({ seed: "something" });
+    const wrongKey = JSON.stringify({ type: "something" });
     test("Returns parsed object on success", () => {
       const succeeded = parseSamplingOpts(valid);
       expect(succeeded).toEqual(validOpts);
     });
+
+    test("Correctly handles missing keys", () => {
+      const allMissing = JSON.stringify({});
+      const parsed = parseSamplingOpts(allMissing);
+      expect(parsed).toEqual(defaultSamplingOpts);
+    });
+
     test("Correctly handles bad parse", () => {
       expect(() => parseSamplingOpts("")).toThrow(/Unexpected end of JSON/);
+      expect(() => parseSamplingOpts(undefined)).toThrow(
+        /Unexpected end of JSON/,
+      );
     });
-    test("Correctly handles wrong object type", () => {
+    test("Correctly handles wrong element type", () => {
       expect(() => parseSamplingOpts(wrongType)).toThrow(
         /Invalid sampling opts/,
       );
       expect(mockedConsoleError).toHaveBeenCalledWith(
         expect.stringMatching(/Sampling_opts does not parse/),
+      );
+    });
+
+    test("Correctly handles wrong object keys", () => {
+      expect(() => parseSamplingOpts(wrongKey)).toThrow(
+        /Invalid sampling opts/,
+      );
+      expect(mockedConsoleError).toHaveBeenCalledWith(
+        expect.stringMatching(/Sampling_opts contains invalid/),
       );
     });
     test("Correctly handles invalid values", () => {

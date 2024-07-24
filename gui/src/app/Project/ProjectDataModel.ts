@@ -16,6 +16,14 @@ export type SamplingOpts = {
   seed: number | undefined;
 };
 
+export const defaultSamplingOpts: SamplingOpts = {
+  num_chains: 4,
+  num_warmup: 1000,
+  num_samples: 1000,
+  init_radius: 2.0,
+  seed: undefined,
+};
+
 export const isSamplingOpts = (x: any): x is SamplingOpts => {
   if (!baseObjectCheck(x)) return false;
   if (typeof x.num_chains !== "number") return false;
@@ -26,6 +34,8 @@ export const isSamplingOpts = (x: any): x is SamplingOpts => {
   return true;
 };
 
+const numSamplingOpts = Object.keys(defaultSamplingOpts).length;
+
 const validateSamplingOpts = (x: SamplingOpts): boolean => {
   const naturalFields = [x.num_chains, x.num_samples, x.num_warmup];
   const positiveFields = [x.num_chains, x.num_samples];
@@ -33,13 +43,16 @@ const validateSamplingOpts = (x: SamplingOpts): boolean => {
   if (naturalFields.some((f) => !Number.isInteger(f))) return false;
   if (positiveFields.some((f) => f <= 0)) return false;
   if (nonnegativeFields.some((f) => f < 0)) return false;
+
+  if (Object.keys(x).length !== numSamplingOpts) return false;
   return true;
 };
 
 export const parseSamplingOpts = (x: string | undefined): SamplingOpts => {
   const parsed = JSON.parse(x ?? "");
-  if (isSamplingOpts(parsed)) {
-    if (validateSamplingOpts(parsed)) return parsed;
+  const opts = { ...defaultSamplingOpts, ...parsed };
+  if (isSamplingOpts(opts)) {
+    if (validateSamplingOpts(opts)) return opts;
     console.error(
       `Sampling_opts contains invalid values: ${JSON.stringify(parsed)}`,
     );
@@ -49,14 +62,6 @@ export const parseSamplingOpts = (x: string | undefined): SamplingOpts => {
     );
   }
   throw new Error(`Invalid sampling opts ${JSON.stringify(parsed)}`);
-};
-
-export const defaultSamplingOpts: SamplingOpts = {
-  num_chains: 4,
-  num_warmup: 1000,
-  num_samples: 1000,
-  init_radius: 2.0,
-  seed: undefined,
 };
 
 type ProjectFiles = {
