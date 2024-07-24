@@ -210,24 +210,16 @@ const StanFileEditor: FunctionComponent<Props> = ({
 
   const isCompiling = compileStatus === "compiling";
 
-  const messagePaneNeeded = syntaxWindowVisible || !editedFileContent;
-
-  const window = messagePaneNeeded ? (
-    editedFileContent ? (
-      <StanCompileResultWindow
-        stancErrors={stancErrors}
-        onClose={() => setSyntaxWindowVisible(false)}
-      />
-    ) : (
-      <div className="StanEditorDefaultText">
-        Begin editing or select an example from the left panel
-      </div>
-    )
+  const window = syntaxWindowVisible ? (
+    <StanCompileResultWindow
+      stancErrors={stancErrors}
+      onClose={() => setSyntaxWindowVisible(false)}
+    />
   ) : (
     <></>
   );
 
-  const initialSizes = messagePaneNeeded ? [60, 40] : [100, 0];
+  const initialSizes = syntaxWindowVisible ? [60, 40] : [100, 0];
 
   return (
     <Splitter direction={SplitDirection.Vertical} initialSizes={initialSizes}>
@@ -242,6 +234,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
         readOnly={!isCompiling ? readOnly : true}
         toolbarItems={toolbarItems}
         codeMarkers={stancErrorsToCodeMarkers(stancErrors)}
+        hintTextOnEmpty="Begin editing or select an example from the left panel"
       />
       {window}
     </Splitter>
