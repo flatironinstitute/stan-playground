@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FunctionComponent, useState } from "react";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
+import { FunctionComponent, useState } from "react";
 
 type TabWidgetProps = {
   labels: string[];
@@ -15,8 +15,17 @@ const TabWidget: FunctionComponent<TabWidgetProps> = ({ labels, children }) => {
   }
 
   const [index, setIndex] = useState(0);
+  const [tabsThatHaveBeenViewed, setTabsThatHaveBeenViewed] = useState<
+    number[]
+  >([index]);
 
   const handleChange = (_: React.SyntheticEvent, newValue: number) => {
+    setTabsThatHaveBeenViewed((prev) => {
+      if (!prev.includes(newValue)) {
+        return [...prev, newValue];
+      }
+      return prev;
+    });
     setIndex(newValue);
   };
 
@@ -29,7 +38,12 @@ const TabWidget: FunctionComponent<TabWidgetProps> = ({ labels, children }) => {
       </Tabs>
       <Box flex="1" overflow="scroll">
         {children.map((child, i) => (
-          <CustomTabPanel key={i} value={index} index={i}>
+          <CustomTabPanel
+            key={i}
+            value={index}
+            index={i}
+            mounted={tabsThatHaveBeenViewed.includes(i)}
+          >
             {child}
           </CustomTabPanel>
         ))}
@@ -41,11 +55,12 @@ const TabWidget: FunctionComponent<TabWidgetProps> = ({ labels, children }) => {
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
+  mounted: boolean;
   value: number;
 }
 
 const CustomTabPanel = (props: TabPanelProps) => {
-  const { children, value, index, ...other } = props;
+  const { children, value, index, mounted, ...other } = props;
 
   return (
     <div
@@ -56,7 +71,7 @@ const CustomTabPanel = (props: TabPanelProps) => {
       style={{ height: "100%", width: "100%" }}
       {...other}
     >
-      {value === index && <>{children}</>}
+      {mounted && <>{children}</>}
     </div>
   );
 };
