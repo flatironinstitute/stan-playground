@@ -71,7 +71,7 @@ const CustomTabPanel = (props: TabPanelProps) => {
       style={{ height: "100%", width: "100%" }}
       {...other}
     >
-      {(value === index || mounted) && <>{children}</>}
+      {mounted && <>{children}</>}
     </div>
   );
 };
