@@ -63,6 +63,9 @@ const DataRFileEditor: FunctionComponent<Props> = ({
       setStatus("running");
       const rCode =
         `
+# redirect install.packages to webr's version
+webr::shim_install()
+
 # Create a list to store printed statements
 print_log <- list()
 
@@ -87,6 +90,9 @@ print <- function(..., sep = " ", collapse = NULL) {
         fileContent +
         "\n\n" +
         `
+if (typeof(data) != "list") {
+  stop("[stan-playground] data must be a list")
+}
 result <- list(data = data, print_log = print_log)
 json_result <- jsonlite::toJSON(result, pretty = TRUE, auto_unbox = TRUE)
 json_result
@@ -131,6 +137,7 @@ json_result
   const toolbarItems: ToolbarItem[] = useMemo(
     () =>
       getDataGenerationToolbarItems({
+        name: "WebR",
         status,
         runnable: fileContent === editedFileContent,
         onRun: handleRun,
