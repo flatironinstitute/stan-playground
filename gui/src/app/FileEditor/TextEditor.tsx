@@ -28,6 +28,7 @@ type Props = {
   label: string;
   codeMarkers?: CodeMarker[];
   hintTextOnEmpty?: string;
+  onClickHintText?: () => void;
 };
 
 export type ToolbarItem =
@@ -56,6 +57,7 @@ const TextEditor: FunctionComponent<Props> = ({
   label,
   codeMarkers,
   hintTextOnEmpty,
+  onClickHintText,
 }) => {
   const handleChange = useCallback(
     (value: string | undefined) => {
@@ -108,12 +110,15 @@ const TextEditor: FunctionComponent<Props> = ({
     if (text || editedText) {
       return;
     }
-    const contentWidget = createHintTextContentWidget(hintTextOnEmpty);
+    const contentWidget = createHintTextContentWidget(
+      hintTextOnEmpty,
+      onClickHintText,
+    );
     editorInstance.addContentWidget(contentWidget);
     return () => {
       editorInstance.removeContentWidget(contentWidget);
     };
-  }, [text, editorInstance, editedText, hintTextOnEmpty]);
+  }, [text, editorInstance, editedText, hintTextOnEmpty, onClickHintText]);
 
   /////////////////////////////////////////////////
 
@@ -242,14 +247,27 @@ const NotSelectable: FunctionComponent<PropsWithChildren> = ({ children }) => {
   return <div className="NotSelectable">{children}</div>;
 };
 
-const createHintTextContentWidget = (hintText: string) => {
+const createHintTextContentWidget = (
+  hintText: string,
+  onClick?: () => void,
+) => {
   return {
     getDomNode: () => {
       const node = document.createElement("div");
       node.style.width = "max-content";
-      node.style.pointerEvents = "none";
-      node.textContent = hintText;
       node.style.fontStyle = "italic";
+      if (onClick) {
+        const link = document.createElement("a");
+        link.textContent = hintText;
+        link.style.cursor = "pointer";
+        link.style.color = "gray";
+        link.style.textDecoration = "underline";
+        link.onclick = onClick;
+        node.appendChild(link);
+      } else {
+        node.style.pointerEvents = "none";
+        node.textContent = hintText;
+      }
       return node;
     },
     getId: () => "hintText",

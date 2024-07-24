@@ -168,9 +168,27 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
       onSetEditedText={setEditedFileContent}
       readOnly={readOnly}
       toolbarItems={toolbarItems}
+      hintTextOnEmpty="Click to create analysis template"
+      onClickHintText={() => setEditedFileContent(analysisPyTemplate)}
     />
   );
 };
+
+const analysisPyTemplate = `import matplotlib.pyplot as plt
+
+# Get the parameter names
+pnames = draws.parameter_names
+
+# Show histogram for first parameter
+for pname in pnames:
+    print(pname)
+    samples = draws.get(pname)
+    print(samples.shape)
+    plt.hist(samples.ravel(), bins=30)
+    plt.title(pname)
+    plt.show()
+    break
+`;
 
 type ConsoleOutType = "stdout" | "stderr";
 

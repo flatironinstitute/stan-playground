@@ -96,8 +96,14 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
       onSetEditedText={setEditedFileContent}
       readOnly={readOnly}
       toolbarItems={toolbarItems}
+      hintTextOnEmpty="Click to create template for data generation"
+      onClickHintText={() => setEditedFileContent(dataPyTemplate)}
     />
   );
 };
+
+const dataPyTemplate = `data = {
+  "a": [1, 2, 3]
+}`;
 
 export default DataPyFileEditor;

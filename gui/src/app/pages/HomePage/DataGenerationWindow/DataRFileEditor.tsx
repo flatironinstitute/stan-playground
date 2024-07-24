@@ -149,8 +149,14 @@ json_result
       onSetEditedText={setEditedFileContent}
       readOnly={readOnly}
       toolbarItems={toolbarItems}
+      hintTextOnEmpty="Click to create template for data generation"
+      onClickHintText={() => setEditedFileContent(dataRTemplate)}
     />
   );
 };
+
+const dataRTemplate = `data <- list(
+  a = c(1, 2, 3)
+)`;
 
 export default DataRFileEditor;
