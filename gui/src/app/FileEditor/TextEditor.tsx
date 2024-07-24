@@ -50,7 +50,6 @@ const TextEditor: FunctionComponent<Props> = ({
   editedText,
   onSetEditedText,
   readOnly,
-  wordWrap,
   toolbarItems,
   language,
   label,
@@ -151,7 +150,7 @@ const TextEditor: FunctionComponent<Props> = ({
         options={{
           readOnly,
           domReadOnly: readOnly,
-          wordWrap: wordWrap ? "on" : "off",
+          wordWrap: "on",
         }}
       />
     </div>

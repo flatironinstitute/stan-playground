@@ -59,6 +59,8 @@ export const StanRunReducer = (
       };
     case "startSampling":
       return {
+        // preserve previous draws, paramNames, etc in case they are still being rendered while sampling progresses
+        ...state,
         status: "sampling",
         errorMessage: "",
         samplingOpts: action.samplingOpts,
