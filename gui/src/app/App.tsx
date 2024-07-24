@@ -1,6 +1,7 @@
 import { BrowserRouter } from "react-router-dom";
 import ProjectContextProvider from "@SpCore/ProjectContextProvider";
 import HomePage from "@SpPages/HomePage";
+import { Analytics } from "@vercel/analytics/react";
 
 function App() {
   return (
@@ -9,6 +10,7 @@ function App() {
         <ProjectContextProvider>
           <HomePage />
         </ProjectContextProvider>
+        <Analytics />
       </div>
     </BrowserRouter>
   );
