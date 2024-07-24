@@ -33,13 +33,16 @@ const validateSamplingOpts = (x: SamplingOpts): boolean => {
   if (naturalFields.some((f) => !Number.isInteger(f))) return false;
   if (positiveFields.some((f) => f <= 0)) return false;
   if (nonnegativeFields.some((f) => f < 0)) return false;
+
+  if (Object.keys(x).length !== 5) return false;
   return true;
 };
 
 export const parseSamplingOpts = (x: string | undefined): SamplingOpts => {
   const parsed = JSON.parse(x ?? "");
-  if (isSamplingOpts(parsed)) {
-    if (validateSamplingOpts(parsed)) return parsed;
+  const opts = { ...defaultSamplingOpts, ...parsed };
+  if (isSamplingOpts(opts)) {
+    if (validateSamplingOpts(opts)) return opts;
     console.error(
       `Sampling_opts contains invalid values: ${JSON.stringify(parsed)}`,
     );
