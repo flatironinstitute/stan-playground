@@ -17,7 +17,7 @@ const TabWidget: FunctionComponent<TabWidgetProps> = ({ labels, children }) => {
   const [index, setIndex] = useState(0);
   const [tabsThatHaveBeenViewed, setTabsThatHaveBeenViewed] = useState<
     number[]
-  >([]);
+  >([index]);
 
   const handleChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabsThatHaveBeenViewed((prev) => {
