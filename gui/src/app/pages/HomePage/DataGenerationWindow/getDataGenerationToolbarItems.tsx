@@ -4,11 +4,12 @@ import { Help, PlayArrow } from "@mui/icons-material";
 
 const getDataGenerationToolbarItems = (o: {
   status: PyodideWorkerStatus;
+  name: string;
   runnable: boolean;
   onRun: () => void;
   onHelp: () => void;
 }): ToolbarItem[] => {
-  const { status, onRun, runnable, onHelp } = o;
+  const { status, onRun, runnable, onHelp, name } = o;
   const ret: ToolbarItem[] = [];
   ret.push({
     type: "button",
@@ -29,7 +30,7 @@ const getDataGenerationToolbarItems = (o: {
   let label: string;
   let color: string;
   if (status === "loading") {
-    label = "Loading pyodide...";
+    label = `Loading ${name}...`;
     color = "blue";
   } else if (status === "running") {
     label = "Running...";
