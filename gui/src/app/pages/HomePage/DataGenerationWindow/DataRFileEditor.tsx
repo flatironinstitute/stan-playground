@@ -81,7 +81,9 @@ if (typeof(data) != "list") {
             `;
 
       try {
-        const ret = await shelter.captureR(rCode);
+        const ret = await shelter.captureR(rCode, {
+          env: {},
+        });
         ret.output.forEach(({ type, data }) => {
           if (type === "stdout" || type === "stderr") {
             writeConsoleOutToDiv(outputDiv, data, type);
