@@ -108,7 +108,6 @@ const TextEditor: FunctionComponent<Props> = ({
     if (text || editedText) {
       return;
     }
-    console.log("--- contentOnEmpty:", contentOnEmpty);
     const contentWidget = createHintTextContentWidget(contentOnEmpty);
     editorInstance.addContentWidget(contentWidget);
     return () => {
