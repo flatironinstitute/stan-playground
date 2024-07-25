@@ -20,8 +20,9 @@ import {
 } from "react";
 import TabWidget from "@SpComponents/TabWidget";
 import SamplingWindow from "./SamplingWindow/SamplingWindow";
-import DataGenerationWindow from "./DataGenerationWindow/DataGenerationWindow";
 import { FileNames } from "@SpCore/FileMapping";
+import DataPyWindow from "app/Scripting/DataGenerationWindow/DataPyWindow";
+import DataRWindow from "app/Scripting/DataGenerationWindow/DataRWindow";
 
 type Props = {
   //
@@ -85,7 +86,10 @@ const RightView: FunctionComponent<RightViewProps> = ({
   return (
     <TabWidget labels={["Sampling", "Data Generation"]}>
       <SamplingWindow compiledMainJsUrl={compiledMainJsUrl} />
-      <DataGenerationWindow />
+      <TabWidget labels={["Python", "R"]}>
+        <DataPyWindow />
+        <DataRWindow />
+      </TabWidget>
     </TabWidget>
   );
 };

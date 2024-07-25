@@ -4,15 +4,15 @@ import pyodideWorkerURL from "./pyodideWorker?worker&url";
 import { useCallback, useEffect, useState } from "react";
 import {
   MessageToPyodideWorker,
-  PyodideWorkerStatus,
   isMessageFromPyodideWorker,
   PyodideRunSettings,
 } from "./pyodideWorkerTypes";
+import { InterpreterStatus } from "../InterpreterTypes";
 
 type PyodideWorkerCallbacks = {
   onStdout: (data: string) => void;
   onStderr: (data: string) => void;
-  onStatus: (status: PyodideWorkerStatus) => void;
+  onStatus: (status: InterpreterStatus) => void;
   onData?: (data: any) => void;
   onImage?: (image: string) => void;
 };
@@ -97,7 +97,7 @@ class PyodideWorkerInterface {
 const usePyodideWorker = (callbacks: {
   onStdout: (data: string) => void;
   onStderr: (data: string) => void;
-  onStatus: (status: PyodideWorkerStatus) => void;
+  onStatus: (status: InterpreterStatus) => void;
   onData?: (data: any) => void;
   onImage?: (image: string) => void;
 }) => {

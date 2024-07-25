@@ -12,8 +12,9 @@ import {
   modelHasUnsavedDataFileChanges,
   SamplingOpts,
 } from "@SpCore/ProjectDataModel";
-import AnalysisWindow from "@SpPages/AnalysisWindow/AnalysisWindow";
+import AnalysisPyWindow from "app/Scripting/AnalysisWindow/AnalysisPyWindow";
 import useStanSampler, { StanRun } from "@SpStanSampler/useStanSampler";
+import AnalysisRWindow from "app/Scripting/AnalysisWindow/AnalysisRWindow";
 
 type SamplingWindowProps = {
   compiledMainJsUrl?: string;
@@ -78,8 +79,8 @@ const SamplingResultsArea: FunctionComponent<SamplingResultsAreaProps> = ({
     <TabWidget labels={["Output", "Analysis (Py)", "Analysis (R)"]}>
       <SamplerOutputView latestRun={latestRun} />
 
-      <AnalysisWindow latestRun={latestRun} language="python" />
-      <AnalysisWindow latestRun={latestRun} language="r" />
+      <AnalysisPyWindow latestRun={latestRun} />
+      <AnalysisRWindow latestRun={latestRun} />
     </TabWidget>
   );
 };

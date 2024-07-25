@@ -1,11 +1,11 @@
 import { PyodideInterface, loadPyodide } from "pyodide";
 import {
   MessageFromPyodideWorker,
-  PyodideWorkerStatus,
   PyodideRunSettings,
 } from "./pyodideWorkerTypes";
 import spDrawsScript from "./sp_load_draws.py?raw";
 import spMPLScript from "./sp_patch_matplotlib.py?raw";
+import { InterpreterStatus } from "../InterpreterTypes";
 
 let pyodide: PyodideInterface | null = null;
 const loadPyodideInstance = async () => {
@@ -47,7 +47,7 @@ const sendStderr = (data: string) => {
   sendMessageToMain({ type: "stderr", data });
 };
 
-const setStatus = (status: PyodideWorkerStatus) => {
+const setStatus = (status: InterpreterStatus) => {
   sendMessageToMain({ type: "setStatus", status });
 };
 

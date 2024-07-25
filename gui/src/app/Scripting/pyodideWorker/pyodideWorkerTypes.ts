@@ -1,4 +1,5 @@
 import baseObjectCheck from "@SpUtil/baseObjectCheck";
+import { InterpreterStatus, isInterpreterStatus } from "../InterpreterTypes";
 
 export type PyodideRunSettings = Partial<{
   loadsDraws: boolean;
@@ -31,7 +32,7 @@ export type MessageFromPyodideWorker =
     }
   | {
       type: "setStatus";
-      status: PyodideWorkerStatus;
+      status: InterpreterStatus;
     }
   | {
       type: "setData";
@@ -48,27 +49,8 @@ export const isMessageFromPyodideWorker = (
   if (!baseObjectCheck(x)) return false;
   if (x.type === "stdout") return x.data !== undefined;
   if (x.type === "stderr") return x.data !== undefined;
-  if (x.type === "setStatus") return isPyodideWorkerStatus(x.status);
+  if (x.type === "setStatus") return isInterpreterStatus(x.status);
   if (x.type === "setData") return x.data !== undefined;
   if (x.type === "addImage") return x.image !== undefined;
   return false;
-};
-
-export type PyodideWorkerStatus =
-  | "idle"
-  | "loading"
-  | "installing"
-  | "running"
-  | "completed"
-  | "failed";
-
-export const isPyodideWorkerStatus = (x: any): x is PyodideWorkerStatus => {
-  return [
-    "idle",
-    "loading",
-    "installing",
-    "running",
-    "completed",
-    "failed",
-  ].includes(x);
 };
