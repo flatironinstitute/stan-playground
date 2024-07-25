@@ -1,19 +1,19 @@
 import { FunctionComponent, useCallback, useContext, useMemo } from "react";
 
-import AnalysisPyWindow from "../AnalysisPyWindow/AnalysisPyWindow";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
 import Divider from "@mui/material/Divider";
+import Grid from "@mui/material/Grid";
+import RunPanel from "@SpComponents/RunPanel";
+import SamplerOutputView from "@SpComponents/SamplerOutputView";
+import SamplingOptsPanel from "@SpComponents/SamplingOptsPanel";
 import TabWidget from "@SpComponents/TabWidget";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import {
   modelHasUnsavedDataFileChanges,
   SamplingOpts,
 } from "@SpCore/ProjectDataModel";
+import AnalysisWindow from "@SpPages/AnalysisWindow/AnalysisWindow";
 import useStanSampler, { StanRun } from "@SpStanSampler/useStanSampler";
-import RunPanel from "@SpComponents/RunPanel";
-import SamplingOptsPanel from "@SpComponents/SamplingOptsPanel";
-import SamplerOutputView from "@SpComponents/SamplerOutputView";
 
 type SamplingWindowProps = {
   compiledMainJsUrl?: string;
@@ -78,10 +78,8 @@ const SamplingResultsArea: FunctionComponent<SamplingResultsAreaProps> = ({
     <TabWidget labels={["Output", "Analysis (Py)", "Analysis (R)"]}>
       <SamplerOutputView latestRun={latestRun} />
 
-      <AnalysisPyWindow latestRun={latestRun} />
-      <div>
-        <div style={{ padding: 5 }}>R analysis not yet implemented</div>
-      </div>
+      <AnalysisWindow latestRun={latestRun} language="python" />
+      <AnalysisWindow latestRun={latestRun} language="r" />
     </TabWidget>
   );
 };

@@ -1,6 +1,5 @@
 import { FunctionComponent, useCallback, useContext, useRef } from "react";
 import DataPyFileEditor from "./DataPyFileEditor";
-import { ConsoleOutputWindow } from "../AnalysisPyWindow/AnalysisPyWindow";
 import DataRFileEditor from "./DataRFileEditor";
 import { writeConsoleOutToDiv } from "@SpPyodide/AnalysisPyFileEditor";
 import { SplitDirection, Splitter } from "@SpComponents/Splitter";
@@ -8,6 +7,7 @@ import TabWidget from "@SpComponents/TabWidget";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import { FileNames } from "@SpCore/FileMapping";
+import { ConsoleOutputWindow } from "@SpPages/AnalysisWindow/AnalysisWindow";
 
 type DataGenerationWindowProps = {
   // empty

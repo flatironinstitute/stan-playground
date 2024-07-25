@@ -22,7 +22,7 @@ type Props = {
 };
 
 let webR: WebR | null = null;
-const loadWebRInstance = async () => {
+export const loadWebRInstance = async () => {
   if (webR === null) {
     const w = new WebR();
     await w.init();

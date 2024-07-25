@@ -11,13 +11,16 @@ import { SplitDirection, Splitter } from "@SpComponents/Splitter";
 import { StanRun } from "@SpStanSampler/useStanSampler";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
+import AnalysisRFileEditor from "./AnalysisRFileEditor";
 
-type AnalysisPyWindowProps = {
+type AnalysisWindowProps = {
   latestRun: StanRun;
+  language: "python" | "r";
 };
 
-const AnalysisPyWindow: FunctionComponent<AnalysisPyWindowProps> = ({
+const AnalysisWindow: FunctionComponent<AnalysisWindowProps> = ({
   latestRun,
+  language,
 }) => {
   const imagesRef = useRef<HTMLDivElement | null>(null);
 
@@ -29,7 +32,11 @@ const AnalysisPyWindow: FunctionComponent<AnalysisPyWindowProps> = ({
 
   return (
     <Splitter>
-      <LeftPane imagesRef={imagesRef} latestRun={latestRun} />
+      <LeftPane
+        imagesRef={imagesRef}
+        latestRun={latestRun}
+        language={language}
+      />
       <ImageOutputWindow imagesRef={imagesRef} />
     </Splitter>
   );
@@ -38,9 +45,10 @@ const AnalysisPyWindow: FunctionComponent<AnalysisPyWindowProps> = ({
 type LeftPaneProps = {
   imagesRef: RefObject<HTMLDivElement>;
   latestRun: StanRun;
+  language: "python" | "r";
 };
 
-export type GlobalDataForAnalysisPy = {
+export type GlobalDataForAnalysis = {
   draws: number[][];
   paramNames: string[];
   numChains: number;
@@ -49,6 +57,7 @@ export type GlobalDataForAnalysisPy = {
 const LeftPane: FunctionComponent<LeftPaneProps> = ({
   imagesRef,
   latestRun,
+  language,
 }) => {
   const consoleRef = useRef<HTMLDivElement | null>(null);
 
@@ -72,8 +81,9 @@ const LeftPane: FunctionComponent<LeftPaneProps> = ({
       return undefined;
     }
   }, [status, draws, numChains, paramNames]);
-  return (
-    <Splitter direction={SplitDirection.Vertical} initialSizes={[60, 40]}>
+
+  const editor =
+    language === "python" ? (
       <AnalysisPyFileEditor
         fileName="analysis.py"
         fileContent={data.analysisPyFileContent}
@@ -96,6 +106,36 @@ const LeftPane: FunctionComponent<LeftPaneProps> = ({
         readOnly={false}
         spData={spData}
       />
+    ) : language === "r" ? (
+      <AnalysisRFileEditor
+        fileName="analysis.R"
+        fileContent={data.analysisPyFileContent}
+        editedFileContent={data.ephemera.analysisPyFileContent}
+        setEditedFileContent={(content) => {
+          update({
+            type: "editFile",
+            content,
+            filename: ProjectKnownFiles.ANALYSISPYFILE,
+          });
+        }}
+        onSaveContent={() => {
+          update({
+            type: "commitFile",
+            filename: ProjectKnownFiles.ANALYSISPYFILE,
+          });
+        }}
+        consoleRef={consoleRef}
+        imagesRef={imagesRef}
+        readOnly={false}
+        spData={spData}
+      />
+    ) : (
+      <div>Unexpected language {language}</div>
+    );
+
+  return (
+    <Splitter direction={SplitDirection.Vertical} initialSizes={[60, 40]}>
+      {editor}
       <ConsoleOutputWindow consoleRef={consoleRef} />
     </Splitter>
   );
@@ -121,4 +161,4 @@ const ImageOutputWindow: FunctionComponent<ImageOutputWindowProps> = ({
   return <div className="ImageOutputArea" ref={imagesRef} />;
 };
 
-export default AnalysisPyWindow;
+export default AnalysisWindow;

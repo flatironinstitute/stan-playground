@@ -8,9 +8,9 @@ import {
 } from "react";
 import { PlayArrow } from "@mui/icons-material";
 import { PyodideWorkerStatus } from "./pyodideWorker/pyodideWorkerTypes";
-import { GlobalDataForAnalysisPy } from "../pages/HomePage/AnalysisPyWindow/AnalysisPyWindow";
 import usePyodideWorker from "./pyodideWorker/usePyodideWorker";
 import TextEditor, { ToolbarItem } from "@SpComponents/TextEditor";
+import { GlobalDataForAnalysis } from "@SpPages/AnalysisWindow/AnalysisWindow";
 
 type Props = {
   fileName: string;
@@ -21,7 +21,7 @@ type Props = {
   readOnly: boolean;
   imagesRef: RefObject<HTMLDivElement>;
   consoleRef: RefObject<HTMLDivElement>;
-  spData: GlobalDataForAnalysisPy | undefined;
+  spData: GlobalDataForAnalysis | undefined;
   scriptHeader?: string;
 };
 
