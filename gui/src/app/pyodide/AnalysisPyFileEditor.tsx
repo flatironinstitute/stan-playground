@@ -191,17 +191,14 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
 const analysisPyTemplate = `import matplotlib.pyplot as plt
 
 # Get the parameter names
-pnames = draws.parameter_names
+print(draws.parameter_names)
 
-# Show histogram for first parameter
-for pname in pnames:
-    print(pname)
-    samples = draws.get(pname)
-    print(samples.shape)
-    plt.hist(samples.ravel(), bins=30)
-    plt.title(pname)
-    plt.show()
-    break
+# plot the lp parameter
+samples = draws.get("lp__")
+print(samples.shape)
+plt.hist(samples.ravel(), bins=30)
+plt.title("lp__")
+plt.show()
 `;
 
 type ConsoleOutType = "stdout" | "stderr";

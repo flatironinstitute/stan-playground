@@ -124,7 +124,7 @@ if (typeof(data) != "list") {
   const contentOnEmpty = useMemo(() => {
     const spanElement = document.createElement("span");
     const t1 = document.createTextNode(
-      "Define a dictionary called data to update the data.json. ",
+      "Define a list called data to update the data.json. ",
     );
     const a1 = document.createElement("a");
     a1.onclick = () => {
