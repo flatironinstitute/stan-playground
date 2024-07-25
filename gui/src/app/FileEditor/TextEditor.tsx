@@ -255,13 +255,12 @@ const createHintTextContentWidget = (
     getDomNode: () => {
       const node = document.createElement("div");
       node.style.width = "max-content";
-      node.style.fontStyle = "italic";
+      node.className = "EditorHintText";
       if (onClick) {
         const link = document.createElement("a");
         link.textContent = hintText;
         link.style.cursor = "pointer";
-        link.style.color = "gray";
-        link.style.textDecoration = "underline";
+        link.className = "EditorHintTextLink";
         link.onclick = onClick;
         node.appendChild(link);
       } else {

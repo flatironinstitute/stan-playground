@@ -192,3 +192,13 @@ span.EditorTitle {
   height: 100%;
   overflow: auto;
 }
+
+.EditorHintText {
+  font-style: italic;
+  color: #aaa;
+}
+
+.EditorHintTextLink {
+  color: gray;
+  text-decoration: underline;
+}

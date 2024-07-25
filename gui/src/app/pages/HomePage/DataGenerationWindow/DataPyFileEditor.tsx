@@ -78,6 +78,7 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
   const toolbarItems: ToolbarItem[] = useMemo(
     () =>
       getDataGenerationToolbarItems({
+        name: "pyodide",
         status,
         runnable: fileContent === editedFileContent,
         onRun: handleRun,
