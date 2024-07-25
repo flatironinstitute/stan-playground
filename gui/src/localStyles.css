@@ -196,9 +196,11 @@ span.EditorTitle {
 .EditorHintText {
   font-style: italic;
   color: #aaa;
+  pointer-events: none;
 }
 
-.EditorHintTextLink {
+.EditorHintText a {
   color: gray;
   text-decoration: underline;
+  pointer-events: all;
 }

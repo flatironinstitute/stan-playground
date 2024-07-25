@@ -27,8 +27,7 @@ type Props = {
   toolbarItems?: ToolbarItem[];
   label: string;
   codeMarkers?: CodeMarker[];
-  hintTextOnEmpty?: string;
-  onClickHintText?: () => void;
+  contentOnEmpty?: string | HTMLSpanElement;
 };
 
 export type ToolbarItem =
@@ -56,8 +55,7 @@ const TextEditor: FunctionComponent<Props> = ({
   language,
   label,
   codeMarkers,
-  hintTextOnEmpty,
-  onClickHintText,
+  contentOnEmpty,
 }) => {
   const handleChange = useCallback(
     (value: string | undefined) => {
@@ -106,19 +104,17 @@ const TextEditor: FunctionComponent<Props> = ({
 
   useEffect(() => {
     if (!editorInstance) return;
-    if (!hintTextOnEmpty) return;
+    if (!contentOnEmpty) return;
     if (text || editedText) {
       return;
     }
-    const contentWidget = createHintTextContentWidget(
-      hintTextOnEmpty,
-      onClickHintText,
-    );
+    console.log("--- contentOnEmpty:", contentOnEmpty);
+    const contentWidget = createHintTextContentWidget(contentOnEmpty);
     editorInstance.addContentWidget(contentWidget);
     return () => {
       editorInstance.removeContentWidget(contentWidget);
     };
-  }, [text, editorInstance, editedText, hintTextOnEmpty, onClickHintText]);
+  }, [text, editorInstance, editedText, contentOnEmpty]);
 
   /////////////////////////////////////////////////
 
@@ -247,26 +243,18 @@ const NotSelectable: FunctionComponent<PropsWithChildren> = ({ children }) => {
   return <div className="NotSelectable">{children}</div>;
 };
 
-const createHintTextContentWidget = (
-  hintText: string,
-  onClick?: () => void,
-) => {
+const createHintTextContentWidget = (content: string | HTMLSpanElement) => {
   return {
     getDomNode: () => {
       const node = document.createElement("div");
       node.style.width = "max-content";
       node.className = "EditorHintText";
-      if (onClick) {
-        const link = document.createElement("a");
-        link.textContent = hintText;
-        link.style.cursor = "pointer";
-        link.className = "EditorHintTextLink";
-        link.onclick = onClick;
-        node.appendChild(link);
-      } else {
-        node.style.pointerEvents = "none";
-        node.textContent = hintText;
+      const spanElement =
+        typeof content === "string" ? document.createElement("span") : content;
+      if (typeof content === "string") {
+        spanElement.textContent = content;
       }
+      node.appendChild(spanElement);
       return node;
     },
     getId: () => "hintText",

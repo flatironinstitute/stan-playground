@@ -234,7 +234,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
         readOnly={!isCompiling ? readOnly : true}
         toolbarItems={toolbarItems}
         codeMarkers={stancErrorsToCodeMarkers(stancErrors)}
-        hintTextOnEmpty="Begin editing or select an example from the left panel"
+        contentOnEmpty="Begin editing or select an example from the left panel"
       />
       {window}
     </Splitter>
