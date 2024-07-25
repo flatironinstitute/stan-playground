@@ -38,22 +38,33 @@ const DataGenerationChildWindow: FunctionComponent<
   const consoleRef = useRef<HTMLDivElement | null>(null);
 
   const handleSetData = useCallback(
-    (data: any) => {
-      update({
-        type: "editFile",
-        content: JSON.stringify(data, null, 2),
-        filename: ProjectKnownFiles.DATAFILE,
-      });
-      update({ type: "commitFile", filename: ProjectKnownFiles.DATAFILE });
-      // Use "stan-playground" prefix to distinguish from console output of the running code
-      writeConsoleOutToDiv(
-        consoleRef,
-        "[stan-playground] Data updated",
-        "stdout",
-      );
+    (newData: unknown) => {
+      const dataJson = JSON.stringify(newData, null, 2);
+
+      if (dataJson !== data.dataFileContent) {
+        update({
+          type: "editFile",
+          content: dataJson,
+          filename: ProjectKnownFiles.DATAFILE,
+        });
+        update({ type: "commitFile", filename: ProjectKnownFiles.DATAFILE });
+        // Use "stan-playground" prefix to distinguish from console output of the running code
+        writeConsoleOutToDiv(
+          consoleRef,
+          "[stan-playground] Data updated",
+          "stdout",
+        );
+      } else {
+        writeConsoleOutToDiv(
+          consoleRef,
+          "[stan-playground] Data unchanged",
+          "stdout",
+        );
+      }
     },
-    [update, consoleRef],
+    [update, consoleRef, data.dataFileContent],
   );
+
   const EditorComponent =
     language === "python" ? DataPyFileEditor : DataRFileEditor;
   return (
