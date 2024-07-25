@@ -109,19 +109,19 @@ const LeftPane: FunctionComponent<LeftPaneProps> = ({
     ) : language === "r" ? (
       <AnalysisRFileEditor
         fileName="analysis.R"
-        fileContent={data.analysisPyFileContent}
-        editedFileContent={data.ephemera.analysisPyFileContent}
+        fileContent={data.analysisRFileContent}
+        editedFileContent={data.ephemera.analysisRFileContent}
         setEditedFileContent={(content) => {
           update({
             type: "editFile",
             content,
-            filename: ProjectKnownFiles.ANALYSISPYFILE,
+            filename: ProjectKnownFiles.ANALYSISRFILE,
           });
         }}
         onSaveContent={() => {
           update({
             type: "commitFile",
-            filename: ProjectKnownFiles.ANALYSISPYFILE,
+            filename: ProjectKnownFiles.ANALYSISRFILE,
           });
         }}
         consoleRef={consoleRef}
