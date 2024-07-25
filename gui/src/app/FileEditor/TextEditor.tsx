@@ -27,6 +27,7 @@ type Props = {
   toolbarItems?: ToolbarItem[];
   label: string;
   codeMarkers?: CodeMarker[];
+  hintTextOnEmpty?: string;
 };
 
 export type ToolbarItem =
@@ -54,6 +55,7 @@ const TextEditor: FunctionComponent<Props> = ({
   language,
   label,
   codeMarkers,
+  hintTextOnEmpty,
 }) => {
   const handleChange = useCallback(
     (value: string | undefined) => {
@@ -99,6 +101,19 @@ const TextEditor: FunctionComponent<Props> = ({
       modelMarkers,
     );
   }, [codeMarkers, monacoInstance, editorInstance]);
+
+  useEffect(() => {
+    if (!editorInstance) return;
+    if (!hintTextOnEmpty) return;
+    if (text || editedText) {
+      return;
+    }
+    const contentWidget = createHintTextContentWidget(hintTextOnEmpty);
+    editorInstance.addContentWidget(contentWidget);
+    return () => {
+      editorInstance.removeContentWidget(contentWidget);
+    };
+  }, [text, editorInstance, editedText, hintTextOnEmpty]);
 
   /////////////////////////////////////////////////
 
@@ -225,6 +240,26 @@ const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
 
 const NotSelectable: FunctionComponent<PropsWithChildren> = ({ children }) => {
   return <div className="NotSelectable">{children}</div>;
+};
+
+const createHintTextContentWidget = (hintText: string) => {
+  return {
+    getDomNode: () => {
+      const node = document.createElement("div");
+      node.style.width = "max-content";
+      node.style.pointerEvents = "none";
+      node.className = "EditorHintText";
+      node.textContent = hintText;
+      return node;
+    },
+    getId: () => "hintText",
+    getPosition: () => {
+      return {
+        position: { lineNumber: 1, column: 1 },
+        preference: [editor.ContentWidgetPositionPreference.EXACT],
+      };
+    },
+  };
 };
 
 export default TextEditor;
