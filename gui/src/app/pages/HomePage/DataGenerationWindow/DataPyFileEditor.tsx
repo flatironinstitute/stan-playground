@@ -87,6 +87,21 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
     [fileContent, editedFileContent, handleRun, status, handleHelp],
   );
 
+  const contentOnEmpty = useMemo(() => {
+    const spanElement = document.createElement("span");
+    const t1 = document.createTextNode(
+      "Define a dictionary called data to update the data.json. ",
+    );
+    const a1 = document.createElement("a");
+    a1.onclick = () => {
+      setEditedFileContent(dataPyTemplate);
+    };
+    a1.textContent = "Click here to generate an example";
+    spanElement.appendChild(t1);
+    spanElement.appendChild(a1);
+    return spanElement;
+  }, [setEditedFileContent]);
+
   return (
     <TextEditor
       language="python"
@@ -97,8 +112,13 @@ const DataPyFileEditor: FunctionComponent<Props> = ({
       onSetEditedText={setEditedFileContent}
       readOnly={readOnly}
       toolbarItems={toolbarItems}
+      contentOnEmpty={contentOnEmpty}
     />
   );
 };
+
+const dataPyTemplate = `data = {
+  "a": [1, 2, 3]
+}`;
 
 export default DataPyFileEditor;

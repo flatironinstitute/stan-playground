@@ -27,7 +27,7 @@ type Props = {
   toolbarItems?: ToolbarItem[];
   label: string;
   codeMarkers?: CodeMarker[];
-  hintTextOnEmpty?: string;
+  contentOnEmpty?: string | HTMLSpanElement;
 };
 
 export type ToolbarItem =
@@ -55,7 +55,7 @@ const TextEditor: FunctionComponent<Props> = ({
   language,
   label,
   codeMarkers,
-  hintTextOnEmpty,
+  contentOnEmpty,
 }) => {
   const handleChange = useCallback(
     (value: string | undefined) => {
@@ -104,16 +104,16 @@ const TextEditor: FunctionComponent<Props> = ({
 
   useEffect(() => {
     if (!editorInstance) return;
-    if (!hintTextOnEmpty) return;
+    if (!contentOnEmpty) return;
     if (text || editedText) {
       return;
     }
-    const contentWidget = createHintTextContentWidget(hintTextOnEmpty);
+    const contentWidget = createHintTextContentWidget(contentOnEmpty);
     editorInstance.addContentWidget(contentWidget);
     return () => {
       editorInstance.removeContentWidget(contentWidget);
     };
-  }, [text, editorInstance, editedText, hintTextOnEmpty]);
+  }, [text, editorInstance, editedText, contentOnEmpty]);
 
   /////////////////////////////////////////////////
 
@@ -242,14 +242,18 @@ const NotSelectable: FunctionComponent<PropsWithChildren> = ({ children }) => {
   return <div className="NotSelectable">{children}</div>;
 };
 
-const createHintTextContentWidget = (hintText: string) => {
+const createHintTextContentWidget = (content: string | HTMLSpanElement) => {
   return {
     getDomNode: () => {
       const node = document.createElement("div");
       node.style.width = "max-content";
-      node.style.pointerEvents = "none";
       node.className = "EditorHintText";
-      node.textContent = hintText;
+      const spanElement =
+        typeof content === "string" ? document.createElement("span") : content;
+      if (typeof content === "string") {
+        spanElement.textContent = content;
+      }
+      node.appendChild(spanElement);
       return node;
     },
     getId: () => "hintText",

@@ -158,6 +158,21 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
     return ret;
   }, [fileContent, editedFileContent, imagesRef, hasData, status, handleRun]);
 
+  const contentOnEmpty = useMemo(() => {
+    const spanElement = document.createElement("span");
+    const t1 = document.createTextNode(
+      "Use the draws object to access the samples. ",
+    );
+    const a1 = document.createElement("a");
+    a1.onclick = () => {
+      setEditedFileContent(analysisPyTemplate);
+    };
+    a1.textContent = "Click here to generate an example";
+    spanElement.appendChild(t1);
+    spanElement.appendChild(a1);
+    return spanElement;
+  }, [setEditedFileContent]);
+
   return (
     <TextEditor
       language="python"
@@ -168,9 +183,26 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
       onSetEditedText={setEditedFileContent}
       readOnly={readOnly}
       toolbarItems={toolbarItems}
+      contentOnEmpty={contentOnEmpty}
     />
   );
 };
+
+const analysisPyTemplate = `import matplotlib.pyplot as plt
+
+# Print the draws object
+print(draws)
+
+# Print parameter names
+print(draws.parameter_names)
+
+# plot the lp parameter
+samples = draws.get("lp__")
+print(samples.shape)
+plt.hist(samples.ravel(), bins=30)
+plt.title("lp__")
+plt.show()
+`;
 
 type ConsoleOutType = "stdout" | "stderr";
 
