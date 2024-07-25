@@ -190,7 +190,10 @@ const AnalysisPyFileEditor: FunctionComponent<Props> = ({
 
 const analysisPyTemplate = `import matplotlib.pyplot as plt
 
-# Get the parameter names
+# Print the draws object
+print(draws)
+
+# Print parameter names
 print(draws.parameter_names)
 
 # plot the lp parameter
