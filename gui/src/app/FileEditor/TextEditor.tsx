@@ -248,8 +248,8 @@ const createHintTextContentWidget = (hintText: string) => {
       const node = document.createElement("div");
       node.style.width = "max-content";
       node.style.pointerEvents = "none";
+      node.className = "EditorHintText";
       node.textContent = hintText;
-      node.style.fontStyle = "italic";
       return node;
     },
     getId: () => "hintText",
