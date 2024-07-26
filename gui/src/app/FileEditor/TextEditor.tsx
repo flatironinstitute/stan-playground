@@ -161,7 +161,6 @@ const TextEditor: FunctionComponent<Props> = ({
         defaultLanguage={language}
         onChange={handleChange}
         onMount={(editor, _) => setEditor(editor)}
-        theme="vs-stan"
         options={{
           readOnly,
           domReadOnly: readOnly,
