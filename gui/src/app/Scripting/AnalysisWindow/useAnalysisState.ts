@@ -37,7 +37,7 @@ const useAnalysisState = (latestRun: StanRun) => {
 
   const [status, setStatus] = useState<InterpreterStatus>("idle");
 
-  return { consoleRef, imagesRef, spData, status, setStatus };
+  return { consoleRef, imagesRef, spData, status, onStatus: setStatus };
 };
 
 export default useAnalysisState;

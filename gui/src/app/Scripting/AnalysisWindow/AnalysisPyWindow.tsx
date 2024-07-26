@@ -1,13 +1,12 @@
-import { FunctionComponent, useCallback, useContext, useMemo } from "react";
+import { FunctionComponent, useCallback, useMemo } from "react";
 import { StanRun } from "@SpStanSampler/useStanSampler";
 import { FileNames } from "@SpCore/FileMapping";
 import PlottingScriptEditor from "app/Scripting/PlottingScriptEditor";
-import { InterpreterStatus } from "app/Scripting/InterpreterTypes";
 import { writeConsoleOutToDiv } from "app/Scripting/ScriptEditor";
-import usePyodideWorker from "app/Scripting/pyodideWorker/usePyodideWorker";
-import { ProjectContext } from "@SpCore/ProjectContextProvider";
+import usePyodideWorker from "app/Scripting/pyodide/usePyodideWorker";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
 import useAnalysisState from "./useAnalysisState";
+import useTemplatedFillerText from "../useTemplatedFillerText";
 
 export type GlobalDataForAnalysis = {
   draws: number[][];
@@ -22,7 +21,7 @@ type AnalysisWindowProps = {
 const AnalysisPyWindow: FunctionComponent<AnalysisWindowProps> = ({
   latestRun,
 }) => {
-  const { consoleRef, imagesRef, spData, status, setStatus } =
+  const { consoleRef, imagesRef, spData, status, onStatus } =
     useAnalysisState(latestRun);
 
   const callbacks = useMemo(
@@ -40,11 +39,9 @@ const AnalysisPyWindow: FunctionComponent<AnalysisWindowProps> = ({
         divElement.appendChild(img);
         imagesRef.current?.appendChild(divElement);
       },
-      onStatus: (status: InterpreterStatus) => {
-        setStatus(status);
-      },
+      onStatus,
     }),
-    [consoleRef, imagesRef, setStatus],
+    [consoleRef, imagesRef, onStatus],
   );
 
   const { run } = usePyodideWorker(callbacks);
@@ -74,25 +71,11 @@ const AnalysisPyWindow: FunctionComponent<AnalysisWindowProps> = ({
     [status, consoleRef, imagesRef, run, spData],
   );
 
-  const { update } = useContext(ProjectContext);
-  const contentOnEmpty = useMemo(() => {
-    const spanElement = document.createElement("span");
-    const t1 = document.createTextNode(
-      "Use the draws object to access the samples. ",
-    );
-    const a1 = document.createElement("a");
-    a1.onclick = () => {
-      update({
-        type: "editFile",
-        filename: ProjectKnownFiles.ANALYSISPYFILE,
-        content: analysisPyTemplate,
-      });
-    };
-    a1.textContent = "Click here to generate an example";
-    spanElement.appendChild(t1);
-    spanElement.appendChild(a1);
-    return spanElement;
-  }, [update]);
+  const contentOnEmpty = useTemplatedFillerText(
+    "Use the draws object to access the samples. ",
+    analysisPyTemplate,
+    ProjectKnownFiles.ANALYSISPYFILE,
+  );
 
   return (
     <PlottingScriptEditor

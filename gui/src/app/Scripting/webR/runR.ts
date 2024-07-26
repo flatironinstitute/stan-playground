@@ -1,7 +1,7 @@
 import { RefObject } from "react";
 import { RString, WebR } from "webr";
-import { InterpreterStatus } from "./InterpreterTypes";
-import { writeConsoleOutToDiv } from "./ScriptEditor";
+import { InterpreterStatus } from "../InterpreterTypes";
+import { writeConsoleOutToDiv } from "../ScriptEditor";
 
 let webR: WebR | null = null;
 export const loadWebRInstance = async () => {
@@ -20,16 +20,16 @@ type RunRProps = {
   code: string;
   consoleRef: RefObject<HTMLDivElement>;
   imagesRef?: RefObject<HTMLDivElement>;
-  setStatus: (status: InterpreterStatus) => void;
-  setData?: (data: any) => void;
+  onStatus: (status: InterpreterStatus) => void;
+  onData?: (data: any) => void;
 };
 
 const runR = async ({
   code,
   imagesRef,
   consoleRef,
-  setStatus,
-  setData,
+  onStatus,
+  onData,
 }: RunRProps) => {
   const captureOutputOptions: any = {
     withAutoprint: true,
@@ -46,13 +46,13 @@ const runR = async ({
   };
 
   try {
-    setStatus("loading");
+    onStatus("loading");
     await sleep(100); // let the UI update
     const webR = await loadWebRInstance();
 
     const shelter = await new webR.Shelter();
 
-    setStatus("running");
+    onStatus("running");
     await sleep(100); // let the UI update
     let rCode =
       `
@@ -61,7 +61,7 @@ webr::shim_install()
 
 ` + code;
 
-    if (setData) {
+    if (onData) {
       rCode += `
 if (typeof(data) != "list") {
 stop("[stan-playground] data must be a list")
@@ -93,18 +93,18 @@ stop("[stan-playground] data must be a list")
         }
       });
 
-      if (setData) {
+      if (onData) {
         const result = JSON.parse(await (ret.result as RString).toString());
-        setData(result);
+        onData(result);
       }
     } finally {
       shelter.purge();
     }
-    setStatus("completed");
+    onStatus("completed");
   } catch (e: any) {
     console.error(e);
     writeConsoleOutToDiv(consoleRef, e.toString(), "stderr");
-    setStatus("failed");
+    onStatus("failed");
   }
 };
 
