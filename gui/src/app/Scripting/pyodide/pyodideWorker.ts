@@ -1,7 +1,7 @@
 import { PyodideInterface, loadPyodide } from "pyodide";
+import { InterpreterStatus } from "@SpScripting/InterpreterTypes";
 import {
   MessageFromPyodideWorker,
-  PyodideWorkerStatus,
   PyodideRunSettings,
 } from "./pyodideWorkerTypes";
 import spDrawsScript from "./sp_load_draws.py?raw";
@@ -47,7 +47,7 @@ const sendStderr = (data: string) => {
   sendMessageToMain({ type: "stderr", data });
 };
 
-const setStatus = (status: PyodideWorkerStatus) => {
+const setStatus = (status: InterpreterStatus) => {
   sendMessageToMain({ type: "setStatus", status });
 };
 

@@ -36,7 +36,7 @@ const TabWidget: FunctionComponent<TabWidgetProps> = ({ labels, children }) => {
           <Tab key={i} label={label} />
         ))}
       </Tabs>
-      <Box flex="1" overflow="scroll">
+      <Box flex="1" overflow="auto">
         {children.map((child, i) => (
           <CustomTabPanel
             key={i}
