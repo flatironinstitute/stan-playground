@@ -1,10 +1,4 @@
-import {
-  FunctionComponent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { FunctionComponent, useCallback } from "react";
 import { StanRun } from "@SpStanSampler/useStanSampler";
 import { FileNames } from "@SpCore/FileMapping";
 import PlottingScriptEditor from "app/Scripting/PlottingScriptEditor";
@@ -12,6 +6,9 @@ import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
 import useAnalysisState from "./useAnalysisState";
 import runR from "../webR/runR";
 import useTemplatedFillerText from "../useTemplatedFillerText";
+
+import loadDrawsCode from "../webR/sp_load_draws.R?raw";
+import analysisRTemplate from "./analysis_template.R?raw";
 
 type AnalysisWindowProps = {
   latestRun: StanRun;
@@ -31,10 +28,23 @@ const AnalysisRWindow: FunctionComponent<AnalysisWindowProps> = ({
   } = useAnalysisState(latestRun);
 
   const handleRun = useCallback(
-    async (code: string) => {
-      await runR({ code, imagesRef, consoleRef, onStatus });
+    async (userCode: string) => {
+      if (consoleRef.current) {
+        consoleRef.current.innerHTML = "";
+      }
+      if (imagesRef.current) {
+        imagesRef.current.innerHTML = "";
+      }
+      const code = loadDrawsCode + userCode;
+      await runR({
+        code,
+        imagesRef,
+        consoleRef,
+        onStatus,
+        spData,
+      });
     },
-    [consoleRef, imagesRef, onStatus],
+    [consoleRef, imagesRef, onStatus, spData],
   );
 
   const contentOnEmpty = useTemplatedFillerText(
@@ -59,9 +69,5 @@ const AnalysisRWindow: FunctionComponent<AnalysisWindowProps> = ({
     />
   );
 };
-
-const analysisRTemplate = `
-TODO
-`;
 
 export default AnalysisRWindow;

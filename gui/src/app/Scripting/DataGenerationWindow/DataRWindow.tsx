@@ -12,6 +12,11 @@ type Props = {
   // empty
 };
 
+const handleHelp = () =>
+  alert(
+    'Write a R script to assign data to the "data" variable and then click "Run" to generate data.',
+  );
+
 const DataRWindow: FunctionComponent<Props> = () => {
   const { consoleRef, status, onStatus, onData } = useDataGenState();
 
@@ -21,12 +26,6 @@ const DataRWindow: FunctionComponent<Props> = () => {
     },
     [consoleRef, onData, onStatus],
   );
-
-  const handleHelp = useCallback(() => {
-    alert(
-      'Write a R script to assign data to the "data" variable and then click "Run" to generate data.',
-    );
-  }, []);
 
   const contentOnEmpty = useTemplatedFillerText(
     "Define a list called data to update the data.json. ",

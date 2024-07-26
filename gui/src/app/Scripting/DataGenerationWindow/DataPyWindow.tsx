@@ -12,6 +12,11 @@ type Props = {
   // empty
 };
 
+const handleHelp = () =>
+  alert(
+    'Write a Python script to assign data to the "data" variable and then click "Run" to generate data.',
+  );
+
 const DataPyWindow: FunctionComponent<Props> = () => {
   const { consoleRef, status, onStatus, onData } = useDataGenState();
 
@@ -41,12 +46,6 @@ const DataPyWindow: FunctionComponent<Props> = () => {
     },
     [run],
   );
-
-  const handleHelp = useCallback(() => {
-    alert(
-      'Write a Python script to assign data to the "data" variable and then click "Run" to generate data.',
-    );
-  }, []);
 
   const contentOnEmpty = useTemplatedFillerText(
     "Define a dictionary called data to update the data.json. ",

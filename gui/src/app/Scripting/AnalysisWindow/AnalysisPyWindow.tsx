@@ -57,10 +57,6 @@ const AnalysisPyWindow: FunctionComponent<AnalysisWindowProps> = ({
 
   const handleRun = useCallback(
     (code: string) => {
-      if (status === "running") {
-        return;
-      }
-
       if (consoleRef.current) {
         consoleRef.current.innerHTML = "";
       }
@@ -73,7 +69,7 @@ const AnalysisPyWindow: FunctionComponent<AnalysisWindowProps> = ({
         producesData: false,
       });
     },
-    [status, consoleRef, imagesRef, run, spData],
+    [consoleRef, imagesRef, run, spData],
   );
 
   const contentOnEmpty = useTemplatedFillerText(

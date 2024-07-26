@@ -4,11 +4,20 @@ import { InterpreterStatus } from "../InterpreterTypes";
 import { writeConsoleOutToDiv } from "../ScriptEditor";
 
 let webR: WebR | null = null;
-export const loadWebRInstance = async () => {
+export const loadWebRInstance = async (
+  onStatus: (s: InterpreterStatus) => void,
+) => {
   if (webR === null) {
+    onStatus("loading");
+    await sleep(100); // let the UI update
+
     const w = new WebR();
     await w.init();
-    w.installPackages(["jsonlite"]);
+
+    onStatus("installing");
+    await sleep(100); // let the UI update
+    await w.installPackages(["jsonlite", "posterior"]);
+
     webR = w;
     return webR;
   } else {
@@ -16,40 +25,39 @@ export const loadWebRInstance = async () => {
   }
 };
 
+const captureOutputOptions = {
+  withAutoprint: true,
+  captureStreams: true,
+  captureConditions: false,
+  captureGraphics: {
+    width: 340,
+    height: 340,
+    bg: "white", // default: transparent
+    pointsize: 12,
+    capture: true,
+  },
+} as const;
+
 type RunRProps = {
   code: string;
   consoleRef: RefObject<HTMLDivElement>;
   imagesRef?: RefObject<HTMLDivElement>;
   onStatus: (status: InterpreterStatus) => void;
   onData?: (data: any) => void;
+  spData?: Record<string, any>;
 };
 
+// todo: consider using something like Console class from webr
 const runR = async ({
   code,
   imagesRef,
   consoleRef,
   onStatus,
   onData,
+  spData,
 }: RunRProps) => {
-  const captureOutputOptions: any = {
-    withAutoprint: true,
-    captureStreams: true,
-    captureConditions: false,
-    env: {},
-    captureGraphics: {
-      width: 340,
-      height: 340,
-      bg: "white", // default: transparent
-      pointsize: 12,
-      capture: true,
-    },
-  };
-
   try {
-    onStatus("loading");
-    await sleep(100); // let the UI update
-    const webR = await loadWebRInstance();
-
+    const webR = await loadWebRInstance(onStatus);
     const shelter = await new webR.Shelter();
 
     onStatus("running");
@@ -70,7 +78,19 @@ stop("[stan-playground] data must be a list")
 .SP_DATA`;
     }
     try {
-      const ret = await shelter.captureR(rCode, captureOutputOptions);
+      const globals: { [key: string]: any } = {
+        ".stan_playground": true,
+      };
+      if (spData) {
+        globals[".SP_DATA_IN"] = await new shelter.RList(spData);
+      }
+
+      const env = await new shelter.REnvironment(globals);
+
+      const options = { ...captureOutputOptions, env };
+
+      const ret = await shelter.captureR(rCode, options);
+
       ret.output.forEach(({ type, data }) => {
         if (type === "stdout" || type === "stderr") {
           writeConsoleOutToDiv(consoleRef, data, type);
