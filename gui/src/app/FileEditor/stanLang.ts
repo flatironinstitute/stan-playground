@@ -741,8 +741,8 @@ export const conf: languages.LanguageConfiguration = {
     { open: "'", close: "'" },
   ],
   indentationRules: {
-    increaseIndentPattern: /(\{[^}"']*$) | (\[[^\]"']*$) | (\([^)"']*$)/,
-    decreaseIndentPattern: /^\s*(\s*\/[*].*[*]\/\s*)*[}\])]/,
+    increaseIndentPattern: /(\{[^}\"\']*$) | (\[[^\]\"\']*$) | (\([^)\"\']*$)/,
+    decreaseIndentPattern: /^[\}\]\)]/,
   },
   folding: {
     markers: {
