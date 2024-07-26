@@ -25,6 +25,7 @@ export enum FileNames {
   STANFILE = "main.stan",
   DATAFILE = "data.json",
   ANALYSISPYFILE = "analysis.py",
+  ANALYSISRFILE = "analysis.R",
   DATAPYFILE = "data.py",
   DATARFILE = "data.R",
 }
@@ -46,6 +47,7 @@ export const ProjectFileMap: FileMapType = {
   stanFileContent: FileNames.STANFILE,
   dataFileContent: FileNames.DATAFILE,
   analysisPyFileContent: FileNames.ANALYSISPYFILE,
+  analysisRFileContent: FileNames.ANALYSISRFILE,
   dataPyFileContent: FileNames.DATAPYFILE,
   dataRFileContent: FileNames.DATARFILE,
 };
