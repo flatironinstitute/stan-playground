@@ -21,8 +21,15 @@ type AnalysisWindowProps = {
 const AnalysisPyWindow: FunctionComponent<AnalysisWindowProps> = ({
   latestRun,
 }) => {
-  const { consoleRef, imagesRef, spData, status, onStatus } =
-    useAnalysisState(latestRun);
+  const {
+    consoleRef,
+    imagesRef,
+    spData,
+    status,
+    onStatus,
+    runnable,
+    notRunnableReason,
+  } = useAnalysisState(latestRun);
 
   const callbacks = useMemo(
     () => ({
@@ -45,10 +52,6 @@ const AnalysisPyWindow: FunctionComponent<AnalysisWindowProps> = ({
   );
 
   const { run } = usePyodideWorker(callbacks);
-
-  const runnable = useMemo(() => {
-    return spData !== undefined && status !== "running";
-  }, [spData, status]);
 
   const handleRun = useCallback(
     (code: string) => {
@@ -85,7 +88,7 @@ const AnalysisPyWindow: FunctionComponent<AnalysisWindowProps> = ({
       status={status}
       onRun={handleRun}
       runnable={runnable}
-      notRunnableReason=""
+      notRunnableReason={notRunnableReason}
       onHelp={() => {}}
       imagesRef={imagesRef}
       consoleRef={consoleRef}

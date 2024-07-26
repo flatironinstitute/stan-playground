@@ -16,3 +16,7 @@ export const isInterpreterStatus = (x: any): x is InterpreterStatus => {
     "failed",
   ].includes(x);
 };
+
+export const isInterpreterBusy = (status: InterpreterStatus) => {
+  return ["loading", "installing", "running"].includes(status);
+};

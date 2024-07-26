@@ -1,6 +1,6 @@
 import { StanRun } from "@SpStanSampler/useStanSampler";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { InterpreterStatus } from "../InterpreterTypes";
+import { InterpreterStatus, isInterpreterBusy } from "../InterpreterTypes";
 
 export type GlobalDataForAnalysis = {
   draws: number[][];
@@ -37,7 +37,33 @@ const useAnalysisState = (latestRun: StanRun) => {
 
   const [status, setStatus] = useState<InterpreterStatus>("idle");
 
-  return { consoleRef, imagesRef, spData, status, onStatus: setStatus };
+  const [runnable, setRunnable] = useState<boolean>(true);
+  const [notRunnableReason, setNotRunnableReason] = useState<string>("");
+
+  const isDataDefined = useMemo(() => spData !== undefined, [spData]);
+
+  useEffect(() => {
+    if (!isDataDefined) {
+      setRunnable(false);
+      setNotRunnableReason("Run sampler first.");
+    } else if (isInterpreterBusy(status)) {
+      setRunnable(false);
+      setNotRunnableReason("");
+    } else {
+      setRunnable(true);
+      setNotRunnableReason("");
+    }
+  }, [isDataDefined, status]);
+
+  return {
+    consoleRef,
+    imagesRef,
+    spData,
+    status,
+    onStatus: setStatus,
+    runnable,
+    notRunnableReason,
+  };
 };
 
 export default useAnalysisState;
