@@ -1,6 +1,9 @@
+import {
+  InterpreterStatus,
+  isInterpreterBusy,
+} from "@SpScripting/InterpreterTypes";
 import { StanRun } from "@SpStanSampler/useStanSampler";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { InterpreterStatus, isInterpreterBusy } from "../InterpreterTypes";
 
 export type GlobalDataForAnalysis = {
   draws: number[][];

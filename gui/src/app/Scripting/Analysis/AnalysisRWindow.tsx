@@ -1,13 +1,13 @@
 import { FunctionComponent, useCallback } from "react";
 import { StanRun } from "@SpStanSampler/useStanSampler";
 import { FileNames } from "@SpCore/FileMapping";
-import PlottingScriptEditor from "app/Scripting/PlottingScriptEditor";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
+import PlottingScriptEditor from "@SpScripting/PlottingScriptEditor";
+import runR from "@SpScripting/webR/runR";
+import useTemplatedFillerText from "@SpScripting/useTemplatedFillerText";
+import loadDrawsCode from "@SpScripting/webR/sp_load_draws.R?raw";
 import useAnalysisState from "./useAnalysisState";
-import runR from "../webR/runR";
-import useTemplatedFillerText from "../useTemplatedFillerText";
 
-import loadDrawsCode from "../webR/sp_load_draws.R?raw";
 import analysisRTemplate from "./analysis_template.R?raw";
 
 type AnalysisWindowProps = {

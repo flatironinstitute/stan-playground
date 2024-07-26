@@ -1,13 +1,14 @@
+import { useCallback, useEffect, useState } from "react";
+import { InterpreterStatus } from "@SpScripting/InterpreterTypes";
+
 // https://vitejs.dev/guide/assets#importing-script-as-a-worker
 // https://vitejs.dev/guide/assets#importing-asset-as-url
 import pyodideWorkerURL from "./pyodideWorker?worker&url";
-import { useCallback, useEffect, useState } from "react";
 import {
   MessageToPyodideWorker,
   isMessageFromPyodideWorker,
   PyodideRunSettings,
 } from "./pyodideWorkerTypes";
-import { InterpreterStatus } from "../InterpreterTypes";
 
 type PyodideWorkerCallbacks = {
   onStdout: (data: string) => void;

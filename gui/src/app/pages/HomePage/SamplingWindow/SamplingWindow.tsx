@@ -12,9 +12,9 @@ import {
   modelHasUnsavedDataFileChanges,
   SamplingOpts,
 } from "@SpCore/ProjectDataModel";
-import AnalysisPyWindow from "app/Scripting/AnalysisWindow/AnalysisPyWindow";
+import AnalysisPyWindow from "@SpScripting/Analysis/AnalysisPyWindow";
 import useStanSampler, { StanRun } from "@SpStanSampler/useStanSampler";
-import AnalysisRWindow from "app/Scripting/AnalysisWindow/AnalysisRWindow";
+import AnalysisRWindow from "@SpScripting/Analysis/AnalysisRWindow";
 
 type SamplingWindowProps = {
   compiledMainJsUrl?: string;

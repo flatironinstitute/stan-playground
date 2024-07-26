@@ -1,5 +1,8 @@
 import baseObjectCheck from "@SpUtil/baseObjectCheck";
-import { InterpreterStatus, isInterpreterStatus } from "../InterpreterTypes";
+import {
+  InterpreterStatus,
+  isInterpreterStatus,
+} from "@SpScripting/InterpreterTypes";
 
 export type PyodideRunSettings = Partial<{
   loadsDraws: boolean;

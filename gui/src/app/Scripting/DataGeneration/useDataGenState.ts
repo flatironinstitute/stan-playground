@@ -1,7 +1,7 @@
-import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
-import { writeConsoleOutToDiv } from "../ScriptEditor";
 import { useCallback, useContext, useRef, useState } from "react";
-import { InterpreterStatus } from "../InterpreterTypes";
+import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
+import { writeConsoleOutToDiv } from "@SpScripting/ScriptEditor";
+import { InterpreterStatus } from "@SpScripting/InterpreterTypes";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 
 const useDataGenState = () => {

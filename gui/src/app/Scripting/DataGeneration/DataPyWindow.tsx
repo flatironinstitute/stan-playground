@@ -1,10 +1,10 @@
 import { FunctionComponent, useCallback, useMemo } from "react";
-import usePyodideWorker from "app/Scripting/pyodide/usePyodideWorker";
-import ScriptEditor, { writeConsoleOutToDiv } from "app/Scripting/ScriptEditor";
 import { FileNames } from "@SpCore/FileMapping";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
+import useTemplatedFillerText from "@SpScripting/useTemplatedFillerText";
+import ScriptEditor, { writeConsoleOutToDiv } from "@SpScripting/ScriptEditor";
+import usePyodideWorker from "@SpScripting/pyodide/usePyodideWorker";
 import useDataGenState from "./useDataGenState";
-import useTemplatedFillerText from "../useTemplatedFillerText";
 
 import dataPyTemplate from "./data_template.py?raw";
 

@@ -1,10 +1,10 @@
 import { FunctionComponent, useCallback } from "react";
-import ScriptEditor from "app/Scripting/ScriptEditor";
+import ScriptEditor from "@SpScripting/ScriptEditor";
 import { FileNames } from "@SpCore/FileMapping";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
-import runR from "../webR/runR";
+import runR from "@SpScripting/webR/runR";
+import useTemplatedFillerText from "@SpScripting/useTemplatedFillerText";
 import useDataGenState from "./useDataGenState";
-import useTemplatedFillerText from "../useTemplatedFillerText";
 
 import dataRTemplate from "./data_template.R?raw";
 

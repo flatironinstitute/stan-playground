@@ -21,8 +21,8 @@ import {
 import TabWidget from "@SpComponents/TabWidget";
 import SamplingWindow from "./SamplingWindow/SamplingWindow";
 import { FileNames } from "@SpCore/FileMapping";
-import DataPyWindow from "app/Scripting/DataGenerationWindow/DataPyWindow";
-import DataRWindow from "app/Scripting/DataGenerationWindow/DataRWindow";
+import DataRWindow from "@SpScripting/DataGeneration/DataRWindow";
+import DataPyWindow from "@SpScripting/DataGeneration/DataPyWindow";
 
 type Props = {
   //

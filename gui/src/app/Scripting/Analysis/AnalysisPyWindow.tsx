@@ -1,12 +1,12 @@
 import { FunctionComponent, useCallback, useMemo } from "react";
 import { StanRun } from "@SpStanSampler/useStanSampler";
 import { FileNames } from "@SpCore/FileMapping";
-import PlottingScriptEditor from "app/Scripting/PlottingScriptEditor";
-import { writeConsoleOutToDiv } from "app/Scripting/ScriptEditor";
-import usePyodideWorker from "app/Scripting/pyodide/usePyodideWorker";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
+import useTemplatedFillerText from "@SpScripting/useTemplatedFillerText";
+import { writeConsoleOutToDiv } from "@SpScripting/ScriptEditor";
+import usePyodideWorker from "@SpScripting/pyodide/usePyodideWorker";
+import PlottingScriptEditor from "@SpScripting/PlottingScriptEditor";
 import useAnalysisState from "./useAnalysisState";
-import useTemplatedFillerText from "../useTemplatedFillerText";
 
 import analysisPyTemplate from "./analysis_template.py?raw";
 
