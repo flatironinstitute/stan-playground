@@ -2,6 +2,8 @@ import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
 import { useContext, useMemo } from "react";
 
+// This is used to create the text span used in the ScriptEditor component when the file is empty.
+// It features a brief description and a clickable link to generate an example template.
 const useTemplatedFillerText = (
   text: string,
   template: string,

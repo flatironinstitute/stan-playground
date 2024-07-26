@@ -4,6 +4,8 @@ import { writeConsoleOutToDiv } from "@SpScripting/ScriptEditor";
 import { InterpreterStatus } from "@SpScripting/InterpreterTypes";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 
+// A custom hook to share logic between the Python and R data generation windows
+// This contains the output div ref, the interpreter state, and the callback to update the data.
 const useDataGenState = () => {
   const [status, setStatus] = useState<InterpreterStatus>("idle");
   const consoleRef = useRef<HTMLDivElement>(null);

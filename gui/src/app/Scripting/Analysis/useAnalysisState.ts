@@ -11,6 +11,9 @@ export type GlobalDataForAnalysis = {
   numChains: number;
 };
 
+// A custom hook to share logic between the Python and R analysis windows
+// This contains the output div refs, the interpreter state, and the data from
+// the latest run.
 const useAnalysisState = (latestRun: StanRun) => {
   const consoleRef = useRef<HTMLDivElement | null>(null);
   const imagesRef = useRef<HTMLDivElement | null>(null);
