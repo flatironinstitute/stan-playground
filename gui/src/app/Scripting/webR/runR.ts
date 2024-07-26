@@ -1,7 +1,7 @@
 import { RefObject } from "react";
 import { RString, WebR } from "webr";
 import { InterpreterStatus } from "@SpScripting/InterpreterTypes";
-import { writeConsoleOutToDiv } from "@SpScripting/ScriptEditor";
+import { writeConsoleOutToDiv } from "@SpScripting/OutputDivUtils";
 
 let webR: WebR | null = null;
 export const loadWebRInstance = async (

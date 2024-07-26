@@ -2,7 +2,11 @@ import { FunctionComponent, useCallback, useMemo } from "react";
 import { FileNames } from "@SpCore/FileMapping";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
 import useTemplatedFillerText from "@SpScripting/useTemplatedFillerText";
-import ScriptEditor, { writeConsoleOutToDiv } from "@SpScripting/ScriptEditor";
+import ScriptEditor from "@SpScripting/ScriptEditor";
+import {
+  clearOutputDivs,
+  writeConsoleOutToDiv,
+} from "@SpScripting/OutputDivUtils";
 import usePyodideWorker from "@SpScripting/pyodide/usePyodideWorker";
 import useDataGenState from "./useDataGenState";
 
@@ -34,9 +38,7 @@ const DataPyWindow: FunctionComponent<Props> = () => {
 
   const handleRun = useCallback(
     (code: string) => {
-      if (consoleRef.current) {
-        consoleRef.current.innerHTML = "";
-      }
+      clearOutputDivs(consoleRef);
       run(
         code,
         {},

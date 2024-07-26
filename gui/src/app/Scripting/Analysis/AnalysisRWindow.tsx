@@ -5,6 +5,7 @@ import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
 import PlottingScriptEditor from "@SpScripting/PlottingScriptEditor";
 import runR from "@SpScripting/webR/runR";
 import useTemplatedFillerText from "@SpScripting/useTemplatedFillerText";
+import { clearOutputDivs } from "@SpScripting/OutputDivUtils";
 import loadDrawsCode from "@SpScripting/webR/sp_load_draws.R?raw";
 import useAnalysisState from "./useAnalysisState";
 
@@ -29,12 +30,7 @@ const AnalysisRWindow: FunctionComponent<AnalysisWindowProps> = ({
 
   const handleRun = useCallback(
     async (userCode: string) => {
-      if (consoleRef.current) {
-        consoleRef.current.innerHTML = "";
-      }
-      if (imagesRef.current) {
-        imagesRef.current.innerHTML = "";
-      }
+      clearOutputDivs(consoleRef, imagesRef);
       const code = loadDrawsCode + userCode;
       await runR({
         code,

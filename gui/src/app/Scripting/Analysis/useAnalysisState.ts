@@ -2,6 +2,7 @@ import {
   InterpreterStatus,
   isInterpreterBusy,
 } from "@SpScripting/InterpreterTypes";
+import { clearOutputDivs } from "@SpScripting/OutputDivUtils";
 import { StanRun } from "@SpStanSampler/useStanSampler";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -19,12 +20,7 @@ const useAnalysisState = (latestRun: StanRun) => {
   const imagesRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (imagesRef.current) {
-      imagesRef.current.innerHTML = "";
-    }
-    if (consoleRef.current) {
-      consoleRef.current.innerHTML = "";
-    }
+    clearOutputDivs(consoleRef, imagesRef);
   }, [latestRun.draws]);
 
   const { draws, paramNames, samplingOpts, status: samplerStatus } = latestRun;

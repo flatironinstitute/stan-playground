@@ -3,7 +3,10 @@ import { StanRun } from "@SpStanSampler/useStanSampler";
 import { FileNames } from "@SpCore/FileMapping";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
 import useTemplatedFillerText from "@SpScripting/useTemplatedFillerText";
-import { writeConsoleOutToDiv } from "@SpScripting/ScriptEditor";
+import {
+  clearOutputDivs,
+  writeConsoleOutToDiv,
+} from "@SpScripting/OutputDivUtils";
 import usePyodideWorker from "@SpScripting/pyodide/usePyodideWorker";
 import PlottingScriptEditor from "@SpScripting/PlottingScriptEditor";
 import useAnalysisState from "./useAnalysisState";
@@ -57,12 +60,7 @@ const AnalysisPyWindow: FunctionComponent<AnalysisWindowProps> = ({
 
   const handleRun = useCallback(
     (code: string) => {
-      if (consoleRef.current) {
-        consoleRef.current.innerHTML = "";
-      }
-      if (imagesRef.current) {
-        imagesRef.current.innerHTML = "";
-      }
+      clearOutputDivs(consoleRef, imagesRef);
       run(code, spData, {
         loadsDraws: true,
         showsPlots: true,

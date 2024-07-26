@@ -1,5 +1,6 @@
 import { FunctionComponent, useCallback } from "react";
 import ScriptEditor from "@SpScripting/ScriptEditor";
+import { clearOutputDivs } from "@SpScripting/OutputDivUtils";
 import { FileNames } from "@SpCore/FileMapping";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
 import runR from "@SpScripting/webR/runR";
@@ -22,9 +23,7 @@ const DataRWindow: FunctionComponent<Props> = () => {
 
   const handleRun = useCallback(
     async (code: string) => {
-      if (consoleRef.current) {
-        consoleRef.current.innerHTML = "";
-      }
+      clearOutputDivs(consoleRef);
       await runR({ code, consoleRef, onStatus, onData });
     },
     [consoleRef, onData, onStatus],

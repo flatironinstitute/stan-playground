@@ -1,6 +1,6 @@
 import { useCallback, useContext, useRef, useState } from "react";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
-import { writeConsoleOutToDiv } from "@SpScripting/ScriptEditor";
+import { writeConsoleOutToDiv } from "@SpScripting/OutputDivUtils";
 import { InterpreterStatus } from "@SpScripting/InterpreterTypes";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 
