@@ -34,7 +34,7 @@ const DataFileEditor: FunctionComponent<Props> = ({
       onSetEditedText={setEditedFileContent}
       readOnly={readOnly}
       toolbarItems={toolbarItems}
-      contentOnEmpty={"Enter your JSON data or use the data generation tab"}
+      contentOnEmpty={"Enter JSON data or use the data generation tab"}
     />
   );
 };
