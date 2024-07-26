@@ -48,7 +48,7 @@ const AnalysisRWindow: FunctionComponent<AnalysisWindowProps> = ({
   );
 
   const contentOnEmpty = useTemplatedFillerText(
-    "Use the draws object to access the samples. ",
+    "Use the draws object (a posterior::draws_array) to access the samples. ",
     analysisRTemplate,
     ProjectKnownFiles.ANALYSISRFILE,
   );
