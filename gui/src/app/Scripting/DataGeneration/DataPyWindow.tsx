@@ -34,6 +34,9 @@ const DataPyWindow: FunctionComponent<Props> = () => {
 
   const handleRun = useCallback(
     (code: string) => {
+      if (consoleRef.current) {
+        consoleRef.current.innerHTML = "";
+      }
       run(
         code,
         {},
@@ -44,7 +47,7 @@ const DataPyWindow: FunctionComponent<Props> = () => {
         },
       );
     },
-    [run],
+    [consoleRef, run],
   );
 
   const contentOnEmpty = useTemplatedFillerText(

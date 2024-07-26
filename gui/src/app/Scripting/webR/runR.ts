@@ -75,7 +75,7 @@ if (typeof(data) != "list") {
 stop("[stan-playground] data must be a list")
 }
 .SP_DATA <- jsonlite::toJSON(data, pretty = TRUE, auto_unbox = TRUE)
-.SP_DATA`;
+invisible(.SP_DATA)`;
     }
     try {
       const globals: { [key: string]: any } = {

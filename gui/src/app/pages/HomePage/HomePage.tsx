@@ -1,7 +1,6 @@
 import Box from "@mui/material/Box";
 import styled from "@mui/material/styles/styled";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import DataFileEditor from "@SpComponents/DataFileEditor";
 import { GutterTheme, SplitDirection, Splitter } from "@SpComponents/Splitter";
 import StanFileEditor from "@SpComponents/StanFileEditor";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
@@ -23,6 +22,7 @@ import SamplingWindow from "./SamplingWindow/SamplingWindow";
 import { FileNames } from "@SpCore/FileMapping";
 import DataRWindow from "@SpScripting/DataGeneration/DataRWindow";
 import DataPyWindow from "@SpScripting/DataGeneration/DataPyWindow";
+import TextEditor from "@SpComponents/TextEditor";
 
 type Props = {
   //
@@ -128,17 +128,18 @@ const LeftView: FunctionComponent<LeftViewProps> = ({
         readOnly={false}
         setCompiledUrl={setCompiledMainJsUrl}
       />
-      <DataFileEditor
-        fileName={FileNames.DATAFILE}
-        fileContent={data.dataFileContent}
-        onSaveContent={() =>
+      <TextEditor
+        language="json"
+        label={FileNames.DATAFILE}
+        text={data.dataFileContent}
+        onSaveText={() =>
           update({
             type: "commitFile",
             filename: ProjectKnownFiles.DATAFILE,
           })
         }
-        editedFileContent={data.ephemera.dataFileContent}
-        setEditedFileContent={(content: string) =>
+        editedText={data.ephemera.dataFileContent}
+        onSetEditedText={(content: string) =>
           update({
             type: "editFile",
             content,

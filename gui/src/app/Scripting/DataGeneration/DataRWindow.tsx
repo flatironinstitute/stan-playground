@@ -22,6 +22,9 @@ const DataRWindow: FunctionComponent<Props> = () => {
 
   const handleRun = useCallback(
     async (code: string) => {
+      if (consoleRef.current) {
+        consoleRef.current.innerHTML = "";
+      }
       await runR({ code, consoleRef, onStatus, onData });
     },
     [consoleRef, onData, onStatus],
