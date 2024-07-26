@@ -176,9 +176,9 @@ type ConsoleOutputWindowProps = {
   consoleRef: RefObject<HTMLDivElement>;
 };
 
-export /* todo don't export */ const ConsoleOutputWindow: FunctionComponent<
-  ConsoleOutputWindowProps
-> = ({ consoleRef }) => {
+const ConsoleOutputWindow: FunctionComponent<ConsoleOutputWindowProps> = ({
+  consoleRef,
+}) => {
   return <div className="ConsoleOutputArea" ref={consoleRef} />;
 };
 
