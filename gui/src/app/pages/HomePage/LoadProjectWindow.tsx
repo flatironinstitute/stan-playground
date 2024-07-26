@@ -15,6 +15,9 @@ import {
   useEffect,
   useState,
 } from "react";
+import { Hyperlink, SmallIconButton } from "@fi-sci/misc";
+import BrowserProjectsInterface from "./BrowserProjectsInterface";
+import { Delete } from "@mui/icons-material";
 
 type LoadProjectWindowProps = {
   onClose: () => void;
@@ -103,9 +106,37 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
     }
   }, [filesUploaded, importUploadedFiles]);
 
+  const [browserProjectTitles, setBrowserProjectTitles] = useState<string[]>(
+    [],
+  );
+  useEffect(() => {
+    const bpi = new BrowserProjectsInterface();
+    bpi.listProjects().then((titles) => {
+      setBrowserProjectTitles(titles);
+    });
+  }, []);
+
+  const handleOpenBrowserProject = useCallback(
+    async (title: string) => {
+      const bpi = new BrowserProjectsInterface();
+      const fileManifest = await bpi.loadProject(title);
+      if (!fileManifest) {
+        alert("Failed to load project");
+        return;
+      }
+      update({
+        type: "loadFiles",
+        files: mapFileContentsToModel(fileManifest),
+        clearExisting: true,
+      });
+      onClose();
+    },
+    [update, onClose],
+  );
+
   return (
     <div>
-      <h3>Load project</h3>
+      <h3>Upload project</h3>
       <div>
         You can upload:
         <ul>
@@ -141,6 +172,43 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
             Load into EXISTING project
           </Button>
         </div>
+      )}
+      <h3>Load from browser</h3>
+      {browserProjectTitles.length > 0 ? (
+        <table>
+          <tbody>
+            {browserProjectTitles.map((title) => (
+              <tr key={title}>
+                <td>
+                  <SmallIconButton
+                    icon={<Delete />}
+                    onClick={async () => {
+                      const ok = window.confirm(
+                        `Delete project "${title}" from browser?`,
+                      );
+                      if (!ok) return;
+                      const bpi = new BrowserProjectsInterface();
+                      await bpi.deleteProject(title);
+                      const titles = await bpi.listProjects();
+                      setBrowserProjectTitles(titles);
+                    }}
+                  />
+                </td>
+                <td>
+                  <Hyperlink
+                    onClick={() => {
+                      handleOpenBrowserProject(title);
+                    }}
+                  >
+                    {title}
+                  </Hyperlink>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <div>No projects found in browser storage</div>
       )}
     </div>
   );
