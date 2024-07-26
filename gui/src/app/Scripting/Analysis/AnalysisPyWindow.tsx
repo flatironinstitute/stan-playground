@@ -1,4 +1,4 @@
-import { FunctionComponent, useCallback, useMemo } from "react";
+import { FunctionComponent, RefObject, useCallback, useMemo } from "react";
 import { StanRun } from "@SpStanSampler/useStanSampler";
 import { FileNames } from "@SpCore/FileMapping";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
@@ -40,17 +40,7 @@ const AnalysisPyWindow: FunctionComponent<AnalysisWindowProps> = ({
     () => ({
       onStdout: (x: string) => writeConsoleOutToDiv(consoleRef, x, "stdout"),
       onStderr: (x: string) => writeConsoleOutToDiv(consoleRef, x, "stderr"),
-      onImage: (b64: string) => {
-        const imageUrl = `data:image/png;base64,${b64}`;
-
-        const img = document.createElement("img");
-        img.style.width = "100%";
-        img.src = imageUrl;
-
-        const divElement = document.createElement("div");
-        divElement.appendChild(img);
-        imagesRef.current?.appendChild(divElement);
-      },
+      onImage: (b64: string) => addImageToDiv(imagesRef, b64),
       onStatus,
     }),
     [consoleRef, imagesRef, onStatus],
@@ -90,6 +80,18 @@ const AnalysisPyWindow: FunctionComponent<AnalysisWindowProps> = ({
       contentOnEmpty={contentOnEmpty}
     />
   );
+};
+
+const addImageToDiv = (imagesRef: RefObject<HTMLDivElement>, b64: string) => {
+  const imageUrl = `data:image/png;base64,${b64}`;
+
+  const img = document.createElement("img");
+  img.style.width = "100%";
+  img.src = imageUrl;
+
+  const divElement = document.createElement("div");
+  divElement.appendChild(img);
+  imagesRef.current?.appendChild(divElement);
 };
 
 export default AnalysisPyWindow;
