@@ -200,8 +200,8 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
                     onClick={() => {
                       handleOpenBrowserProject(title);
                     }}
-                    component={"a"}
-                    style={{ cursor: "pointer" }}
+                    component="button"
+                    underline="none"
                   >
                     {title}
                   </Link>
