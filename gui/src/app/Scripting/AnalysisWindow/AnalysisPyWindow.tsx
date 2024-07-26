@@ -8,6 +8,8 @@ import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
 import useAnalysisState from "./useAnalysisState";
 import useTemplatedFillerText from "../useTemplatedFillerText";
 
+import analysisPyTemplate from "./analysis_template.py?raw";
+
 export type GlobalDataForAnalysis = {
   draws: number[][];
   paramNames: string[];
@@ -96,21 +98,5 @@ const AnalysisPyWindow: FunctionComponent<AnalysisWindowProps> = ({
     />
   );
 };
-
-const analysisPyTemplate = `import matplotlib.pyplot as plt
-
-# Print the draws object
-print(draws)
-
-# Print parameter names
-print(draws.parameter_names)
-
-# plot the lp parameter
-samples = draws.get("lp__")
-print(samples.shape)
-plt.hist(samples.ravel(), bins=30)
-plt.title("lp__")
-plt.show()
-`;
 
 export default AnalysisPyWindow;

@@ -6,6 +6,8 @@ import runR from "../webR/runR";
 import useDataGenState from "./useDataGenState";
 import useTemplatedFillerText from "../useTemplatedFillerText";
 
+import dataRTemplate from "./data_template.R?raw";
+
 type Props = {
   // empty
 };
@@ -22,12 +24,12 @@ const DataRWindow: FunctionComponent<Props> = () => {
 
   const handleHelp = useCallback(() => {
     alert(
-      'Write a Rthon script to assign data to the "data" variable and then click "Run" to generate data.',
+      'Write a R script to assign data to the "data" variable and then click "Run" to generate data.',
     );
   }, []);
 
   const contentOnEmpty = useTemplatedFillerText(
-    "Define a dictionary called data to update the data.json. ",
+    "Define a list called data to update the data.json. ",
     dataRTemplate,
     ProjectKnownFiles.DATARFILE,
   );
@@ -47,9 +49,5 @@ const DataRWindow: FunctionComponent<Props> = () => {
     />
   );
 };
-
-const dataRTemplate = `data = {
-  "a": [1, 2, 3]
-}`;
 
 export default DataRWindow;

@@ -6,6 +6,8 @@ import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
 import useDataGenState from "./useDataGenState";
 import useTemplatedFillerText from "../useTemplatedFillerText";
 
+import dataPyTemplate from "./data_template.py?raw";
+
 type Props = {
   // empty
 };
@@ -67,9 +69,5 @@ const DataPyWindow: FunctionComponent<Props> = () => {
     />
   );
 };
-
-const dataPyTemplate = `data = {
-  "a": [1, 2, 3]
-}`;
 
 export default DataPyWindow;
