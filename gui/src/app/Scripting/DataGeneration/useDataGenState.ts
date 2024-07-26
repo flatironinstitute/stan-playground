@@ -10,11 +10,14 @@ const useDataGenState = () => {
 
   const { data, update } = useContext(ProjectContext);
 
+  // we don't want the callback to force itself to re-render when data is set
+  const lastData = useRef(data.dataFileContent);
   const onData = useCallback(
     (newData: unknown) => {
       const dataJson = JSON.stringify(newData, null, 2);
 
-      if (dataJson !== data.dataFileContent) {
+      if (dataJson !== lastData.current) {
+        lastData.current = dataJson;
         update({
           type: "editFile",
           content: dataJson,
@@ -35,7 +38,7 @@ const useDataGenState = () => {
         );
       }
     },
-    [update, consoleRef, data.dataFileContent],
+    [update, consoleRef],
   );
 
   return { consoleRef, status, onStatus: setStatus, onData };
