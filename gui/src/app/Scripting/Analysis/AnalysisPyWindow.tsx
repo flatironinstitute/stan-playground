@@ -87,7 +87,6 @@ const AnalysisPyWindow: FunctionComponent<AnalysisWindowProps> = ({
       onRun={handleRun}
       runnable={runnable}
       notRunnableReason={notRunnableReason}
-      onHelp={() => {}}
       imagesRef={imagesRef}
       consoleRef={consoleRef}
       contentOnEmpty={contentOnEmpty}

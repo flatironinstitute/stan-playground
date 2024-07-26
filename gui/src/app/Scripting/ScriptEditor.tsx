@@ -23,7 +23,7 @@ export type ScriptEditorProps = {
   onRun: (code: string) => void;
   runnable: boolean;
   notRunnableReason?: string;
-  onHelp: () => void;
+  onHelp?: () => void;
   contentOnEmpty?: string | HTMLSpanElement;
   consoleRef: RefObject<HTMLDivElement>;
 };
@@ -113,16 +113,18 @@ const makeToolbar = (o: {
   runnable: boolean;
   notRunnableReason?: string;
   onRun: () => void;
-  onHelp: () => void;
+  onHelp?: () => void;
 }): ToolbarItem[] => {
   const { status, onRun, runnable, onHelp, name } = o;
   const ret: ToolbarItem[] = [];
-  ret.push({
-    type: "button",
-    tooltip: "Help",
-    icon: <Help />,
-    onClick: onHelp,
-  });
+  if (onHelp !== undefined) {
+    ret.push({
+      type: "button",
+      tooltip: "Help",
+      icon: <Help />,
+      onClick: onHelp,
+    });
+  }
   if (runnable) {
     ret.push({
       type: "button",
