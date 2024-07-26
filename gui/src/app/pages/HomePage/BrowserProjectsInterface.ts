@@ -4,18 +4,14 @@ export class BrowserProjectsInterface {
     private storeName: string = "projects",
   ) {}
   async loadProject(title: string) {
-    const db = await this.openDatabase();
-    const transaction = db.transaction(this.storeName, "readonly");
-    const objectStore = transaction.objectStore(this.storeName);
+    const objectStore = await this.openObjectStore("readonly");
     const filename = `${title}.json`;
     const content = await this.getTextFile(objectStore, filename);
     if (!content) return null;
     return JSON.parse(content);
   }
   async saveProject(title: string, fileManifest: { [name: string]: string }) {
-    const db = await this.openDatabase();
-    const transaction = db.transaction(this.storeName, "readwrite");
-    const objectStore = transaction.objectStore(this.storeName);
+    const objectStore = await this.openObjectStore("readwrite");
     const filename = `${title}.json`;
     return await this.setTextFile(
       objectStore,
@@ -24,9 +20,7 @@ export class BrowserProjectsInterface {
     );
   }
   async listProjects(): Promise<string[]> {
-    const db = await this.openDatabase();
-    const transaction = db.transaction(this.storeName, "readonly");
-    const objectStore = transaction.objectStore(this.storeName);
+    const objectStore = await this.openObjectStore("readonly");
     return new Promise<string[]>((resolve, reject) => {
       const request = objectStore.getAllKeys();
       request.onsuccess = () => {
@@ -42,9 +36,7 @@ export class BrowserProjectsInterface {
     });
   }
   async deleteProject(title: string) {
-    const db = await this.openDatabase();
-    const transaction = db.transaction(this.storeName, "readwrite");
-    const objectStore = transaction.objectStore(this.storeName);
+    const objectStore = await this.openObjectStore("readwrite");
     const filename = `${title}.json`;
     await this.deleteTextFile(objectStore, filename);
   }
@@ -64,6 +56,11 @@ export class BrowserProjectsInterface {
         reject(request.error);
       };
     });
+  }
+  private async openObjectStore(mode: IDBTransactionMode) {
+    const db = await this.openDatabase();
+    const transaction = db.transaction(this.storeName, mode);
+    return transaction.objectStore(this.storeName);
   }
   private async getTextFile(objectStore: IDBObjectStore, filename: string) {
     return new Promise<string | null>((resolve, reject) => {

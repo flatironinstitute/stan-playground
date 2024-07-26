@@ -1,4 +1,3 @@
-import Button from "@mui/material/Button";
 import {
   FieldsContentsMap,
   FileNames,
@@ -8,6 +7,10 @@ import {
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import { deserializeZipToFiles, parseFile } from "@SpCore/ProjectSerialization";
 import UploadFilesArea from "@SpPages/UploadFilesArea";
+import { SmallIconButton } from "@fi-sci/misc";
+import { Delete } from "@mui/icons-material";
+import { Link } from "@mui/material";
+import Button from "@mui/material/Button";
 import {
   FunctionComponent,
   useCallback,
@@ -15,9 +18,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { Hyperlink, SmallIconButton } from "@fi-sci/misc";
 import BrowserProjectsInterface from "./BrowserProjectsInterface";
-import { Delete } from "@mui/icons-material";
 
 type LoadProjectWindowProps = {
   onClose: () => void;
@@ -195,13 +196,15 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
                   />
                 </td>
                 <td>
-                  <Hyperlink
+                  <Link
                     onClick={() => {
                       handleOpenBrowserProject(title);
                     }}
+                    component={"a"}
+                    style={{ cursor: "pointer" }}
                   >
                     {title}
-                  </Hyperlink>
+                  </Link>
                 </td>
               </tr>
             ))}

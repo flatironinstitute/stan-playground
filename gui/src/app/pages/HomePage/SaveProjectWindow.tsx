@@ -89,7 +89,7 @@ const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
         <SaveToBrowserView
           fileManifest={fileManifest}
           title={data.meta.title}
-          onClose={onClose}
+          onCancel={onClose}
         />
       )}
     </div>
@@ -231,13 +231,13 @@ const makeSPShareableLinkFromGistUrl = (gistUrl: string) => {
 type SaveToBrowserViewProps = {
   fileManifest: Partial<FileRegistry>;
   title: string;
-  onClose: () => void;
+  onCancel: () => void;
 };
 
 const SaveToBrowserView: FunctionComponent<SaveToBrowserViewProps> = ({
   fileManifest,
   title,
-  onClose,
+  onCancel,
 }) => {
   // use IndexedDB to save the project
   // https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
@@ -258,16 +258,16 @@ const SaveToBrowserView: FunctionComponent<SaveToBrowserViewProps> = ({
     } catch (err: any) {
       alert(`Error saving to browser: ${err.message}`);
     }
-    onClose();
-  }, [title, fileManifest, onClose]);
+    onCancel();
+  }, [title, fileManifest, onCancel]);
 
   return (
     <div className="SaveToBrowserView">
       <h3>Save to Browser</h3>
       <p>
         This project will be saved to your browser as &quot;{title}&quot;.&nbsp;
-        It will be available to you on this device, but not on other devices or
-        browsers.
+        It will be available to you on this device until you clear your browser
+        cache, but not on other devices or browsers.
       </p>
       <div>
         <Button
@@ -278,7 +278,7 @@ const SaveToBrowserView: FunctionComponent<SaveToBrowserViewProps> = ({
           Save to Browser
         </Button>
         &nbsp;
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onCancel}>Cancel</Button>
       </div>
     </div>
   );
