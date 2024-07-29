@@ -136,6 +136,7 @@ const TextEditor: FunctionComponent<Props> = ({
           readOnly,
           domReadOnly: readOnly,
           wordWrap: "on",
+          minimap: { enabled: false },
         }}
       />
     </div>
