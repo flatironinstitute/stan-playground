@@ -1,13 +1,13 @@
-import { FunctionComponent, useCallback } from "react";
+import { FunctionComponent, useCallback, useMemo } from "react";
 import ScriptEditor from "@SpScripting/ScriptEditor";
 import { clearOutputDivs } from "@SpScripting/OutputDivUtils";
 import { FileNames } from "@SpCore/FileMapping";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
-import runR from "@SpScripting/webR/runR";
 import useTemplatedFillerText from "@SpScripting/useTemplatedFillerText";
 import useDataGenState from "./useDataGenState";
 
 import dataRTemplate from "./data_template.R?raw";
+import useWebR from "@SpScripting/webR/useWebR";
 
 type Props = {
   // empty
@@ -21,12 +21,18 @@ const handleHelp = () =>
 const DataRWindow: FunctionComponent<Props> = () => {
   const { consoleRef, status, onStatus, onData } = useDataGenState();
 
+  const webRArgs = useMemo(
+    () => ({ consoleRef, onStatus, onData }),
+    [consoleRef, onData, onStatus],
+  );
+
+  const { run } = useWebR(webRArgs);
   const handleRun = useCallback(
     async (code: string) => {
       clearOutputDivs(consoleRef);
-      await runR({ code, consoleRef, onStatus, onData });
+      await run({ code });
     },
-    [consoleRef, onData, onStatus],
+    [consoleRef, run],
   );
 
   const contentOnEmpty = useTemplatedFillerText(
