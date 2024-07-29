@@ -67,6 +67,7 @@ export const updateGitHubGist = async (
       files[path] = { content };
     }
   }
+  console.log("--------------- files", files);
   await octokit.request(`PATCH /gists/${gistId}`, {
     gist_id: gistId,
     files,
