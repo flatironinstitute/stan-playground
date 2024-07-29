@@ -30,6 +30,8 @@ const captureOutputOptions = {
   captureStreams: true,
   captureConditions: false,
   captureGraphics: {
+    height: 504, // default values for height and width
+    width: 504,
     bg: "white", // default: transparent
     pointsize: 12,
     capture: true,
