@@ -27,7 +27,7 @@ const exampleLinks = [
   },
 ];
 
-export const drawerWidth = 240;
+export const drawerWidth = 180;
 
 const Sidebar: FunctionComponent<Sidebar> = ({
   hasUnsavedChanges,
@@ -62,7 +62,8 @@ const Sidebar: FunctionComponent<Sidebar> = ({
       {/* For spacing purposes */}
       <Toolbar />
 
-      <h3>Examples</h3>
+
+      <div className="SidebarContentWrapper SidebarHeading">Examples</div>
 
       {exampleLinks.map((example, i) => (
         <div key={i} className="SidebarContentWrapper">
@@ -72,43 +73,44 @@ const Sidebar: FunctionComponent<Sidebar> = ({
         </div>
       ))}
       <Divider />
-      <List>
-        <ListItem>
-          <Button
-            variant="outlined"
-            onClick={loadProjectOpen}
-            disabled={hasUnsavedChanges}
-          >
-            Load project
-          </Button>
-        </ListItem>
 
-        <ListItem>
-          <Button
-            variant="outlined"
-            onClick={saveProjectOpen}
-            disabled={hasUnsavedChanges}
-          >
-            Save project
-          </Button>
-        </ListItem>
-        <ListItem>
-          {/* This will probably be removed or replaced in the future. It's just for convenience during development. */}
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={() => {
-              const ok = window.confirm(
-                "Are you sure you want to clear all data in the editors?",
-              );
-              if (!ok) return;
-              update({ type: "clear" });
-            }}
-          >
-            Clear all
-          </Button>
-        </ListItem>
-      </List>
+      <div className="SidebarContentWrapper">
+        <Button
+          variant="outlined"
+          onClick={loadProjectOpen}
+          disabled={hasUnsavedChanges}
+        >
+          Load project
+        </Button>
+      </div>
+
+      <div className="SidebarContentWrapper">
+        <Button
+          variant="outlined"
+          onClick={saveProjectOpen}
+          disabled={hasUnsavedChanges}
+        >
+          Save project
+        </Button>
+      </div>
+
+      {/* This will probably be removed or replaced in the future. It's just for convenience during development. */}
+      <div className="SidebarContentWrapper">
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={() => {
+            const ok = window.confirm(
+              "Are you sure you want to clear all data in the editors?",
+            );
+            if (!ok) return;
+            update({ type: "clear" });
+          }}
+        >
+          Clear all
+        </Button>
+      </div>
+
       <ModalWindow visible={loadProjectVisible} onClose={loadProjectClose}>
         <LoadProjectWindow onClose={loadProjectClose} />
       </ModalWindow>
