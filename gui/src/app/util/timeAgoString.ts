@@ -8,8 +8,7 @@ const timeAgoString = (timestampMsec?: number) => {
   const diffHours = Math.floor(diffMinutes / 60);
   const diffDays = Math.floor(diffHours / 24);
   const diffWeeks = Math.floor(diffDays / 7);
-  const diffMonths = Math.floor(diffWeeks / 4);
-  const diffYears = Math.floor(diffMonths / 12);
+  const diffYears = Math.floor(diffDays / 365);
   if (diffYears > 0) {
     return `${diffYears} yr${diffYears === 1 ? "" : "s"} ago`;
   } else if (diffWeeks > 0) {
