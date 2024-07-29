@@ -131,26 +131,33 @@ const GistExportView: FunctionComponent<GistExportViewProps> = ({
         In order to save this project as a GitHub Gist, you will need to provide
         a GitHub Personal Access Token.&nbsp; This token will be used to
         authenticate with GitHub and create a new Gist with the files in this
-        project.&nbsp; You can create a new Personal Access Token by visiting
-        your{" "}
+        project.&nbsp; To create a new Personal Access Token granting permission
+        to read/write your Gists,{" "}
+        <a
+          href="https://github.com/settings/tokens/new?description=Stan%20Playground&scopes=gist"
+          target="_blank"
+          rel="noreferrer"
+          style={{ fontWeight: "bold" }}
+        >
+          follow this link
+        </a>
+        . Alternatively, you can visit{" "}
         <a
           href="https://github.com/settings/tokens?type=beta"
           target="_blank"
           rel="noreferrer"
         >
-          GitHub settings
-        </a>
-        .&nbsp; Go to <i>Fine-grained tokens</i> and generate a new fine-grained
-        token. Be sure to only grant Gist read/write permission by using Gists
-        item in the <i>Account Permissions</i> section. You should also specify
-        an expiration date.&nbsp; Copy the token and paste it into the field
-        below.
+          GitHub developer settings
+        </a>{" "}
+        and navigate to either <i>Classic</i> or <i>Fine-grained tokens</i>.
+        Create a token with only Gist read/write permissions.
       </p>
       <p>
-        For security reasons, your token will not be saved in this
-        application,&nbsp; so you should store it securely in a text file for
-        future use.
+        Be sure to specify an expiration date. For security reasons, your token
+        will not be saved in this application, so you should store it securely
+        in a text file for future use.
       </p>
+      <p>Copy the token and paste it into the field below.</p>
       <table className="project-summary-table">
         <tbody>
           <tr>
