@@ -5,8 +5,6 @@ import ModalWindow, { useModalWindow } from "@fi-sci/modal-window";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
 import Toolbar from "@mui/material/Toolbar";
 import { FunctionComponent, useContext } from "react";
 import { Link } from "react-router-dom";
