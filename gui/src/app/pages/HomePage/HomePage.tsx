@@ -147,6 +147,7 @@ const LeftView: FunctionComponent<LeftViewProps> = ({
           })
         }
         readOnly={false}
+        contentOnEmpty={"Enter JSON data or use the data generation tab"}
       />
     </Splitter>
   );
