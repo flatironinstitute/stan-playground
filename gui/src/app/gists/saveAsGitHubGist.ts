@@ -67,7 +67,6 @@ export const updateGitHubGist = async (
       files[path] = { content };
     }
   }
-  console.log("--------------- files", files);
   await octokit.request(`PATCH /gists/${gistId}`, {
     gist_id: gistId,
     files,
@@ -75,6 +74,26 @@ export const updateGitHubGist = async (
       "X-GitHub-Api-Version": "2022-11-28",
     },
   });
+};
+
+export const createPatchForUpdatingGist = (
+  existingFiles: { [key: string]: string },
+  newFiles: { [key: string]: string },
+) => {
+  const patch: { [key: string]: string | null } = {};
+  for (const fname in newFiles) {
+    const newContent = newFiles[fname];
+    if (existingFiles[fname] === newContent) continue;
+    if (!newContent.trim()) continue;
+    patch[fname] = newContent;
+  }
+  // handle deleted files
+  for (const fname in existingFiles) {
+    if (!newFiles[fname] || !newFiles[fname].trim()) {
+      patch[fname] = null;
+    }
+  }
+  return patch;
 };
 
 export default saveAsGitHubGist;
