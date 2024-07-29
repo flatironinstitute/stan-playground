@@ -9,7 +9,7 @@ import { deserializeZipToFiles, parseFile } from "@SpCore/ProjectSerialization";
 import UploadFilesArea from "@SpPages/UploadFilesArea";
 import { SmallIconButton } from "@fi-sci/misc";
 import { Delete } from "@mui/icons-material";
-import { Link } from "@mui/material/Link";
+import Link from "@mui/material/Link";
 import Button from "@mui/material/Button";
 import {
   FunctionComponent,
@@ -18,7 +18,10 @@ import {
   useEffect,
   useState,
 } from "react";
-import BrowserProjectsInterface from "./BrowserProjectsInterface";
+import BrowserProjectsInterface, {
+  BrowserProject,
+} from "./BrowserProjectsInterface";
+import timeAgoString from "@SpUtil/timeAgoString";
 
 type LoadProjectWindowProps = {
   onClose: () => void;
@@ -107,24 +110,25 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
     }
   }, [filesUploaded, importUploadedFiles]);
 
-  const [browserProjectTitles, setBrowserProjectTitles] = useState<string[]>(
-    [],
-  );
+  const [allBrowserProjects, setAllBrowserProjects] = useState<
+    BrowserProject[]
+  >([]);
   useEffect(() => {
     const bpi = new BrowserProjectsInterface();
-    bpi.listProjects().then((titles) => {
-      setBrowserProjectTitles(titles);
+    bpi.getAllBrowserProjects().then((p) => {
+      setAllBrowserProjects(p);
     });
   }, []);
 
   const handleOpenBrowserProject = useCallback(
     async (title: string) => {
       const bpi = new BrowserProjectsInterface();
-      const fileManifest = await bpi.loadProject(title);
-      if (!fileManifest) {
+      const browserProject = await bpi.loadBrowserProject(title);
+      if (!browserProject) {
         alert("Failed to load project");
         return;
       }
+      const { fileManifest } = browserProject;
       update({
         type: "loadFiles",
         files: mapFileContentsToModel(fileManifest),
@@ -175,36 +179,41 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
         </div>
       )}
       <h3>Load from browser</h3>
-      {browserProjectTitles.length > 0 ? (
+      {allBrowserProjects.length > 0 ? (
         <table>
           <tbody>
-            {browserProjectTitles.map((title) => (
-              <tr key={title}>
+            {allBrowserProjects.map((browserProject) => (
+              <tr key={browserProject.title}>
                 <td>
                   <SmallIconButton
                     icon={<Delete />}
                     onClick={async () => {
                       const ok = window.confirm(
-                        `Delete project "${title}" from browser?`,
+                        `Delete project "${browserProject.title}" from browser?`,
                       );
                       if (!ok) return;
                       const bpi = new BrowserProjectsInterface();
-                      await bpi.deleteProject(title);
-                      const titles = await bpi.listProjects();
-                      setBrowserProjectTitles(titles);
+                      await bpi.deleteProject(browserProject.title);
+                      const p = await bpi.getAllBrowserProjects();
+                      setAllBrowserProjects(p);
                     }}
                   />
                 </td>
                 <td>
                   <Link
                     onClick={() => {
-                      handleOpenBrowserProject(title);
+                      handleOpenBrowserProject(browserProject.title);
                     }}
                     component="button"
                     underline="none"
                   >
-                    {title}
+                    {browserProject.title}
                   </Link>
+                </td>
+                <td>
+                  <span style={{ color: "gray" }}>
+                    {timeAgoString(browserProject.timestamp)}
+                  </span>
                 </td>
               </tr>
             ))}

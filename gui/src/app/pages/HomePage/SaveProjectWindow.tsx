@@ -7,6 +7,7 @@ import saveAsGitHubGist from "@SpCore/gists/saveAsGitHubGist";
 import { triggerDownload } from "@SpUtil/triggerDownload";
 import Button from "@mui/material/Button";
 import BrowserProjectsInterface from "./BrowserProjectsInterface";
+import timeAgoString from "@SpUtil/timeAgoString";
 
 type SaveProjectWindowProps = {
   onClose: () => void;
@@ -245,16 +246,20 @@ const SaveToBrowserView: FunctionComponent<SaveToBrowserViewProps> = ({
   const handleSave = useCallback(async () => {
     try {
       const bpi = new BrowserProjectsInterface();
-      const existingProject = await bpi.loadProject(title);
-      if (existingProject) {
+      const existingBrowserProject = await bpi.loadBrowserProject(title);
+      if (existingBrowserProject) {
         const overwrite = window.confirm(
-          `A project with the title "${title}" already exists. Do you want to overwrite it?`,
+          `A project with the title "${title}" already exists (modified ${timeAgoString(existingBrowserProject.timestamp)}). Do you want to overwrite it?`,
         );
         if (!overwrite) {
           return;
         }
       }
-      await bpi.saveProject(title, fileManifest);
+      await bpi.saveBrowserProject(title, {
+        title,
+        timestamp: Date.now(),
+        fileManifest,
+      });
     } catch (err: any) {
       alert(`Error saving to browser: ${err.message}`);
     }
