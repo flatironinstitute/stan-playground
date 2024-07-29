@@ -9,7 +9,7 @@ import { deserializeZipToFiles, parseFile } from "@SpCore/ProjectSerialization";
 import UploadFilesArea from "@SpPages/UploadFilesArea";
 import { SmallIconButton } from "@fi-sci/misc";
 import { Delete } from "@mui/icons-material";
-import { Link } from "@mui/material";
+import { Link } from "@mui/material/Link";
 import Button from "@mui/material/Button";
 import {
   FunctionComponent,
