@@ -30,8 +30,8 @@ const captureOutputOptions = {
   captureStreams: true,
   captureConditions: false,
   captureGraphics: {
-    width: 340,
-    height: 340,
+    height: 504, // default values for height and width
+    width: 504,
     bg: "white", // default: transparent
     pointsize: 12,
     capture: true,
@@ -103,6 +103,7 @@ invisible(.SP_DATA)`;
           // Set canvas size to image
           canvas.width = img.width;
           canvas.height = img.height;
+          canvas.style.width = "100%";
 
           // Draw image onto Canvas
           const ctx = canvas.getContext("2d");
