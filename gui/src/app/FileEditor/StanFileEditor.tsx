@@ -231,9 +231,12 @@ const StanFileEditor: FunctionComponent<Props> = ({
     />
   );
 
-  if (!syntaxWindowVisible) return editor;
   return (
-    <Split horizontal initialPrimarySize="60%">
+    <Split
+      horizontal
+      initialPrimarySize={syntaxWindowVisible ? "60%" : "100%"}
+      splitterSize={syntaxWindowVisible ? "7px" : "0px"}
+    >
       {editor}
       {window}
     </Split>
