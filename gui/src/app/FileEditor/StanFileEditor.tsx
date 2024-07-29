@@ -1,5 +1,4 @@
 import { AutoFixHigh, Cancel, Settings } from "@mui/icons-material";
-import useMediaQuery from "@mui/material/useMediaQuery";
 import { SplitDirection, Splitter } from "@SpComponents/Splitter";
 import StanCompileResultWindow from "@SpComponents/StanCompileResultWindow";
 import TextEditor, { ToolbarItem } from "@SpComponents/TextEditor";
@@ -123,7 +122,6 @@ const StanFileEditor: FunctionComponent<Props> = ({
     }
   }, [fileContent, handleCompile, didInitialCompile]);
 
-  const showLabelsOnButtons = useMediaQuery("(min-width:600px)");
   const [syntaxWindowVisible, setSyntaxWindowVisible] = useState(false);
 
   const toolbarItems: ToolbarItem[] = useMemo(() => {
@@ -134,7 +132,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
       ret.push({
         type: "button",
         icon: <Cancel />,
-        label: showLabelsOnButtons ? "Syntax error" : "",
+        label: "Syntax error",
         color: "darkred",
         tooltip: "Syntax error in Stan file",
         onClick: () => {
@@ -145,7 +143,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
       ret.push({
         type: "button",
         icon: <Cancel />,
-        label: showLabelsOnButtons ? "Syntax warning" : "",
+        label: "Syntax warning",
         color: "blue",
         tooltip: "Syntax warning in Stan file",
         onClick: () => {
@@ -155,17 +153,15 @@ const StanFileEditor: FunctionComponent<Props> = ({
     }
 
     // auto format
-    if (!readOnly) {
-      if (editedFileContent) {
-        ret.push({
-          type: "button",
-          icon: <AutoFixHigh />,
-          tooltip: "Auto format this stan file",
-          label: showLabelsOnButtons ? "auto format" : undefined,
-          onClick: requestFormat,
-          color: "darkblue",
-        });
-      }
+    if (!readOnly && editedFileContent && validSyntax) {
+      ret.push({
+        type: "button",
+        icon: <AutoFixHigh />,
+        tooltip: "Auto format this stan file",
+        label: "Auto format",
+        onClick: requestFormat,
+        color: "darkblue",
+      });
     }
     if (editedFileContent && editedFileContent === fileContent) {
       if (compileStatus !== "compiling") {
@@ -173,7 +169,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
           ret.push({
             type: "button",
             tooltip: "Compile Stan model",
-            label: "compile",
+            label: "Compile",
             icon: <Settings />,
             onClick: handleCompile,
             color: "darkblue",
@@ -183,7 +179,8 @@ const StanFileEditor: FunctionComponent<Props> = ({
       if (compileStatus !== "") {
         ret.push({
           type: "text",
-          label: compileMessage,
+          label:
+            compileMessage.charAt(0).toUpperCase() + compileMessage.slice(1),
           color:
             compileStatus === "compiled"
               ? "green"
@@ -200,7 +197,6 @@ const StanFileEditor: FunctionComponent<Props> = ({
     fileContent,
     handleCompile,
     requestFormat,
-    showLabelsOnButtons,
     validSyntax,
     compileStatus,
     compileMessage,

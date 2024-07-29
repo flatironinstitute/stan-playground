@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { SmallIconButton } from "@fi-sci/misc";
 import { Editor, loader, useMonaco } from "@monaco-editor/react";
 import { Save } from "@mui/icons-material";
+import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
 import monacoAddStanLang from "@SpComponents/stanLang";
 import { CodeMarker } from "@SpStanc/Linting";
 import { editor, MarkerSeverity } from "monaco-editor";
 import {
   FunctionComponent,
-  PropsWithChildren,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
@@ -36,7 +36,7 @@ export type ToolbarItem =
       tooltip?: string;
       label?: string;
       icon?: any;
-      onClick?: () => void;
+      onClick: () => void;
       color?: string;
     }
   | {
@@ -131,32 +131,19 @@ const TextEditor: FunctionComponent<Props> = ({
     [onSaveText, readOnly],
   );
 
+  const edited = useMemo(() => {
+    return editedText !== text;
+  }, [editedText, text]);
+
   return (
     <div className="EditorWithToolbar" onKeyDown={handleKeyDown}>
-      <NotSelectable>
-        <div className="EditorMenuBar">
-          <span className="EditorTitle">{label}</span>
-          &nbsp;&nbsp;&nbsp;
-          {!readOnly && text !== editedText && (
-            <SmallIconButton
-              onClick={onSaveText}
-              icon={<Save />}
-              title="Save file"
-              disabled={text === editedText}
-              label="save"
-            />
-          )}
-          &nbsp;&nbsp;&nbsp;
-          {editedText !== text && <span className="EditedText">edited</span>}
-          &nbsp;&nbsp;&nbsp;
-          {readOnly && <span className="ReadOnlyText">read only</span>}
-          &nbsp;&nbsp;&nbsp;
-          {toolbarItems &&
-            toolbarItems.map((item, i) => (
-              <ToolbarItemComponent key={i} item={item} />
-            ))}
-        </div>
-      </NotSelectable>
+      <ToolBar
+        items={toolbarItems || []}
+        label={label}
+        onSaveText={onSaveText}
+        edited={edited}
+        readOnly={!!readOnly}
+      />
       <Editor
         defaultLanguage={language}
         onChange={handleChange}
@@ -186,6 +173,66 @@ const toMonacoMarkerSeverity = (
   }
 };
 
+type ToolbarProps = {
+  items: ToolbarItem[];
+  label: string;
+  onSaveText: () => void;
+  edited: boolean;
+  readOnly: boolean;
+};
+
+const ToolBar: FunctionComponent<ToolbarProps> = ({
+  items,
+  label,
+  onSaveText,
+  edited,
+  readOnly,
+}) => {
+  const toolBarItems = useMemo(() => {
+    const editorItems: ToolbarItem[] = [];
+
+    if (!readOnly && edited) {
+      editorItems.push({
+        type: "button",
+        icon: <Save />,
+        onClick: onSaveText,
+        tooltip: "Save file",
+        label: "Save",
+      });
+    }
+
+    if (edited) {
+      editorItems.push({
+        type: "text",
+        label: "Edited",
+        color: "red",
+      });
+    }
+
+    if (readOnly) {
+      editorItems.push({
+        type: "text",
+        label: "Read Only",
+        color: "gray",
+      });
+    }
+
+    return editorItems.concat(items);
+  }, [edited, items, onSaveText, readOnly]);
+
+  return (
+    <div className="NotSelectable">
+      <div className="EditorMenuBar">
+        <span className="EditorTitle">{label}</span>
+        {toolBarItems &&
+          toolBarItems.map((item, i) => (
+            <ToolbarItemComponent key={i} item={item} />
+          ))}
+      </div>
+    </div>
+  );
+};
+
 const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
   item,
 }) => {
@@ -193,32 +240,28 @@ const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
     const { onClick, color, label, tooltip, icon } = item;
     if (icon) {
       return (
-        <span style={{ color }}>
-          <SmallIconButton
+        <span className="EditorToolbarItem" style={{ color }}>
+          <Button
+            startIcon={icon}
             onClick={onClick}
-            icon={icon}
-            title={tooltip}
-            label={label}
             disabled={!onClick}
-          />
-          &nbsp;&nbsp;&nbsp;
+            color="inherit"
+            size="small"
+            title={tooltip}
+          >
+            {label && <span className="ToolbarButtonText">{label}</span>}
+          </Button>
         </span>
       );
     } else {
-      if (!onClick) {
-        return (
-          <span style={{ color: color || "gray" }} title={label}>
-            {label}&nbsp;&nbsp;&nbsp;
-          </span>
-        );
-      }
       return (
-        <span>
+        <span className="EditorToolbarItem">
           <Link
             onClick={onClick}
             color={color || "gray"}
             component="button"
             underline="none"
+            title={tooltip}
           >
             {label}
           </Link>
@@ -228,17 +271,17 @@ const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
     }
   } else if (item.type === "text") {
     return (
-      <span style={{ color: item.color || "gray" }} title={item.label}>
+      <span
+        className="EditorToolbarItem"
+        style={{ color: item.color || "gray" }}
+        title={item.label}
+      >
         {item.label}&nbsp;&nbsp;&nbsp;
       </span>
     );
   } else {
     return <span>unknown toolbar item type</span>;
   }
-};
-
-const NotSelectable: FunctionComponent<PropsWithChildren> = ({ children }) => {
-  return <div className="NotSelectable">{children}</div>;
 };
 
 const createHintTextContentWidget = (content: string | HTMLSpanElement) => {
