@@ -1,6 +1,7 @@
 import { Help, PlayArrow } from "@mui/icons-material";
 import { SplitDirection, Splitter } from "@SpComponents/Splitter";
-import TextEditor, { ToolbarItem } from "@SpComponents/TextEditor";
+import TextEditor from "@SpComponents/TextEditor";
+import { ToolbarItem } from "@SpComponents/ToolBar";
 import { FileNames } from "@SpCore/FileMapping";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";

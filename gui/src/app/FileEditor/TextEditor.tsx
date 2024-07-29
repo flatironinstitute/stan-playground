@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Editor, loader, useMonaco } from "@monaco-editor/react";
-import { Save } from "@mui/icons-material";
-import Button from "@mui/material/Button";
-import Link from "@mui/material/Link";
+
 import monacoAddStanLang from "@SpComponents/stanLang";
+import { ToolBar, ToolbarItem } from "@SpComponents/ToolBar";
 import { CodeMarker } from "@SpStanc/Linting";
 import { editor, MarkerSeverity } from "monaco-editor";
 import {
@@ -29,21 +28,6 @@ type Props = {
   codeMarkers?: CodeMarker[];
   contentOnEmpty?: string | HTMLSpanElement;
 };
-
-export type ToolbarItem =
-  | {
-      type: "button";
-      tooltip?: string;
-      label?: string;
-      icon?: any;
-      onClick: () => void;
-      color?: string;
-    }
-  | {
-      type: "text";
-      label: string;
-      color?: string;
-    };
 
 const TextEditor: FunctionComponent<Props> = ({
   text,
@@ -170,117 +154,6 @@ const toMonacoMarkerSeverity = (
       return MarkerSeverity.Hint;
     case "info":
       return MarkerSeverity.Info;
-  }
-};
-
-type ToolbarProps = {
-  items: ToolbarItem[];
-  label: string;
-  onSaveText: () => void;
-  edited: boolean;
-  readOnly: boolean;
-};
-
-const ToolBar: FunctionComponent<ToolbarProps> = ({
-  items,
-  label,
-  onSaveText,
-  edited,
-  readOnly,
-}) => {
-  const toolBarItems = useMemo(() => {
-    const editorItems: ToolbarItem[] = [];
-
-    if (!readOnly && edited) {
-      editorItems.push({
-        type: "button",
-        icon: <Save />,
-        onClick: onSaveText,
-        tooltip: "Save file",
-        label: "Save",
-      });
-    }
-
-    if (edited) {
-      editorItems.push({
-        type: "text",
-        label: "Edited",
-        color: "red",
-      });
-    }
-
-    if (readOnly) {
-      editorItems.push({
-        type: "text",
-        label: "Read Only",
-        color: "gray",
-      });
-    }
-
-    return editorItems.concat(items);
-  }, [edited, items, onSaveText, readOnly]);
-
-  return (
-    <div className="NotSelectable">
-      <div className="EditorMenuBar">
-        <span className="EditorTitle">{label}</span>
-        {toolBarItems &&
-          toolBarItems.map((item, i) => (
-            <ToolbarItemComponent key={i} item={item} />
-          ))}
-      </div>
-    </div>
-  );
-};
-
-const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
-  item,
-}) => {
-  if (item.type === "button") {
-    const { onClick, color, label, tooltip, icon } = item;
-    if (icon) {
-      return (
-        <span className="EditorToolbarItem" style={{ color }}>
-          <Button
-            startIcon={icon}
-            onClick={onClick}
-            disabled={!onClick}
-            color="inherit"
-            size="small"
-            title={tooltip}
-          >
-            {label && <span className="ToolbarButtonText">{label}</span>}
-          </Button>
-        </span>
-      );
-    } else {
-      return (
-        <span className="EditorToolbarItem">
-          <Link
-            onClick={onClick}
-            color={color || "gray"}
-            component="button"
-            underline="none"
-            title={tooltip}
-          >
-            {label}
-          </Link>
-          &nbsp;&nbsp;&nbsp;
-        </span>
-      );
-    }
-  } else if (item.type === "text") {
-    return (
-      <span
-        className="EditorToolbarItem"
-        style={{ color: item.color || "gray" }}
-        title={item.label}
-      >
-        {item.label}&nbsp;&nbsp;&nbsp;
-      </span>
-    );
-  } else {
-    return <span>unknown toolbar item type</span>;
   }
 };
 

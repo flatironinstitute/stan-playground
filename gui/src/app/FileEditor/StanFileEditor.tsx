@@ -1,7 +1,8 @@
 import { AutoFixHigh, Cancel, Settings } from "@mui/icons-material";
 import { SplitDirection, Splitter } from "@SpComponents/Splitter";
 import StanCompileResultWindow from "@SpComponents/StanCompileResultWindow";
-import TextEditor, { ToolbarItem } from "@SpComponents/TextEditor";
+import TextEditor from "@SpComponents/TextEditor";
+import { ToolbarItem } from "@SpComponents/ToolBar";
 import compileStanProgram from "@SpStanc/compileStanProgram";
 import { stancErrorsToCodeMarkers } from "@SpStanc/Linting";
 import useStanc from "@SpStanc/useStanc";

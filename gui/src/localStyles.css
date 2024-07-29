@@ -116,12 +116,15 @@ span.EditorToolbarItem {
   letter-spacing: normal;
   display: inline-block;
   white-space: normal;
+  padding-left: 5px;
+  font-size: 14px;
 }
 
 @container EditorMenuBar (max-width: 500px) {
   .ToolbarButtonText {
     display: none;
     width: 0;
+    padding: 0;
   }
   span.EditorToolbarItem {
     padding: 0px;
