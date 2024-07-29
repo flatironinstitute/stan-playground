@@ -228,7 +228,10 @@ const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
     }
   } else if (item.type === "text") {
     return (
-      <span style={{ color: item.color || "gray" }} title={item.label}>
+      <span
+        style={{ color: item.color || "gray", position: "relative", top: 1 }}
+        title={item.label}
+      >
         {item.label}&nbsp;&nbsp;&nbsp;
       </span>
     );

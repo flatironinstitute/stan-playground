@@ -145,19 +145,19 @@ const makeToolbar = (o: {
   let label: string;
   let color: string;
   if (status === "loading") {
-    label = `Loading ${name}...`;
+    label = `loading ${name}...`;
     color = "blue";
   } else if (status === "installing") {
-    label = `Installing packages for ${name}...`;
+    label = `installing packages for ${name}...`;
     color = "blue";
   } else if (status === "running") {
-    label = "Running...";
+    label = "running...";
     color = "blue";
   } else if (status === "completed") {
-    label = "Completed";
+    label = "completed";
     color = "green";
   } else if (status === "failed") {
-    label = "Failed";
+    label = "failed";
     color = "red";
   } else {
     label = "";

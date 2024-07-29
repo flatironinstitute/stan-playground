@@ -87,6 +87,7 @@
 .EditorMenuBar {
   background-color: lightgray;
   height: 25px;
+  padding-top: 5px;
 }
 
 .EditorWithToolbar {
