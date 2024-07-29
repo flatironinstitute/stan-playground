@@ -1,5 +1,5 @@
+import { Split } from "@geoffcox/react-splitter";
 import { AutoFixHigh, Cancel, Settings } from "@mui/icons-material";
-import { SplitDirection, Splitter } from "@SpComponents/Splitter";
 import StanCompileResultWindow from "@SpComponents/StanCompileResultWindow";
 import TextEditor from "@SpComponents/TextEditor";
 import { ToolbarItem } from "@SpComponents/ToolBar";
@@ -216,25 +216,27 @@ const StanFileEditor: FunctionComponent<Props> = ({
     <></>
   );
 
-  const initialSizes = syntaxWindowVisible ? [60, 40] : [100, 0];
+  const editor = (
+    <TextEditor
+      language="stan"
+      label={fileName}
+      text={fileContent}
+      onSaveText={onSaveContent}
+      editedText={editedFileContent}
+      onSetEditedText={setEditedFileContent}
+      readOnly={!isCompiling ? readOnly : true}
+      toolbarItems={toolbarItems}
+      codeMarkers={stancErrorsToCodeMarkers(stancErrors)}
+      contentOnEmpty="Begin editing or select an example from the left panel"
+    />
+  );
 
+  if (!syntaxWindowVisible) return editor;
   return (
-    <Splitter direction={SplitDirection.Vertical} initialSizes={initialSizes}>
-      <TextEditor
-        // language="stan"
-        language="stan"
-        label={fileName}
-        text={fileContent}
-        onSaveText={onSaveContent}
-        editedText={editedFileContent}
-        onSetEditedText={setEditedFileContent}
-        readOnly={!isCompiling ? readOnly : true}
-        toolbarItems={toolbarItems}
-        codeMarkers={stancErrorsToCodeMarkers(stancErrors)}
-        contentOnEmpty="Begin editing or select an example from the left panel"
-      />
+    <Split horizontal initialPrimarySize="60%">
+      {editor}
       {window}
-    </Splitter>
+    </Split>
   );
 };
 
