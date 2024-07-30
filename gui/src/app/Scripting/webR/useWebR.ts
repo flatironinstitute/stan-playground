@@ -3,6 +3,9 @@ import { WebR } from "webr";
 import { InterpreterStatus } from "@SpScripting/InterpreterTypes";
 import { writeConsoleOutToDiv } from "@SpScripting/OutputDivUtils";
 
+import webRPreamble from "./webR_preamble.R?raw";
+import dataPostamble from "./data_postamble.R?raw";
+
 const captureOutputOptions = {
   withAutoprint: true,
   captureStreams: false,
@@ -84,23 +87,12 @@ const useWebR = ({ imagesRef, consoleRef, onStatus, onData }: useWebRProps) => {
           const options = { ...captureOutputOptions, env };
 
           // setup
-          await webR.evalRVoid(
-            `webr::shim_install()
-webr::canvas()`,
-            options,
-          );
+          await webR.evalRVoid(webRPreamble, options);
           await webR.evalRVoid(code, options);
 
           if (onData) {
             const result = JSON.parse(
-              await webR.evalRString(
-                `if (typeof(data) != "list") {
-stop("[stan-playground] data must be a list")
-}
-.SP_DATA <- jsonlite::toJSON(data, pretty = TRUE, auto_unbox = TRUE)
-invisible(.SP_DATA)`,
-                options,
-              ),
+              await webR.evalRString(dataPostamble, options),
             );
             onData(result);
           }
