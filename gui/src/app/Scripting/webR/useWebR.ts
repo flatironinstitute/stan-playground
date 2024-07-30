@@ -114,42 +114,52 @@ invisible(.SP_DATA)`,
     [consoleRef, loadWebRInstance, onData, onStatus],
   );
 
-  return { run };
+  const cancel = useCallback(() => {
+    if (webR) {
+      // NOTE: only works if COORS is set to allow shared worker usage
+      webR.interrupt();
+    }
+  }, [webR]);
+
+  return { run, cancel };
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Similar to examples at
+// https://docs.r-wasm.org/webr/latest/communication.html#handling-messages
+//
 const outputLoop = async (
   webR: WebR,
   consoleRef: RefObject<HTMLDivElement>,
   imagesRef?: RefObject<HTMLDivElement>,
 ) => {
+  // ignore startup messages from R repl
   for (;;) {
-    // ignore startup messages
-
     const output = await webR.read();
     if (output.type === "prompt") {
-      break;
+      break; // no more startup messages
     }
     if (output.type === "closed") {
-      return;
+      return; // killed early
     }
   }
 
-  let canvas;
+  let canvas = undefined;
 
   for (;;) {
     const output = await webR.read();
 
     switch (output.type) {
+      case "closed":
+        return; // end loop
       case "stdout":
-        writeConsoleOutToDiv(consoleRef, output.data, "stdout");
-        break;
       case "stderr":
-        writeConsoleOutToDiv(consoleRef, output.data, "stderr");
+        writeConsoleOutToDiv(consoleRef, output.data, output.type);
         break;
       case "canvas":
         if (imagesRef?.current && output.data.event === "canvasNewPage") {
+          // Starting a new plot
           canvas = document.createElement("canvas");
           canvas.setAttribute("width", "1008");
           canvas.setAttribute("height", "1008");
@@ -157,17 +167,15 @@ const outputLoop = async (
           canvas.style.display = "inline-block";
           // Append canvas to figure output area
           imagesRef.current.appendChild(canvas);
-        } else if (
-          canvas !== undefined &&
-          output.data.event === "canvasImage"
-        ) {
+          break;
+        }
+        if (canvas !== undefined && output.data.event === "canvasImage") {
+          // Add layer to the existing plot
           canvas.getContext("2d")?.drawImage(output.data.image, 0, 0);
         }
         break;
-      case "closed":
-        return;
       default:
-        console.log(output);
+        console.log("unexpected webR message: ", output);
     }
   }
 };
