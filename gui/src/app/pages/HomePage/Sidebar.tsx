@@ -2,11 +2,10 @@ import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import LoadProjectWindow from "@SpPages/LoadProjectWindow";
 import SaveProjectWindow from "@SpPages/SaveProjectWindow";
 import ModalWindow, { useModalWindow } from "@fi-sci/modal-window";
+import { List, ListItem } from "@mui/material";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
 import Toolbar from "@mui/material/Toolbar";
 import { FunctionComponent, useContext } from "react";
 import { Link } from "react-router-dom";
@@ -27,7 +26,7 @@ const exampleLinks = [
   },
 ];
 
-export const drawerWidth = 240;
+export const drawerWidth = 180;
 
 const Sidebar: FunctionComponent<Sidebar> = ({
   hasUnsavedChanges,
@@ -62,53 +61,61 @@ const Sidebar: FunctionComponent<Sidebar> = ({
       {/* For spacing purposes */}
       <Toolbar />
 
-      <h3>Examples</h3>
+      <div className="Sidebar">
+        <h3>Examples</h3>
 
-      {exampleLinks.map((example, i) => (
-        <div key={i} className="SidebarContentWrapper">
-          <Link replace to={`?project=${example.link}`}>
-            {example.name}
-          </Link>
-        </div>
-      ))}
-      <Divider />
-      <List>
-        <ListItem>
-          <Button
-            variant="outlined"
-            onClick={loadProjectOpen}
-            disabled={hasUnsavedChanges}
-          >
-            Load project
-          </Button>
-        </ListItem>
+        <List>
+          {exampleLinks.map((example, i) => (
+            <ListItem key={i}>
+              <Link replace to={`?project=${example.link}`}>
+                {example.name}
+              </Link>
+            </ListItem>
+          ))}
+        </List>
 
-        <ListItem>
-          <Button
-            variant="outlined"
-            onClick={saveProjectOpen}
-            disabled={hasUnsavedChanges}
-          >
-            Save project
-          </Button>
-        </ListItem>
-        <ListItem>
+        <Divider />
+
+        <List>
+          <ListItem key="load-project">
+            <Button
+              variant="outlined"
+              onClick={loadProjectOpen}
+              disabled={hasUnsavedChanges}
+            >
+              Load project
+            </Button>
+          </ListItem>
+
+          <ListItem key="save-project">
+            <Button
+              variant="outlined"
+              onClick={saveProjectOpen}
+              disabled={hasUnsavedChanges}
+            >
+              Save project
+            </Button>
+          </ListItem>
+
           {/* This will probably be removed or replaced in the future. It's just for convenience during development. */}
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={() => {
-              const ok = window.confirm(
-                "Are you sure you want to clear all data in the editors?",
-              );
-              if (!ok) return;
-              update({ type: "clear" });
-            }}
-          >
-            Clear all
-          </Button>
-        </ListItem>
-      </List>
+          <ListItem key="clear-all">
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={() => {
+                const ok = window.confirm(
+                  "Are you sure you want to clear all data in the editors?",
+                );
+                if (!ok) return;
+                update({ type: "clear" });
+              }}
+            >
+              Clear all
+            </Button>
+          </ListItem>
+        </List>
+      </div>
+
       <ModalWindow visible={loadProjectVisible} onClose={loadProjectClose}>
         <LoadProjectWindow onClose={loadProjectClose} />
       </ModalWindow>
