@@ -47,7 +47,7 @@ export const ToolBar: FunctionComponent<ToolbarProps> = ({
         type: "button",
         icon: <Save />,
         onClick: onSaveText,
-        tooltip: "Save file",
+        tooltip: "Save file (Ctrl-S)",
         label: "Save",
       });
       editorItems.push({
