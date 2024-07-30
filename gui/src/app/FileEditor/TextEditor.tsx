@@ -103,7 +103,7 @@ const TextEditor: FunctionComponent<Props> = ({
 
   useEffect(() => {
     if (!editorInstance) return;
-    editorInstance.addAction({
+    const disposable = editorInstance.addAction({
       id: "save",
       label: "Save",
       keybindings: [KeyMod.CtrlCmd | KeyCode.KeyS],
@@ -113,14 +113,18 @@ const TextEditor: FunctionComponent<Props> = ({
         }
       },
     });
+    return () => {
+      disposable.dispose();
+    };
   }, [editorInstance, onSaveText, readOnly]);
 
   useEffect(() => {
     if (!editorInstance) return;
     if (!actions) return;
-    for (const action of actions) {
-      editorInstance.addAction(action);
-    }
+    const disposables = actions.map(editorInstance.addAction);
+    return () => {
+      disposables.forEach((d) => d.dispose());
+    };
   }, [actions, editorInstance]);
 
   const edited = useMemo(() => {
