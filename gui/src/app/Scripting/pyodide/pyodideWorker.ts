@@ -147,7 +147,8 @@ patch_matplotlib(_SP_ADD_IMAGE)
 
     postamble += `
 import matplotlib.pyplot as plt
-plt.show()
+if len(plt.gcf().get_children()) > 1:
+    plt.show()
 `;
   }
 
