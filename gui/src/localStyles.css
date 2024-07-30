@@ -65,12 +65,18 @@
 }
 
 /* Sidebar */
-.SidebarContentWrapper {
-  margin: 8px;
+.Sidebar h3 {
+  padding: 0px;
+  margin-left: 12px;
+  margin-bottom: 0px;
+  margin-top: 0px;
 }
 
-.SidebarHeading {
-  font-weight: bold;
+.Sidebar li {
+  margin-left: 12px;
+  margin-top: 0px;
+  margin-bottom: 5px;
+  padding: 0px;
 }
 
 /* File Upload */

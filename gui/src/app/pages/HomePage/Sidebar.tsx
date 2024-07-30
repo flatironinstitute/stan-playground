@@ -2,6 +2,7 @@ import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import LoadProjectWindow from "@SpPages/LoadProjectWindow";
 import SaveProjectWindow from "@SpPages/SaveProjectWindow";
 import ModalWindow, { useModalWindow } from "@fi-sci/modal-window";
+import { List, ListItem } from "@mui/material";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
@@ -60,53 +61,59 @@ const Sidebar: FunctionComponent<Sidebar> = ({
       {/* For spacing purposes */}
       <Toolbar />
 
+      <div className="Sidebar">
+        <h3>Examples</h3>
 
-      <div className="SidebarContentWrapper SidebarHeading">Examples</div>
+        <List>
+          {exampleLinks.map((example, i) => (
+            <ListItem key={i}>
+              <Link replace to={`?project=${example.link}`}>
+                {example.name}
+              </Link>
+            </ListItem>
+          ))}
+        </List>
 
-      {exampleLinks.map((example, i) => (
-        <div key={i} className="SidebarContentWrapper">
-          <Link replace to={`?project=${example.link}`}>
-            {example.name}
-          </Link>
-        </div>
-      ))}
-      <Divider />
+        <Divider />
 
-      <div className="SidebarContentWrapper">
-        <Button
-          variant="outlined"
-          onClick={loadProjectOpen}
-          disabled={hasUnsavedChanges}
-        >
-          Load project
-        </Button>
-      </div>
+        <List>
+          <ListItem key="load-project">
+            <Button
+              variant="outlined"
+              onClick={loadProjectOpen}
+              disabled={hasUnsavedChanges}
+            >
+              Load project
+            </Button>
+          </ListItem>
 
-      <div className="SidebarContentWrapper">
-        <Button
-          variant="outlined"
-          onClick={saveProjectOpen}
-          disabled={hasUnsavedChanges}
-        >
-          Save project
-        </Button>
-      </div>
+          <ListItem key="save-project">
+            <Button
+              variant="outlined"
+              onClick={saveProjectOpen}
+              disabled={hasUnsavedChanges}
+            >
+              Save project
+            </Button>
+          </ListItem>
 
-      {/* This will probably be removed or replaced in the future. It's just for convenience during development. */}
-      <div className="SidebarContentWrapper">
-        <Button
-          variant="outlined"
-          color="error"
-          onClick={() => {
-            const ok = window.confirm(
-              "Are you sure you want to clear all data in the editors?",
-            );
-            if (!ok) return;
-            update({ type: "clear" });
-          }}
-        >
-          Clear all
-        </Button>
+          {/* This will probably be removed or replaced in the future. It's just for convenience during development. */}
+          <ListItem key="clear-all">
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={() => {
+                const ok = window.confirm(
+                  "Are you sure you want to clear all data in the editors?",
+                );
+                if (!ok) return;
+                update({ type: "clear" });
+              }}
+            >
+              Clear all
+            </Button>
+          </ListItem>
+        </List>
       </div>
 
       <ModalWindow visible={loadProjectVisible} onClose={loadProjectClose}>
