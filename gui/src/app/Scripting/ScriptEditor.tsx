@@ -73,17 +73,19 @@ const ScriptEditor: FunctionComponent<ScriptEditorProps> = ({
     return content !== editedContent;
   }, [content, editedContent]);
 
-  const runCtrlEnter: editor.IActionDescriptor = useMemo(
-    () => ({
-      id: "run-script",
-      label: "Run Script",
-      keybindings: [KeyMod.CtrlCmd | KeyCode.Enter],
-      run: () => {
-        if (runnable && !unsavedChanges) {
-          runCode();
-        }
+  const runCtrlEnter: editor.IActionDescriptor[] = useMemo(
+    () => [
+      {
+        id: "run-script",
+        label: "Run Script",
+        keybindings: [KeyMod.CtrlCmd | KeyCode.Enter],
+        run: () => {
+          if (runnable && !unsavedChanges) {
+            runCode();
+          }
+        },
       },
-    }),
+    ],
     [runCode, runnable, unsavedChanges],
   );
 
@@ -117,7 +119,7 @@ const ScriptEditor: FunctionComponent<ScriptEditorProps> = ({
         onSaveText={onSaveText}
         toolbarItems={toolbarItems}
         contentOnEmpty={contentOnEmpty}
-        actions={[runCtrlEnter]}
+        actions={runCtrlEnter}
       />
       <ConsoleOutputWindow consoleRef={consoleRef} />
     </Split>

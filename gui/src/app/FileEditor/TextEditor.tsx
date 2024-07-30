@@ -4,7 +4,13 @@ import { Editor, loader, useMonaco } from "@monaco-editor/react";
 import monacoAddStanLang from "@SpComponents/stanLang";
 import { ToolBar, ToolbarItem } from "@SpComponents/ToolBar";
 import { CodeMarker } from "@SpStanc/Linting";
-import { editor, KeyCode, KeyMod, MarkerSeverity } from "monaco-editor";
+import {
+  editor,
+  IDisposable,
+  KeyCode,
+  KeyMod,
+  MarkerSeverity,
+} from "monaco-editor";
 import {
   FunctionComponent,
   useCallback,
@@ -121,7 +127,10 @@ const TextEditor: FunctionComponent<Props> = ({
   useEffect(() => {
     if (!editorInstance) return;
     if (!actions) return;
-    const disposables = actions.map(editorInstance.addAction);
+    const disposables: IDisposable[] = [];
+    for (const action of actions) {
+      disposables.push(editorInstance.addAction(action));
+    }
     return () => {
       disposables.forEach((d) => d.dispose());
     };
