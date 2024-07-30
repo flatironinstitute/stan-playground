@@ -1,6 +1,6 @@
 import { Help, PlayArrow } from "@mui/icons-material";
-import { SplitDirection, Splitter } from "@SpComponents/Splitter";
-import TextEditor, { ToolbarItem } from "@SpComponents/TextEditor";
+import TextEditor from "@SpComponents/TextEditor";
+import { ToolbarItem } from "@SpComponents/ToolBar";
 import { FileNames } from "@SpCore/FileMapping";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
@@ -12,6 +12,7 @@ import {
   useMemo,
 } from "react";
 import { InterpreterStatus } from "./InterpreterTypes";
+import { Split } from "@geoffcox/react-splitter";
 
 const interpreterNames = { python: "pyodide", r: "webR" } as const;
 
@@ -91,7 +92,7 @@ const ScriptEditor: FunctionComponent<ScriptEditorProps> = ({
   ]);
 
   return (
-    <Splitter direction={SplitDirection.Vertical} initialSizes={[60, 40]}>
+    <Split horizontal initialPrimarySize="60%">
       <TextEditor
         label={filename}
         language={language}
@@ -103,7 +104,7 @@ const ScriptEditor: FunctionComponent<ScriptEditorProps> = ({
         contentOnEmpty={contentOnEmpty}
       />
       <ConsoleOutputWindow consoleRef={consoleRef} />
-    </Splitter>
+    </Split>
   );
 };
 

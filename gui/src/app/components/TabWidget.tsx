@@ -31,7 +31,12 @@ const TabWidget: FunctionComponent<TabWidgetProps> = ({ labels, children }) => {
 
   return (
     <Box display="flex" height="100%" width="100%" flexDirection="column">
-      <Tabs value={index} onChange={handleChange}>
+      <Tabs
+        value={index}
+        onChange={handleChange}
+        variant="scrollable"
+        scrollButtons="auto"
+      >
         {labels.map((label, i) => (
           <Tab key={i} label={label} />
         ))}

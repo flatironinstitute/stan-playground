@@ -1,7 +1,6 @@
 import Box from "@mui/material/Box";
 import styled from "@mui/material/styles/styled";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { GutterTheme, SplitDirection, Splitter } from "@SpComponents/Splitter";
 import StanFileEditor from "@SpComponents/StanFileEditor";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import {
@@ -23,6 +22,7 @@ import { FileNames } from "@SpCore/FileMapping";
 import DataRWindow from "@SpScripting/DataGeneration/DataRWindow";
 import DataPyWindow from "@SpScripting/DataGeneration/DataPyWindow";
 import TextEditor from "@SpComponents/TextEditor";
+import { Split } from "@geoffcox/react-splitter";
 
 type Props = {
   //
@@ -63,14 +63,10 @@ const HomePage: FunctionComponent<Props> = () => {
       />
 
       <MovingBox open={leftPanelCollapsed} flex="1" minHeight="0">
-        <Splitter
-          minWidths={[80, 120]}
-          direction={SplitDirection.Horizontal}
-          gutterTheme={GutterTheme.Light}
-        >
+        <Split minPrimarySize="80px" minSecondarySize="120px">
           <LeftView setCompiledMainJsUrl={setCompiledMainJsUrl} />
           <RightView compiledMainJsUrl={compiledMainJsUrl} />
-        </Splitter>
+        </Split>
       </MovingBox>
     </Box>
   );
@@ -103,10 +99,7 @@ const LeftView: FunctionComponent<LeftViewProps> = ({
 }) => {
   const { data, update } = useContext(ProjectContext);
   return (
-    <Splitter
-      direction={SplitDirection.Vertical}
-      gutterTheme={GutterTheme.Light}
-    >
+    <Split horizontal>
       <StanFileEditor
         fileName={FileNames.STANFILE}
         fileContent={data.stanFileContent}
@@ -149,7 +142,7 @@ const LeftView: FunctionComponent<LeftViewProps> = ({
         readOnly={false}
         contentOnEmpty={"Enter JSON data or use the data generation tab"}
       />
-    </Splitter>
+    </Split>
   );
 };
 

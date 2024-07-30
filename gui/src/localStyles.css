@@ -84,28 +84,57 @@
 
 /* Text Editors ------ */
 
+:root {
+  --editor-menu-height: 30px;
+}
+
 .EditorMenuBar {
   background-color: lightgray;
-  height: 25px;
+  height: var(--editor-menu-height);
+  position: relative;
+  display: flex;
+  align-content: center;
+  align-items: center;
+  container-name: EditorMenuBar;
+  container-type: inline-size;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .EditorWithToolbar {
-  height: calc(100% - 25px);
+  height: calc(100% - var(--editor-menu-height));
+}
+
+span.EditorToolbarItem {
+  padding-left: 15px;
+}
+
+.ToolbarButtonText {
+  text-transform: none;
+  font-weight: normal;
+  letter-spacing: normal;
+  display: inline-block;
+  white-space: normal;
+  padding-left: 5px;
+  font-size: 14px;
+}
+
+@container EditorMenuBar (max-width: 500px) {
+  .ToolbarButtonText {
+    display: none;
+    width: 0;
+    padding: 0;
+  }
+  span.EditorToolbarItem {
+    padding: 0px;
+  }
 }
 
 span.EditorTitle {
-  position: relative;
-  top: 1px;
   padding-left: 5px;
-}
-
-.EditedText {
-  color: #a33;
-  font-size: 12px;
-}
-
-.ReadOnlyText {
-  color: gray;
+  padding-right: 5px;
+  font-weight: 500;
 }
 
 .NotSelectable {

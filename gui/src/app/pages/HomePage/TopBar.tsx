@@ -18,7 +18,12 @@ const TopBar: FunctionComponent<TopBarProps> = ({ title, onSetCollapsed }) => {
       position="sticky"
       sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
     >
-      <Toolbar variant="dense">
+      <Toolbar
+        variant="dense"
+        sx={{
+          minHeight: "0px",
+        }}
+      >
         <IconButton
           color="inherit"
           aria-label="open menu"
