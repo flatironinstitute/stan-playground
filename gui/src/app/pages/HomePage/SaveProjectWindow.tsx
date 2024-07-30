@@ -270,8 +270,8 @@ const SaveToBrowserView: FunctionComponent<SaveToBrowserViewProps> = ({
     <div className="SaveToBrowserView">
       <h3>Save to Browser</h3>
       <p>
-        This project will be saved to your browser as &quot;{title}&quot;.&nbsp;
-        It will be available to you on this device until you clear your browser
+        This project will be saved to your browser as &quot;{title}&quot;. It
+        will be available to you on this device until you clear your browser
         cache, but not on other devices or browsers.
       </p>
       <div>
