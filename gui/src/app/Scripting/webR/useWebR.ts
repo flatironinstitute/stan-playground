@@ -52,9 +52,10 @@ const useWebR = ({ imagesRef, consoleRef, onStatus, onData }: useWebRProps) => {
         console.log("closing webR!");
         webR.close();
         setWebR(null);
+        onStatus("idle");
       }
     };
-  }, [consoleRef, imagesRef, webR]);
+  }, [consoleRef, imagesRef, onStatus, webR]);
 
   const run = useCallback(
     async ({ code, spData }: RunRProps) => {
@@ -152,6 +153,7 @@ const outputLoop = async (
 
     switch (output.type) {
       case "closed":
+        console.log("webR closed, terminating output loop");
         return; // end loop
       case "stdout":
       case "stderr":
