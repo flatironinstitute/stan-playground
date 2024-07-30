@@ -4,7 +4,7 @@ import { Editor, loader, useMonaco } from "@monaco-editor/react";
 import monacoAddStanLang from "@SpComponents/stanLang";
 import { ToolBar, ToolbarItem } from "@SpComponents/ToolBar";
 import { CodeMarker } from "@SpStanc/Linting";
-import { editor, MarkerSeverity } from "monaco-editor";
+import { editor, KeyCode, KeyMod, MarkerSeverity } from "monaco-editor";
 import {
   FunctionComponent,
   useCallback,
@@ -27,6 +27,7 @@ type Props = {
   label: string;
   codeMarkers?: CodeMarker[];
   contentOnEmpty?: string | HTMLSpanElement;
+  actions?: editor.IActionDescriptor[];
 };
 
 const TextEditor: FunctionComponent<Props> = ({
@@ -40,6 +41,7 @@ const TextEditor: FunctionComponent<Props> = ({
   label,
   codeMarkers,
   contentOnEmpty,
+  actions,
 }) => {
   const handleChange = useCallback(
     (value: string | undefined) => {
@@ -99,28 +101,34 @@ const TextEditor: FunctionComponent<Props> = ({
     };
   }, [text, editorInstance, editedText, contentOnEmpty]);
 
-  /////////////////////////////////////////////////
-
-  // Can't do this in the usual way with monaco editor:
-  // See: https://github.com/microsoft/monaco-editor/issues/2947
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLDivElement>) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
-        e.preventDefault();
+  useEffect(() => {
+    if (!editorInstance) return;
+    editorInstance.addAction({
+      id: "save",
+      label: "Save",
+      keybindings: [KeyMod.CtrlCmd | KeyCode.KeyS],
+      run: () => {
         if (!readOnly) {
           onSaveText();
         }
-      }
-    },
-    [onSaveText, readOnly],
-  );
+      },
+    });
+  }, [editorInstance, onSaveText, readOnly]);
+
+  useEffect(() => {
+    if (!editorInstance) return;
+    if (!actions) return;
+    for (const action of actions) {
+      editorInstance.addAction(action);
+    }
+  }, [actions, editorInstance]);
 
   const edited = useMemo(() => {
     return editedText !== text;
   }, [editedText, text]);
 
   return (
-    <div className="EditorWithToolbar" onKeyDown={handleKeyDown}>
+    <div className="EditorWithToolbar">
       <ToolBar
         items={toolbarItems || []}
         label={label}
