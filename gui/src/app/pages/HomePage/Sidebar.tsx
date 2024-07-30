@@ -1,14 +1,15 @@
+import CloseableDialog, {
+  useDialogControls,
+} from "@SpComponents/CloseableDialog";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import { modelHasUnsavedChanges } from "@SpCore/ProjectDataModel";
 import LoadProjectWindow from "@SpPages/LoadProjectWindow";
 import SaveProjectWindow from "@SpPages/SaveProjectWindow";
-import ModalWindow, { useModalWindow } from "@fi-sci/modal-window";
+import { List, ListItem } from "@mui/material";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
 import Link from "@mui/material/Link";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
 import Toolbar from "@mui/material/Toolbar";
 import { FunctionComponent, useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
@@ -43,15 +44,15 @@ const Sidebar: FunctionComponent<Sidebar> = ({
   const dataModified = useMemo(() => modelHasUnsavedChanges(data), [data]);
 
   const {
-    visible: saveProjectVisible,
+    open: saveProjectVisible,
     handleOpen: saveProjectOpen,
     handleClose: saveProjectClose,
-  } = useModalWindow();
+  } = useDialogControls();
   const {
-    visible: loadProjectVisible,
+    open: loadProjectVisible,
     handleOpen: loadProjectOpen,
     handleClose: loadProjectClose,
-  } = useModalWindow();
+  } = useDialogControls();
 
   return (
     <Drawer
@@ -136,12 +137,22 @@ const Sidebar: FunctionComponent<Sidebar> = ({
         </List>
       </div>
 
-      <ModalWindow visible={loadProjectVisible} onClose={loadProjectClose}>
+      <CloseableDialog
+        title={"Load Project"}
+        id={"loadProjectDialog"}
+        open={loadProjectVisible}
+        handleClose={loadProjectClose}
+      >
         <LoadProjectWindow onClose={loadProjectClose} />
-      </ModalWindow>
-      <ModalWindow visible={saveProjectVisible} onClose={saveProjectClose}>
+      </CloseableDialog>
+      <CloseableDialog
+        title={"Save this project"}
+        id={"saveProjectDialog"}
+        open={saveProjectVisible}
+        handleClose={saveProjectClose}
+      >
         <SaveProjectWindow onClose={saveProjectClose} />
-      </ModalWindow>
+      </CloseableDialog>
     </Drawer>
   );
 };

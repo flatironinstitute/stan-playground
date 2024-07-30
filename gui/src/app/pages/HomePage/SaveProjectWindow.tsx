@@ -1,8 +1,8 @@
 import { FunctionComponent, useCallback, useContext, useState } from "react";
 
-import { serializeAsZip } from "@SpCore/ProjectSerialization";
 import { FileRegistry, mapModelToFileManifest } from "@SpCore/FileMapping";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
+import { serializeAsZip } from "@SpCore/ProjectSerialization";
 import saveAsGitHubGist from "@SpCore/gists/saveAsGitHubGist";
 import { triggerDownload } from "@SpUtil/triggerDownload";
 import Button from "@mui/material/Button";
@@ -20,8 +20,7 @@ const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
   const [exportingToGist, setExportingToGist] = useState(false);
 
   return (
-    <div>
-      <h3>Save this project</h3>
+    <div className="dialogWrapper">
       <table className="project-summary-table">
         <tbody>
           <tr>
