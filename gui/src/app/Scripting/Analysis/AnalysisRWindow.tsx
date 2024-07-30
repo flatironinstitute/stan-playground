@@ -1,4 +1,4 @@
-import { FunctionComponent, useCallback, useMemo } from "react";
+import { FunctionComponent, useCallback } from "react";
 import { StanRun } from "@SpStanSampler/useStanSampler";
 import { FileNames } from "@SpCore/FileMapping";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
@@ -28,12 +28,7 @@ const AnalysisRWindow: FunctionComponent<AnalysisWindowProps> = ({
     notRunnableReason,
   } = useAnalysisState(latestRun);
 
-  const webRArgs = useMemo(
-    () => ({ consoleRef, imagesRef, onStatus }),
-    [consoleRef, imagesRef, onStatus],
-  );
-
-  const { run } = useWebR(webRArgs);
+  const { run } = useWebR({ consoleRef, imagesRef, onStatus });
   const handleRun = useCallback(
     async (userCode: string) => {
       clearOutputDivs(consoleRef, imagesRef);

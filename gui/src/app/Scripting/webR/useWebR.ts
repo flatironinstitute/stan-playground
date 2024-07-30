@@ -45,7 +45,8 @@ const useWebR = ({ imagesRef, consoleRef, onStatus, onData }: useWebRProps) => {
   }, [onStatus, webR]);
 
   useEffect(() => {
-    if (webR) outputLoop(webR, consoleRef, imagesRef);
+    const closedHandle = { closed: false };
+    if (webR) outputLoop(webR, consoleRef, imagesRef, closedHandle);
 
     return () => {
       if (webR) {
@@ -54,6 +55,7 @@ const useWebR = ({ imagesRef, consoleRef, onStatus, onData }: useWebRProps) => {
         setWebR(null);
         onStatus("idle");
       }
+      closedHandle.closed = true;
     };
   }, [consoleRef, imagesRef, onStatus, webR]);
 
@@ -133,10 +135,11 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const outputLoop = async (
   webR: WebR,
   consoleRef: RefObject<HTMLDivElement>,
-  imagesRef?: RefObject<HTMLDivElement>,
+  imagesRef: RefObject<HTMLDivElement> | undefined,
+  closedHandle: { closed: boolean },
 ) => {
   // ignore startup messages from R repl
-  for (;;) {
+  while (!closedHandle.closed) {
     const output = await webR.read();
     if (output.type === "prompt") {
       break; // no more startup messages
@@ -148,8 +151,9 @@ const outputLoop = async (
 
   let canvas = undefined;
 
-  for (;;) {
+  while (!closedHandle.closed) {
     const output = await webR.read();
+    if (closedHandle.closed) return;
 
     switch (output.type) {
       case "closed":

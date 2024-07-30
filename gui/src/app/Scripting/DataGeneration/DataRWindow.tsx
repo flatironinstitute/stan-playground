@@ -1,4 +1,4 @@
-import { FunctionComponent, useCallback, useMemo } from "react";
+import { FunctionComponent, useCallback } from "react";
 import ScriptEditor from "@SpScripting/ScriptEditor";
 import { clearOutputDivs } from "@SpScripting/OutputDivUtils";
 import { FileNames } from "@SpCore/FileMapping";
@@ -21,12 +21,7 @@ const handleHelp = () =>
 const DataRWindow: FunctionComponent<Props> = () => {
   const { consoleRef, status, onStatus, onData } = useDataGenState();
 
-  const webRArgs = useMemo(
-    () => ({ consoleRef, onStatus, onData }),
-    [consoleRef, onData, onStatus],
-  );
-
-  const { run } = useWebR(webRArgs);
+  const { run } = useWebR({ consoleRef, onStatus, onData });
   const handleRun = useCallback(
     async (code: string) => {
       clearOutputDivs(consoleRef);
