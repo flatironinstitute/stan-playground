@@ -34,8 +34,9 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
         files: fileManifest,
         clearExisting: true,
       });
+      onClose();
     },
-    [update],
+    [onClose, update],
   );
 
   const importUploadedFiles = useCallback(
