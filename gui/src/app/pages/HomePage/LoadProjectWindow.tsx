@@ -77,7 +77,11 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
           clearExisting: replaceProject,
         });
 
-        if (stanFileName !== "" && fileManifest.meta === undefined) {
+        if (
+          replaceProject &&
+          stanFileName !== "" &&
+          fileManifest.meta === undefined
+        ) {
           update({ type: "retitle", title: stanFileName });
         }
 
