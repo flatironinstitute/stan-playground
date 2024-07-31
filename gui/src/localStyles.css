@@ -67,6 +67,10 @@
 }
 
 /* Sidebar */
+.Sidebar {
+  overflow-x: hidden;
+}
+
 .Sidebar h3 {
   padding: 0px;
   margin-left: 12px;
