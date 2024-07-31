@@ -5,6 +5,7 @@ import TextEditor from "@SpComponents/TextEditor";
 import { ToolbarItem } from "@SpComponents/ToolBar";
 import compileStanProgram from "@SpStanc/compileStanProgram";
 import { stancErrorsToCodeMarkers } from "@SpStanc/Linting";
+import { checkMainJsUrlCache } from "@SpStanc/mainJsUrlCache";
 import useStanc from "@SpStanc/useStanc";
 import {
   FunctionComponent,
@@ -79,16 +80,6 @@ const StanFileEditor: FunctionComponent<Props> = ({
     setCompiledUrl(mainJsUrl);
     setCompileStatus("compiled");
     setTheStanFileContentThasHasBeenCompiled(fileContent);
-
-    // record in local storage that we compiled this particular stan file
-    try {
-      const key = getKeyNameForCompiledFile(stanWasmServerUrl, fileContent);
-      const value = JSON.stringify({ mainJsUrl });
-      localStorage.setItem(key, value);
-    } catch (e: any) {
-      console.error("Problem recording compiled file in local storage");
-      console.error(e);
-    }
   }, [fileContent, setCompiledUrl]);
 
   useEffect(() => {
@@ -107,21 +98,15 @@ const StanFileEditor: FunctionComponent<Props> = ({
     setCompiledUrl,
   ]);
 
-  const [didInitialCompile, setDidInitialCompile] = useState(false);
   useEffect(() => {
-    // if we think this has been compiled before, let's go ahead and compile it (should be in cache on server)
-    // but we are only going to do this on initial load
-    if (didInitialCompile) return;
-    const stanWasmServerUrl = localStorage.getItem("stanWasmServerUrl") || "";
-    if (!stanWasmServerUrl) return;
-    const key = getKeyNameForCompiledFile(stanWasmServerUrl, fileContent);
-    const value = localStorage.getItem(key);
-    if (!value) return;
-    handleCompile();
-    if (fileContent) {
-      setDidInitialCompile(true);
-    }
-  }, [fileContent, handleCompile, didInitialCompile]);
+    // if the stan program has already been compiled, and the record of that is in the cache,
+    // then call handleCompile, which will end up loading from the cache
+    checkMainJsUrlCache(fileContent).then((mainJsUrl) => {
+      if (mainJsUrl) {
+        handleCompile();
+      }
+    });
+  }, [fileContent, handleCompile]);
 
   const [syntaxWindowVisible, setSyntaxWindowVisible] = useState(false);
 
@@ -241,24 +226,6 @@ const StanFileEditor: FunctionComponent<Props> = ({
       {window}
     </Split>
   );
-};
-
-const getKeyNameForCompiledFile = (
-  stanWasmServerUrl: string,
-  stanFileContent: string,
-) => {
-  return `compiled-file|${stanWasmServerUrl}|${stringChecksum(stanFileContent)}`;
-};
-
-const stringChecksum = (str: string) => {
-  let hash = 0;
-  if (str.length == 0) return hash;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return hash;
 };
 
 export default StanFileEditor;
