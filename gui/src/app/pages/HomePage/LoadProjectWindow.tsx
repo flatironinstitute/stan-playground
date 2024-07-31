@@ -1,5 +1,6 @@
 import { Delete } from "@mui/icons-material";
 import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import {
@@ -25,54 +26,56 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
   const [errorText, setErrorText] = useState<string>("");
   const [filesUploaded, setFilesUploaded] = useState<File[]>([]);
 
+  const importUploadedZip = useCallback(
+    async (zipFile: ArrayBuffer) => {
+      const fileManifest = await deserializeZipToFiles(zipFile);
+      update({
+        type: "loadFiles",
+        files: fileManifest,
+        clearExisting: true,
+      });
+    },
+    [update],
+  );
+
   const importUploadedFiles = useCallback(
     async (o: { replaceProject: boolean }) => {
       const { replaceProject } = o;
       if (!filesUploaded) return;
       try {
-        if (
-          filesUploaded.length === 1 &&
-          filesUploaded[0].name.endsWith(".zip")
-        ) {
-          // a single .zip file
-          const fileManifest = await deserializeZipToFiles(
-            filesUploaded[0].content,
-          );
-          update({
-            type: "loadFiles",
-            files: fileManifest,
-            clearExisting: replaceProject,
-          });
-        } else {
-          let stanFileName = "";
-          const files: Partial<FileRegistry> = {};
+        let stanFileName = "";
+        const files: Partial<FileRegistry> = {};
 
-          for (const file of filesUploaded) {
-            if (file.name.endsWith(".stan")) {
-              if (stanFileName !== "") {
-                throw Error("Only one .stan file can be uploaded at a time");
-              }
-              files["main.stan"] = parseFile(file.content);
-              stanFileName = file.name;
-              continue;
+        for (const file of filesUploaded) {
+          if (file.name.endsWith(".stan")) {
+            if (stanFileName !== "") {
+              throw Error("Only one .stan file can be uploaded at a time");
             }
-            if (!Object.values(FileNames).includes(file.name as any)) {
-              throw Error(`Unrecognized file: ${file.name}`);
-            }
-            files[file.name as FileNames] = parseFile(file.content);
+            files["main.stan"] = parseFile(file.content);
+            stanFileName = file.name;
+            continue;
+          }
+          if (file.name.endsWith(".zip")) {
+            throw Error(".zip files cannot be uploaded alongside other files");
           }
 
-          const fileManifest = mapFileContentsToModel(files);
-          update({
-            type: "loadFiles",
-            files: fileManifest,
-            clearExisting: replaceProject,
-          });
-
-          if (stanFileName !== "" && fileManifest.meta === undefined) {
-            update({ type: "retitle", title: stanFileName });
+          if (!Object.values(FileNames).includes(file.name as any)) {
+            throw Error(`Unsupported file name: ${file.name}`);
           }
+          files[file.name as FileNames] = parseFile(file.content);
         }
+
+        const fileManifest = mapFileContentsToModel(files);
+        update({
+          type: "loadFiles",
+          files: fileManifest,
+          clearExisting: replaceProject,
+        });
+
+        if (stanFileName !== "" && fileManifest.meta === undefined) {
+          update({ type: "retitle", title: stanFileName });
+        }
+
         onClose();
       } catch (e: any) {
         setErrorText(e.message);
@@ -82,10 +85,9 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
   );
 
   const onUpload = useCallback(
-    (fs: { name: string; content: ArrayBuffer }[]) => {
+    (fs: File[]) => {
       if (fs.length === 1 && fs[0].name.endsWith(".zip")) {
-        setFilesUploaded(fs);
-        importUploadedFiles({ replaceProject: true });
+        importUploadedZip(fs[0].content);
       } else {
         setFilesUploaded((prev) => {
           const newNames = fs.map((f) => f.name);
@@ -94,7 +96,7 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
         });
       }
     },
-    [importUploadedFiles],
+    [importUploadedZip],
   );
 
   return (
@@ -110,7 +112,7 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
             </li>
             <li>An individual *.stan file</li>
             <li>
-              Other individual project files (meta.json, data.json, init.json,
+              Other individual project files (data.json, meta.json, data.py,
               etc.)
             </li>
           </ul>
@@ -144,19 +146,22 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
                 </tbody>
               </table>
             </div>
-            <div>
-              <Button
-                onClick={() => importUploadedFiles({ replaceProject: true })}
-              >
-                Load into a NEW project
-              </Button>
-              <span style={{ margin: "0 10px" }}>or</span>
-              <Button
-                onClick={() => importUploadedFiles({ replaceProject: false })}
-              >
-                Load into EXISTING project
-              </Button>
-            </div>
+            <Grid container justifyContent="center" spacing={1}>
+              <Grid item>
+                <Button
+                  onClick={() => importUploadedFiles({ replaceProject: true })}
+                >
+                  Load into a NEW project
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button
+                  onClick={() => importUploadedFiles({ replaceProject: false })}
+                >
+                  Load into EXISTING project
+                </Button>
+              </Grid>
+            </Grid>
           </>
         )}
       </Stack>
