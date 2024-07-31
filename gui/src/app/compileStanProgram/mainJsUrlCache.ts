@@ -16,7 +16,6 @@ export const checkMainJsUrlCache = async (
     // check to see if the url is still valid
     const exists = await checkRemoteFileExists(url);
     if (!exists) {
-      console.warn("mainJsCache url no longer exists");
       delete cache[stanProgramHash];
       localStorage.setItem("mainJsCache", JSON.stringify(cache));
       return null;
