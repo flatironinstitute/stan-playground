@@ -6,7 +6,10 @@ import { triggerDownload } from "@SpUtil/triggerDownload";
 import Button from "@mui/material/Button";
 import loadFilesFromGist from "@SpCore/gists/loadFilesFromGist";
 import { serializeAsZip } from "@SpCore/ProjectSerialization";
-import saveAsGitHubGist, { createPatchForUpdatingGist, updateGitHubGist } from "@SpCore/gists/saveAsGitHubGist";
+import saveAsGitHubGist, {
+  createPatchForUpdatingGist,
+  updateGitHubGist,
+} from "@SpCore/gists/saveAsGitHubGist";
 
 type SaveProjectWindowProps = {
   onClose: () => void;
@@ -80,15 +83,13 @@ const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
         <GistExportView
           fileManifest={fileManifest}
           title={data.meta.title}
-          updateExisting={false}
           onClose={onClose}
         />
       )}
       {updatingExistingGist && (
-        <GistExportView
+        <GistUpdateView
           fileManifest={fileManifest}
           title={data.meta.title}
-          updateExisting={true}
           onClose={onClose}
         />
       )}
@@ -117,20 +118,17 @@ const EditTitleComponent: FunctionComponent<EditTitleComponentProps> = ({
 type GistExportViewProps = {
   fileManifest: Partial<FileRegistry>;
   title: string;
-  updateExisting?: boolean;
   onClose: () => void;
 };
 
 const GistExportView: FunctionComponent<GistExportViewProps> = ({
   fileManifest,
   title,
-  updateExisting,
   onClose,
 }) => {
   const [gitHubPersonalAccessToken, setGitHubPersonalAccessToken] =
     useState("");
   const [gistUrl, setGistUrl] = useState<string | null>(null);
-  const [gistUrlToUpdate, setGistUrlToUpdate] = useState<string | null>(null);
 
   const handleExport = useCallback(async () => {
     try {
@@ -144,42 +142,15 @@ const GistExportView: FunctionComponent<GistExportViewProps> = ({
     }
   }, [gitHubPersonalAccessToken, fileManifest, title]);
 
-  const handleUpdateGist = useCallback(async () => {
-    if (!gistUrlToUpdate) return; // should not happen
-    try {
-      const { files: existingFiles, description } =
-        await loadFilesFromGist(gistUrlToUpdate);
-      if (description !== title) {
-        alert(
-          `Gist description does not match project title. At this time, changing the title of a project when updating a Gist is not supported.`,
-        );
-        return;
-      }
-      const patch = createPatchForUpdatingGist(existingFiles, fileManifest);
-      await updateGitHubGist(gistUrlToUpdate, patch, {
-        personalAccessToken: gitHubPersonalAccessToken,
-      });
-      setGistUrl(gistUrlToUpdate);
-    } catch (err: any) {
-      alert(`Error updating GitHub Gist: ${err.message}`);
-    }
-  }, [gitHubPersonalAccessToken, fileManifest, title, gistUrlToUpdate]);
-
   return (
     <div className="GistExplainer">
-      <h3>
-        {!updateExisting ? "Save to GitHub Gist" : "Update a GitHub Gist"}
-      </h3>
+      <h3>Save to GitHub Gist</h3>
       <p>
-        In order to{" "}
-        {!updateExisting
-          ? "save this project as a GitHub Gist"
-          : "update a Gist"}
-        , you will need to provide a GitHub Personal Access Token.&nbsp; This
-        token will be used to authenticate with GitHub and{" "}
-        {!updateExisting ? "create a new Gist" : "update a Gist"} with the files
-        in this project.&nbsp; To create a new Personal Access Token granting
-        permission to read/write your Gists,{" "}
+        In order to save this project as a GitHub Gist, you will need to provide
+        a GitHub Personal Access Token. This token will be used to authenticate
+        with GitHub and create a new Gist with the files in this project. To
+        create a new Personal Access Token granting permission to read/write
+        your Gists,{" "}
         <a
           href="https://github.com/settings/tokens/new?description=Stan%20Playground&scopes=gist"
           target="_blank"
@@ -205,31 +176,12 @@ const GistExportView: FunctionComponent<GistExportViewProps> = ({
         in a text file for future use.
       </p>
       <p>Copy the token and paste it into the field below.</p>
-      <table className="project-summary-table">
-        <tbody>
-          <tr>
-            <td>GitHub Personal Access Token</td>
-            <td>
-              <input
-                type="password"
-                value={gitHubPersonalAccessToken}
-                onChange={(e) => setGitHubPersonalAccessToken(e.target.value)}
-              />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      {updateExisting && (
-        <>
-          <div>&nbsp;</div>
-          <SpecifyGistUrlToUpdateComponent
-            gistUrl={gistUrlToUpdate}
-            setGistUrl={setGistUrlToUpdate}
-          />
-        </>
-      )}
+      <InputGitHubPersonalAccessTokenComponent
+        gitHubPersonalAccessToken={gitHubPersonalAccessToken}
+        setGitHubPersonalAccessToken={setGitHubPersonalAccessToken}
+      />
       <div>&nbsp;</div>
-      {!gistUrl && !updateExisting && (
+      {!gistUrl && (
         <div>
           <Button onClick={handleExport} disabled={!gitHubPersonalAccessToken}>
             Save to GitHub Gist
@@ -238,23 +190,10 @@ const GistExportView: FunctionComponent<GistExportViewProps> = ({
           <Button onClick={onClose}>Cancel</Button>
         </div>
       )}
-      {!gistUrl && updateExisting && (
-        <div>
-          <Button
-            onClick={handleUpdateGist}
-            disabled={!gitHubPersonalAccessToken || !gistUrlToUpdate}
-          >
-            Update GitHub Gist
-          </Button>
-          &nbsp;
-          <Button onClick={onClose}>Cancel</Button>
-        </div>
-      )}
       {gistUrl && (
         <div>
           <p>
-            Successfully {!updateExisting ? "saved to" : "updated"} GitHub
-            Gist:&nbsp;
+            Successfully saved to GitHub Gist:{" "}
             <a href={gistUrl} target="_blank" rel="noreferrer">
               {gistUrl}
             </a>
@@ -277,6 +216,136 @@ const GistExportView: FunctionComponent<GistExportViewProps> = ({
         </div>
       )}
     </div>
+  );
+};
+
+type GistUpdateViewProps = {
+  fileManifest: Partial<FileRegistry>;
+  title: string;
+  onClose: () => void;
+};
+
+const GistUpdateView: FunctionComponent<GistUpdateViewProps> = ({
+  fileManifest,
+  title,
+  onClose,
+}) => {
+  const [gitHubPersonalAccessToken, setGitHubPersonalAccessToken] =
+    useState("");
+  const [gistUrl, setGistUrl] = useState<string | null>(null);
+  const [updated, setUpdated] = useState(false);
+
+  const handleUpdateGist = useCallback(async () => {
+    if (!gistUrl) return; // should not happen
+    try {
+      const { files: existingFiles, description } =
+        await loadFilesFromGist(gistUrl);
+      if (description !== title) {
+        alert(
+          `Gist description does not match project title. At this time, changing the title of a project when updating a Gist is not supported.`,
+        );
+        return;
+      }
+      const patch = createPatchForUpdatingGist(existingFiles, fileManifest);
+      await updateGitHubGist(gistUrl, patch, {
+        personalAccessToken: gitHubPersonalAccessToken,
+      });
+      setUpdated(true);
+    } catch (err: any) {
+      alert(`Error updating GitHub Gist: ${err.message}`);
+    }
+  }, [gitHubPersonalAccessToken, fileManifest, title, gistUrl]);
+
+  return (
+    <div className="GistExplainer">
+      <h3>Update a GitHub Gist</h3>
+      <div>&nbsp;</div>
+      <SpecifyGistUrlToUpdateComponent
+        gistUrl={gistUrl}
+        setGistUrl={setGistUrl}
+      />
+      <div>&nbsp;</div>
+      <InputGitHubPersonalAccessTokenComponent
+        gitHubPersonalAccessToken={gitHubPersonalAccessToken}
+        setGitHubPersonalAccessToken={setGitHubPersonalAccessToken}
+      />
+      <div>&nbsp;</div>
+      {!updated && gistUrl && (
+        <div>
+          <Button
+            onClick={handleUpdateGist}
+            disabled={!gitHubPersonalAccessToken || !gistUrl}
+          >
+            Update GitHub Gist
+          </Button>
+          &nbsp;
+          <Button onClick={onClose}>Cancel</Button>
+        </div>
+      )}
+      {updated && gistUrl && (
+        <div>
+          <p>
+            Successfully updated Gist:{" "}
+            <a href={gistUrl} target="_blank" rel="noreferrer">
+              {gistUrl}
+            </a>
+          </p>
+          <InvitationToShareProjectParagraph gistUrl={gistUrl} />
+          <Button onClick={onClose}>Close</Button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+type InputGitHubPersonalAccessTokenComponentProps = {
+  gitHubPersonalAccessToken: string;
+  setGitHubPersonalAccessToken: (token: string) => void;
+};
+
+const InputGitHubPersonalAccessTokenComponent: FunctionComponent<
+  InputGitHubPersonalAccessTokenComponentProps
+> = ({ gitHubPersonalAccessToken, setGitHubPersonalAccessToken }) => {
+  return (
+    <table className="project-summary-table">
+      <tbody>
+        <tr>
+          <td>GitHub Personal Access Token</td>
+          <td>
+            <input
+              type="password"
+              value={gitHubPersonalAccessToken}
+              onChange={(e) => setGitHubPersonalAccessToken(e.target.value)}
+            />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  );
+};
+
+type InvitationToShareProjectParagraphProps = {
+  gistUrl: string;
+};
+
+const InvitationToShareProjectParagraph: FunctionComponent<
+  InvitationToShareProjectParagraphProps
+> = ({ gistUrl }) => {
+  return (
+    <p>
+      You can now share the following link to this Stan Playground
+      project:&nbsp;
+      <br />
+      <br />
+      <a
+        href={makeSPShareableLinkFromGistUrl(gistUrl)}
+        target="_blank"
+        rel="noreferrer"
+      >
+        {makeSPShareableLinkFromGistUrl(gistUrl)}
+      </a>
+      <br />
+    </p>
   );
 };
 
