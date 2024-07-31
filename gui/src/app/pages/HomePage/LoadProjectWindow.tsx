@@ -104,8 +104,7 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
   }, [filesUploaded, importUploadedFiles]);
 
   return (
-    <div>
-      <h3>Load project</h3>
+    <div className="dialogWrapper">
       <div>
         You can upload:
         <ul>

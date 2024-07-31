@@ -1,15 +1,12 @@
 import { FunctionComponent, useCallback, useContext, useState } from "react";
 
-import { serializeAsZip } from "@SpCore/ProjectSerialization";
 import { FileRegistry, mapModelToFileManifest } from "@SpCore/FileMapping";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
-import saveAsGitHubGist, {
-  createPatchForUpdatingGist,
-  updateGitHubGist,
-} from "@SpCore/gists/saveAsGitHubGist";
 import { triggerDownload } from "@SpUtil/triggerDownload";
 import Button from "@mui/material/Button";
 import loadFilesFromGist from "@SpCore/gists/loadFilesFromGist";
+import { serializeAsZip } from "@SpCore/ProjectSerialization";
+import saveAsGitHubGist, { createPatchForUpdatingGist, updateGitHubGist } from "@SpCore/gists/saveAsGitHubGist";
 
 type SaveProjectWindowProps = {
   onClose: () => void;
@@ -25,8 +22,7 @@ const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
   const [updatingExistingGist, setUpdatingExistingGist] = useState(false);
 
   return (
-    <div>
-      <h3>Save this project</h3>
+    <div className="dialogWrapper">
       <table className="project-summary-table">
         <tbody>
           <tr>
