@@ -28,13 +28,17 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
 
   const importUploadedZip = useCallback(
     async (zipFile: ArrayBuffer) => {
-      const fileManifest = await deserializeZipToFiles(zipFile);
-      update({
-        type: "loadFiles",
-        files: fileManifest,
-        clearExisting: true,
-      });
-      onClose();
+      try {
+        const fileManifest = await deserializeZipToFiles(zipFile);
+        update({
+          type: "loadFiles",
+          files: fileManifest,
+          clearExisting: true,
+        });
+        onClose();
+      } catch (e: any) {
+        setErrorText(e.message);
+      }
     },
     [onClose, update],
   );
