@@ -1,4 +1,8 @@
-import { initialDataModel, ProjectDataModel } from "@SpCore/ProjectDataModel";
+import {
+  initialDataModel,
+  modelHasUnsavedChanges,
+  ProjectDataModel,
+} from "@SpCore/ProjectDataModel";
 import {
   fetchRemoteProject,
   fromQueryParams,
@@ -47,9 +51,13 @@ const ProjectContextProvider: FunctionComponent<
 
   useEffect(() => {
     // as user reloads the page or closes the tab, save state to local storage
-    const handleBeforeUnload = () => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       const state = serializeProjectToLocalStorage(data);
       localStorage.setItem("stan-playground-saved-state", state);
+      if (modelHasUnsavedChanges(data)) {
+        e.preventDefault();
+        e.returnValue = true; // legacy
+      }
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
 

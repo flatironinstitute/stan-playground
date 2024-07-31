@@ -13,6 +13,7 @@ import {
 } from "react";
 import { InterpreterStatus } from "./InterpreterTypes";
 import { Split } from "@geoffcox/react-splitter";
+import { editor, KeyCode, KeyMod } from "monaco-editor";
 
 const interpreterNames = { python: "pyodide", r: "webR" } as const;
 
@@ -72,6 +73,22 @@ const ScriptEditor: FunctionComponent<ScriptEditorProps> = ({
     return content !== editedContent;
   }, [content, editedContent]);
 
+  const runCtrlEnter: editor.IActionDescriptor[] = useMemo(
+    () => [
+      {
+        id: "run-script",
+        label: "Run Script",
+        keybindings: [KeyMod.CtrlCmd | KeyCode.Enter],
+        run: () => {
+          if (runnable && !unsavedChanges) {
+            runCode();
+          }
+        },
+      },
+    ],
+    [runCode, runnable, unsavedChanges],
+  );
+
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     return makeToolbar({
       status,
@@ -102,6 +119,7 @@ const ScriptEditor: FunctionComponent<ScriptEditorProps> = ({
         onSaveText={onSaveText}
         toolbarItems={toolbarItems}
         contentOnEmpty={contentOnEmpty}
+        actions={runCtrlEnter}
       />
       <ConsoleOutputWindow consoleRef={consoleRef} />
     </Split>
@@ -129,7 +147,7 @@ const makeToolbar = (o: {
   if (runnable) {
     ret.push({
       type: "button",
-      tooltip: "Run code to generate data",
+      tooltip: "Run code (Ctrl-Enter)",
       label: "Run",
       icon: <PlayArrow />,
       onClick: onRun,

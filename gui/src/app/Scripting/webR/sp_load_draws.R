@@ -15,12 +15,12 @@
     names <- .repair_variable_names(SP_DATA_IN$paramNames)
     num_params <- length(names)
 
-    num_draws <- length(draws) %/% num_chains
+    num_draws <- length(draws)%/%num_params%/%num_chains
 
-    dims <- c(num_params,  num_draws, num_chains )
-    draws <- array(unlist(draws), dim = dims, dimnames = list( names, NULL, NULL))
+    dims <- c(num_draws, num_chains, num_params)
+    draws <- array(draws, dim = dims, dimnames = list(NULL, NULL, names))
     # posterior likes draws x chains x params
-    draws <- aperm(draws, c(2,3,1))
+    draws <- aperm(draws, c(1, 2, 3))
 
     posterior::as_draws_array(draws)
 }

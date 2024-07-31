@@ -3,13 +3,13 @@ import { StanRun } from "@SpStanSampler/useStanSampler";
 import { FileNames } from "@SpCore/FileMapping";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
 import PlottingScriptEditor from "@SpScripting/PlottingScriptEditor";
-import runR from "@SpScripting/webR/runR";
 import useTemplatedFillerText from "@SpScripting/useTemplatedFillerText";
 import { clearOutputDivs } from "@SpScripting/OutputDivUtils";
 import loadDrawsCode from "@SpScripting/webR/sp_load_draws.R?raw";
 import useAnalysisState from "./useAnalysisState";
 
 import analysisRTemplate from "./analysis_template.R?raw";
+import useWebR from "@SpScripting/webR/useWebR";
 
 type AnalysisWindowProps = {
   latestRun: StanRun;
@@ -28,19 +28,14 @@ const AnalysisRWindow: FunctionComponent<AnalysisWindowProps> = ({
     notRunnableReason,
   } = useAnalysisState(latestRun);
 
+  const { run } = useWebR({ consoleRef, imagesRef, onStatus });
   const handleRun = useCallback(
     async (userCode: string) => {
       clearOutputDivs(consoleRef, imagesRef);
       const code = loadDrawsCode + userCode;
-      await runR({
-        code,
-        imagesRef,
-        consoleRef,
-        onStatus,
-        spData,
-      });
+      await run({ code, spData });
     },
-    [consoleRef, imagesRef, onStatus, spData],
+    [consoleRef, imagesRef, run, spData],
   );
 
   const contentOnEmpty = useTemplatedFillerText(
