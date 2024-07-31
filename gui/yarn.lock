@@ -554,14 +554,6 @@
   resolved "https://registry.yarnpkg.com/@fi-sci/misc/-/misc-0.0.8.tgz#56b0c5402fc64df873c8a7b0d65966c3df3f0dd7"
   integrity sha512-lhbKCriIv9TxBw3xSZ/q7mlfVDc+OsJ1x6jesyeHEVMdqqYHDIRTZTdUIrnA0jdL4nMj3FbYNHE49Z7K+iouiQ==
 
-"@fi-sci/modal-window@^0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@fi-sci/modal-window/-/modal-window-0.0.2.tgz#ab50fe92925a2efd01fd8d3ab54f8f47bf7821b3"
-  integrity sha512-CHeCWWLblUNUtqCWIhnR6+2TYzzcoJlKj0PGgnw5XYEOFHhV7TBDGFQ5jzc609jAPRfc3grkUYJy6lru+BnFWA==
-  dependencies:
-    "@mui/icons-material" "^5.14.19"
-    "@mui/material" "^5.14.20"
-
 "@floating-ui/core@^1.6.0":
   version "1.6.4"
   resolved "https://registry.yarnpkg.com/@floating-ui/core/-/core-1.6.4.tgz#0140cf5091c8dee602bff9da5ab330840ff91df6"
@@ -715,14 +707,14 @@
   resolved "https://registry.yarnpkg.com/@mui/core-downloads-tracker/-/core-downloads-tracker-5.15.21.tgz#15ffc56cef7009479229b55126176f988afba96b"
   integrity sha512-dp9lXBaJZzJYeJfQY3Ow4Rb49QaCEdkl2KKYscdQHQm6bMJ+l4XPY3Cd9PCeeJTsHPIDJ60lzXbeRgs6sx/rpw==
 
-"@mui/icons-material@^5.14.19", "@mui/icons-material@^5.15.17":
-  version "5.15.21"
-  resolved "https://registry.yarnpkg.com/@mui/icons-material/-/icons-material-5.15.21.tgz#1e29e1bdb90916be5b66c95c45951f441821f34a"
-  integrity sha512-yqkq1MbdkmX5ZHyvZTBuAaA6RkvoqkoAgwBSx9Oh0L0jAfj9T/Ih/NhMNjkl8PWVSonjfDUkKroBnjRyo/1M9Q==
+"@mui/icons-material@^5.16.5":
+  version "5.16.5"
+  resolved "https://registry.yarnpkg.com/@mui/icons-material/-/icons-material-5.16.5.tgz#53cdd03132315c8daff2200d146035f34c913470"
+  integrity sha512-bn88xxU/J9UV0s6+eutq7o3TTOrOlbCX+KshFb8kxgIxJZZfYz3JbAXVMivvoMF4Md6jCVUzM9HEkf4Ajab4tw==
   dependencies:
     "@babel/runtime" "^7.23.9"
 
-"@mui/material@^5.14.20", "@mui/material@^5.15.17":
+"@mui/material@^5.15.17":
   version "5.15.21"
   resolved "https://registry.yarnpkg.com/@mui/material/-/material-5.15.21.tgz#b2c8d756af570a61cb4975acf0e71dafb110b001"
   integrity sha512-nTyCcgduKwHqiuQ/B03EQUa+utSMzn2sQp0QAibsnYe4tvc3zkMbO0amKpl48vhABIY3IvT6w9615BFIgMt0YA==
