@@ -93,7 +93,8 @@ async def compile_stan_program(
     """
     try:
         job_main = get_job_source_file(job_dir)
-        cmd = f"emmake make {job_main.with_suffix('.js')} && emstrip {job_main.with_suffix('.wasm')}"
+        cmd = f"emmake make STANCFLAGS=--filename-in-msg=main.stan {job_main.with_suffix('.js')} \
+            && emstrip {job_main.with_suffix('.wasm')}"
         logger.info("Compiling in %s", job_dir)
         before = time.time()
         process = await asyncio.create_subprocess_shell(

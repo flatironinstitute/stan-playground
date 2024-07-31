@@ -549,11 +549,6 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.57.0.tgz#a5417ae8427873f1dd08b70b3574b453e67b5f7f"
   integrity sha512-Ys+3g2TaW7gADOJzPt83SJtCDhMjndcDMFVQ/Tj9iA1BfJzFKD9mAUXT3OenpuPHbI6P/myECxRJrofUsDx/5g==
 
-"@fi-sci/misc@^0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@fi-sci/misc/-/misc-0.0.8.tgz#56b0c5402fc64df873c8a7b0d65966c3df3f0dd7"
-  integrity sha512-lhbKCriIv9TxBw3xSZ/q7mlfVDc+OsJ1x6jesyeHEVMdqqYHDIRTZTdUIrnA0jdL4nMj3FbYNHE49Z7K+iouiQ==
-
 "@floating-ui/core@^1.6.0":
   version "1.6.4"
   resolved "https://registry.yarnpkg.com/@floating-ui/core/-/core-1.6.4.tgz#0140cf5091c8dee602bff9da5ab330840ff91df6"
