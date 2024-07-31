@@ -1,6 +1,9 @@
+import { Delete } from "@mui/icons-material";
 import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid";
+import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
 import {
-  FieldsContentsMap,
   FileNames,
   FileRegistry,
   mapFileContentsToModel,
@@ -8,13 +11,9 @@ import {
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import { deserializeZipToFiles, parseFile } from "@SpCore/ProjectSerialization";
 import UploadFilesArea from "@SpPages/UploadFilesArea";
-import {
-  FunctionComponent,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { FunctionComponent, useCallback, useContext, useState } from "react";
+
+type File = { name: string; content: ArrayBuffer };
 
 type LoadProjectWindowProps = {
   onClose: () => void;
@@ -24,63 +23,68 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
   onClose,
 }) => {
   const { update } = useContext(ProjectContext);
-  const [errorText, setErrorText] = useState<string | null>(null);
-  const [filesUploaded, setFilesUploaded] = useState<
-    { name: string; content: ArrayBuffer }[] | null
-  >(null);
-  const [showReplaceProjectOptions, setShowReplaceProjectOptions] =
-    useState<boolean>(false);
+  const [errorText, setErrorText] = useState<string>("");
+  const [filesUploaded, setFilesUploaded] = useState<File[]>([]);
+
+  const importUploadedZip = useCallback(
+    async (zipFile: ArrayBuffer) => {
+      try {
+        const fileManifest = await deserializeZipToFiles(zipFile);
+        update({
+          type: "loadFiles",
+          files: fileManifest,
+          clearExisting: true,
+        });
+        onClose();
+      } catch (e: any) {
+        setErrorText(e.message);
+      }
+    },
+    [onClose, update],
+  );
 
   const importUploadedFiles = useCallback(
     async (o: { replaceProject: boolean }) => {
       const { replaceProject } = o;
       if (!filesUploaded) return;
       try {
-        if (
-          filesUploaded.length === 1 &&
-          filesUploaded[0].name.endsWith(".zip")
-        ) {
-          // a single .zip file
-          const fileManifest = await deserializeZipToFiles(
-            filesUploaded[0].content,
-          );
-          update({
-            type: "loadFiles",
-            files: fileManifest,
-            clearExisting: replaceProject,
-          });
-        } else if (
-          filesUploaded.length === 1 &&
-          filesUploaded[0].name.endsWith(".stan")
-        ) {
-          // a single .stan file
-          if (replaceProject) {
-            update({ type: "retitle", title: filesUploaded[0].name });
-          }
-          const fileManifest: Partial<FieldsContentsMap> = {
-            stanFileContent: parseFile(filesUploaded[0].content),
-          };
-          update({
-            type: "loadFiles",
-            files: fileManifest,
-            clearExisting: replaceProject,
-          });
-        } else {
-          const files: Partial<FileRegistry> = {};
-          for (const file of filesUploaded) {
-            if (!Object.values(FileNames).includes(file.name as any)) {
-              throw Error(`Unrecognized file: ${file.name}`);
+        let stanFileName = "";
+        const files: Partial<FileRegistry> = {};
+
+        for (const file of filesUploaded) {
+          if (file.name.endsWith(".stan")) {
+            if (stanFileName !== "") {
+              throw Error("Only one .stan file can be uploaded at a time");
             }
-            files[file.name as FileNames] = parseFile(file.content);
+            files["main.stan"] = parseFile(file.content);
+            stanFileName = file.name;
+            continue;
+          }
+          if (file.name.endsWith(".zip")) {
+            throw Error(".zip files cannot be uploaded alongside other files");
           }
 
-          const fileManifest = mapFileContentsToModel(files);
-          update({
-            type: "loadFiles",
-            files: fileManifest,
-            clearExisting: replaceProject,
-          });
+          if (!Object.values(FileNames).includes(file.name as any)) {
+            throw Error(`Unsupported file name: ${file.name}`);
+          }
+          files[file.name as FileNames] = parseFile(file.content);
         }
+
+        const fileManifest = mapFileContentsToModel(files);
+        update({
+          type: "loadFiles",
+          files: fileManifest,
+          clearExisting: replaceProject,
+        });
+
+        if (
+          replaceProject &&
+          stanFileName !== "" &&
+          fileManifest.meta === undefined
+        ) {
+          update({ type: "retitle", title: stanFileName });
+        }
+
         onClose();
       } catch (e: any) {
         setErrorText(e.message);
@@ -89,58 +93,87 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
     [filesUploaded, onClose, update],
   );
 
-  useEffect(() => {
-    if (!filesUploaded) return;
-    if (filesUploaded.length === 1 && !filesUploaded[0].name.endsWith(".zip")) {
-      // The user has uploaded a single file and it is not a zip file. In
-      // this case we want to give the user the option whether or not to
-      // replace the current project.
-      setShowReplaceProjectOptions(true);
-    } else {
-      // Otherwise, we just go ahead and import the files, replacing the
-      // entire project
-      importUploadedFiles({ replaceProject: true });
-    }
-  }, [filesUploaded, importUploadedFiles]);
+  const onUpload = useCallback(
+    (fs: File[]) => {
+      if (fs.length === 1 && fs[0].name.endsWith(".zip")) {
+        importUploadedZip(fs[0].content);
+      } else {
+        setFilesUploaded((prev) => {
+          const newNames = fs.map((f) => f.name);
+          const oldToKeep = prev.filter((f) => !newNames.includes(f.name));
+          return [...oldToKeep, ...fs];
+        });
+      }
+    },
+    [importUploadedZip],
+  );
 
   return (
     <div className="dialogWrapper">
-      <div>
-        You can upload:
-        <ul>
-          <li>A .zip file that was previously exported</li>
-          <li>
-            A directory of files that were extracted from an exported .zip file
-          </li>
-          <li>An individual *.stan file</li>
-          <li>An individual data.json file</li>
-        </ul>
-      </div>
-      <div className="ErrorText">{errorText}</div>
-      {!filesUploaded ? (
+      <Stack spacing={2}>
         <div>
-          <UploadFilesArea height={300} onUpload={setFilesUploaded} />
+          You can upload:
+          <ul>
+            <li>A .zip file that was previously exported</li>
+            <li>
+              A directory of files that were extracted from an exported .zip
+              file
+            </li>
+            <li>An individual *.stan file</li>
+            <li>
+              Other individual project files (data.json, meta.json, data.py,
+              etc.)
+            </li>
+          </ul>
         </div>
-      ) : (
-        <div>
-          {filesUploaded.map((file) => (
-            <div key={file.name}>{file.name}</div>
-          ))}
-        </div>
-      )}
-      {showReplaceProjectOptions && (
-        <div>
-          <Button onClick={() => importUploadedFiles({ replaceProject: true })}>
-            Load into a NEW project
-          </Button>
-          &nbsp;
-          <Button
-            onClick={() => importUploadedFiles({ replaceProject: false })}
-          >
-            Load into EXISTING project
-          </Button>
-        </div>
-      )}
+        <UploadFilesArea height={300} onUpload={onUpload} />
+        {errorText !== "" && <div className="ErrorText">{errorText}</div>}
+
+        {filesUploaded.length > 0 && (
+          <>
+            <div>
+              <table className="project-summary-table">
+                <tbody>
+                  {filesUploaded.map(({ name, content }) => (
+                    <tr key={name}>
+                      <td>{name}</td>
+                      <td>{content.byteLength} bytes</td>
+                      <td>
+                        <IconButton
+                          onClick={() => {
+                            setFilesUploaded((prev) =>
+                              prev.filter((f) => f.name !== name),
+                            );
+                          }}
+                          size="small"
+                        >
+                          <Delete fontSize="inherit" />
+                        </IconButton>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <Grid container justifyContent="center" spacing={1}>
+              <Grid item>
+                <Button
+                  onClick={() => importUploadedFiles({ replaceProject: true })}
+                >
+                  Load into a NEW project
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button
+                  onClick={() => importUploadedFiles({ replaceProject: false })}
+                >
+                  Load into EXISTING project
+                </Button>
+              </Grid>
+            </Grid>
+          </>
+        )}
+      </Stack>
     </div>
   );
 };

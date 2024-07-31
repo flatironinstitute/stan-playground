@@ -1,6 +1,6 @@
 import { StancErrors } from "@SpStanc/Types";
-import { SmallIconButton } from "@fi-sci/misc";
 import { Close, Done } from "@mui/icons-material";
+import IconButton from "@mui/material/IconButton";
 import { FunctionComponent } from "react";
 
 type Props = {
@@ -45,7 +45,9 @@ const StanCompileResultWindow: FunctionComponent<Props> = ({
 
   return (
     <div className="ErrorsWindow">
-      <SmallIconButton icon={<Close />} onClick={onClose} />
+      <IconButton size="small" onClick={onClose} title="Close">
+        <Close fontSize="inherit" />
+      </IconButton>
       {content}
     </div>
   );

@@ -22,7 +22,6 @@
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
-    "@fi-sci/misc": "^0.0.8",
     "@geoffcox/react-splitter": "^2.1.2",
     "@monaco-editor/react": "^4.6.0",
     "@mui/icons-material": "^5.16.5",
