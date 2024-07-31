@@ -4,13 +4,19 @@ import LinearProgress, {
   LinearProgressProps,
 } from "@mui/material/LinearProgress";
 import Typography from "@mui/material/Typography";
-import { FunctionComponent, useCallback } from "react";
+import { FunctionComponent, useCallback, useContext } from "react";
 
-import { SamplingOpts } from "@SpCore/ProjectDataModel";
+import {
+  ProjectDataModel,
+  SamplingOpts,
+  modelHasUnsavedChanges,
+} from "@SpCore/ProjectDataModel";
 import { Progress } from "@SpStanSampler/StanModelWorker";
 import StanSampler from "@SpStanSampler/StanSampler";
 import { StanRun } from "@SpStanSampler/useStanSampler";
 import Button from "@mui/material/Button";
+import { CompileContext } from "@SpCompileContext/CompileContext";
+import { ProjectContext } from "@SpCore/ProjectContextProvider";
 
 type RunPanelProps = {
   sampler?: StanSampler;
@@ -39,8 +45,10 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
     sampler.cancel();
   }, [sampler]);
 
-  if (!sampler)
-    return <div className="RunPanelPadded">Stan model not compiled</div>;
+  const { compile, compileMessage, compileStatus, validSyntax } =
+    useContext(CompileContext);
+
+  const { data: projectData } = useContext(ProjectContext);
 
   if (!dataIsSaved) {
     return <div className="RunPanelPadded">Data not saved</div>;
@@ -48,51 +56,77 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
   return (
     <div className="RunPanel">
       <div className="RunPanelPadded">
-        <div>
-          <Button
-            variant="contained"
-            color="success"
-            onClick={handleRun}
-            disabled={runStatus === "sampling" || runStatus === "loading"}
-          >
-            run sampling
-          </Button>
-          &nbsp;
-          {runStatus === "sampling" && (
+        {compileStatus === "compiled" ? (
+          <div>
             <Button
-              color="error"
-              variant="outlined"
-              onClick={cancelRun}
-              disabled={runStatus !== "sampling"}
+              variant="contained"
+              color="success"
+              onClick={handleRun}
+              disabled={runStatus === "sampling" || runStatus === "loading"}
             >
-              cancel
+              run sampling
             </Button>
-          )}
-          <hr />
-          {runStatus === "loading" && <div>Loading compiled Stan model...</div>}
-          {runStatus === "sampling" && (
-            <div>
-              Sampling
-              <SamplingProgressComponent
-                report={progress}
-                numChains={samplingOpts.num_chains}
-              />
-            </div>
-          )}
-          {runStatus === "completed" && <div>done sampling</div>}
-          {runStatus === "failed" && (
-            <div>
-              Sampling failed!
-              <pre className="SamplerError">{errorMessage}</pre>
-              <span className="details">
-                (see browser console for more details)
-              </span>
-            </div>
-          )}
-        </div>
+            &nbsp;
+            {runStatus === "sampling" && (
+              <Button
+                color="error"
+                variant="outlined"
+                onClick={cancelRun}
+                disabled={runStatus !== "sampling"}
+              >
+                cancel
+              </Button>
+            )}
+            <hr />
+            {runStatus === "loading" && (
+              <div>Loading compiled Stan model...</div>
+            )}
+            {runStatus === "sampling" && (
+              <div>
+                Sampling
+                <SamplingProgressComponent
+                  report={progress}
+                  numChains={samplingOpts.num_chains}
+                />
+              </div>
+            )}
+            {runStatus === "completed" && <div>done sampling</div>}
+            {runStatus === "failed" && (
+              <div>
+                Sampling failed!
+                <pre className="SamplerError">{errorMessage}</pre>
+                <span className="details">
+                  (see browser console for more details)
+                </span>
+              </div>
+            )}
+          </div>
+        ) : ["preparing", "compiling"].includes(compileStatus) ? (
+          <div>{compileMessage}</div>
+        ) : (
+          <div>
+            <Button
+              variant="contained"
+              onClick={compile}
+              disabled={isCompileModelDisabled(projectData, validSyntax)}
+            >
+              compile model
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
+};
+
+const isCompileModelDisabled = (
+  projectData: ProjectDataModel,
+  validSyntax: boolean,
+) => {
+  if (!projectData.stanFileContent.trim()) return true;
+  if (modelHasUnsavedChanges(projectData)) return true;
+  if (!validSyntax) return true;
+  return false;
 };
 
 type SamplingProgressComponentProps = {

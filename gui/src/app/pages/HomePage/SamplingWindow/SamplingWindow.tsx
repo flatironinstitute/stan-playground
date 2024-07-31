@@ -15,14 +15,13 @@ import {
 import AnalysisPyWindow from "@SpScripting/Analysis/AnalysisPyWindow";
 import useStanSampler, { StanRun } from "@SpStanSampler/useStanSampler";
 import AnalysisRWindow from "@SpScripting/Analysis/AnalysisRWindow";
+import { CompileContext } from "@SpCompileContext/CompileContext";
 
 type SamplingWindowProps = {
-  compiledMainJsUrl?: string;
+  // none
 };
 
-const SamplingWindow: FunctionComponent<SamplingWindowProps> = ({
-  compiledMainJsUrl,
-}) => {
+const SamplingWindow: FunctionComponent<SamplingWindowProps> = () => {
   const { data, update } = useContext(ProjectContext);
   const parsedData = useMemo(() => {
     try {
@@ -38,6 +37,8 @@ const SamplingWindow: FunctionComponent<SamplingWindowProps> = ({
     },
     [update],
   );
+
+  const { compiledMainJsUrl } = useContext(CompileContext);
 
   const { sampler, latestRun } = useStanSampler(compiledMainJsUrl);
   const isSampling = latestRun.status === "sampling";

@@ -45,7 +45,8 @@
       "@SpStanSampler/*": ["app/StanSampler/*"],
       "@SpUtil/*": ["app/util/*"],
       "@SpStanStats/*": ["app/util/stan_stats/*"],
-      "@SpScripting/*": ["app/Scripting/*"]
+      "@SpScripting/*": ["app/Scripting/*"],
+      "@SpCompileContext/*": ["app/CompileContext/*"]
     }
   },
   "include": ["src", "test"],

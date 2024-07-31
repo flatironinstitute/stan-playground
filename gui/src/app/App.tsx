@@ -4,6 +4,7 @@ import ProjectContextProvider from "@SpCore/ProjectContextProvider";
 import HomePage from "@SpPages/HomePage";
 import { Analytics } from "@vercel/analytics/react";
 import { BrowserRouter } from "react-router-dom";
+import { CompileContextProvider } from "./CompileContext/CompileContextProvider";
 
 const theme = createTheme();
 
@@ -13,7 +14,9 @@ function App() {
       <ThemeProvider theme={theme}>
         <div className="MainWindow">
           <ProjectContextProvider>
-            <HomePage />
+            <CompileContextProvider>
+              <HomePage />
+            </CompileContextProvider>
           </ProjectContextProvider>
           <Analytics />
         </div>
