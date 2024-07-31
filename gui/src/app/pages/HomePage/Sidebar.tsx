@@ -138,16 +138,16 @@ const Sidebar: FunctionComponent<Sidebar> = ({
       </div>
 
       <CloseableDialog
-        title={"Load Project"}
-        id={"loadProjectDialog"}
+        title="Load Project"
+        id="loadProjectDialog"
         open={loadProjectVisible}
         handleClose={loadProjectClose}
       >
         <LoadProjectWindow onClose={loadProjectClose} />
       </CloseableDialog>
       <CloseableDialog
-        title={"Save this project"}
-        id={"saveProjectDialog"}
+        title="Save this project"
+        id="saveProjectDialog"
         open={saveProjectVisible}
         handleClose={saveProjectClose}
       >
