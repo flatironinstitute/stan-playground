@@ -1,4 +1,3 @@
-import Button from "@mui/material/Button";
 import {
   FieldsContentsMap,
   FileNames,
@@ -8,6 +7,10 @@ import {
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import { deserializeZipToFiles, parseFile } from "@SpCore/ProjectSerialization";
 import UploadFilesArea from "@SpPages/UploadFilesArea";
+import { SmallIconButton } from "@fi-sci/misc";
+import { Delete } from "@mui/icons-material";
+import Link from "@mui/material/Link";
+import Button from "@mui/material/Button";
 import {
   FunctionComponent,
   useCallback,
@@ -15,6 +18,10 @@ import {
   useEffect,
   useState,
 } from "react";
+import BrowserProjectsInterface, {
+  BrowserProject,
+} from "./BrowserProjectsInterface";
+import timeAgoString from "@SpUtil/timeAgoString";
 
 type LoadProjectWindowProps = {
   onClose: () => void;
@@ -103,9 +110,38 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
     }
   }, [filesUploaded, importUploadedFiles]);
 
+  const [allBrowserProjects, setAllBrowserProjects] = useState<
+    BrowserProject[]
+  >([]);
+  useEffect(() => {
+    const bpi = new BrowserProjectsInterface();
+    bpi.getAllBrowserProjects().then((p) => {
+      setAllBrowserProjects(p);
+    });
+  }, []);
+
+  const handleOpenBrowserProject = useCallback(
+    async (title: string) => {
+      const bpi = new BrowserProjectsInterface();
+      const browserProject = await bpi.loadBrowserProject(title);
+      if (!browserProject) {
+        alert("Failed to load project");
+        return;
+      }
+      const { fileManifest } = browserProject;
+      update({
+        type: "loadFiles",
+        files: mapFileContentsToModel(fileManifest),
+        clearExisting: true,
+      });
+      onClose();
+    },
+    [update, onClose],
+  );
+
   return (
     <div>
-      <h3>Load project</h3>
+      <h3>Upload project</h3>
       <div>
         You can upload:
         <ul>
@@ -141,6 +177,50 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
             Load into EXISTING project
           </Button>
         </div>
+      )}
+      <h3>Load from browser</h3>
+      {allBrowserProjects.length > 0 ? (
+        <table>
+          <tbody>
+            {allBrowserProjects.map((browserProject) => (
+              <tr key={browserProject.title}>
+                <td>
+                  <SmallIconButton
+                    icon={<Delete />}
+                    onClick={async () => {
+                      const ok = window.confirm(
+                        `Delete project "${browserProject.title}" from browser?`,
+                      );
+                      if (!ok) return;
+                      const bpi = new BrowserProjectsInterface();
+                      await bpi.deleteProject(browserProject.title);
+                      const p = await bpi.getAllBrowserProjects();
+                      setAllBrowserProjects(p);
+                    }}
+                  />
+                </td>
+                <td>
+                  <Link
+                    onClick={() => {
+                      handleOpenBrowserProject(browserProject.title);
+                    }}
+                    component="button"
+                    underline="none"
+                  >
+                    {browserProject.title}
+                  </Link>
+                </td>
+                <td>
+                  <span style={{ color: "gray" }}>
+                    {timeAgoString(browserProject.timestamp)}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <div>No projects found in browser storage</div>
       )}
     </div>
   );

@@ -6,6 +6,8 @@ import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import saveAsGitHubGist from "@SpCore/gists/saveAsGitHubGist";
 import { triggerDownload } from "@SpUtil/triggerDownload";
 import Button from "@mui/material/Button";
+import BrowserProjectsInterface from "./BrowserProjectsInterface";
+import timeAgoString from "@SpUtil/timeAgoString";
 
 type SaveProjectWindowProps = {
   onClose: () => void;
@@ -18,6 +20,7 @@ const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
   const fileManifest = mapModelToFileManifest(data);
 
   const [exportingToGist, setExportingToGist] = useState(false);
+  const [savingToBrowser, setSavingToBrowser] = useState(false);
 
   return (
     <div>
@@ -47,7 +50,7 @@ const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
         </tbody>
       </table>
       <div>&nbsp;</div>
-      {!exportingToGist && (
+      {!exportingToGist && !savingToBrowser && (
         <div>
           <Button
             onClick={async () => {
@@ -66,6 +69,14 @@ const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
           >
             Save to GitHub Gist
           </Button>
+          &nbsp;
+          <Button
+            onClick={() => {
+              setSavingToBrowser(true);
+            }}
+          >
+            Save to Browser
+          </Button>
         </div>
       )}
       {exportingToGist && (
@@ -73,6 +84,13 @@ const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
           fileManifest={fileManifest}
           title={data.meta.title}
           onClose={onClose}
+        />
+      )}
+      {savingToBrowser && (
+        <SaveToBrowserView
+          fileManifest={fileManifest}
+          title={data.meta.title}
+          onCancel={onClose}
         />
       )}
     </div>
@@ -209,6 +227,66 @@ const makeSPShareableLinkFromGistUrl = (gistUrl: string) => {
   const host = window.location.host;
   const url = `${protocol}//${host}?project=${gistUrl}`;
   return url;
+};
+
+type SaveToBrowserViewProps = {
+  fileManifest: Partial<FileRegistry>;
+  title: string;
+  onCancel: () => void;
+};
+
+const SaveToBrowserView: FunctionComponent<SaveToBrowserViewProps> = ({
+  fileManifest,
+  title,
+  onCancel,
+}) => {
+  // use IndexedDB to save the project
+  // https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
+
+  const handleSave = useCallback(async () => {
+    try {
+      const bpi = new BrowserProjectsInterface();
+      const existingBrowserProject = await bpi.loadBrowserProject(title);
+      if (existingBrowserProject) {
+        const overwrite = window.confirm(
+          `A project with the title "${title}" already exists (modified ${timeAgoString(existingBrowserProject.timestamp)}). Do you want to overwrite it?`,
+        );
+        if (!overwrite) {
+          return;
+        }
+      }
+      await bpi.saveBrowserProject(title, {
+        title,
+        timestamp: Date.now(),
+        fileManifest,
+      });
+    } catch (err: any) {
+      alert(`Error saving to browser: ${err.message}`);
+    }
+    onCancel();
+  }, [title, fileManifest, onCancel]);
+
+  return (
+    <div className="SaveToBrowserView">
+      <h3>Save to Browser</h3>
+      <p>
+        This project will be saved to your browser as &quot;{title}&quot;. It
+        will be available to you on this device until you clear your browser
+        cache, but not on other devices or browsers.
+      </p>
+      <div>
+        <Button
+          onClick={() => {
+            handleSave();
+          }}
+        >
+          Save to Browser
+        </Button>
+        &nbsp;
+        <Button onClick={onCancel}>Cancel</Button>
+      </div>
+    </div>
+  );
 };
 
 export default SaveProjectWindow;
