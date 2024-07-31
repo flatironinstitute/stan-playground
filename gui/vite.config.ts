@@ -5,6 +5,7 @@ import { configDefaults, coverageConfigDefaults } from "vitest/config";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  optimizeDeps: { exclude: ["pyodide"] },
   build: {
     rollupOptions: {
       output: {

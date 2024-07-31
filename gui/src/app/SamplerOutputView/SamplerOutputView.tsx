@@ -1,4 +1,3 @@
-import { SmallIconButton } from "@fi-sci/misc";
 import { Download } from "@mui/icons-material";
 import HistsView from "@SpComponents/HistsView";
 import SummaryView from "@SpComponents/SummaryView";
@@ -10,6 +9,7 @@ import JSZip from "jszip";
 import { FunctionComponent, useCallback, useMemo, useState } from "react";
 import TracePlotsView from "./TracePlotsView";
 import Button from "@mui/material/Button";
+import { IconButton } from "@mui/material";
 
 type SamplerOutputViewProps = {
   latestRun: StanRun;
@@ -143,18 +143,21 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
   return (
     <div className="DrawsTable">
       <div>
-        <SmallIconButton
-          icon={<Download />}
-          label="Export to single .csv"
-          onClick={handleExportToCsv}
-        />
+        <IconButton size="small" title="Download" onClick={handleExportToCsv}>
+          <Download fontSize="inherit" />
+          &nbsp;Export to single .csv
+        </IconButton>
         &nbsp;
-        <SmallIconButton
-          icon={<Download />}
-          label="Export to multiple .csv"
+        <IconButton
+          size="small"
+          title="Download"
           onClick={handleExportToMultipleCsvs}
-        />
+        >
+          <Download fontSize="inherit" />
+          &nbsp;Export to multiple .csv
+        </IconButton>
       </div>
+      <br />
       <table className="draws-table">
         <thead>
           <tr>
