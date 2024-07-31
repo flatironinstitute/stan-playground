@@ -5,7 +5,6 @@ import TextEditor from "@SpComponents/TextEditor";
 import { ToolbarItem } from "@SpComponents/ToolBar";
 import compileStanProgram from "@SpStanc/compileStanProgram";
 import { stancErrorsToCodeMarkers } from "@SpStanc/Linting";
-import { checkMainJsUrlCache } from "@SpStanc/mainJsUrlCache";
 import useStanc from "@SpStanc/useStanc";
 import {
   FunctionComponent,
@@ -97,16 +96,6 @@ const StanFileEditor: FunctionComponent<Props> = ({
     compileStatus,
     setCompiledUrl,
   ]);
-
-  useEffect(() => {
-    // if the stan program has already been compiled, and the record of that is in the cache,
-    // then call handleCompile, which will end up loading from the cache
-    checkMainJsUrlCache(fileContent).then((mainJsUrl) => {
-      if (mainJsUrl) {
-        handleCompile();
-      }
-    });
-  }, [fileContent, handleCompile]);
 
   const [syntaxWindowVisible, setSyntaxWindowVisible] = useState(false);
 
