@@ -47,19 +47,17 @@ const ConfigureCompilationServerDialog: FunctionComponent<
         server is required to compile the Stan programs.
       </p>
       <Divider />
-      <div>
-        <p>
-          {isConnected ? (
-            <span className="connected">Connected</span>
-          ) : (
-            <span className="disconnected">Not connected</span>
-          )}
-          &nbsp;
-          <IconButton onClick={onRetry} size="small" title="Retry connection">
-            <Refresh fontSize="inherit" />
-          </IconButton>
-        </p>
-      </div>
+      <p>
+        {isConnected ? (
+          <span className="connected">Connected</span>
+        ) : (
+          <span className="disconnected">Not connected</span>
+        )}
+        &nbsp;
+        <IconButton onClick={onRetry} size="small" title="Retry connection">
+          <Refresh fontSize="inherit" />
+        </IconButton>
+      </p>
       <Divider />
 
       <FormControl>

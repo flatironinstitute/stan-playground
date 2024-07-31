@@ -66,7 +66,6 @@ const CompilationServerConnectionControl: FunctionComponent<
           stanWasmServerUrl={stanWasmServerUrl}
           setStanWasmServerUrl={setStanWasmServerUrl}
           isConnected={isConnected}
-          closeDialog={closeDialog}
           onRetry={handleRetry}
         />
       </CloseableDialog>
