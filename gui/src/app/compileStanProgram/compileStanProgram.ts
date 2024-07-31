@@ -1,9 +1,21 @@
+import { checkMainJsUrlCache, setToMainJsUrlCache } from "./mainJsUrlCache";
+
 const compileStanProgram = async (
   stanWasmServerUrl: string,
   stanProgram: string,
   onStatus: (s: string) => void,
 ): Promise<{ mainJsUrl?: string }> => {
   try {
+    onStatus("checking cache");
+    const downloadMainJsUrlFromCache = await checkMainJsUrlCache(
+      stanProgram,
+      stanWasmServerUrl,
+    );
+    if (downloadMainJsUrlFromCache) {
+      onStatus("compiled");
+      return { mainJsUrl: downloadMainJsUrlFromCache };
+    }
+
     onStatus("initiating job");
     const initiateJobUrl = `${stanWasmServerUrl}/job/initiate`;
     // post
@@ -55,6 +67,8 @@ const compileStanProgram = async (
     }
 
     const downloadMainJsUrl = `${stanWasmServerUrl}/job/${job_id}/download/main.js`;
+
+    setToMainJsUrlCache(stanProgram, downloadMainJsUrl);
 
     // download to make sure it is there
     onStatus("Checking download of main.js");
