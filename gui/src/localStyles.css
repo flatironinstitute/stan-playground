@@ -17,16 +17,9 @@
   padding: 10px;
 }
 
-.CompilationServerConnectionPane {
-  font-size: 12px;
-}
-
-.CompilationServerConnectionPane .connected {
-  color: lightgreen;
-}
-
-.CompilationServerConnectionPane .disconnected {
-  color: pink;
+.details {
+  color: gray;
+  font-size: smaller;
 }
 
 /* Compilation Results (StanCompileResultWindow) */

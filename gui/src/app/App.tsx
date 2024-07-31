@@ -1,4 +1,4 @@
-import { createTheme } from "@mui/material";
+import createTheme from "@mui/material/styles/createTheme";
 import { ThemeProvider } from "@mui/system";
 import ProjectContextProvider from "@SpCore/ProjectContextProvider";
 import HomePage from "@SpPages/HomePage";

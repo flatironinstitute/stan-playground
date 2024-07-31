@@ -1,12 +1,12 @@
-import { SmallIconButton } from "@fi-sci/misc";
 import { Cancel, Check } from "@mui/icons-material";
-import Link from "@mui/material/Link";
 
 import CloseableDialog, {
   useDialogControls,
 } from "@SpComponents/CloseableDialog";
 import { FunctionComponent, useCallback, useEffect, useState } from "react";
 import ConfigureCompilationServerDialog from "./ConfigureCompilationServerDialog";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
 
 export const publicUrl = "https://trom-stan-wasm-server.magland.org";
 export const localUrl = "http://localhost:8083";
@@ -43,26 +43,19 @@ const CompilationServerConnectionControl: FunctionComponent<
         ? "local"
         : "custom";
   return (
-    <span>
-      <span className="CompilationServerConnectionPane">
-        <span className={isConnected ? "connected" : "disconnected"}>
-          <SmallIconButton
-            icon={isConnected ? <Check /> : <Cancel />}
-            onClick={openDialog}
-          />
-        </span>
+    <>
+      <IconButton onClick={openDialog} color="inherit" size="small">
+        {isConnected ? (
+          <Check htmlColor="lightgreen" fontSize="inherit" />
+        ) : (
+          <Cancel htmlColor="pink" fontSize="inherit" />
+        )}
         &nbsp;
-        <Link
-          onClick={openDialog}
-          color="white"
-          underline="none"
-          component="button"
-        >
+        <Typography color="white" fontSize={12}>
           {isConnected ? "connected to " : "not connected to "}
           {serverLabel}
-        </Link>
-        &nbsp;&nbsp;
-      </span>
+        </Typography>
+      </IconButton>
       <CloseableDialog
         title="Select a compilation server"
         id="compilationDialog"
@@ -73,11 +66,10 @@ const CompilationServerConnectionControl: FunctionComponent<
           stanWasmServerUrl={stanWasmServerUrl}
           setStanWasmServerUrl={setStanWasmServerUrl}
           isConnected={isConnected}
-          closeDialog={closeDialog}
           onRetry={handleRetry}
         />
       </CloseableDialog>
-    </span>
+    </>
   );
 };
 
