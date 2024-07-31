@@ -17,6 +17,11 @@
   padding: 10px;
 }
 
+.details {
+  color: gray;
+  font-size: smaller;
+}
+
 /* Compilation Results (StanCompileResultWindow) */
 .ErrorsWindow {
   height: 100%;

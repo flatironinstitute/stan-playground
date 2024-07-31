@@ -1,5 +1,3 @@
-import Button from "@mui/material/Button";
-import Link from "@mui/material/Link";
 import { FunctionComponent, useCallback, useState } from "react";
 import { localUrl, publicUrl } from "./CompilationServerConnectionControl";
 import FormControl from "@mui/material/FormControl";
@@ -9,6 +7,8 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
 import TextField from "@mui/material/TextField";
+import IconButton from "@mui/material/IconButton";
+import { Refresh } from "@mui/icons-material";
 
 type ServerType = "public" | "local" | "custom";
 
@@ -16,19 +16,12 @@ type ConfigureCompilationServerDialogProps = {
   stanWasmServerUrl: string;
   setStanWasmServerUrl: (url: string) => void;
   isConnected: boolean;
-  closeDialog: () => void;
   onRetry: () => void;
 };
 
 const ConfigureCompilationServerDialog: FunctionComponent<
   ConfigureCompilationServerDialogProps
-> = ({
-  stanWasmServerUrl,
-  setStanWasmServerUrl,
-  isConnected,
-  closeDialog,
-  onRetry,
-}) => {
+> = ({ stanWasmServerUrl, setStanWasmServerUrl, isConnected, onRetry }) => {
   const [choice, setChoice] = useState<ServerType>("custom");
 
   const makeChoice = useCallback(
@@ -37,7 +30,9 @@ const ConfigureCompilationServerDialog: FunctionComponent<
         setStanWasmServerUrl(publicUrl);
       } else if (choice === "local") {
         setStanWasmServerUrl(localUrl);
-      } else if (choice !== "custom") {
+      } else if (choice === "custom") {
+        setStanWasmServerUrl("");
+      } else {
         return;
       }
       setChoice(choice);
@@ -60,9 +55,9 @@ const ConfigureCompilationServerDialog: FunctionComponent<
             <span className="disconnected">Not connected</span>
           )}
           &nbsp;
-          <Link onClick={onRetry} component="button" underline="none">
-            retry
-          </Link>
+          <IconButton onClick={onRetry} size="small" title="Retry connection">
+            <Refresh fontSize="inherit" />
+          </IconButton>
         </p>
       </div>
       <Divider />
@@ -106,7 +101,10 @@ const ConfigureCompilationServerDialog: FunctionComponent<
 
       {choice === "local" && (
         <div>
-          <p>To start a local compilation server:</p>
+          <p>
+            To start a local compilation server{" "}
+            <span className="details">({localUrl})</span>:
+          </p>
           <div>
             <pre>
               docker run -p 8083:8080 -it magland/stan-wasm-server:latest
@@ -117,15 +115,12 @@ const ConfigureCompilationServerDialog: FunctionComponent<
       {choice === "public" && (
         <div>
           <p>
-            The public server is provided for convenience, but may not be as
-            reliable as a local server, depending on the current load and
-            availability.
+            The public server <span className="details">({publicUrl})</span> is
+            provided for convenience, but may not be as reliable as a local
+            server, depending on the current load and availability.
           </p>
         </div>
       )}
-
-      <Divider />
-      <Button onClick={() => closeDialog()}>Close</Button>
     </div>
   );
 };
