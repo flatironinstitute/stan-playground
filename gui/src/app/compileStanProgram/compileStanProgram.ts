@@ -7,7 +7,10 @@ const compileStanProgram = async (
 ): Promise<{ mainJsUrl?: string }> => {
   try {
     onStatus("checking cache");
-    const downloadMainJsUrlFromCache = await checkMainJsUrlCache(stanProgram);
+    const downloadMainJsUrlFromCache = await checkMainJsUrlCache(
+      stanProgram,
+      stanWasmServerUrl,
+    );
     if (downloadMainJsUrlFromCache) {
       onStatus("compiled");
       return { mainJsUrl: downloadMainJsUrlFromCache };

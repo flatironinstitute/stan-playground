@@ -1,5 +1,6 @@
 export const checkMainJsUrlCache = async (
   stanProgram: string,
+  baseStanWasmServerUrl: string,
 ): Promise<string | null> => {
   const mainJsCache = localStorage.getItem("mainJsCache");
   if (!mainJsCache) return null;
@@ -8,6 +9,10 @@ export const checkMainJsUrlCache = async (
     const stanProgramHash = stringChecksum(stanProgram);
     const url = cache[stanProgramHash];
     if (!url) return null;
+    if (!url.startsWith(baseStanWasmServerUrl)) {
+      // the url is not from the current server
+      return null;
+    }
     // check to see if the url is still valid
     const exists = await checkRemoteFileExists(url);
     if (!exists) {
