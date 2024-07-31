@@ -22,6 +22,11 @@
   font-size: smaller;
 }
 
+.SamplerError {
+  color: red;
+  white-space: pre-wrap;
+}
+
 /* Compilation Results (StanCompileResultWindow) */
 .ErrorsWindow {
   height: 100%;

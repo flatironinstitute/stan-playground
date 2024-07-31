@@ -82,7 +82,11 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
           {runStatus === "completed" && <div>done sampling</div>}
           {runStatus === "failed" && (
             <div>
-              failed: {errorMessage} (see browser console for more details)
+              Sampling failed!
+              <pre className="SamplerError">{errorMessage}</pre>
+              <span className="details">
+                (see browser console for more details)
+              </span>
             </div>
           )}
         </div>
