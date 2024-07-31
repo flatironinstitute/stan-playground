@@ -3,14 +3,12 @@ import Link from "@mui/material/Link";
 import { FunctionComponent, useCallback, useState } from "react";
 import { localUrl, publicUrl } from "./CompilationServerConnectionControl";
 import FormControl from "@mui/material/FormControl";
-import {
-  Divider,
-  FormControlLabel,
-  FormLabel,
-  Radio,
-  RadioGroup,
-  TextField,
-} from "@mui/material";
+import Divider from "@mui/material/Divider";
+import FormLabel from "@mui/material/FormLabel";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Radio from "@mui/material/Radio";
+import TextField from "@mui/material/TextField";
 
 type ServerType = "public" | "local" | "custom";
 
