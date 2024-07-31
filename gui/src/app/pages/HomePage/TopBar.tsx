@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import CompilationServerConnectionControl from "@SpStanc/CompilationServerConnectionControl";
-import { SmallIconButton } from "@fi-sci/misc";
 import { Menu, QuestionMark } from "@mui/icons-material";
 import AppBar from "@mui/material/AppBar";
 import IconButton from "@mui/material/IconButton";
@@ -35,18 +34,18 @@ const TopBar: FunctionComponent<TopBarProps> = ({ title, onSetCollapsed }) => {
         Stan Playground - {title}
         <span className="TopBarSpacer" />
         <CompilationServerConnectionControl />
-        <span>
-          <SmallIconButton
-            icon={<QuestionMark />}
-            onClick={() => {
-              window.open(
-                "https://github.com/flatironinstitute/stan-playground",
-                "_blank",
-              );
-            }}
-            title={`About Stan Playground`}
-          />
-        </span>
+        <IconButton
+          title="About Stan Playground"
+          size="small"
+          onClick={() =>
+            window.open(
+              "https://github.com/flatironinstitute/stan-playground",
+              "_blank",
+            )
+          }
+        >
+          <QuestionMark fontSize="inherit" htmlColor="white" />
+        </IconButton>
       </Toolbar>
     </AppBar>
   );
