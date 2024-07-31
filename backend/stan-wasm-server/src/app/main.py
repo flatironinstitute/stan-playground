@@ -51,14 +51,19 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://stan-playground.flatironinstitute.org",
+        "https://stan-playground.vercel.app",
+        "http://127.0.0.1:3000",  # yarn dev
+        "http://127.0.0.1:4173",  # yarn preview
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-##### Custom exception handlers
+# Custom exception handlers
 Exn = TypeVar("Exn", bound=Exception)
 
 
@@ -84,7 +89,7 @@ for e in exceptions_codes:
     register_exn_handler(*e)
 
 
-##### Routing
+# Routing
 
 DictResponse = dict[str, Any]
 
