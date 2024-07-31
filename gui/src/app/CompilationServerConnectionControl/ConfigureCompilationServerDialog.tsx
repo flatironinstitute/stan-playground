@@ -22,7 +22,7 @@ type ConfigureCompilationServerDialogProps = {
 const ConfigureCompilationServerDialog: FunctionComponent<
   ConfigureCompilationServerDialogProps
 > = ({ stanWasmServerUrl, setStanWasmServerUrl, isConnected, onRetry }) => {
-  const [choice, setChoice] = useState<ServerType>("custom");
+  const [choice, setChoice] = useState<ServerType>("public");
 
   const makeChoice = useCallback(
     (_: unknown, choice: string) => {
