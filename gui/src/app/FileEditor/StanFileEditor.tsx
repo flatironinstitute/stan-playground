@@ -1,5 +1,5 @@
 import { Split } from "@geoffcox/react-splitter";
-import { AutoFixHigh, Cancel, Settings } from "@mui/icons-material";
+import { AutoFixHigh, Cancel, Help, Settings } from "@mui/icons-material";
 import StanCompileResultWindow from "@SpComponents/StanCompileResultWindow";
 import TextEditor from "@SpComponents/TextEditor";
 import { ToolbarItem } from "@SpComponents/ToolBar";
@@ -102,6 +102,14 @@ const StanFileEditor: FunctionComponent<Props> = ({
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     const ret: ToolbarItem[] = [];
 
+    ret.push({
+      type: "button",
+      icon: <Help />,
+      tooltip: "Open Stan Users Guide",
+      onClick: () =>
+        window.open("https://mc-stan.org/docs/stan-users-guide/", "_blank"),
+    });
+
     // invalid syntax
     if (!validSyntax && !!editedFileContent) {
       ret.push({
@@ -181,7 +189,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
 
   const isCompiling = compileStatus === "compiling";
 
-  const window = syntaxWindowVisible ? (
+  const compileResultWindow = syntaxWindowVisible ? (
     <StanCompileResultWindow
       stancErrors={stancErrors}
       onClose={() => setSyntaxWindowVisible(false)}
@@ -212,7 +220,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
       splitterSize={syntaxWindowVisible ? "7px" : "0px"}
     >
       {editor}
-      {window}
+      {compileResultWindow}
     </Split>
   );
 };
