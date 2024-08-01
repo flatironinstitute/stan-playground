@@ -18,7 +18,7 @@ import { CompileContext } from "@SpCompileContext/CompileContext";
 export const publicUrl = "https://trom-stan-wasm-server.magland.org";
 export const localUrl = "http://localhost:8083";
 
-export type ServerType = "public" | "local" | "custom";
+type ServerType = "public" | "local" | "custom";
 
 type CompilationServerConnectionControlProps = {
   // none
@@ -40,12 +40,7 @@ const CompilationServerConnectionControl: FunctionComponent<
     retryConnection();
   }, [retryConnection]);
 
-  const serverLabel =
-    stanWasmServerUrl === publicUrl
-      ? "public"
-      : stanWasmServerUrl === localUrl
-        ? "local"
-        : "custom";
+  const serverType = serverTypeForUrl(stanWasmServerUrl);
 
   return (
     <>
@@ -58,7 +53,7 @@ const CompilationServerConnectionControl: FunctionComponent<
         &nbsp;
         <Typography color="white" fontSize={12}>
           {isConnected ? "connected to " : "not connected to "}
-          {serverLabel}
+          {serverType}
         </Typography>
       </IconButton>
       <CloseableDialog
@@ -74,6 +69,10 @@ const CompilationServerConnectionControl: FunctionComponent<
       </CloseableDialog>
     </>
   );
+};
+
+export const serverTypeForUrl = (url: string): ServerType => {
+  return url === publicUrl ? "public" : url === localUrl ? "local" : "custom";
 };
 
 const useIsConnected = (stanWasmServerUrl: string) => {

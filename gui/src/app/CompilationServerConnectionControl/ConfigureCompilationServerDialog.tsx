@@ -9,9 +9,11 @@ import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import TextField from "@mui/material/TextField";
 import { FunctionComponent, useCallback, useContext } from "react";
-import { localUrl, publicUrl } from "./CompilationServerConnectionControl";
-
-type ServerType = "public" | "local" | "custom";
+import {
+  localUrl,
+  publicUrl,
+  serverTypeForUrl,
+} from "./CompilationServerConnectionControl";
 
 type ConfigureCompilationServerDialogProps = {
   isConnected: boolean;
@@ -24,12 +26,7 @@ const ConfigureCompilationServerDialog: FunctionComponent<
   const { stanWasmServerUrl, setStanWasmServerUrl } =
     useContext(CompileContext);
 
-  const serverType: ServerType =
-    stanWasmServerUrl === publicUrl
-      ? "public"
-      : stanWasmServerUrl === localUrl
-        ? "local"
-        : "custom";
+  const serverType = serverTypeForUrl(stanWasmServerUrl);
 
   const makeChoice = useCallback(
     (_: unknown, choice: string) => {
