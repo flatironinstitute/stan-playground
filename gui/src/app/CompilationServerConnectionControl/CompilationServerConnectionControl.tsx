@@ -85,7 +85,7 @@ const useIsConnected = (stanWasmServerUrl: string) => {
   }, []);
   useEffect(() => {
     setIsConnected(false);
-    if (!probeUrl.startsWith("http") && !probeUrl.startsWith("https")) {
+    if (!probeUrl.startsWith("http://") && !probeUrl.startsWith("https://")) {
       // important to do this check because otherwise fetch may succeed because
       // the server of this web app may respond with success
       return;
