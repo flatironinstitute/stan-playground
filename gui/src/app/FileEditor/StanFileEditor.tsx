@@ -6,13 +6,7 @@ import { ToolbarItem } from "@SpComponents/ToolBar";
 import { stancErrorsToCodeMarkers } from "@SpStanc/Linting";
 import useStanc from "@SpStanc/useStanc";
 import { CompileContext } from "@SpCompileContext/CompileContext";
-import {
-  FunctionComponent,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { FunctionComponent, useContext, useMemo, useState } from "react";
 
 type Props = {
   fileName: string;
@@ -38,16 +32,8 @@ const StanFileEditor: FunctionComponent<Props> = ({
     setEditedFileContent,
   );
 
-  const { compileStatus, compileMessage, compile, setValidSyntax } =
+  const { compileStatus, compileMessage, compile, validSyntax } =
     useContext(CompileContext);
-
-  const validSyntax = useMemo(() => {
-    return stancErrors.errors === undefined;
-  }, [stancErrors]);
-
-  useEffect(() => {
-    setValidSyntax(validSyntax);
-  }, [validSyntax, setValidSyntax]);
 
   const hasWarnings = useMemo(() => {
     return stancErrors.warnings && stancErrors.warnings.length > 0;

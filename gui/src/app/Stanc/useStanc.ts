@@ -3,10 +3,11 @@ import {
   StancReplyMessage,
   StancWorkerRequests,
 } from "@SpStanc/Types";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 // https://vitejs.dev/guide/assets#importing-script-as-a-worker
 // https://vitejs.dev/guide/assets#importing-asset-as-url
 import stancWorkerURL from "@SpStanc/stancWorker?worker&url";
+import { CompileContext } from "@SpCompileContext/CompileContext";
 
 const useStanc = (
   modelName: string,
@@ -66,6 +67,14 @@ const useStanc = (
       code,
     });
   }, [modelName, code, stancWorker]);
+
+  const { setValidSyntax } = useContext(CompileContext);
+  const validSyntax = useMemo(() => {
+    return stancErrors.errors === undefined;
+  }, [stancErrors]);
+  useEffect(() => {
+    setValidSyntax(validSyntax);
+  }, [validSyntax, setValidSyntax]);
 
   return { stancErrors, requestFormat };
 };
