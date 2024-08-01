@@ -37,10 +37,7 @@
       "@SpCore/gists/*": ["app/gists/*"],
       /* We are playing a bit fast and loose with the distinction */
       "@SpPages/*": ["app/pages/HomePage/*"],
-      "@SpStanc/*": [
-        "app/Stanc/*",
-        "app/CompilationServerConnectionControl/*"
-      ],
+      "@SpStanc/*": ["app/Stanc/*", "app/CompilationServerConnectionControl/*"],
       "@SpStanSampler/*": ["app/StanSampler/*"],
       "@SpUtil/*": ["app/util/*"],
       "@SpStanStats/*": ["app/util/stan_stats/*"],

@@ -1,10 +1,4 @@
-import {
-  FunctionComponent,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from "react";
+import { FunctionComponent, useCallback, useContext, useState } from "react";
 import { localUrl, publicUrl } from "./CompilationServerConnectionControl";
 import FormControl from "@mui/material/FormControl";
 import Divider from "@mui/material/Divider";
@@ -30,15 +24,12 @@ const ConfigureCompilationServerDialog: FunctionComponent<
   const { stanWasmServerUrl, setStanWasmServerUrl } =
     useContext(CompileContext);
 
-  const serverType: ServerType = useMemo(() => {
-    if (stanWasmServerUrl === publicUrl) {
-      return "public";
-    } else if (stanWasmServerUrl === localUrl) {
-      return "local";
-    } else {
-      return "custom";
-    }
-  }, [stanWasmServerUrl]);
+  const serverType: ServerType =
+    stanWasmServerUrl === publicUrl
+      ? "public"
+      : stanWasmServerUrl === localUrl
+        ? "local"
+        : "custom";
 
   const makeChoice = useCallback(
     (_: unknown, choice: string) => {

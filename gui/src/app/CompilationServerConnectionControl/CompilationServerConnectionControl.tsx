@@ -18,6 +18,8 @@ import { CompileContext } from "@SpCompileContext/CompileContext";
 export const publicUrl = "https://trom-stan-wasm-server.magland.org";
 export const localUrl = "http://localhost:8083";
 
+export type ServerType = "public" | "local" | "custom";
+
 type CompilationServerConnectionControlProps = {
   // none
 };
@@ -44,6 +46,7 @@ const CompilationServerConnectionControl: FunctionComponent<
       : stanWasmServerUrl === localUrl
         ? "local"
         : "custom";
+
   return (
     <>
       <IconButton onClick={openDialog} color="inherit" size="small">
