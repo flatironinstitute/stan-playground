@@ -6,13 +6,7 @@ import { ToolbarItem } from "@SpComponents/ToolBar";
 import { stancErrorsToCodeMarkers } from "@SpStanc/Linting";
 import useStanc from "@SpStanc/useStanc";
 import { CompileContext } from "@SpCompileContext/CompileContext";
-import {
-  FunctionComponent,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { FunctionComponent, useContext, useMemo, useState } from "react";
 
 type Props = {
   fileName: string;
