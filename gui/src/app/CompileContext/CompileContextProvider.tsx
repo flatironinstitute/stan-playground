@@ -1,5 +1,5 @@
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
-import compileStanProgram from "@SpStanc/compileStanProgram";
+import compileStanProgram from "@SpCompileContext/compileStanProgram";
 import {
   FunctionComponent,
   PropsWithChildren,

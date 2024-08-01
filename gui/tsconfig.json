@@ -39,8 +39,7 @@
       "@SpPages/*": ["app/pages/HomePage/*"],
       "@SpStanc/*": [
         "app/Stanc/*",
-        "app/CompilationServerConnectionControl/*",
-        "app/compileStanProgram/*"
+        "app/CompilationServerConnectionControl/*"
       ],
       "@SpStanSampler/*": ["app/StanSampler/*"],
       "@SpUtil/*": ["app/util/*"],
