@@ -3,10 +3,17 @@ import { Cancel, Check } from "@mui/icons-material";
 import CloseableDialog, {
   useDialogControls,
 } from "@SpComponents/CloseableDialog";
-import { FunctionComponent, useCallback, useEffect, useState } from "react";
+import {
+  FunctionComponent,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import ConfigureCompilationServerDialog from "./ConfigureCompilationServerDialog";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
+import { CompileContext } from "@SpCompileContext/CompileContext";
 
 export const publicUrl = "https://trom-stan-wasm-server.magland.org";
 export const localUrl = "http://localhost:8083";
@@ -18,13 +25,8 @@ type CompilationServerConnectionControlProps = {
 const CompilationServerConnectionControl: FunctionComponent<
   CompilationServerConnectionControlProps
 > = () => {
-  const [stanWasmServerUrl, setStanWasmServerUrl] = useState<string>(
-    localStorage.getItem("stanWasmServerUrl") || publicUrl,
-  );
+  const { stanWasmServerUrl } = useContext(CompileContext);
   const { isConnected, retryConnection } = useIsConnected(stanWasmServerUrl);
-  useEffect(() => {
-    localStorage.setItem("stanWasmServerUrl", stanWasmServerUrl);
-  }, [stanWasmServerUrl]);
 
   const {
     handleOpen: openDialog,
@@ -63,8 +65,6 @@ const CompilationServerConnectionControl: FunctionComponent<
         handleClose={closeDialog}
       >
         <ConfigureCompilationServerDialog
-          stanWasmServerUrl={stanWasmServerUrl}
-          setStanWasmServerUrl={setStanWasmServerUrl}
           isConnected={isConnected}
           onRetry={handleRetry}
         />
@@ -82,6 +82,11 @@ const useIsConnected = (stanWasmServerUrl: string) => {
   }, []);
   useEffect(() => {
     setIsConnected(false);
+    if (!probeUrl.startsWith("http") && !probeUrl.startsWith("https")) {
+      // important to do this check because otherwise fetch may succeed because
+      // the server of this web app may respond with success
+      return;
+    }
     (async () => {
       try {
         const response = await fetch(probeUrl);

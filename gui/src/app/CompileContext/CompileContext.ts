@@ -14,6 +14,8 @@ type CompileContextType = {
   validSyntax: boolean;
   compile: () => void;
   setValidSyntax: (valid: boolean) => void;
+  stanWasmServerUrl: string;
+  setStanWasmServerUrl: (url: string) => void;
 };
 
 export const CompileContext = createContext<CompileContextType>({
@@ -22,4 +24,6 @@ export const CompileContext = createContext<CompileContextType>({
   validSyntax: false,
   compile: () => {},
   setValidSyntax: () => {},
+  stanWasmServerUrl: "",
+  setStanWasmServerUrl: () => {},
 });

@@ -14,6 +14,10 @@ type CompileContextProviderProps = {
   // none
 };
 
+const initialStanWasmServerUrl =
+  localStorage.getItem("stanWasmServerUrl") ||
+  "https://trom-stan-wasm-server.magland.org";
+
 export const CompileContextProvider: FunctionComponent<
   PropsWithChildren<CompileContextProviderProps>
 > = ({ children }) => {
@@ -45,15 +49,20 @@ export const CompileContextProvider: FunctionComponent<
     setCompiledMainJsUrl,
   ]);
 
+  const [stanWasmServerUrl, setStanWasmServerUrl] = useState<string>(
+    initialStanWasmServerUrl,
+  );
+  useEffect(() => {
+    // persist to local storage
+    localStorage.setItem("stanWasmServerUrl", stanWasmServerUrl);
+  }, [stanWasmServerUrl]);
+
   const handleCompile = useCallback(async () => {
     setCompileStatus("compiling");
     await new Promise((resolve) => setTimeout(resolve, 500)); // for effect
     const onStatus = (msg: string) => {
       setCompileMessage(msg);
     };
-    const stanWasmServerUrl =
-      localStorage.getItem("stanWasmServerUrl") ||
-      "https://trom-stan-wasm-server.magland.org";
     const { mainJsUrl } = await compileStanProgram(
       stanWasmServerUrl,
       data.stanFileContent,
@@ -67,7 +76,12 @@ export const CompileContextProvider: FunctionComponent<
     setCompiledMainJsUrl(mainJsUrl);
     setCompileStatus("compiled");
     setTheStanFileContentThasHasBeenCompiled(data.stanFileContent);
-  }, [data.stanFileContent, setCompiledMainJsUrl]);
+  }, [
+    data.stanFileContent,
+    setCompiledMainJsUrl,
+    setCompileStatus,
+    stanWasmServerUrl,
+  ]);
 
   return (
     <CompileContext.Provider
@@ -78,6 +92,8 @@ export const CompileContextProvider: FunctionComponent<
         validSyntax,
         compile: handleCompile,
         setValidSyntax,
+        stanWasmServerUrl,
+        setStanWasmServerUrl,
       }}
     >
       {children}

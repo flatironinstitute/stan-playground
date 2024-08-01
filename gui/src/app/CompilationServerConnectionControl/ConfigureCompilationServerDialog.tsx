@@ -1,4 +1,10 @@
-import { FunctionComponent, useCallback, useState } from "react";
+import {
+  FunctionComponent,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { localUrl, publicUrl } from "./CompilationServerConnectionControl";
 import FormControl from "@mui/material/FormControl";
 import Divider from "@mui/material/Divider";
@@ -9,20 +15,30 @@ import Radio from "@mui/material/Radio";
 import TextField from "@mui/material/TextField";
 import IconButton from "@mui/material/IconButton";
 import { Refresh } from "@mui/icons-material";
+import { CompileContext } from "@SpCompileContext/CompileContext";
 
 type ServerType = "public" | "local" | "custom";
 
 type ConfigureCompilationServerDialogProps = {
-  stanWasmServerUrl: string;
-  setStanWasmServerUrl: (url: string) => void;
   isConnected: boolean;
   onRetry: () => void;
 };
 
 const ConfigureCompilationServerDialog: FunctionComponent<
   ConfigureCompilationServerDialogProps
-> = ({ stanWasmServerUrl, setStanWasmServerUrl, isConnected, onRetry }) => {
-  const [choice, setChoice] = useState<ServerType>("public");
+> = ({ isConnected, onRetry }) => {
+  const { stanWasmServerUrl, setStanWasmServerUrl } =
+    useContext(CompileContext);
+
+  const serverType: ServerType = useMemo(() => {
+    if (stanWasmServerUrl === publicUrl) {
+      return "public";
+    } else if (stanWasmServerUrl === localUrl) {
+      return "local";
+    } else {
+      return "custom";
+    }
+  }, [stanWasmServerUrl]);
 
   const makeChoice = useCallback(
     (_: unknown, choice: string) => {
@@ -35,7 +51,6 @@ const ConfigureCompilationServerDialog: FunctionComponent<
       } else {
         return;
       }
-      setChoice(choice);
     },
     [setStanWasmServerUrl],
   );
@@ -64,7 +79,7 @@ const ConfigureCompilationServerDialog: FunctionComponent<
         <FormLabel id="compilation-server-selection">
           Compilation server
         </FormLabel>
-        <RadioGroup value={choice} onChange={makeChoice}>
+        <RadioGroup value={serverType} onChange={makeChoice}>
           <FormControlLabel
             value="public"
             control={<Radio />}
@@ -82,13 +97,13 @@ const ConfigureCompilationServerDialog: FunctionComponent<
           />
         </RadioGroup>
 
-        {choice === "custom" && (
+        {serverType === "custom" && (
           <div>
             <p>
               <TextField
                 variant="standard"
                 label="Custom server URL"
-                disabled={choice !== "custom"}
+                disabled={serverType !== "custom"}
                 value={stanWasmServerUrl}
                 onChange={(e) => setStanWasmServerUrl(e.target.value)}
               />
@@ -97,7 +112,7 @@ const ConfigureCompilationServerDialog: FunctionComponent<
         )}
       </FormControl>
 
-      {choice === "local" && (
+      {serverType === "local" && (
         <div>
           <p>
             To start a local compilation server{" "}
@@ -110,7 +125,7 @@ const ConfigureCompilationServerDialog: FunctionComponent<
           </div>
         </div>
       )}
-      {choice === "public" && (
+      {serverType === "public" && (
         <div>
           <p>
             The public server <span className="details">({publicUrl})</span> is
