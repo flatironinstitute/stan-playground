@@ -3,12 +3,12 @@ import { AutoFixHigh, Cancel, Help, Settings } from "@mui/icons-material";
 import StanCompileResultWindow from "@SpComponents/StanCompileResultWindow";
 import TextEditor from "@SpComponents/TextEditor";
 import { ToolbarItem } from "@SpComponents/ToolBar";
-import compileStanProgram from "@SpStanc/compileStanProgram";
 import { stancErrorsToCodeMarkers } from "@SpStanc/Linting";
 import useStanc from "@SpStanc/useStanc";
+import { CompileContext } from "@SpCompileContext/CompileContext";
 import {
   FunctionComponent,
-  useCallback,
+  useContext,
   useEffect,
   useMemo,
   useState,
@@ -22,10 +22,7 @@ type Props = {
   setEditedFileContent: (text: string) => void;
   onDeleteFile?: () => void;
   readOnly: boolean;
-  setCompiledUrl: (s: string) => void;
 };
-
-type CompileStatus = "preparing" | "compiling" | "compiled" | "failed" | "";
 
 const StanFileEditor: FunctionComponent<Props> = ({
   fileName,
@@ -34,7 +31,6 @@ const StanFileEditor: FunctionComponent<Props> = ({
   editedFileContent,
   setEditedFileContent,
   readOnly,
-  setCompiledUrl,
 }) => {
   const { stancErrors, requestFormat } = useStanc(
     "main.stan",
@@ -42,60 +38,20 @@ const StanFileEditor: FunctionComponent<Props> = ({
     setEditedFileContent,
   );
 
+  const { compileStatus, compileMessage, compile, setValidSyntax } =
+    useContext(CompileContext);
+
   const validSyntax = useMemo(() => {
     return stancErrors.errors === undefined;
   }, [stancErrors]);
 
+  useEffect(() => {
+    setValidSyntax(validSyntax);
+  }, [validSyntax, setValidSyntax]);
+
   const hasWarnings = useMemo(() => {
     return stancErrors.warnings && stancErrors.warnings.length > 0;
   }, [stancErrors]);
-
-  const [compileStatus, setCompileStatus] = useState<CompileStatus>("");
-  const [
-    theStanFileContentThasHasBeenCompiled,
-    setTheStanFileContentThasHasBeenCompiled,
-  ] = useState<string>("");
-  const [compileMessage, setCompileMessage] = useState<string>("");
-
-  const handleCompile = useCallback(async () => {
-    setCompileStatus("compiling");
-    await new Promise((resolve) => setTimeout(resolve, 500)); // for effect
-    const onStatus = (msg: string) => {
-      setCompileMessage(msg);
-    };
-    const stanWasmServerUrl =
-      localStorage.getItem("stanWasmServerUrl") ||
-      "https://trom-stan-wasm-server.magland.org";
-    const { mainJsUrl } = await compileStanProgram(
-      stanWasmServerUrl,
-      fileContent,
-      onStatus,
-    );
-
-    if (!mainJsUrl) {
-      setCompileStatus("failed");
-      return;
-    }
-    setCompiledUrl(mainJsUrl);
-    setCompileStatus("compiled");
-    setTheStanFileContentThasHasBeenCompiled(fileContent);
-  }, [fileContent, setCompiledUrl]);
-
-  useEffect(() => {
-    // if the compiled content is not the same as the current content,
-    // then the state should not be compiled or failed
-    if (fileContent !== theStanFileContentThasHasBeenCompiled) {
-      if (compileStatus === "compiled" || compileStatus === "failed") {
-        setCompileStatus("");
-        setCompiledUrl("");
-      }
-    }
-  }, [
-    fileContent,
-    theStanFileContentThasHasBeenCompiled,
-    compileStatus,
-    setCompiledUrl,
-  ]);
 
   const [syntaxWindowVisible, setSyntaxWindowVisible] = useState(false);
 
@@ -154,7 +110,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
             tooltip: "Compile Stan model",
             label: "Compile",
             icon: <Settings />,
-            onClick: handleCompile,
+            onClick: compile,
             color: "darkblue",
           });
         }
@@ -178,7 +134,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
   }, [
     editedFileContent,
     fileContent,
-    handleCompile,
+    compile,
     requestFormat,
     validSyntax,
     compileStatus,

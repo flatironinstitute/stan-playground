@@ -37,15 +37,12 @@
       "@SpCore/gists/*": ["app/gists/*"],
       /* We are playing a bit fast and loose with the distinction */
       "@SpPages/*": ["app/pages/HomePage/*"],
-      "@SpStanc/*": [
-        "app/Stanc/*",
-        "app/CompilationServerConnectionControl/*",
-        "app/compileStanProgram/*"
-      ],
+      "@SpStanc/*": ["app/Stanc/*", "app/CompilationServerConnectionControl/*"],
       "@SpStanSampler/*": ["app/StanSampler/*"],
       "@SpUtil/*": ["app/util/*"],
       "@SpStanStats/*": ["app/util/stan_stats/*"],
-      "@SpScripting/*": ["app/Scripting/*"]
+      "@SpScripting/*": ["app/Scripting/*"],
+      "@SpCompileContext/*": ["app/CompileContext/*"]
     }
   },
   "include": ["src", "test"],

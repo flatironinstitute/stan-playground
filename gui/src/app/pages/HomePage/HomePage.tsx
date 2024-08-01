@@ -1,7 +1,11 @@
+import { Split } from "@geoffcox/react-splitter";
 import Box from "@mui/material/Box";
 import styled from "@mui/material/styles/styled";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import StanFileEditor from "@SpComponents/StanFileEditor";
+import TabWidget from "@SpComponents/TabWidget";
+import TextEditor from "@SpComponents/TextEditor";
+import { FileNames } from "@SpCore/FileMapping";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import {
   modelHasUnsavedChanges,
@@ -9,6 +13,8 @@ import {
 } from "@SpCore/ProjectDataModel";
 import Sidebar, { drawerWidth } from "@SpPages/Sidebar";
 import TopBar from "@SpPages/TopBar";
+import DataPyWindow from "@SpScripting/DataGeneration/DataPyWindow";
+import DataRWindow from "@SpScripting/DataGeneration/DataRWindow";
 import {
   FunctionComponent,
   useContext,
@@ -16,13 +22,7 @@ import {
   useRef,
   useState,
 } from "react";
-import TabWidget from "@SpComponents/TabWidget";
 import SamplingWindow from "./SamplingWindow/SamplingWindow";
-import { FileNames } from "@SpCore/FileMapping";
-import DataRWindow from "@SpScripting/DataGeneration/DataRWindow";
-import DataPyWindow from "@SpScripting/DataGeneration/DataPyWindow";
-import TextEditor from "@SpComponents/TextEditor";
-import { Split } from "@geoffcox/react-splitter";
 
 type Props = {
   //
@@ -30,8 +30,6 @@ type Props = {
 
 const HomePage: FunctionComponent<Props> = () => {
   const { data } = useContext(ProjectContext);
-
-  const [compiledMainJsUrl, setCompiledMainJsUrl] = useState<string>("");
 
   const smallScreen = useMediaQuery("(max-width:600px)");
 
@@ -64,8 +62,8 @@ const HomePage: FunctionComponent<Props> = () => {
 
       <MovingBox open={leftPanelCollapsed} flex="1" minHeight="0">
         <Split minPrimarySize="80px" minSecondarySize="120px">
-          <LeftView setCompiledMainJsUrl={setCompiledMainJsUrl} />
-          <RightView compiledMainJsUrl={compiledMainJsUrl} />
+          <LeftView />
+          <RightView />
         </Split>
       </MovingBox>
     </Box>
@@ -73,15 +71,13 @@ const HomePage: FunctionComponent<Props> = () => {
 };
 
 type RightViewProps = {
-  compiledMainJsUrl: string;
+  // none
 };
 
-const RightView: FunctionComponent<RightViewProps> = ({
-  compiledMainJsUrl,
-}) => {
+const RightView: FunctionComponent<RightViewProps> = () => {
   return (
     <TabWidget labels={["Sampling", "Data Generation"]}>
-      <SamplingWindow compiledMainJsUrl={compiledMainJsUrl} />
+      <SamplingWindow />
       <TabWidget labels={["Python", "R"]}>
         <DataPyWindow />
         <DataRWindow />
@@ -91,12 +87,10 @@ const RightView: FunctionComponent<RightViewProps> = ({
 };
 
 type LeftViewProps = {
-  setCompiledMainJsUrl: (url: string) => void;
+  // none
 };
 
-const LeftView: FunctionComponent<LeftViewProps> = ({
-  setCompiledMainJsUrl,
-}) => {
+const LeftView: FunctionComponent<LeftViewProps> = () => {
   const { data, update } = useContext(ProjectContext);
   return (
     <Split horizontal>
@@ -119,7 +113,6 @@ const LeftView: FunctionComponent<LeftViewProps> = ({
           })
         }
         readOnly={false}
-        setCompiledUrl={setCompiledMainJsUrl}
       />
       <TextEditor
         language="json"
