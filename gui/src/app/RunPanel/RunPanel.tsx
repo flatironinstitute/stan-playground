@@ -89,9 +89,9 @@ const isCompileModelDisabled = (
   projectData: ProjectDataModel,
   validSyntax: boolean,
 ) => {
+  if (!validSyntax) return true;
   if (!projectData.stanFileContent.trim()) return true;
   if (modelHasUnsavedChanges(projectData)) return true;
-  if (!validSyntax) return true;
   return false;
 };
 
