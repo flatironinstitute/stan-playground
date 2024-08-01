@@ -38,9 +38,8 @@ const StanFileEditor: FunctionComponent<Props> = ({
     setEditedFileContent,
   );
 
-  const { setValidSyntax } = useContext(CompileContext);
-
-  const { compileStatus, compileMessage, compile } = useContext(CompileContext);
+  const { compileStatus, compileMessage, compile, setValidSyntax } =
+    useContext(CompileContext);
 
   const validSyntax = useMemo(() => {
     return stancErrors.errors === undefined;

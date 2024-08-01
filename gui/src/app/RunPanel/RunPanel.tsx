@@ -53,68 +53,72 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
   if (!dataIsSaved) {
     return <div className="RunPanelPadded">Data not saved</div>;
   }
-  return (
-    <div className="RunPanel">
-      <div className="RunPanelPadded">
-        {compileStatus === "compiled" ? (
+
+  let content;
+  if (compileStatus === "compiled") {
+    content = (
+      <div>
+        <Button
+          variant="contained"
+          color="success"
+          onClick={handleRun}
+          disabled={runStatus === "sampling" || runStatus === "loading"}
+        >
+          run sampling
+        </Button>
+        &nbsp;
+        {runStatus === "sampling" && (
+          <Button
+            color="error"
+            variant="outlined"
+            onClick={cancelRun}
+            disabled={runStatus !== "sampling"}
+          >
+            cancel
+          </Button>
+        )}
+        <hr />
+        {runStatus === "loading" && <div>Loading compiled Stan model...</div>}
+        {runStatus === "sampling" && (
           <div>
-            <Button
-              variant="contained"
-              color="success"
-              onClick={handleRun}
-              disabled={runStatus === "sampling" || runStatus === "loading"}
-            >
-              run sampling
-            </Button>
-            &nbsp;
-            {runStatus === "sampling" && (
-              <Button
-                color="error"
-                variant="outlined"
-                onClick={cancelRun}
-                disabled={runStatus !== "sampling"}
-              >
-                cancel
-              </Button>
-            )}
-            <hr />
-            {runStatus === "loading" && (
-              <div>Loading compiled Stan model...</div>
-            )}
-            {runStatus === "sampling" && (
-              <div>
-                Sampling
-                <SamplingProgressComponent
-                  report={progress}
-                  numChains={samplingOpts.num_chains}
-                />
-              </div>
-            )}
-            {runStatus === "completed" && <div>done sampling</div>}
-            {runStatus === "failed" && (
-              <div>
-                Sampling failed!
-                <pre className="SamplerError">{errorMessage}</pre>
-                <span className="details">
-                  (see browser console for more details)
-                </span>
-              </div>
-            )}
+            Sampling
+            <SamplingProgressComponent
+              report={progress}
+              numChains={samplingOpts.num_chains}
+            />
           </div>
-        ) : ["preparing", "compiling"].includes(compileStatus) ? (
-          <div>{compileMessage}</div>
-        ) : (
+        )}
+        {runStatus === "completed" && <div>done sampling</div>}
+        {runStatus === "failed" && (
           <div>
-            <Button
-              variant="contained"
-              onClick={compile}
-              disabled={isCompileModelDisabled(projectData, validSyntax)}
-            >
-              compile model
-            </Button>
+            Sampling failed!
+            <pre className="SamplerError">{errorMessage}</pre>
+            <span className="details">
+              (see browser console for more details)
+            </span>
           </div>
         )}
       </div>
+    );
+  } else if (["preparing", "compiling"].includes(compileStatus)) {
+    content = <div>{compileMessage}</div>;
+  } else {
+    content = (
+      <div>
+        <Button
+          variant="contained"
+          onClick={compile}
+          disabled={isCompileModelDisabled(projectData, validSyntax)}
+        >
+          compile model
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="RunPanel">
+      <div className="RunPanelPadded">{content}</div>
     </div>
   );
 };
