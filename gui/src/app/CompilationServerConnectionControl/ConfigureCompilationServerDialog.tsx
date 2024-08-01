@@ -1,5 +1,9 @@
-import { FunctionComponent, useCallback, useState } from "react";
-import { localUrl, publicUrl } from "./CompilationServerConnectionControl";
+import { FunctionComponent, useCallback } from "react";
+import {
+  localUrl,
+  publicUrl,
+  ServerType,
+} from "./CompilationServerConnectionControl";
 import FormControl from "@mui/material/FormControl";
 import Divider from "@mui/material/Divider";
 import FormLabel from "@mui/material/FormLabel";
@@ -10,20 +14,25 @@ import TextField from "@mui/material/TextField";
 import IconButton from "@mui/material/IconButton";
 import { Refresh } from "@mui/icons-material";
 
-type ServerType = "public" | "local" | "custom";
-
 type ConfigureCompilationServerDialogProps = {
   stanWasmServerUrl: string;
   setStanWasmServerUrl: (url: string) => void;
   isConnected: boolean;
   onRetry: () => void;
+  choice: ServerType;
+  setChoice: (choice: ServerType) => void;
 };
 
 const ConfigureCompilationServerDialog: FunctionComponent<
   ConfigureCompilationServerDialogProps
-> = ({ stanWasmServerUrl, setStanWasmServerUrl, isConnected, onRetry }) => {
-  const [choice, setChoice] = useState<ServerType>("public");
-
+> = ({
+  stanWasmServerUrl,
+  setStanWasmServerUrl,
+  isConnected,
+  onRetry,
+  choice,
+  setChoice,
+}) => {
   const makeChoice = useCallback(
     (_: unknown, choice: string) => {
       if (choice === "public") {
@@ -37,7 +46,7 @@ const ConfigureCompilationServerDialog: FunctionComponent<
       }
       setChoice(choice);
     },
-    [setStanWasmServerUrl],
+    [setChoice, setStanWasmServerUrl],
   );
 
   return (

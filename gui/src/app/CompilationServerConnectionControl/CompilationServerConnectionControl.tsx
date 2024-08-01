@@ -11,6 +11,8 @@ import Typography from "@mui/material/Typography";
 export const publicUrl = "https://trom-stan-wasm-server.magland.org";
 export const localUrl = "http://localhost:8083";
 
+export type ServerType = "public" | "local" | "custom";
+
 type CompilationServerConnectionControlProps = {
   // none
 };
@@ -21,6 +23,15 @@ const CompilationServerConnectionControl: FunctionComponent<
   const [stanWasmServerUrl, setStanWasmServerUrl] = useState<string>(
     localStorage.getItem("stanWasmServerUrl") || publicUrl,
   );
+
+  const [serverType, setServerType] = useState<ServerType>(
+    stanWasmServerUrl === publicUrl
+      ? "public"
+      : stanWasmServerUrl === localUrl
+        ? "local"
+        : "custom",
+  );
+
   const { isConnected, retryConnection } = useIsConnected(stanWasmServerUrl);
   useEffect(() => {
     localStorage.setItem("stanWasmServerUrl", stanWasmServerUrl);
@@ -36,12 +47,6 @@ const CompilationServerConnectionControl: FunctionComponent<
     retryConnection();
   }, [retryConnection]);
 
-  const serverLabel =
-    stanWasmServerUrl === publicUrl
-      ? "public"
-      : stanWasmServerUrl === localUrl
-        ? "local"
-        : "custom";
   return (
     <>
       <IconButton onClick={openDialog} color="inherit" size="small">
@@ -53,7 +58,7 @@ const CompilationServerConnectionControl: FunctionComponent<
         &nbsp;
         <Typography color="white" fontSize={12}>
           {isConnected ? "connected to " : "not connected to "}
-          {serverLabel}
+          {serverType}
         </Typography>
       </IconButton>
       <CloseableDialog
@@ -67,6 +72,8 @@ const CompilationServerConnectionControl: FunctionComponent<
           setStanWasmServerUrl={setStanWasmServerUrl}
           isConnected={isConnected}
           onRetry={handleRetry}
+          choice={serverType}
+          setChoice={setServerType}
         />
       </CloseableDialog>
     </>
