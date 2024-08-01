@@ -49,37 +49,38 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
     return <div className="RunPanelPadded">Data not saved</div>;
   }
 
-  let content;
-  if (compileStatus === "compiled") {
-    content = (
-      <CompiledRunPanel
-        handleRun={handleRun}
-        cancelRun={cancelRun}
-        runStatus={runStatus}
-        progress={progress}
-        samplingOpts={samplingOpts}
-        errorMessage={errorMessage}
-      />
-    );
-  } else if (["preparing", "compiling"].includes(compileStatus)) {
-    content = <div>{compileMessage}</div>;
-  } else {
-    content = (
-      <div>
-        <Button
-          variant="contained"
-          onClick={compile}
-          disabled={isCompileModelDisabled(projectData, validSyntax)}
-        >
-          compile model
-        </Button>
-      </div>
-    );
-  }
+  const compileDiv = (
+    <div>
+      <Button
+        variant="contained"
+        onClick={compile}
+        disabled={isCompileModelDisabled(projectData, validSyntax)}
+      >
+        compile model
+      </Button>
+    </div>
+  );
+
+  const compilingDiv = <div>{compileMessage}</div>;
 
   return (
     <div className="RunPanel">
-      <div className="RunPanelPadded">{content}</div>
+      <div className="RunPanelPadded">
+        {compileStatus === "compiled" ? (
+          <CompiledRunPanel
+            handleRun={handleRun}
+            cancelRun={cancelRun}
+            runStatus={runStatus}
+            progress={progress}
+            samplingOpts={samplingOpts}
+            errorMessage={errorMessage}
+          />
+        ) : ["preparing", "compiling"].includes(compileStatus) ? (
+          compilingDiv
+        ) : (
+          compileDiv
+        )}
+      </div>
     </div>
   );
 };
