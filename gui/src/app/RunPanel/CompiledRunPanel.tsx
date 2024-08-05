@@ -19,8 +19,18 @@ type CompiledRunPanelProps = {
   errorMessage: string;
 };
 
-const loadingDiv = <div>Loading compiled Stan model...</div>;
-const completedDiv = <div>done sampling</div>;
+const loadingDiv = (
+  <div>
+    <hr />
+    Loading compiled Stan model...
+  </div>
+);
+const completedDiv = (
+  <div>
+    <hr />
+    done sampling
+  </div>
+);
 
 const CompiledRunPanel: FunctionComponent<CompiledRunPanelProps> = ({
   handleRun,
@@ -40,6 +50,7 @@ const CompiledRunPanel: FunctionComponent<CompiledRunPanelProps> = ({
       >
         cancel
       </Button>
+      <hr />
       <div>
         Sampling
         <SamplingProgressComponent
@@ -52,6 +63,7 @@ const CompiledRunPanel: FunctionComponent<CompiledRunPanelProps> = ({
 
   const failedDiv = (
     <div>
+      <hr />
       Sampling failed!
       <pre className="SamplerError">{errorMessage}</pre>
       <span className="details">(see browser console for more details)</span>
@@ -69,7 +81,6 @@ const CompiledRunPanel: FunctionComponent<CompiledRunPanelProps> = ({
         run sampling
       </Button>
       &nbsp;
-      <hr />
       {runStatus === "loading" ? (
         loadingDiv
       ) : runStatus === "completed" ? (
