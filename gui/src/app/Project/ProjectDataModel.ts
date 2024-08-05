@@ -126,7 +126,7 @@ export const isProjectDataModel = (x: any): x is ProjectDataModel => {
 export type ProjectPersistentDataModel = Omit<ProjectDataModel, "ephemera">;
 
 export const initialDataModel: ProjectDataModel = {
-  meta: { title: "Undefined" },
+  meta: { title: "Untitled" },
   ephemera: {
     stanFileContent: "",
     dataFileContent: "",
