@@ -12,6 +12,7 @@ import {
 import StanSampler from "@SpStanSampler/StanSampler";
 import { StanRun } from "@SpStanSampler/useStanSampler";
 import CompiledRunPanel from "./CompiledRunPanel";
+import CircularProgress from "@mui/material/CircularProgress";
 
 type RunPanelProps = {
   sampler?: StanSampler;
@@ -40,8 +41,7 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
     sampler.cancel();
   }, [sampler]);
 
-  const { compile, compileMessage, compileStatus, validSyntax } =
-    useContext(CompileContext);
+  const { compile, compileStatus, validSyntax } = useContext(CompileContext);
 
   const { data: projectData } = useContext(ProjectContext);
 
@@ -61,7 +61,11 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
     </div>
   );
 
-  const compilingDiv = <div>{compileMessage}</div>;
+  const compilingDiv = (
+    <div>
+      <CircularProgress />
+    </div>
+  );
 
   return (
     <div className="RunPanel">
