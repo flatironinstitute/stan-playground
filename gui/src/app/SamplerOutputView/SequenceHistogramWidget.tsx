@@ -1,5 +1,6 @@
 import LazyPlotlyPlot from "@SpComponents/LazyPlotlyPlot";
 import { FunctionComponent, useMemo } from "react";
+import ReactVisibilitySensor from "react-visibility-sensor";
 
 type Props = {
   histData: number[];
@@ -25,15 +26,23 @@ const SequenceHistogramWidget: FunctionComponent<Props> = ({
   );
   return (
     <div className="SequenceHistogram">
-      <LazyPlotlyPlot
-        data={[data]}
-        layout={{
-          title: { text: title, font: { size: 12 } },
-          xaxis: { title: variableName },
-          yaxis: { title: "Count" },
-          margin: { r: 0 },
-        }}
-      />
+      <ReactVisibilitySensor partialVisibility>
+        {({ isVisible }: { isVisible: boolean }) =>
+          isVisible ? (
+            <LazyPlotlyPlot
+              data={[data]}
+              layout={{
+                title: { text: title, font: { size: 12 } },
+                xaxis: { title: variableName },
+                yaxis: { title: "Count" },
+                margin: { r: 0 },
+              }}
+            />
+          ) : (
+            <div style={{ height: "200px" }}></div>
+          )
+        }
+      </ReactVisibilitySensor>
     </div>
   );
 };
