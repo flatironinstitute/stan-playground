@@ -27,6 +27,24 @@
   white-space: pre-wrap;
 }
 
+.stdout {
+  color: darkblue;
+}
+
+.stdout pre {
+  margin: 0px;
+  padding: 1px;
+}
+
+.stderr {
+  color: red;
+}
+
+.stderr pre {
+  margin: 0px;
+  padding: 1px;
+}
+
 /* Compilation Results (StanCompileResultWindow) */
 .ErrorsWindow {
   height: 100%;

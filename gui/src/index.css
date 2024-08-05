@@ -4,20 +4,32 @@ body {
   min-height: 100vh;
 }
 
-.WorkerStdout {
-  color: darkblue;
+@supports (scrollbar-width: auto) {
+  body {
+    scrollbar-width: thin;
+  }
 }
 
-.WorkerStdout pre {
-  margin: 0px;
-  padding: 1px;
-}
+@supports selector(::-webkit-scrollbar) {
+  ::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
 
-.WorkerStderr {
-  color: red;
-}
+  :hover::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
 
-.WorkerStderr pre {
-  margin: 0px;
-  padding: 1px;
+  ::-webkit-scrollbar-track {
+    background: #f2f2f2;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #bdbdbd;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #6e6e6e;
+  }
 }
