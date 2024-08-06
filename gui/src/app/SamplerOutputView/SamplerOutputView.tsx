@@ -106,7 +106,7 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
   const [abbreviatedToNumRows, setAbbreviatedToNumRows] = useState<
     number | undefined
   >(300);
-  const draws2 = useMemo(() => {
+  const formattedDraws = useMemo(() => {
     if (abbreviatedToNumRows === undefined) return draws;
     return draws.map((draw) => draw.slice(0, abbreviatedToNumRows));
   }, [draws, abbreviatedToNumRows]);
@@ -169,7 +169,7 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
           </tr>
         </thead>
         <tbody>
-          {draws2[0].map((_, i) => (
+          {formattedDraws[0].map((_, i) => (
             <tr key={i}>
               <td>{drawChainIds[i]}</td>
               <td>{drawNumbers[i]}</td>
