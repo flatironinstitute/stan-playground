@@ -175,7 +175,7 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
             <tr key={i}>
               <td>{drawChainIds[i]}</td>
               <td>{drawNumbers[i]}</td>
-              {draws2.map((draw, j) => (
+              {formattedDraws.map((draw, j) => (
                 <td key={j}>{draw[i]}</td>
               ))}
             </tr>
