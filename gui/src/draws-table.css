@@ -22,6 +22,7 @@
 .draws-table th,
 .draws-table td {
   padding: 2px 2px;
+  white-space: nowrap;
 }
 
 .draws-table tbody tr {

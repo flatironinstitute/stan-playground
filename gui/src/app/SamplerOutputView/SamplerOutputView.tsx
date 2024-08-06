@@ -108,7 +108,9 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
   >(300);
   const formattedDraws = useMemo(() => {
     if (abbreviatedToNumRows === undefined) return draws;
-    return draws.map((draw) => draw.slice(0, abbreviatedToNumRows));
+    return draws.map((draw) =>
+      formatDraws(draw.slice(0, abbreviatedToNumRows)),
+    );
   }, [draws, abbreviatedToNumRows]);
   const handleExportToCsv = useCallback(() => {
     const csvText = prepareCsvText(
@@ -173,7 +175,7 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
             <tr key={i}>
               <td>{drawChainIds[i]}</td>
               <td>{drawNumbers[i]}</td>
-              {draws.map((draw, j) => (
+              {draws2.map((draw, j) => (
                 <td key={j}>{draw[i]}</td>
               ))}
             </tr>
@@ -194,6 +196,11 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
         )}
     </div>
   );
+};
+
+const formatDraws = (draws: number[]) => {
+  if (draws.every((x) => Number.isInteger(x))) return draws;
+  return draws.map((x) => x.toPrecision(6));
 };
 
 const prepareCsvText = (
