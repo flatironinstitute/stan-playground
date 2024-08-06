@@ -207,6 +207,13 @@ span.EditorTitle {
   padding: 5px;
 }
 
+/* Histograms */
+
+.PlotAbbreviationToggle {
+  background: white;
+  padding: 5px;
+}
+
 /* Trace Plots */
 .TracePlotsView {
 }
