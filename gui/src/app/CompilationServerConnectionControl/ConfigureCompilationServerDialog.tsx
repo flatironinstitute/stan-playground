@@ -104,7 +104,7 @@ const ConfigureCompilationServerDialog: FunctionComponent<
         <div>
           <p>
             To start a local compilation server{" "}
-            <span className="details">({localUrl})</span>:
+            <span className="details">({localCompilationServerUrl})</span>:
           </p>
           <div>
             <pre>
