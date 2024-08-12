@@ -10,8 +10,8 @@ import RadioGroup from "@mui/material/RadioGroup";
 import TextField from "@mui/material/TextField";
 import { FunctionComponent, useCallback, useContext } from "react";
 import {
-  localUrl,
-  publicUrl,
+  localCompilationServerUrl,
+  publicCompilationServerUrl,
   serverTypeForUrl,
 } from "./CompilationServerConnectionControl";
 
@@ -31,9 +31,9 @@ const ConfigureCompilationServerDialog: FunctionComponent<
   const makeChoice = useCallback(
     (_: unknown, choice: string) => {
       if (choice === "public") {
-        setStanWasmServerUrl(publicUrl);
+        setStanWasmServerUrl(publicCompilationServerUrl);
       } else if (choice === "local") {
-        setStanWasmServerUrl(localUrl);
+        setStanWasmServerUrl(localCompilationServerUrl);
       } else if (choice === "custom") {
         setStanWasmServerUrl("");
       } else {
@@ -116,7 +116,8 @@ const ConfigureCompilationServerDialog: FunctionComponent<
       {serverType === "public" && (
         <div>
           <p>
-            The public server <span className="details">({publicUrl})</span> is
+            The public server{" "}
+            <span className="details">({publicCompilationServerUrl})</span> is
             provided for convenience, but may not be as reliable as a local
             server, depending on the current load and availability.
           </p>

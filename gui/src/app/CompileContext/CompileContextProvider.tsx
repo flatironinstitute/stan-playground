@@ -9,14 +9,14 @@ import {
   useState,
 } from "react";
 import { CompileContext, CompileStatus } from "./CompileContext";
+import { publicCompilationServerUrl } from "@SpStanc/CompilationServerConnectionControl";
 
 type CompileContextProviderProps = {
   // none
 };
 
 const initialStanWasmServerUrl =
-  localStorage.getItem("stanWasmServerUrl") ||
-  "https://trom-stan-wasm-server.magland.org";
+  localStorage.getItem("stanWasmServerUrl") || publicCompilationServerUrl;
 
 export const CompileContextProvider: FunctionComponent<
   PropsWithChildren<CompileContextProviderProps>

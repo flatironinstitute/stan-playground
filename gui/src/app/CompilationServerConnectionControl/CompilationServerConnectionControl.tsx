@@ -15,8 +15,9 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import { CompileContext } from "@SpCompileContext/CompileContext";
 
-export const publicUrl = "https://trom-stan-wasm-server.magland.org";
-export const localUrl = "http://localhost:8083";
+export const publicCompilationServerUrl =
+  "https://stan-wasm.flatironinstitute.org";
+export const localCompilationServerUrl = "http://localhost:8083";
 
 type ServerType = "public" | "local" | "custom";
 
@@ -72,7 +73,11 @@ const CompilationServerConnectionControl: FunctionComponent<
 };
 
 export const serverTypeForUrl = (url: string): ServerType => {
-  return url === publicUrl ? "public" : url === localUrl ? "local" : "custom";
+  return url === publicCompilationServerUrl
+    ? "public"
+    : url === localCompilationServerUrl
+      ? "local"
+      : "custom";
 };
 
 const useIsConnected = (stanWasmServerUrl: string) => {
