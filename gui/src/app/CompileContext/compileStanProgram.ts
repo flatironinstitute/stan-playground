@@ -5,6 +5,11 @@ const compileStanProgram = async (
   stanProgram: string,
   onStatus: (s: string) => void,
 ): Promise<{ mainJsUrl?: string }> => {
+  const setStatusAndWarn = (msg: string) => {
+    onStatus(msg);
+    console.warn(msg);
+  };
+
   try {
     onStatus("checking cache");
     const downloadMainJsUrlFromCache = await checkMainJsUrlCache(
@@ -27,13 +32,15 @@ const compileStanProgram = async (
       },
     });
     if (!initiation.ok) {
-      onStatus(`failed to initiate job: ${await messageOrStatus(initiation)}`);
+      setStatusAndWarn(
+        `failed to initiate job: ${await messageOrStatus(initiation)}`,
+      );
       return {};
     }
     const resp = await initiation.json();
     const job_id = resp.job_id;
     if (!job_id) {
-      onStatus(`failed to initiate job: ${JSON.stringify(resp)}`);
+      setStatusAndWarn(`failed to initiate job: ${JSON.stringify(resp)}`);
       return {};
     }
 
@@ -47,7 +54,9 @@ const compileStanProgram = async (
       body: stanProgram,
     });
     if (!upload.ok) {
-      onStatus(`failed to upload file: ${await messageOrStatus(upload)}`);
+      setStatusAndWarn(
+        `failed to upload file: ${await messageOrStatus(upload)}`,
+      );
       return {};
     }
     onStatus("file uploaded successfully");
@@ -61,7 +70,9 @@ const compileStanProgram = async (
       },
     });
     if (!runCompile.ok) {
-      onStatus(`failed to compile: ${await messageOrStatus(runCompile)}`);
+      setStatusAndWarn(
+        `failed to compile: ${await messageOrStatus(runCompile)}`,
+      );
       return {};
     }
 
@@ -73,7 +84,7 @@ const compileStanProgram = async (
     onStatus("Checking download of main.js");
     const downloadCheck = await fetch(mainJsUrl);
     if (!downloadCheck.ok) {
-      onStatus(
+      setStatusAndWarn(
         `failed to download main.js: ${await messageOrStatus(downloadCheck)}`,
       );
       return {};
@@ -82,7 +93,7 @@ const compileStanProgram = async (
     onStatus("compiled");
     return { mainJsUrl };
   } catch (e) {
-    onStatus(`failed to compile: ${e}`);
+    setStatusAndWarn(`failed to compile: ${e}`);
     return {};
   }
 };
