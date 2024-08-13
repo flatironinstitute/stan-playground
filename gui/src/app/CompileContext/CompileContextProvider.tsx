@@ -69,13 +69,13 @@ export const CompileContextProvider: FunctionComponent<
       onStatus,
     );
 
+    setTheStanFileContentThasHasBeenCompiled(data.stanFileContent);
     if (!mainJsUrl) {
       setCompileStatus("failed");
       return;
     }
     setCompiledMainJsUrl(mainJsUrl);
     setCompileStatus("compiled");
-    setTheStanFileContentThasHasBeenCompiled(data.stanFileContent);
   }, [
     data.stanFileContent,
     setCompiledMainJsUrl,
