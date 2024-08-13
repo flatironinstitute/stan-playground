@@ -87,15 +87,15 @@ const ConfigureCompilationServerDialog: FunctionComponent<
 
         {serverType === "custom" && (
           <div>
-            <p>
-              <TextField
-                variant="standard"
-                label="Custom server URL"
-                disabled={serverType !== "custom"}
-                value={stanWasmServerUrl}
-                onChange={(e) => setStanWasmServerUrl(e.target.value)}
-              />
-            </p>
+            <TextField
+              variant="standard"
+              label="Custom server URL"
+              disabled={serverType !== "custom"}
+              value={stanWasmServerUrl}
+              onChange={(e) => setStanWasmServerUrl(e.target.value)}
+            />
+            <br />
+            <br />
           </div>
         )}
       </FormControl>

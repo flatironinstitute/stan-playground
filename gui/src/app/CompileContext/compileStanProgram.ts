@@ -5,6 +5,11 @@ const compileStanProgram = async (
   stanProgram: string,
   onStatus: (s: string) => void,
 ): Promise<{ mainJsUrl?: string }> => {
+  const setStatusAndWarn = (msg: string) => {
+    onStatus(msg);
+    console.warn(msg);
+  };
+
   try {
     onStatus("checking cache");
     const downloadMainJsUrlFromCache = await checkMainJsUrlCache(
@@ -18,72 +23,84 @@ const compileStanProgram = async (
 
     onStatus("initiating job");
     const initiateJobUrl = `${stanWasmServerUrl}/job/initiate`;
-    // post
-    const a = await fetch(initiateJobUrl, {
+
+    const initiation = await fetch(initiateJobUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer 1234",
       },
     });
-    if (!a.ok) {
-      onStatus(`failed to initiate job: ${a.statusText}`);
+    if (!initiation.ok) {
+      setStatusAndWarn(
+        `failed to initiate job: ${await messageOrStatus(initiation)}`,
+      );
       return {};
     }
-    const resp = await a.json();
+    const resp = await initiation.json();
     const job_id = resp.job_id;
     if (!job_id) {
-      onStatus(`failed to initiate job: ${JSON.stringify(resp)}`);
+      setStatusAndWarn(`failed to initiate job: ${JSON.stringify(resp)}`);
       return {};
     }
 
     onStatus(`job initiated: ${job_id}`);
     const uploadFileUrl = `${stanWasmServerUrl}/job/${job_id}/upload/main.stan`;
-    const b = await fetch(uploadFileUrl, {
+    const upload = await fetch(uploadFileUrl, {
       method: "POST",
       headers: {
         "Content-Type": "text/plain",
       },
       body: stanProgram,
     });
-    if (!b.ok) {
-      onStatus(`failed to upload file: ${b.statusText}`);
+    if (!upload.ok) {
+      setStatusAndWarn(
+        `failed to upload file: ${await messageOrStatus(upload)}`,
+      );
       return {};
     }
     onStatus("file uploaded successfully");
 
     onStatus("compiling...");
     const runJobUrl = `${stanWasmServerUrl}/job/${job_id}/run`;
-    const c = await fetch(runJobUrl, {
+    const runCompile = await fetch(runJobUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
     });
-    if (!c.ok) {
-      const j = await c.json();
-      onStatus(`failed to run job: ${j?.message ?? c.statusText}`);
+    if (!runCompile.ok) {
+      setStatusAndWarn(
+        `failed to compile: ${await messageOrStatus(runCompile)}`,
+      );
       return {};
     }
 
-    const downloadMainJsUrl = `${stanWasmServerUrl}/job/${job_id}/download/main.js`;
+    const mainJsUrl = `${stanWasmServerUrl}/job/${job_id}/download/main.js`;
 
-    setToMainJsUrlCache(stanProgram, downloadMainJsUrl);
+    setToMainJsUrlCache(stanProgram, mainJsUrl);
 
     // download to make sure it is there
     onStatus("Checking download of main.js");
-    const d = await fetch(downloadMainJsUrl);
-    if (!d.ok) {
-      onStatus(`failed to download main.js: ${d.statusText}`);
+    const downloadCheck = await fetch(mainJsUrl);
+    if (!downloadCheck.ok) {
+      setStatusAndWarn(
+        `failed to download main.js: ${await messageOrStatus(downloadCheck)}`,
+      );
       return {};
     }
 
     onStatus("compiled");
-    return { mainJsUrl: downloadMainJsUrl };
+    return { mainJsUrl };
   } catch (e) {
-    onStatus(`failed to compile: ${e}`);
+    setStatusAndWarn(`failed to compile: ${e}`);
     return {};
   }
+};
+
+const messageOrStatus = async (response: Response) => {
+  const j = await response.json();
+  return j?.message ?? response.statusText;
 };
 
 export default compileStanProgram;

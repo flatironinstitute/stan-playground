@@ -149,7 +149,7 @@ span.EditorToolbarItem {
   font-weight: normal;
   letter-spacing: normal;
   display: inline-block;
-  white-space: normal;
+  white-space: nowrap;
   padding-left: 5px;
   font-size: 14px;
 }
