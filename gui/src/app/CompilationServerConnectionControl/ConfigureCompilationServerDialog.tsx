@@ -8,6 +8,7 @@ import IconButton from "@mui/material/IconButton";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import { FunctionComponent, useCallback, useContext } from "react";
 import {
   localCompilationServerUrl,
@@ -52,9 +53,13 @@ const ConfigureCompilationServerDialog: FunctionComponent<
       <Divider />
       <p>
         {isConnected ? (
-          <span className="connected">Connected</span>
+          <Typography component="span" color="success.main">
+            Connected
+          </Typography>
         ) : (
-          <span className="disconnected">Not connected</span>
+          <Typography component="span" color="error.main">
+            Not connected
+          </Typography>
         )}
         &nbsp;
         <IconButton onClick={onRetry} size="small" title="Retry connection">

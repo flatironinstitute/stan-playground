@@ -1,4 +1,13 @@
 import { Download } from "@mui/icons-material";
+import { styled } from "@mui/material/styles";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Button from "@mui/material/Button";
+import { IconButton } from "@mui/material";
 import HistsView from "@SpComponents/HistsView";
 import SummaryView from "@SpComponents/SummaryView";
 import TabWidget from "@SpComponents/TabWidget";
@@ -8,8 +17,6 @@ import { triggerDownload } from "@SpUtil/triggerDownload";
 import JSZip from "jszip";
 import { FunctionComponent, useCallback, useMemo, useState } from "react";
 import TracePlotsView from "./TracePlotsView";
-import Button from "@mui/material/Button";
-import { IconButton } from "@mui/material";
 
 type SamplerOutputViewProps = {
   latestRun: StanRun;
@@ -143,7 +150,7 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
     URL.revokeObjectURL(url);
   }, [draws, paramNames, drawChainIds, samplingOpts]);
   return (
-    <div className="DrawsTable">
+    <>
       <div>
         <IconButton size="small" title="Download" onClick={handleExportToCsv}>
           <Download fontSize="inherit" />
@@ -160,43 +167,62 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
         </IconButton>
       </div>
       <br />
-      <table className="draws-table">
-        <thead>
-          <tr>
-            <th key="chain">Chain</th>
-            <th key="draw">Draw</th>
-            {paramNames.map((name, i) => (
-              <th key={i}>{name}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {formattedDraws[0].map((_, i) => (
-            <tr key={i}>
-              <td>{drawChainIds[i]}</td>
-              <td>{drawNumbers[i]}</td>
-              {formattedDraws.map((draw, j) => (
-                <td key={j}>{draw[i]}</td>
+      <TableContainer>
+        <Table size="small" padding="none">
+          <StyledTableHead>
+            <StyledTableRow>
+              <TableCell key="chain">Chain</TableCell>
+              <TableCell key="draw">Draw</TableCell>
+              {paramNames.map((name, i) => (
+                <TableCell key={i}>{name}</TableCell>
               ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {abbreviatedToNumRows !== undefined &&
-        abbreviatedToNumRows < draws[0].length && (
-          <div className="DrawAbbreviationToggle">
-            <Button
-              onClick={() => {
-                setAbbreviatedToNumRows((x) => (x || 0) + 300);
-              }}
-            >
-              Show more
-            </Button>
-          </div>
-        )}
-    </div>
+            </StyledTableRow>
+          </StyledTableHead>
+          <TableBody>
+            {formattedDraws[0].map((_, i) => (
+              <StyledTableRow key={i} hover>
+                <TableCell>{drawChainIds[i]}</TableCell>
+                <TableCell>{drawNumbers[i]}</TableCell>
+                {formattedDraws.map((draw, j) => (
+                  <TableCell key={j}>{draw[i]}</TableCell>
+                ))}
+              </StyledTableRow>
+            ))}
+          </TableBody>
+        </Table>
+        {abbreviatedToNumRows !== undefined &&
+          abbreviatedToNumRows < draws[0].length && (
+            <div className="DrawAbbreviationToggle">
+              <Button
+                onClick={() => {
+                  setAbbreviatedToNumRows((x) => (x || 0) + 300);
+                }}
+              >
+                Show more
+              </Button>
+            </div>
+          )}
+      </TableContainer>
+    </>
   );
 };
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  "&:nth-of-type(odd)": {
+    backgroundColor: theme.palette.action.focus,
+  },
+
+  "&:last-of-type": {
+    borderBottom: "2px solid " + theme.palette.success.main,
+  },
+}));
+
+const StyledTableHead = styled(TableHead)(({ theme }) => ({
+  backgroundColor: theme.palette.success.light,
+  th: {
+    color: theme.palette.success.contrastText,
+  },
+}));
 
 const formatDraws = (draws: number[]) => {
   if (draws.every((x) => Number.isInteger(x))) return draws;

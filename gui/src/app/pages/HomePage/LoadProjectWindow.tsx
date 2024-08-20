@@ -3,6 +3,7 @@ import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import {
   FileNames,
   FileRegistry,
@@ -127,7 +128,9 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
           </ul>
         </div>
         <UploadFilesArea height={300} onUpload={onUpload} />
-        {errorText !== "" && <div className="ErrorText">{errorText}</div>}
+        {errorText !== "" && (
+          <Typography color="error.main">{errorText}</Typography>
+        )}
 
         {filesUploaded.length > 0 && (
           <>
