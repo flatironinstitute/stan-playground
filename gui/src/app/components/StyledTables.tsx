@@ -21,3 +21,11 @@ export const SuccessColoredTableHead = styled(TableHead)(({ theme }) => ({
     color: theme.palette.success.contrastText,
   },
 }));
+
+export const SuccessBorderedTableRow = styled(AlternatingTableRow)(
+  ({ theme }) => ({
+    "&:last-of-type": {
+      borderBottom: "2px solid " + theme.palette.success.main,
+    },
+  }),
+);

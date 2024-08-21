@@ -1,11 +1,10 @@
 import { Download } from "@mui/icons-material";
-import { styled } from "@mui/material/styles";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import {
-  AlternatingTableRow,
+  SuccessBorderedTableRow,
   SuccessColoredTableHead,
 } from "@SpComponents/StyledTables";
 import Button from "@mui/material/Button";
@@ -172,23 +171,23 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
       <TableContainer>
         <Table size="small" padding="none">
           <SuccessColoredTableHead>
-            <BorderedTableRow>
+            <SuccessBorderedTableRow>
               <TableCell key="chain">Chain</TableCell>
               <TableCell key="draw">Draw</TableCell>
               {paramNames.map((name, i) => (
                 <TableCell key={i}>{name}</TableCell>
               ))}
-            </BorderedTableRow>
+            </SuccessBorderedTableRow>
           </SuccessColoredTableHead>
           <TableBody>
             {formattedDraws[0].map((_, i) => (
-              <BorderedTableRow key={i} hover>
+              <SuccessBorderedTableRow key={i} hover>
                 <TableCell>{drawChainIds[i]}</TableCell>
                 <TableCell>{drawNumbers[i]}</TableCell>
                 {formattedDraws.map((draw, j) => (
                   <TableCell key={j}>{draw[i]}</TableCell>
                 ))}
-              </BorderedTableRow>
+              </SuccessBorderedTableRow>
             ))}
           </TableBody>
         </Table>
@@ -208,12 +207,6 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
     </>
   );
 };
-
-const BorderedTableRow = styled(AlternatingTableRow)(({ theme }) => ({
-  "&:last-of-type": {
-    borderBottom: "2px solid " + theme.palette.success.main,
-  },
-}));
 
 const formatDraws = (draws: number[]) => {
   if (draws.every((x) => Number.isInteger(x))) return draws;
