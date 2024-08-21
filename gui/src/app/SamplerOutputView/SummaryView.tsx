@@ -129,7 +129,7 @@ const SummaryView: FunctionComponent<SummaryViewProps> = ({
       <Table>
         <StyledTableHead>
           <TableRow>
-            <TableCell color="white">Parameter</TableCell>
+            <TableCell>Parameter</TableCell>
             {columns.map((column, i) => (
               <TableCell key={i} title={column.title}>
                 {column.label}
