@@ -1,5 +1,9 @@
 import { FunctionComponent, useCallback, useContext, useState } from "react";
-
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import { AlternatingTableRow } from "@SpComponents/StyledTables";
 import { FileRegistry, mapModelToFileManifest } from "@SpCore/FileMapping";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import { triggerDownload } from "@SpUtil/triggerDownload";
@@ -10,6 +14,9 @@ import saveAsGitHubGist, {
   createPatchForUpdatingGist,
   updateGitHubGist,
 } from "@SpCore/gists/saveAsGitHubGist";
+import TextField from "@mui/material/TextField";
+import TableRow from "@mui/material/TableRow";
+import Link from "@mui/material/Link";
 
 type SaveProjectWindowProps = {
   onClose: () => void;
@@ -26,30 +33,40 @@ const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
 
   return (
     <div className="dialogWrapper">
-      <table className="project-summary-table">
-        <tbody>
-          <tr>
-            <td>Title</td>
-            <td>
-              <EditTitleComponent
-                value={data.meta.title}
-                onChange={(newTitle: string) =>
-                  update({ type: "retitle", title: newTitle })
-                }
-              />
-            </td>
-          </tr>
-          {Object.entries(fileManifest).map(
-            ([name, content], i) =>
-              content.trim() !== "" && (
-                <tr key={i}>
-                  <td>{name}</td>
-                  <td>{content.length} bytes</td>
-                </tr>
-              ),
-          )}
-        </tbody>
-      </table>
+      <TableContainer>
+        <Table padding="none">
+          <TableBody>
+            <AlternatingTableRow hover>
+              <TableCell>
+                <strong>Title</strong>
+              </TableCell>
+              <TableCell>
+                <TextField
+                  type="text"
+                  value={data.meta.title}
+                  onChange={(e) =>
+                    update({ type: "retitle", title: e.target.value })
+                  }
+                  margin="dense"
+                  size="small"
+                  variant="standard"
+                />
+              </TableCell>
+            </AlternatingTableRow>
+            {Object.entries(fileManifest).map(
+              ([name, content], i) =>
+                content.trim() !== "" && (
+                  <AlternatingTableRow key={i} hover>
+                    <TableCell>
+                      <strong>{name}</strong>
+                    </TableCell>
+                    <TableCell>{content.length} bytes</TableCell>
+                  </AlternatingTableRow>
+                ),
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
       <div>&nbsp;</div>
       {!exportingToGist && !updatingExistingGist && (
         <div>
@@ -97,24 +114,6 @@ const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
   );
 };
 
-type EditTitleComponentProps = {
-  value: string;
-  onChange: (value: string) => void;
-};
-
-const EditTitleComponent: FunctionComponent<EditTitleComponentProps> = ({
-  value,
-  onChange,
-}) => {
-  return (
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    />
-  );
-};
-
 type GistExportViewProps = {
   fileManifest: Partial<FileRegistry>;
   title: string;
@@ -151,22 +150,22 @@ const GistExportView: FunctionComponent<GistExportViewProps> = ({
         with GitHub and create a new Gist with the files in this project. To
         create a new Personal Access Token granting permission to read/write
         your Gists,{" "}
-        <a
+        <Link
           href="https://github.com/settings/tokens/new?description=Stan%20Playground&scopes=gist"
           target="_blank"
           rel="noreferrer"
           style={{ fontWeight: "bold" }}
         >
           follow this link
-        </a>
+        </Link>
         . Alternatively, you can visit{" "}
-        <a
+        <Link
           href="https://github.com/settings/tokens?type=beta"
           target="_blank"
           rel="noreferrer"
         >
           GitHub developer settings
-        </a>{" "}
+        </Link>{" "}
         and navigate to either <i>Classic</i> or <i>Fine-grained tokens</i>.
         Create a token with only Gist read/write permissions.
       </p>
@@ -194,22 +193,22 @@ const GistExportView: FunctionComponent<GistExportViewProps> = ({
         <div>
           <p>
             Successfully saved to GitHub Gist:{" "}
-            <a href={gistUrl} target="_blank" rel="noreferrer">
+            <Link href={gistUrl} target="_blank" rel="noreferrer">
               {gistUrl}
-            </a>
+            </Link>
           </p>
           <p>
             You can now share the following link to this Stan Playground
             project:&nbsp;
             <br />
             <br />
-            <a
+            <Link
               href={makeSPShareableLinkFromGistUrl(gistUrl)}
               target="_blank"
               rel="noreferrer"
             >
               {makeSPShareableLinkFromGistUrl(gistUrl)}
-            </a>
+            </Link>
             <br />
           </p>
           <Button onClick={onClose}>Close</Button>
@@ -286,9 +285,9 @@ const GistUpdateView: FunctionComponent<GistUpdateViewProps> = ({
         <div>
           <p>
             Successfully updated Gist:{" "}
-            <a href={gistUrl} target="_blank" rel="noreferrer">
+            <Link href={gistUrl} target="_blank" rel="noreferrer">
               {gistUrl}
-            </a>
+            </Link>
           </p>
           <InvitationToShareProjectParagraph gistUrl={gistUrl} />
           <Button onClick={onClose}>Close</Button>
@@ -307,20 +306,27 @@ const InputGitHubPersonalAccessTokenComponent: FunctionComponent<
   InputGitHubPersonalAccessTokenComponentProps
 > = ({ gitHubPersonalAccessToken, setGitHubPersonalAccessToken }) => {
   return (
-    <table className="project-summary-table">
-      <tbody>
-        <tr>
-          <td>GitHub Personal Access Token</td>
-          <td>
-            <input
-              type="password"
-              value={gitHubPersonalAccessToken}
-              onChange={(e) => setGitHubPersonalAccessToken(e.target.value)}
-            />
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <TableContainer>
+      <Table padding="none">
+        <TableBody>
+          <TableRow>
+            <TableCell>
+              <strong>GitHub Personal Access Token</strong>
+            </TableCell>
+            <TableCell>
+              <TextField
+                type="password"
+                value={gitHubPersonalAccessToken}
+                onChange={(e) => setGitHubPersonalAccessToken(e.target.value)}
+                margin="dense"
+                size="small"
+                variant="standard"
+              />
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 
@@ -337,13 +343,13 @@ const InvitationToShareProjectParagraph: FunctionComponent<
       project:&nbsp;
       <br />
       <br />
-      <a
+      <Link
         href={makeSPShareableLinkFromGistUrl(gistUrl)}
         target="_blank"
         rel="noreferrer"
       >
         {makeSPShareableLinkFromGistUrl(gistUrl)}
-      </a>
+      </Link>
       <br />
     </p>
   );
@@ -358,20 +364,27 @@ const SpecifyGistUrlToUpdateComponent: FunctionComponent<
   SpecifyGistUrlToUpdateComponentProps
 > = ({ gistUrl, setGistUrl }) => {
   return (
-    <table className="project-summary-table">
-      <tbody>
-        <tr>
-          <td>GitHub Gist URL to update</td>
-          <td>
-            <input
-              type="text"
-              value={gistUrl || ""}
-              onChange={(e) => setGistUrl(e.target.value)}
-            />
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <TableContainer>
+      <Table padding="none">
+        <TableBody>
+          <TableRow>
+            <TableCell>
+              <strong>GitHub Gist URL to update</strong>
+            </TableCell>
+            <TableCell>
+              <TextField
+                type="text"
+                value={gistUrl || ""}
+                onChange={(e) => setGistUrl(e.target.value)}
+                margin="dense"
+                size="small"
+                variant="standard"
+              />
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 

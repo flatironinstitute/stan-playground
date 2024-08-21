@@ -4,8 +4,10 @@ import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
+import {
+  AlternatingTableRow,
+  SuccessColoredTableHead,
+} from "@SpComponents/StyledTables";
 import Button from "@mui/material/Button";
 import { IconButton } from "@mui/material";
 import HistsView from "@SpComponents/HistsView";
@@ -169,24 +171,24 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
       <br />
       <TableContainer>
         <Table size="small" padding="none">
-          <StyledTableHead>
-            <StyledTableRow>
+          <SuccessColoredTableHead>
+            <BorderedTableRow>
               <TableCell key="chain">Chain</TableCell>
               <TableCell key="draw">Draw</TableCell>
               {paramNames.map((name, i) => (
                 <TableCell key={i}>{name}</TableCell>
               ))}
-            </StyledTableRow>
-          </StyledTableHead>
+            </BorderedTableRow>
+          </SuccessColoredTableHead>
           <TableBody>
             {formattedDraws[0].map((_, i) => (
-              <StyledTableRow key={i} hover>
+              <BorderedTableRow key={i} hover>
                 <TableCell>{drawChainIds[i]}</TableCell>
                 <TableCell>{drawNumbers[i]}</TableCell>
                 {formattedDraws.map((draw, j) => (
                   <TableCell key={j}>{draw[i]}</TableCell>
                 ))}
-              </StyledTableRow>
+              </BorderedTableRow>
             ))}
           </TableBody>
         </Table>
@@ -207,20 +209,9 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
   );
 };
 
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  "&:nth-of-type(odd)": {
-    backgroundColor: theme.palette.action.focus,
-  },
-
+const BorderedTableRow = styled(AlternatingTableRow)(({ theme }) => ({
   "&:last-of-type": {
     borderBottom: "2px solid " + theme.palette.success.main,
-  },
-}));
-
-const StyledTableHead = styled(TableHead)(({ theme }) => ({
-  backgroundColor: theme.palette.success.light,
-  th: {
-    color: theme.palette.success.contrastText,
   },
 }));
 

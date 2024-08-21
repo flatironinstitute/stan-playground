@@ -1,10 +1,12 @@
-import { styled } from "@mui/material/styles";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import {
+  AlternatingTableRow,
+  SecondaryColoredTableHead,
+} from "@SpComponents/StyledTables";
 import {
   compute_effective_sample_size,
   compute_split_potential_scale_reduction,
@@ -127,7 +129,7 @@ const SummaryView: FunctionComponent<SummaryViewProps> = ({
   return (
     <TableContainer>
       <Table>
-        <StyledTableHead>
+        <SecondaryColoredTableHead>
           <TableRow>
             <TableCell>Parameter</TableCell>
             {columns.map((column, i) => (
@@ -136,15 +138,15 @@ const SummaryView: FunctionComponent<SummaryViewProps> = ({
               </TableCell>
             ))}
           </TableRow>
-        </StyledTableHead>
+        </SecondaryColoredTableHead>
         <TableBody>
           {rows.map((row, i) => (
-            <StyledTableRow key={i} hover>
+            <AlternatingTableRow key={i} hover>
               <TableCell component="th">{row.key}</TableCell>
               {row.values.map((value, j) => (
                 <TableCell key={j}>{value.toPrecision(4)}</TableCell>
               ))}
-            </StyledTableRow>
+            </AlternatingTableRow>
           ))}
         </TableBody>
       </Table>
@@ -158,19 +160,6 @@ const SummaryView: FunctionComponent<SummaryViewProps> = ({
     </TableContainer>
   );
 };
-
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  "&:nth-of-type(odd)": {
-    backgroundColor: theme.palette.action.focus,
-  },
-}));
-
-const StyledTableHead = styled(TableHead)(({ theme }) => ({
-  backgroundColor: theme.palette.secondary.light,
-  th: {
-    color: theme.palette.secondary.contrastText,
-  },
-}));
 
 const drawsByChain = (draws: number[], chainIds: number[]): number[][] => {
   // Group draws by chain for use in computing ESS and Rhat

@@ -4,6 +4,11 @@ import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import { AlternatingTableRow } from "@SpComponents/StyledTables";
 import {
   FileNames,
   FileRegistry,
@@ -134,14 +139,16 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
 
         {filesUploaded.length > 0 && (
           <>
-            <div>
-              <table className="project-summary-table">
-                <tbody>
+            <TableContainer>
+              <Table padding="none">
+                <TableBody>
                   {filesUploaded.map(({ name, content }) => (
-                    <tr key={name}>
-                      <td>{name}</td>
-                      <td>{content.byteLength} bytes</td>
-                      <td>
+                    <AlternatingTableRow hover key={name}>
+                      <TableCell>
+                        <strong>{name}</strong>
+                      </TableCell>
+                      <TableCell>{content.byteLength} bytes</TableCell>
+                      <TableCell>
                         <IconButton
                           onClick={() => {
                             setFilesUploaded((prev) =>
@@ -152,12 +159,12 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
                         >
                           <Delete fontSize="inherit" />
                         </IconButton>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </AlternatingTableRow>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </TableBody>
+              </Table>
+            </TableContainer>
             <Grid container justifyContent="center" spacing={1}>
               <Grid item>
                 <Button
