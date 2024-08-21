@@ -58,7 +58,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
         type: "button",
         icon: <Cancel />,
         label: "Syntax error",
-        color: "darkred",
+        color: "error.dark",
         tooltip: "Syntax error in Stan file",
         onClick: () => {
           setSyntaxWindowVisible((v) => !v);
@@ -69,7 +69,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
         type: "button",
         icon: <Cancel />,
         label: "Syntax warning",
-        color: "blue",
+        color: "info.dark",
         tooltip: "Syntax warning in Stan file",
         onClick: () => {
           setSyntaxWindowVisible((v) => !v);
@@ -85,7 +85,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
         tooltip: "Auto format this stan file",
         label: "Auto format",
         onClick: requestFormat,
-        color: "darkblue",
+        color: "info",
       });
     }
     if (editedFileContent && editedFileContent === fileContent) {
@@ -97,7 +97,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
             label: "Compile",
             icon: <Settings />,
             onClick: compile,
-            color: "darkblue",
+            color: "info.dark",
           });
         }
       }
@@ -108,10 +108,10 @@ const StanFileEditor: FunctionComponent<Props> = ({
             compileMessage.charAt(0).toUpperCase() + compileMessage.slice(1),
           color:
             compileStatus === "compiled"
-              ? "green"
+              ? "success"
               : compileStatus === "failed"
-                ? "red"
-                : "black",
+                ? "error"
+                : undefined,
         });
       }
     }

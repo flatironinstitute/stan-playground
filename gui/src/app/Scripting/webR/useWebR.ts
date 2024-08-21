@@ -162,6 +162,7 @@ const outputLoop = async (
           canvas.setAttribute("width", "1008");
           canvas.setAttribute("height", "1008");
           canvas.style.width = "100%";
+          canvas.style.backgroundColor = "white";
           canvas.style.display = "inline-block";
           // Append canvas to figure output area
           imagesRef.current.appendChild(canvas);

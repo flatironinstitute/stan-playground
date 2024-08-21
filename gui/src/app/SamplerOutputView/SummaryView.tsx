@@ -1,3 +1,12 @@
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableRow from "@mui/material/TableRow";
+import {
+  AlternatingTableRow,
+  SecondaryColoredTableHead,
+} from "@SpComponents/StyledTables";
 import {
   compute_effective_sample_size,
   compute_split_potential_scale_reduction,
@@ -118,29 +127,29 @@ const SummaryView: FunctionComponent<SummaryViewProps> = ({
   }, [draws, paramNames, drawChainIds, computeTimeSec]);
 
   return (
-    <div className="SummaryViewWrapper">
-      <table className="scientific-table">
-        <thead>
-          <tr>
-            <th>Parameter</th>
+    <TableContainer>
+      <Table>
+        <SecondaryColoredTableHead>
+          <TableRow>
+            <TableCell>Parameter</TableCell>
             {columns.map((column, i) => (
-              <th key={i} title={column.title}>
+              <TableCell key={i} title={column.title}>
                 {column.label}
-              </th>
+              </TableCell>
             ))}
-          </tr>
-        </thead>
-        <tbody>
+          </TableRow>
+        </SecondaryColoredTableHead>
+        <TableBody>
           {rows.map((row, i) => (
-            <tr key={i}>
-              <td>{row.key}</td>
+            <AlternatingTableRow key={i} hover>
+              <TableCell component="th">{row.key}</TableCell>
               {row.values.map((value, j) => (
-                <td key={j}>{value.toPrecision(4)}</td>
+                <TableCell key={j}>{value.toPrecision(4)}</TableCell>
               ))}
-            </tr>
+            </AlternatingTableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
       <ul>
         {columns.map((column, i) => (
           <li key={i}>
@@ -148,7 +157,7 @@ const SummaryView: FunctionComponent<SummaryViewProps> = ({
           </li>
         ))}
       </ul>
-    </div>
+    </TableContainer>
   );
 };
 

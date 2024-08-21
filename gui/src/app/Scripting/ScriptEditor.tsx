@@ -1,6 +1,7 @@
 import { Help, PlayArrow } from "@mui/icons-material";
+import Box from "@mui/material/Box";
 import TextEditor from "@SpComponents/TextEditor";
-import { ToolbarItem } from "@SpComponents/ToolBar";
+import { ColorOptions, ToolbarItem } from "@SpComponents/ToolBar";
 import { FileNames } from "@SpCore/FileMapping";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
@@ -151,36 +152,36 @@ const makeToolbar = (o: {
       label: "Run",
       icon: <PlayArrow />,
       onClick: onRun,
-      color: "black",
+      color: "success.dark",
     });
   } else if (o.notRunnableReason) {
     ret.push({
       type: "text",
       label: o.notRunnableReason,
-      color: "red",
+      color: "error",
     });
   }
 
   let label: string;
-  let color: string;
+  let color: ColorOptions;
   if (status === "loading") {
     label = `Loading ${name}...`;
-    color = "blue";
+    color = "info";
   } else if (status === "installing") {
     label = `Installing packages for ${name}...`;
-    color = "blue";
+    color = "info";
   } else if (status === "running") {
     label = "Running...";
-    color = "blue";
+    color = "info";
   } else if (status === "completed") {
     label = "Completed";
-    color = "green";
+    color = "success";
   } else if (status === "failed") {
     label = "Failed";
-    color = "red";
+    color = "error";
   } else {
     label = "";
-    color = "black";
+    color = "primary";
   }
 
   if (label) {
@@ -200,7 +201,25 @@ type ConsoleOutputWindowProps = {
 const ConsoleOutputWindow: FunctionComponent<ConsoleOutputWindowProps> = ({
   consoleRef,
 }) => {
-  return <div className="ConsoleOutputArea" ref={consoleRef} />;
+  return (
+    <Box
+      ref={consoleRef}
+      overflow="auto"
+      height="100%"
+      width="100%"
+      sx={[
+        // necessary to get styling of the createElement'd divs
+        (theme) => ({
+          ".stdout": {
+            color: theme.palette.info.dark,
+          },
+          ".stderr": {
+            color: theme.palette.error.main,
+          },
+        }),
+      ]}
+    />
+  );
 };
 
 export default ScriptEditor;

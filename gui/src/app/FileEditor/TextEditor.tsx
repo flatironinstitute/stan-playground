@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Editor, loader, useMonaco } from "@monaco-editor/react";
+import { useTheme } from "@mui/material/styles";
 
 import monacoAddStanLang from "@SpComponents/stanLang";
 import { ToolBar, ToolbarItem } from "@SpComponents/ToolBar";
@@ -140,6 +141,13 @@ const TextEditor: FunctionComponent<Props> = ({
     return editedText !== text;
   }, [editedText, text]);
 
+  const muiTheme = useTheme();
+
+  const theme = useMemo(
+    () => (muiTheme.palette.mode === "dark" ? "vs-dark" : "vs"),
+    [muiTheme.palette.mode],
+  );
+
   return (
     <div className="EditorWithToolbar">
       <ToolBar
@@ -159,6 +167,7 @@ const TextEditor: FunctionComponent<Props> = ({
           wordWrap: "on",
           minimap: { enabled: false },
         }}
+        theme={theme}
       />
     </div>
   );

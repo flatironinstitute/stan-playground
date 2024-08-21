@@ -2,6 +2,19 @@ import { FunctionComponent, useMemo } from "react";
 import { Save } from "@mui/icons-material";
 import Link from "@mui/material/Link";
 import IconButton from "@mui/material/IconButton";
+import { useTheme } from "@mui/material/styles";
+
+type Palletes =
+  | "primary"
+  | "secondary"
+  | "error"
+  | "warning"
+  | "info"
+  | "success";
+
+type Variant = "main" | "light" | "dark" | "contrastText";
+
+export type ColorOptions = `${Palletes}.${Variant}` | Palletes;
 
 export type ToolbarItem =
   | {
@@ -10,12 +23,12 @@ export type ToolbarItem =
       label?: string;
       icon?: any;
       onClick: () => void;
-      color?: string;
+      color?: ColorOptions;
     }
   | {
       type: "text";
       label: string;
-      color?: string;
+      color?: ColorOptions;
     };
 
 type ToolbarProps = {
@@ -40,7 +53,6 @@ export const ToolBar: FunctionComponent<ToolbarProps> = ({
       editorItems.push({
         type: "text",
         label: "Read Only",
-        color: "gray",
       });
     } else if (edited) {
       editorItems.push({
@@ -53,16 +65,23 @@ export const ToolBar: FunctionComponent<ToolbarProps> = ({
       editorItems.push({
         type: "text",
         label: "Edited",
-        color: "red",
+        color: "error",
       });
     }
 
     return editorItems.concat(items);
   }, [edited, items, onSaveText, readOnly]);
 
+  const theme = useTheme();
+  const backgroundColor = useMemo(() => {
+    return theme.palette.mode === "light"
+      ? theme.palette.grey[300]
+      : theme.palette.grey[800];
+  }, [theme.palette.grey, theme.palette.mode]);
+
   return (
     <div className="NotSelectable">
-      <div className="EditorMenuBar">
+      <div className="EditorMenuBar" style={{ backgroundColor }}>
         <span className="EditorTitle">{label}</span>
         {toolBarItems &&
           toolBarItems.map((item, i) => (
@@ -76,8 +95,21 @@ export const ToolBar: FunctionComponent<ToolbarProps> = ({
 const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
   item,
 }) => {
+  const theme = useTheme();
+
+  let color =
+    theme.palette.mode === "light"
+      ? theme.palette.grey[700]
+      : theme.palette.grey[400];
+
+  if (item.color) {
+    const [pallete_color, color_variant] = item.color.split(".");
+    const pallete = theme.palette[pallete_color as Palletes];
+    color = pallete[(color_variant ?? "main") as Variant];
+  }
+
   if (item.type === "button") {
-    const { onClick, color, label, tooltip, icon } = item;
+    const { onClick, label, tooltip, icon } = item;
     if (icon) {
       return (
         <span className="EditorToolbarItem" style={{ color }}>
@@ -98,7 +130,7 @@ const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
         <span className="EditorToolbarItem">
           <Link
             onClick={onClick}
-            color={color || "gray"}
+            color={color}
             component="button"
             underline="none"
             title={tooltip}
@@ -111,11 +143,7 @@ const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
     }
   } else if (item.type === "text") {
     return (
-      <span
-        className="EditorToolbarItem"
-        style={{ color: item.color || "gray" }}
-        title={item.label}
-      >
+      <span className="EditorToolbarItem" style={{ color }} title={item.label}>
         {item.label}&nbsp;&nbsp;&nbsp;
       </span>
     );

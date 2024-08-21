@@ -1,4 +1,14 @@
 import { Download } from "@mui/icons-material";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import {
+  SuccessBorderedTableRow,
+  SuccessColoredTableHead,
+} from "@SpComponents/StyledTables";
+import Button from "@mui/material/Button";
+import { IconButton } from "@mui/material";
 import HistsView from "@SpComponents/HistsView";
 import SummaryView from "@SpComponents/SummaryView";
 import TabWidget from "@SpComponents/TabWidget";
@@ -8,8 +18,6 @@ import { triggerDownload } from "@SpUtil/triggerDownload";
 import JSZip from "jszip";
 import { FunctionComponent, useCallback, useMemo, useState } from "react";
 import TracePlotsView from "./TracePlotsView";
-import Button from "@mui/material/Button";
-import { IconButton } from "@mui/material";
 
 type SamplerOutputViewProps = {
   latestRun: StanRun;
@@ -143,7 +151,7 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
     URL.revokeObjectURL(url);
   }, [draws, paramNames, drawChainIds, samplingOpts]);
   return (
-    <div className="DrawsTable">
+    <>
       <div>
         <IconButton size="small" title="Download" onClick={handleExportToCsv}>
           <Download fontSize="inherit" />
@@ -160,41 +168,43 @@ const DrawsView: FunctionComponent<DrawsViewProps> = ({
         </IconButton>
       </div>
       <br />
-      <table className="draws-table">
-        <thead>
-          <tr>
-            <th key="chain">Chain</th>
-            <th key="draw">Draw</th>
-            {paramNames.map((name, i) => (
-              <th key={i}>{name}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {formattedDraws[0].map((_, i) => (
-            <tr key={i}>
-              <td>{drawChainIds[i]}</td>
-              <td>{drawNumbers[i]}</td>
-              {formattedDraws.map((draw, j) => (
-                <td key={j}>{draw[i]}</td>
+      <TableContainer>
+        <Table size="small" padding="none">
+          <SuccessColoredTableHead>
+            <SuccessBorderedTableRow>
+              <TableCell key="chain">Chain</TableCell>
+              <TableCell key="draw">Draw</TableCell>
+              {paramNames.map((name, i) => (
+                <TableCell key={i}>{name}</TableCell>
               ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {abbreviatedToNumRows !== undefined &&
-        abbreviatedToNumRows < draws[0].length && (
-          <div className="DrawAbbreviationToggle">
-            <Button
-              onClick={() => {
-                setAbbreviatedToNumRows((x) => (x || 0) + 300);
-              }}
-            >
-              Show more
-            </Button>
-          </div>
-        )}
-    </div>
+            </SuccessBorderedTableRow>
+          </SuccessColoredTableHead>
+          <TableBody>
+            {formattedDraws[0].map((_, i) => (
+              <SuccessBorderedTableRow key={i} hover>
+                <TableCell>{drawChainIds[i]}</TableCell>
+                <TableCell>{drawNumbers[i]}</TableCell>
+                {formattedDraws.map((draw, j) => (
+                  <TableCell key={j}>{draw[i]}</TableCell>
+                ))}
+              </SuccessBorderedTableRow>
+            ))}
+          </TableBody>
+        </Table>
+        {abbreviatedToNumRows !== undefined &&
+          abbreviatedToNumRows < draws[0].length && (
+            <div className="DrawAbbreviationToggle">
+              <Button
+                onClick={() => {
+                  setAbbreviatedToNumRows((x) => (x || 0) + 300);
+                }}
+              >
+                Show more
+              </Button>
+            </div>
+          )}
+      </TableContainer>
+    </>
   );
 };
 

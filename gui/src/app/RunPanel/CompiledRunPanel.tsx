@@ -65,7 +65,9 @@ const CompiledRunPanel: FunctionComponent<CompiledRunPanelProps> = ({
     <div>
       <hr />
       Sampling failed!
-      <pre className="SamplerError">{errorMessage}</pre>
+      <Box color="error.main">
+        <pre className="SamplerError">{errorMessage}</pre>
+      </Box>
       <span className="details">(see browser console for more details)</span>
     </div>
   );
