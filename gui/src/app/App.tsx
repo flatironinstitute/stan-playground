@@ -1,19 +1,14 @@
-import createTheme from "@mui/material/styles/createTheme";
-import { ThemeProvider } from "@mui/material/styles";
-import CssBaseline from "@mui/material/CssBaseline";
+import ToggleableThemeProvider from "./ToggleableThemeProvider";
 import ProjectContextProvider from "@SpCore/ProjectContextProvider";
 import HomePage from "@SpPages/HomePage";
 import { Analytics } from "@vercel/analytics/react";
 import { BrowserRouter } from "react-router-dom";
 import { CompileContextProvider } from "./CompileContext/CompileContextProvider";
 
-const theme = createTheme();
-
-function App() {
+const App = () => {
   return (
     <BrowserRouter>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
+      <ToggleableThemeProvider>
         <div className="MainWindow">
           <ProjectContextProvider>
             <CompileContextProvider>
@@ -22,9 +17,9 @@ function App() {
           </ProjectContextProvider>
           <Analytics />
         </div>
-      </ThemeProvider>
+      </ToggleableThemeProvider>
     </BrowserRouter>
   );
-}
+};
 
 export default App;

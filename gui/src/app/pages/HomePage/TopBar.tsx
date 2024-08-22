@@ -1,10 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import CompilationServerConnectionControl from "@SpStanc/CompilationServerConnectionControl";
-import { Menu, QuestionMark } from "@mui/icons-material";
+import { Brightness7, DarkMode, Menu, QuestionMark } from "@mui/icons-material";
 import AppBar from "@mui/material/AppBar";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
-import { FunctionComponent } from "react";
+import { useTheme } from "@mui/material/styles";
+import { LightDarkContext } from "app/ToggleableThemeProvider";
+import { FunctionComponent, useContext } from "react";
 
 type TopBarProps = {
   title: string;
@@ -12,6 +13,10 @@ type TopBarProps = {
 };
 
 const TopBar: FunctionComponent<TopBarProps> = ({ title, onSetCollapsed }) => {
+  const theme = useTheme();
+  const isLight = theme.palette.mode === "light";
+  const { toggleMode } = useContext(LightDarkContext);
+
   return (
     <AppBar
       position="sticky"
@@ -33,6 +38,13 @@ const TopBar: FunctionComponent<TopBarProps> = ({ title, onSetCollapsed }) => {
         </IconButton>
         Stan Playground - {title}
         <span className="TopBarSpacer" />
+        <IconButton title="Toggle light/dark" size="small" onClick={toggleMode}>
+          {isLight ? (
+            <DarkMode fontSize="inherit" htmlColor="white" />
+          ) : (
+            <Brightness7 fontSize="inherit" />
+          )}
+        </IconButton>
         <CompilationServerConnectionControl />
         <IconButton
           title="About Stan Playground"
