@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./gui/public/StanPlay_Logo_RGB_White.png">
+  <img alt="The Stan Playground logo" src="./gui/public/StanPlay_Logo_RGB_Full.png" align="right" width=25%>
+</picture>
+
 # stan-playground
 
 :warning: This software is under active development.
