@@ -82,7 +82,7 @@ const ProjectReducer = (s: ProjectDataModel, a: ProjectReducerAction) => {
       return initialDataModel;
     }
     default:
-      unreachable(a);
+      return unreachable(a);
   }
 };
 
