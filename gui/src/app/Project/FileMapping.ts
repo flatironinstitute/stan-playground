@@ -3,6 +3,7 @@ import {
   ProjectPersistentDataModel,
   stringifyField,
 } from "@SpCore/ProjectDataModel";
+import { unreachable } from "@SpUtil/unreachable";
 
 // This code exists to provide rigorous definitions for the mappings between
 // the in-memory representation of a Stan Playground project (i.e. the
@@ -29,6 +30,10 @@ export enum FileNames {
   DATAPYFILE = "data.py",
   DATARFILE = "data.R",
 }
+
+const isFileName = (x: any): x is FileNames => {
+  return Object.values(FileNames).includes(x);
+};
 
 // FileMapType enforces an exhaustive mapping from data-model fields to the
 // known file names that store those fields. (This is the 1-2 leg of the
@@ -94,7 +99,11 @@ export const mapFileContentsToModel = (
 ): Partial<FieldsContentsMap> => {
   const fields = Object.keys(files);
   const theMap: Partial<FieldsContentsMap> = {};
+
   fields.forEach((f) => {
+    // Don't do anything for unrecognized filenames
+    if (!isFileName(f)) return;
+
     switch (f) {
       case FileNames.META: {
         theMap.meta = files[f];
@@ -112,6 +121,10 @@ export const mapFileContentsToModel = (
         theMap.analysisPyFileContent = files[f];
         break;
       }
+      case FileNames.ANALYSISRFILE: {
+        theMap.analysisRFileContent = files[f];
+        break;
+      }
       case FileNames.DATAPYFILE: {
         theMap.dataPyFileContent = files[f];
         break;
@@ -125,8 +138,7 @@ export const mapFileContentsToModel = (
         break;
       }
       default:
-        // Don't do anything for unrecognized filenames
-        break;
+        unreachable(f);
     }
   });
   return theMap;

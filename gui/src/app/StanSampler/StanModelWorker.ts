@@ -1,3 +1,4 @@
+import { unreachable } from "@SpUtil/unreachable";
 import StanModel from "tinystan";
 
 export enum Requests {
@@ -112,5 +113,7 @@ self.onmessage = (e) => {
       }
       break;
     }
+    default:
+      unreachable(purpose);
   }
 };
