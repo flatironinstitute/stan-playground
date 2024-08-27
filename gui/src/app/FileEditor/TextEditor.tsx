@@ -85,7 +85,7 @@ const TextEditor: FunctionComponent<Props> = ({
 
     const modelMarkers = codeMarkers.map((marker) => ({
       ...marker,
-      severity: toMonacoMarkerSeverity(marker.severity),
+      severity: toMonacoMarkerSeverity[marker.severity],
     }));
 
     monacoInstance.editor.setModelMarkers(
@@ -173,20 +173,12 @@ const TextEditor: FunctionComponent<Props> = ({
   );
 };
 
-const toMonacoMarkerSeverity = (
-  s: "error" | "warning" | "hint" | "info",
-): MarkerSeverity => {
-  switch (s) {
-    case "error":
-      return MarkerSeverity.Error;
-    case "warning":
-      return MarkerSeverity.Warning;
-    case "hint":
-      return MarkerSeverity.Hint;
-    case "info":
-      return MarkerSeverity.Info;
-  }
-};
+const toMonacoMarkerSeverity = {
+  error: MarkerSeverity.Error,
+  warning: MarkerSeverity.Warning,
+  hint: MarkerSeverity.Hint,
+  info: MarkerSeverity.Info,
+} as const;
 
 const createHintTextContentWidget = (content: string | HTMLSpanElement) => {
   return {

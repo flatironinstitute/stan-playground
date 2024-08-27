@@ -3,6 +3,7 @@ import { type Progress } from "@SpStanSampler/StanModelWorker";
 import StanSampler, {
   type StanSamplerStatus,
 } from "@SpStanSampler/StanSampler";
+import { unreachable } from "@SpUtil/unreachable";
 import { useEffect, useReducer, useState } from "react";
 
 export type StanRun = {
@@ -73,6 +74,8 @@ export const StanRunReducer = (
         paramNames: action.paramNames,
         computeTimeSec: action.computeTimeSec,
       };
+    default:
+      return unreachable(action);
   }
 };
 

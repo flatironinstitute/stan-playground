@@ -3,6 +3,7 @@ import { Replies, Requests } from "@SpStanSampler/StanModelWorker";
 import StanWorkerUrl from "@SpStanSampler/StanModelWorker?worker&url";
 import type { SamplerParams } from "tinystan";
 import { type StanRunAction } from "./useStanSampler";
+import { unreachable } from "@SpUtil/unreachable";
 
 export type StanSamplerStatus =
   | ""
@@ -77,6 +78,8 @@ class StanSampler {
           }
           break;
         }
+        default:
+          unreachable(purpose);
       }
     };
     this.update({ type: "statusUpdate", status: "loading" });

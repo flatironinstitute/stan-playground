@@ -6,6 +6,7 @@ import {
   SamplingOpts,
 } from "@SpCore/ProjectDataModel";
 import { loadFromProjectFiles } from "@SpCore/ProjectSerialization";
+import { unreachable } from "@SpUtil/unreachable";
 import { Reducer } from "react";
 
 export type ProjectReducerType = Reducer<
@@ -80,6 +81,8 @@ const ProjectReducer = (s: ProjectDataModel, a: ProjectReducerAction) => {
     case "clear": {
       return initialDataModel;
     }
+    default:
+      unreachable(a);
   }
 };
 

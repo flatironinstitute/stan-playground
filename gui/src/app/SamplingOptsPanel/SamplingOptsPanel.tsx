@@ -1,6 +1,7 @@
 import Grid from "@mui/material/Grid";
 import Link from "@mui/material/Link";
 import { defaultSamplingOpts, SamplingOpts } from "@SpCore/ProjectDataModel";
+import { unreachable } from "@SpUtil/unreachable";
 import { FunctionComponent, useCallback } from "react";
 
 type SamplingOptsPanelProps = {
@@ -212,6 +213,8 @@ const NumberEdit: FunctionComponent<NumberEditProps> = ({
           newValue = undefined;
         }
         break;
+      default:
+        unreachable(type);
     }
     onChange(newValue);
   };
