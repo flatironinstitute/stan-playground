@@ -5,6 +5,8 @@ import {
   StancWorkerRequests,
 } from "@SpStanc/Types";
 import rawStancJS from "@SpStanc/stanc.js?raw"; // https://vitejs.dev/guide/assets#importing-asset-as-string
+import { isMonacoWorkerNoise } from "@SpUtil/isMonacoWorkerNoise";
+import { unreachable } from "@SpUtil/unreachable";
 
 let stanc: undefined | StancFunction;
 try {
@@ -33,6 +35,10 @@ try {
 const postReply = (message: StancReplyMessage) => self.postMessage(message);
 
 self.onmessage = (e: MessageEvent<StancRequestMessage>) => {
+  if (isMonacoWorkerNoise(e.data)) {
+    return;
+  }
+
   const { purpose, name, code } = e.data;
 
   if (!stanc) {
@@ -61,5 +67,7 @@ self.onmessage = (e: MessageEvent<StancRequestMessage>) => {
       postReply({ errors, warnings });
       break;
     }
+    default:
+      unreachable(purpose);
   }
 };

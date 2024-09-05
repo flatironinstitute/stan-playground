@@ -1,4 +1,5 @@
 import { PyodideInterface, loadPyodide } from "pyodide";
+import { isMonacoWorkerNoise } from "@SpUtil/isMonacoWorkerNoise";
 import { InterpreterStatus } from "@SpScripting/InterpreterTypes";
 import {
   MessageFromPyodideWorker,
@@ -62,6 +63,9 @@ const addImage = (image: any) => {
 console.log("pyodide worker loaded");
 
 self.onmessage = async (e) => {
+  if (isMonacoWorkerNoise(e.data)) {
+    return;
+  }
   const message = e.data;
   await run(message.code, message.spData, message.spRunSettings);
 };

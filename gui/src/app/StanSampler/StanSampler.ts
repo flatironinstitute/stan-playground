@@ -1,5 +1,10 @@
 import { SamplingOpts } from "@SpCore/ProjectDataModel";
-import { Replies, Requests } from "@SpStanSampler/StanModelWorker";
+import {
+  Replies,
+  Requests,
+  StanModelReplyMessage,
+  StanModelRequestMessage,
+} from "@SpStanSampler/StanModelWorker";
 import StanWorkerUrl from "@SpStanSampler/StanModelWorker?worker&url";
 import type { SamplerParams } from "tinystan";
 import { type StanRunAction } from "./useStanSampler";
@@ -19,7 +24,7 @@ type StanSamplerAndCleanup = {
 };
 
 class StanSampler {
-  #worker: Worker | undefined;
+  #stanWorker: Worker | undefined;
   #samplingStartTimeSec: number = 0;
 
   private constructor(
@@ -36,23 +41,22 @@ class StanSampler {
     const sampler = new StanSampler(compiledUrl, update);
     const cleanup = () => {
       console.log("terminating model worker");
-      sampler.#worker && sampler.#worker.terminate();
-      sampler.#worker = undefined;
+      sampler.#stanWorker && sampler.#stanWorker.terminate();
+      sampler.#stanWorker = undefined;
     };
     return { sampler, cleanup };
   }
 
   _initialize() {
-    this.#worker = new Worker(StanWorkerUrl, {
+    this.#stanWorker = new Worker(StanWorkerUrl, {
       name: "tinystan worker",
       type: "module",
     });
 
     this.update({ type: "clear" });
 
-    this.#worker.onmessage = (e) => {
-      const purpose: Replies = e.data.purpose;
-      switch (purpose) {
+    this.#stanWorker.onmessage = (e: MessageEvent<StanModelReplyMessage>) => {
+      switch (e.data.purpose) {
         case Replies.Progress: {
           this.update({ type: "progressUpdate", progress: e.data.report });
           break;
@@ -62,7 +66,7 @@ class StanSampler {
           break;
         }
         case Replies.StanReturn: {
-          if (e.data.error) {
+          if (e.data.error !== null) {
             this.update({
               type: "statusUpdate",
               status: "failed",
@@ -79,11 +83,11 @@ class StanSampler {
           break;
         }
         default:
-          unreachable(purpose);
+          unreachable(e.data);
       }
     };
     this.update({ type: "statusUpdate", status: "loading" });
-    this.#worker.postMessage({ purpose: Requests.Load, url: this.compiledUrl });
+    this.postMessage({ purpose: Requests.Load, url: this.compiledUrl });
   }
 
   sample(data: any, samplingOpts: SamplingOpts) {
@@ -94,16 +98,21 @@ class StanSampler {
       seed: samplingOpts.seed !== undefined ? samplingOpts.seed : null,
       refresh,
     };
-    if (!this.#worker) throw new Error("model worker is undefined");
+    if (!this.#stanWorker) throw new Error("model worker is undefined");
 
     this.update({ type: "startSampling", samplingOpts });
 
     this.#samplingStartTimeSec = Date.now() / 1000;
-    this.#worker.postMessage({ purpose: Requests.Sample, sampleConfig });
+    this.postMessage({ purpose: Requests.Sample, sampleConfig });
+  }
+
+  private postMessage(message: StanModelRequestMessage) {
+    if (!this.#stanWorker) throw new Error("model worker is undefined");
+    this.#stanWorker.postMessage(message);
   }
 
   cancel() {
-    this.#worker?.terminate();
+    this.#stanWorker?.terminate();
     this._initialize();
   }
 }
