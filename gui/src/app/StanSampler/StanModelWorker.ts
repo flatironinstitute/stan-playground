@@ -1,5 +1,6 @@
+import { isMonacoWorkerNoise } from "@SpUtil/isMonacoWorkerNoise";
 import { unreachable } from "@SpUtil/unreachable";
-import StanModel from "tinystan";
+import StanModel, { PathfinderParams, SamplerParams } from "tinystan";
 
 export enum Requests {
   Load = "load",
@@ -7,11 +8,44 @@ export enum Requests {
   Pathfinder = "pathfinder",
 }
 
+export type StanModelRequestMessage =
+  | {
+      purpose: Requests.Load;
+      url: string;
+    }
+  | {
+      purpose: Requests.Sample;
+      sampleConfig: Partial<SamplerParams>;
+    }
+  | {
+      purpose: Requests.Pathfinder;
+      pathfinderConfig: Partial<PathfinderParams>;
+    };
+
 export enum Replies {
   ModelLoaded = "modelLoaded",
   StanReturn = "stanReturn",
   Progress = "progress",
 }
+
+export type StanModelReplyMessage =
+  | {
+      purpose: Replies.ModelLoaded;
+    }
+  | {
+      purpose: Replies.StanReturn;
+      error: string;
+    }
+  | {
+      purpose: Replies.StanReturn;
+      draws: number[][];
+      paramNames: string[];
+      error: null;
+    }
+  | {
+      purpose: Replies.Progress;
+      report: Progress;
+    };
 
 export type Progress = {
   chain: number;
@@ -20,6 +54,8 @@ export type Progress = {
   percent: number;
   warmup: boolean;
 };
+
+const postReply = (message: StanModelReplyMessage) => self.postMessage(message);
 
 const parseProgress = (msg: string): Progress => {
   // Examples (note different spacing):
@@ -47,15 +83,17 @@ const progressPrintCallback = (msg: string) => {
     return;
   }
   const report = parseProgress(msg);
-  self.postMessage({ purpose: Replies.Progress, report });
+  postReply({ purpose: Replies.Progress, report });
 };
 
 let model: StanModel;
 
-self.onmessage = (e) => {
-  const purpose: Requests = e.data.purpose;
+self.onmessage = (e: MessageEvent<StanModelRequestMessage>) => {
+  if (isMonacoWorkerNoise(e.data)) {
+    return;
+  }
 
-  switch (purpose) {
+  switch (e.data.purpose) {
     case Requests.Load: {
       import(/* @vite-ignore */ e.data.url)
         .then((js) => StanModel.load(js.default, progressPrintCallback))
@@ -65,13 +103,13 @@ self.onmessage = (e) => {
             "Web Worker loaded Stan model built from version " +
               m.stanVersion(),
           );
-          self.postMessage({ purpose: Replies.ModelLoaded });
+          postReply({ purpose: Replies.ModelLoaded });
         }, console.error);
       break;
     }
     case Requests.Sample: {
       if (!model) {
-        self.postMessage({
+        postReply({
           purpose: Replies.StanReturn,
           error: "Model not loaded yet!",
         });
@@ -80,20 +118,20 @@ self.onmessage = (e) => {
       try {
         const { paramNames, draws } = model.sample(e.data.sampleConfig);
         // TODO? use an ArrayBuffer so we can transfer without serialization cost
-        self.postMessage({
+        postReply({
           purpose: Replies.StanReturn,
           draws,
           paramNames,
           error: null,
         });
       } catch (e: any) {
-        self.postMessage({ purpose: Replies.StanReturn, error: e.toString() });
+        postReply({ purpose: Replies.StanReturn, error: e.toString() });
       }
       break;
     }
     case Requests.Pathfinder: {
       if (!model) {
-        self.postMessage({
+        postReply({
           purpose: Replies.StanReturn,
           error: "Model not loaded yet!",
         });
@@ -102,18 +140,19 @@ self.onmessage = (e) => {
       try {
         const { draws, paramNames } = model.pathfinder(e.data.pathfinderConfig);
         // TODO? use an ArrayBuffer so we can transfer without serialization cost
-        self.postMessage({
+        postReply({
           purpose: Replies.StanReturn,
           draws,
           paramNames,
           error: null,
         });
       } catch (e: any) {
-        self.postMessage({ purpose: Replies.StanReturn, error: e.toString() });
+        postReply({ purpose: Replies.StanReturn, error: e.toString() });
       }
       break;
     }
-    default:
-      unreachable(purpose);
+    default: {
+      unreachable(e.data);
+    }
   }
 };
