@@ -1,35 +1,11 @@
 import {
-  StancFunction,
   StancReplyMessage,
   StancRequestMessage,
   StancWorkerRequests,
 } from "@SpStanc/Types";
-import rawStancJS from "@SpStanc/stanc.js?raw"; // https://vitejs.dev/guide/assets#importing-asset-as-string
 import { isMonacoWorkerNoise } from "@SpUtil/isMonacoWorkerNoise";
 import { unreachable } from "@SpUtil/unreachable";
-
-let stanc: undefined | StancFunction;
-try {
-  // stanc.js code is not a module, so most nice options for loading are unavailable
-  eval(rawStancJS);
-  // stanc.js also detects if it is running under node, which makes testing annoying
-  if (typeof module !== "undefined") {
-    // node (default vitest setup)
-    stanc = module.exports.stanc;
-  } else {
-    // browser
-    stanc = (globalThis as any).stanc;
-  }
-  if (stanc) {
-    const stanc_version = stanc("", "", ["version"]).result;
-    console.log(`loaded stanc.js, version '${stanc_version}'`);
-  } else {
-    console.error("Failed to load stanc.js");
-  }
-} catch (e) {
-  console.error("Failed to load stanc.js");
-  console.error(e);
-}
+import { stanc } from "@SpStanc/WrappedStanc";
 
 // helper alias for type safety
 const postReply = (message: StancReplyMessage) => self.postMessage(message);

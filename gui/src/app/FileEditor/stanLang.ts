@@ -4,6 +4,7 @@
 // Adapted in part from https://github.com/WardBrian/vscode-stan-extension/blob/main/lang/syntaxes/stan.json
 
 import { Monaco } from "@monaco-editor/react";
+import { getMathSignatures } from "@SpStanc/WrappedStanc";
 import { languages } from "monaco-editor";
 
 const BLOCKS = [
@@ -851,6 +852,12 @@ const monacoAddStanLang = (monacoInstance: Monaco) => {
   monacoInstance.languages.register({ id: "stan" });
   monacoInstance.languages.setMonarchTokensProvider("stan", language);
   monacoInstance.languages.setLanguageConfiguration("stan", conf);
+  // monacoInstance.languages.registerHoverProvider("stan",
+  // monacoInstance.languages.registerCompletionItemProvider("stan",
+  // monacoInstance.languages.registerDocumentFormattingEditProvider("stan",
+  // problem: this doubles bundle size hit we take from stanc.js
+  // maybe worth making part of the build, rather than runtime?
+  // console.log(getMathSignatures && getMathSignatures());
 };
 
 export default monacoAddStanLang;
