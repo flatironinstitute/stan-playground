@@ -19,7 +19,7 @@ This project is based on [stan-web-demo](https://github.com/WardBrian/stan-web-d
 
 ## Preparing links to existing models or projects
 
-In addition to the build-in sharing feature which integrates with [Github Gists](https://docs.github.com/en/get-started/writing-on-github/editing-and-sharing-content-with-gists), you can also manually prepare links which will pre-populate each portion of Stan Playground when clicked by using [URL Parameters](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/Web_mechanics/What_is_a_URL#parameters):
+In addition to the built-in sharing feature which integrates with [Github Gists](https://docs.github.com/en/get-started/writing-on-github/editing-and-sharing-content-with-gists), you can also manually prepare links which will pre-populate each portion of Stan Playground when clicked by using [URL Parameters](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/Web_mechanics/What_is_a_URL#parameters):
 
 | Parameter | Use | Example | Notes |
 |-----------|-----|:-------:|------:|
@@ -28,9 +28,9 @@ In addition to the build-in sharing feature which integrates with [Github Gists]
 | `data` | Link to a data.json file | `https://raw.githubusercontent.com/stan-dev/cmdstan/develop/examples/bernoulli/bernoulli.data.json` | |
 | `title` | Text to use for the project Title | `Hello%20World` | |
 | `data_py` | Link to a Python file for data preparation | `https://raw.githubusercontent.com/flatironinstitute/stan-playground/main/gui/src/app/Scripting/DataGeneration/data_template.py` | |
-| `data_r` | Link to a R file for data preparation | `https://raw.githubusercontent.com/flatironinstitute/stan-playground/main/gui/src/app/Scripting/DataGeneration/data_template.R` | |
+| `data_r` | Link to an R file for data preparation | `https://raw.githubusercontent.com/flatironinstitute/stan-playground/main/gui/src/app/Scripting/DataGeneration/data_template.R` | |
 | `analysis_py` | Link to a Python file for downstream analysis | `https://raw.githubusercontent.com/flatironinstitute/stan-playground/main/gui/src/app/Scripting/Analysis/analysis_template.py` | |
-| `analysis_r` | Link to a R file for downstream analysis | `https://raw.githubusercontent.com/flatironinstitute/stan-playground/main/gui/src/app/Scripting/Analysis/analysis_template.R` | |
+| `analysis_r` | Link to an R file for downstream analysis | `https://raw.githubusercontent.com/flatironinstitute/stan-playground/main/gui/src/app/Scripting/Analysis/analysis_template.R` | |
 | `sampling_opts` | Link to a JSON file containing settings for the sampler | `https://gist.githubusercontent.com/WardBrian/e47253bf29282d0eabf13616265d393e/raw/059f3fc6a5cb671f2821f567cfc1efb04475220c/sampling_opts.json` | Cannot be combined with the individual sampling parameters in the following rows |
 | `num_chains` | Number of chains to pre-select in the sampling options | `6` | Cannot be combined with `sampling_opts` |
 | `num_warmup` | Number of warmup iterations to pre-select in the sampling options | `250` | Cannot be combined with `sampling_opts` |
