@@ -5,8 +5,6 @@
 
 # stan-playground
 
-:warning: This software is under active development.
-
 Run Stan models directly in your browser.
 
 [Visit the live site!](https://stan-playground.flatironinstitute.org)
@@ -18,6 +16,33 @@ Stan Playground enables you to run Stan sampling directly in your browser, elimi
 While the Stan models execute in the browser (on your local machine), the compilation process requires a dedicated server. We provide a default public server for your convenience, but you can also set up your own compilation server either locally or remotely.
 
 This project is based on [stan-web-demo](https://github.com/WardBrian/stan-web-demo) which shows how to use [TinyStan](https://github.com/WardBrian/tinystan) to build a WebAssembly version of a Stan model that can be executed in the browser. While stan-web-demo focuses on integrating a specific Stan model into a website—essentially "baking" the model into the web environment—stan-playground is designed for a broader purpose. It offers a flexible platform for experimenting with and exploring various Stan models. This makes it ideal for users looking to test different statistical models and hypotheses directly in their browser, without the commitment to a single model implementation.
+
+## Preparing links to existing models or projects
+
+In addition to the built-in sharing feature which integrates with [Github Gists](https://docs.github.com/en/get-started/writing-on-github/editing-and-sharing-content-with-gists), you can also manually prepare links which will pre-populate each portion of Stan Playground when clicked by using [URL Parameters](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/Web_mechanics/What_is_a_URL#parameters):
+
+| Parameter | Use | Example | Notes |
+|-----------|-----|:-------:|------:|
+| `project`| Link to a github gist containing any subset of the project files |`https://gist.github.com/WardBrian/e47253bf29282d0eabf13616265d393e` | Cannot be combined with other url parameters |
+| `stan` | Link to a Stan model | `https://raw.githubusercontent.com/stan-dev/cmdstan/develop/examples/bernoulli/bernoulli.stan` | |
+| `data` | Link to a data.json file | `https://raw.githubusercontent.com/stan-dev/cmdstan/develop/examples/bernoulli/bernoulli.data.json` | |
+| `title` | Text to use for the project Title | `Hello%20World` | |
+| `data_py` | Link to a Python file for data preparation | `https://raw.githubusercontent.com/flatironinstitute/stan-playground/main/gui/src/app/Scripting/DataGeneration/data_template.py` | |
+| `data_r` | Link to an R file for data preparation | `https://raw.githubusercontent.com/flatironinstitute/stan-playground/main/gui/src/app/Scripting/DataGeneration/data_template.R` | |
+| `analysis_py` | Link to a Python file for downstream analysis | `https://raw.githubusercontent.com/flatironinstitute/stan-playground/main/gui/src/app/Scripting/Analysis/analysis_template.py` | |
+| `analysis_r` | Link to an R file for downstream analysis | `https://raw.githubusercontent.com/flatironinstitute/stan-playground/main/gui/src/app/Scripting/Analysis/analysis_template.R` | |
+| `sampling_opts` | Link to a JSON file containing settings for the sampler | `https://gist.githubusercontent.com/WardBrian/e47253bf29282d0eabf13616265d393e/raw/059f3fc6a5cb671f2821f567cfc1efb04475220c/sampling_opts.json` | Cannot be combined with the individual sampling parameters in the following rows |
+| `num_chains` | Number of chains to pre-select in the sampling options | `6` | Cannot be combined with `sampling_opts` |
+| `num_warmup` | Number of warmup iterations to pre-select in the sampling options | `250` | Cannot be combined with `sampling_opts` |
+| `num_samples` | Number of sampling iterations to pre-select in the sampling options | `2000` | Cannot be combined with `sampling_opts` |
+| `init_radius` | Radius to randomly initialize parameters around 0 to pre-select in the sampling options| `1.5` | Cannot be combined with `sampling_opts` |
+| `seed` | Random seed to pre-select in the sampling options | `12345` | Cannot be combined with `sampling_opts` |
+
+
+Except where noted, these can also be combined. Here is a link that provides a Stan model, data.json file, and sets the title and the number of warmup draws:
+
+https://stan-playground.flatironinstitute.org/?stan=https://raw.githubusercontent.com/stan-dev/cmdstan/develop/examples/bernoulli/bernoulli.stan&data=https://raw.githubusercontent.com/stan-dev/cmdstan/develop/examples/bernoulli/bernoulli.data.json&num_warmup=1234&title=Bernoulli%20Example
+
 
 ## Compilation server setup
 
