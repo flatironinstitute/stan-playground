@@ -39,6 +39,7 @@
     "react-router-dom": "^6.17.0",
     "react-use-measure": "^2.1.1",
     "tinystan": "^0.0.2",
+    "trie-search": "^2.0.0",
     "webr": "^0.4.0"
   },
   "devDependencies": {

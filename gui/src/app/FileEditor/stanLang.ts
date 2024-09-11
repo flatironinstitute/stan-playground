@@ -855,8 +855,17 @@ const monacoAddStanLang = (monacoInstance: Monaco) => {
   // dynamic import to avoid increasing bundle size
   import("@SpStanc/WrappedStanc").then((m) => {
     const { getMathSignatures, getMathDistributions } = m;
-    console.log(getMathDistributions && getMathDistributions());
-    console.log(getMathSignatures && getMathSignatures());
+
+    if (!getMathSignatures || !getMathDistributions) {
+      console.error("Failed to load math signatures and distributions");
+      return;
+    }
+    const mathSignatures = getMathSignatures().split("\n");
+    const mathDistributions = getMathDistributions().split("\n");
+
+    console.log(mathSignatures);
+    console.log(mathDistributions);
+
     // monacoInstance.languages.registerHoverProvider("stan",
     // monacoInstance.languages.registerCompletionItemProvider("stan",
     // monacoInstance.languages.registerDocumentFormattingEditProvider("stan",

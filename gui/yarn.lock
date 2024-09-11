@@ -2463,6 +2463,13 @@ has-tostringtag@^1.0.0, has-tostringtag@^1.0.2:
   dependencies:
     has-symbols "^1.0.3"
 
+hasharray@^1.1.1:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/hasharray/-/hasharray-1.1.2.tgz#ba5aa8656d26af92c9e4525315b62b5f651039d3"
+  integrity sha512-7w3idwaVXX9gL9LiTCBSNKRGTBcp2WI/kf13UYeZ9+trOGBHVYHei6qtMY6DVnwGOouVUSRg0+L2xf4Q2/CmzA==
+  dependencies:
+    jclass "^1.0.1"
+
 hasown@^2.0.0, hasown@^2.0.1, hasown@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/hasown/-/hasown-2.0.2.tgz#003eaf91be7adc372e84ec59dc37252cedb80003"
@@ -2808,6 +2815,11 @@ iterator.prototype@^1.1.2:
     has-symbols "^1.0.3"
     reflect.getprototypeof "^1.0.4"
     set-function-name "^2.0.1"
+
+jclass@^1.0.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/jclass/-/jclass-1.2.1.tgz#eaafeec0dd6a5bf8b3ea43c04e010c637638768b"
+  integrity sha512-mRx8uv1qJLOtxbRf3IWOQIH2ro7VIPn6ZkhbTcUJvJEslLzYA7BSATXDi/GR1yKYV9DASsjTZL+0YJPdqSMznw==
 
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"
@@ -4027,6 +4039,13 @@ tr46@^5.0.0:
   integrity sha512-tk2G5R2KRwBd+ZN0zaEXpmzdKyOYksXwywulIX95MBODjSzMIuQnQ3m8JxgbhnL1LeVo7lqQKsYa1O3Htl7K5g==
   dependencies:
     punycode "^2.3.1"
+
+trie-search@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/trie-search/-/trie-search-2.0.0.tgz#8ee779cd82d37baf19449a2dbb389ce2e0caf813"
+  integrity sha512-AJMlAQ/6E5+K45SAOqzeqr0qXWqSREclp3mAWss0PvB9ifBL+QXn2LeZBgUBUifjj5ZtTpo4uKplqUnt9VZcdQ==
+  dependencies:
+    hasharray "^1.1.1"
 
 ts-api-utils@^1.0.1:
   version "1.3.0"
