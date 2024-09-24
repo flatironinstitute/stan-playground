@@ -77,11 +77,12 @@ const SamplingResultsArea: FunctionComponent<SamplingResultsAreaProps> = ({
   latestRun,
 }) => {
   return (
-    <TabWidget labels={["Output", "Analysis (Py)", "Analysis (R)"]}>
+    <TabWidget labels={["Output", "Analysis Scripts"]}>
       <SamplerOutputView latestRun={latestRun} />
-
-      <AnalysisPyWindow latestRun={latestRun} />
-      <AnalysisRWindow latestRun={latestRun} />
+      <TabWidget labels={["Python", "R"]}>
+        <AnalysisPyWindow latestRun={latestRun} />
+        <AnalysisRWindow latestRun={latestRun} />
+      </TabWidget>
     </TabWidget>
   );
 };
