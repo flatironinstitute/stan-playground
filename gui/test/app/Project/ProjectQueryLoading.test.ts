@@ -1,10 +1,85 @@
+import { afterEach, describe, expect, test, vi } from "vitest";
 import {
+  fetchRemoteProject,
   fromQueryParams,
-  //   fetchRemoteProject,
   QueryParamKeys,
   queryStringHasParameters,
 } from "@SpCore/ProjectQueryLoading";
-import { afterEach, describe, expect, test, vi } from "vitest";
+import {
+  defaultSamplingOpts,
+  initialDataModel,
+  ProjectKnownFiles,
+  SamplingOpts,
+} from "@SpCore/ProjectDataModel";
+
+const mockedConsoleError = vi
+  .spyOn(console, "error")
+  .mockImplementation(() => undefined);
+
+const mockedAlert = vi.fn();
+globalThis.alert = mockedAlert;
+
+const mockedConsoleWarn = vi
+  .spyOn(console, "warn")
+  .mockImplementation(() => undefined);
+
+const hoistedMocks = vi.hoisted(() => {
+  const mockedSamplingOpts: SamplingOpts = {
+    num_chains: 123,
+    num_samples: 456,
+    num_warmup: 789,
+    init_radius: 0.1,
+    seed: 987654321,
+  } as const;
+
+  const tryFetch = vi.fn(async (url: string) => {
+    console.error("url", url);
+    if (url === "good") {
+      return "good data";
+    }
+    if (url === "good_sampling_opts") {
+      return JSON.stringify(mockedSamplingOpts);
+    }
+    return undefined;
+  });
+
+  const mockedGistFiles = {
+    description: "gist discription",
+    files: {
+      "main.stan": "gist stan code",
+    },
+  };
+
+  const loadFilesFromGist = vi.fn(async (gistUri: string) => {
+    if (gistUri === "https://gist.github.com/test/good") {
+      return mockedGistFiles;
+    }
+    return Promise.reject("bad url");
+  });
+
+  return {
+    mockedSamplingOpts,
+    tryFetch,
+    mockedGistFiles,
+    loadFilesFromGist,
+  };
+});
+
+vi.mock("@SpUtil/tryFetch", async () => {
+  return { tryFetch: hoistedMocks.tryFetch };
+});
+
+vi.mock("@SpCore/gists/loadFilesFromGist", async () => {
+  return { default: hoistedMocks.loadFilesFromGist };
+});
+
+afterEach(() => {
+  mockedConsoleError.mockClear();
+  hoistedMocks.tryFetch.mockClear();
+  hoistedMocks.loadFilesFromGist.mockClear();
+  mockedConsoleWarn.mockClear();
+  mockedAlert.mockClear();
+});
 
 class MockSearchParams {
   keysDict: { [key: string]: string };
@@ -30,14 +105,6 @@ baseParams[QueryParamKeys.Project] = "my project";
 baseParams[QueryParamKeys.Title] = "my title";
 
 const baseSearchParams = new MockSearchParams(baseParams);
-
-const mockedConsoleWarn = vi
-  .spyOn(console, "warn")
-  .mockImplementation(() => undefined);
-
-afterEach(() => {
-  mockedConsoleWarn.mockClear();
-});
 
 describe("Project query parameter processing", () => {
   describe("Query string object creation", () => {
@@ -78,4 +145,158 @@ describe("Project query parameter processing", () => {
   });
 });
 
-// TODO: Testing fetchRemoteProject
+describe("Query fetching", () => {
+  test("fetchRemoteProject gets title", async () => {
+    const queryParam = new URLSearchParams("title=my title");
+    const queries = fromQueryParams(queryParam);
+
+    const project = await fetchRemoteProject(queries);
+    expect(project.meta.title).toEqual("my title");
+  });
+
+  const keyToDataModel = {
+    stan: "stanFileContent",
+    data: "dataFileContent",
+    analysis_py: "analysisPyFileContent",
+    analysis_r: "analysisRFileContent",
+    data_py: "dataPyFileContent",
+    data_r: "dataRFileContent",
+  } as const;
+
+  for (const key of Object.keys(keyToDataModel)) {
+    const dataModelKey = keyToDataModel[
+      key as keyof typeof keyToDataModel
+    ] as ProjectKnownFiles;
+
+    test(`fetchRemoteProject fills in error for bad ${key} URL`, async () => {
+      const queryParam = new URLSearchParams(key + "=badurl");
+      const queries = fromQueryParams(queryParam);
+
+      const project = await fetchRemoteProject(queries);
+
+      expect(project[dataModelKey]).toContain(
+        "Failed to load content from badurl",
+      );
+      expect(project.ephemera[dataModelKey]).toContain(
+        "Failed to load content from badurl",
+      );
+    });
+
+    test(`fetchRemoteProject populates from good ${key} URL`, async () => {
+      const queryParam = new URLSearchParams(key + "=good");
+      const queries = fromQueryParams(queryParam);
+
+      const project = await fetchRemoteProject(queries);
+      expect(project[dataModelKey]).toEqual("good data");
+      expect(project.ephemera[dataModelKey]).toEqual("good data");
+    });
+  }
+
+  test(`fetchRemoteProject fills in error for bad sampling_opts URL`, async () => {
+    const queryParam = new URLSearchParams("sampling_opts=bad_sampling_opts");
+    const queries = fromQueryParams(queryParam);
+
+    const project = await fetchRemoteProject(queries);
+    expect(project.samplingOpts).toEqual(initialDataModel.samplingOpts);
+    const msg = "Failed to load content from bad_sampling_opts";
+    expect(mockedConsoleError).toHaveBeenCalledWith(msg);
+    expect(mockedAlert).toHaveBeenCalledWith(msg);
+  });
+
+  test(`fetchRemoteProject populates from good sampling_opts URL`, async () => {
+    const queryParam = new URLSearchParams("sampling_opts=good_sampling_opts");
+    const queries = fromQueryParams(queryParam);
+
+    const project = await fetchRemoteProject(queries);
+    expect(project.samplingOpts).toEqual(hoistedMocks.mockedSamplingOpts);
+  });
+
+  test(`fetchRemoteProject populates from good URL with bad JSON`, async () => {
+    const queryParam = new URLSearchParams("sampling_opts=good");
+    const queries = fromQueryParams(queryParam);
+
+    const project = await fetchRemoteProject(queries);
+    expect(project.samplingOpts).toEqual(defaultSamplingOpts);
+    expect(mockedConsoleError).toHaveBeenCalledWith(
+      "Failed to parse sampling_opts",
+      expect.anything(),
+    );
+  });
+
+  for (const key of Object.keys(hoistedMocks.mockedSamplingOpts)) {
+    const option = key as keyof SamplingOpts;
+    const value = hoistedMocks.mockedSamplingOpts[option];
+
+    test(`fetchRemoteProject gets sampling option ${key}`, async () => {
+      const queryParam = new URLSearchParams(`${key}=${value}`);
+      const queries = fromQueryParams(queryParam);
+
+      const project = await fetchRemoteProject(queries);
+      expect(project.samplingOpts[option]).toEqual(value);
+      expect(mockedConsoleError).not.toHaveBeenCalled();
+    });
+
+    test(`fetchRemoteProject errors on bad ${key}`, async () => {
+      const queryParam = new URLSearchParams(`${key}=bad`);
+      const queries = fromQueryParams(queryParam);
+
+      const project = await fetchRemoteProject(queries);
+      expect(project.samplingOpts[option]).toEqual(defaultSamplingOpts[option]);
+      expect(mockedConsoleError).toHaveBeenCalledWith(
+        "Invalid sampling options",
+        expect.anything(),
+      );
+    });
+  }
+
+  test(`fetchRemoteProject gets sampling seed even if undefined`, async () => {
+    const queryParam = new URLSearchParams("seed=undefined");
+    const queries = fromQueryParams(queryParam);
+
+    const project = await fetchRemoteProject(queries);
+    expect(project.samplingOpts.seed).toBeUndefined();
+    expect(mockedConsoleError).not.toHaveBeenCalled();
+  });
+
+  describe("fetchRemoteProject project handling", () => {
+    test("fetchRemoteProject errors on non-gist project", async () => {
+      const queryParam = new URLSearchParams("project=notgist");
+      const queries = fromQueryParams(queryParam);
+
+      const project = await fetchRemoteProject(queries);
+      expect(project).toEqual(initialDataModel);
+
+      expect(mockedConsoleError).toHaveBeenCalledWith(
+        "Unsupported project URI",
+        "notgist",
+      );
+    });
+
+    test("fetchRemoteProject errors on when gist retrieval fails", async () => {
+      const queryParam = new URLSearchParams(
+        "project=https://gist.github.com/test/bad",
+      );
+      const queries = fromQueryParams(queryParam);
+
+      const project = await fetchRemoteProject(queries);
+      expect(project).toEqual(initialDataModel);
+
+      expect(mockedConsoleError).toHaveBeenCalledWith(
+        "Failed to load content from gist",
+        "bad url",
+      );
+    });
+
+    test("fetchRemoteProject populates from good gist project", async () => {
+      const queryParam = new URLSearchParams(
+        "project=https://gist.github.com/test/good",
+      );
+      const queries = fromQueryParams(queryParam);
+
+      const project = await fetchRemoteProject(queries);
+      expect(project.stanFileContent).toEqual("gist stan code");
+      expect(project.ephemera.stanFileContent).toEqual("gist stan code");
+      expect(project.meta.title).toEqual("gist discription");
+    });
+  });
+});

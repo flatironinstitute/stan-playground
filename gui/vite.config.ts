@@ -17,11 +17,8 @@ export default defineConfig({
     },
   },
   test: {
-    // note for testing: mockReset clears all spies/mocks and resets to empty function,
-    // while restoreMocks: true calls .mockRestore() thereby clearing spies & mock
-    // history and resets implementation to origina implementation.
     // Consider logHeapUsage flag to diagnose memory leaks.
-    mockReset: true,
+    clearMocks: true,
     coverage: {
       enabled: true,
       exclude: [
