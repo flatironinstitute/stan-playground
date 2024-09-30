@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
   compute_effective_sample_size,
   compute_split_effective_sample_size,
