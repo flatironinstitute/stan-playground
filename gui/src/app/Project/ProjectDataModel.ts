@@ -37,13 +37,15 @@ export const isSamplingOpts = (x: any): x is SamplingOpts => {
 
 const numSamplingOpts = Object.keys(defaultSamplingOpts).length;
 
-const validateSamplingOpts = (x: SamplingOpts): boolean => {
+export const validateSamplingOpts = (x: SamplingOpts): boolean => {
   const naturalFields = [x.num_chains, x.num_samples, x.num_warmup];
   const positiveFields = [x.num_chains, x.num_samples];
   const nonnegativeFields = [x.num_warmup, x.init_radius];
   if (naturalFields.some((f) => !Number.isInteger(f))) return false;
-  if (positiveFields.some((f) => f <= 0)) return false;
-  if (nonnegativeFields.some((f) => f < 0)) return false;
+  if (positiveFields.some((f) => !Number.isFinite(f) || f <= 0)) return false;
+  if (nonnegativeFields.some((f) => !Number.isFinite(f) || f < 0)) return false;
+
+  if (x.seed !== undefined && !Number.isInteger(x.seed)) return false;
 
   if (Object.keys(x).length !== numSamplingOpts) return false;
   return true;

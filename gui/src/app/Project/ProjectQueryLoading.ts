@@ -2,12 +2,13 @@ import { mapFileContentsToModel } from "@SpCore/FileMapping";
 import loadFilesFromGist from "@SpCore/gists/loadFilesFromGist";
 import {
   ProjectDataModel,
+  defaultSamplingOpts,
   initialDataModel,
   parseSamplingOpts,
   persistStateToEphemera,
+  validateSamplingOpts,
 } from "@SpCore/ProjectDataModel";
 import { loadFromProjectFiles } from "@SpCore/ProjectSerialization";
-import { deepCopy } from "@SpUtil/deepCopy";
 import { tryFetch } from "@SpUtil/tryFetch";
 
 export enum QueryParamKeys {
@@ -66,7 +67,7 @@ export const queryStringHasParameters = (query: QueryParams) => {
 export const fetchRemoteProject = async (query: QueryParams) => {
   const projectUri = query.project;
 
-  let data: ProjectDataModel = deepCopy(initialDataModel);
+  let data: ProjectDataModel = structuredClone(initialDataModel);
   if (projectUri) {
     if (projectUri.startsWith("https://gist.github.com/")) {
       let contentLoadedFromGist: {
@@ -113,7 +114,7 @@ export const fetchRemoteProject = async (query: QueryParams) => {
     : Promise.resolve(data.dataRFileContent);
   const sampling_optsPromise = query.sampling_opts
     ? tryFetch(query.sampling_opts)
-    : Promise.resolve(undefined);
+    : Promise.resolve(null);
 
   const stanFileContent = await stanFilePromise;
   if (stanFileContent !== undefined) {
@@ -158,11 +159,16 @@ export const fetchRemoteProject = async (query: QueryParams) => {
   }
 
   const sampling_opts = await sampling_optsPromise;
-  if (sampling_opts) {
+  if (sampling_opts === undefined) {
+    const msg = `Failed to load content from ${query["sampling_opts"]}`;
+    alert(msg);
+    console.error(msg);
+  } else if (sampling_opts !== null) {
     try {
       data.samplingOpts = parseSamplingOpts(sampling_opts);
     } catch (err) {
       console.error("Failed to parse sampling_opts", err);
+      alert("Invalid sampling options: " + sampling_opts);
     }
   } else {
     if (query.num_chains) {
@@ -178,7 +184,14 @@ export const fetchRemoteProject = async (query: QueryParams) => {
       data.samplingOpts.init_radius = parseFloat(query.init_radius);
     }
     if (query.seed) {
-      data.samplingOpts.seed = parseInt(query.seed);
+      data.samplingOpts.seed =
+        query.seed === "undefined" ? undefined : parseInt(query.seed);
+    }
+
+    if (!validateSamplingOpts(data.samplingOpts)) {
+      console.error("Invalid sampling options", data.samplingOpts);
+      alert("Invalid sampling options: " + JSON.stringify(data.samplingOpts));
+      data.samplingOpts = defaultSamplingOpts;
     }
   }
 
