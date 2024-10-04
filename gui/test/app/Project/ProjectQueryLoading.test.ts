@@ -272,7 +272,7 @@ describe("Query fetching", () => {
       );
     });
 
-    test("fetchRemoteProject errors on when gist retrieval fails", async () => {
+    test("fetchRemoteProject errors when gist retrieval fails", async () => {
       const queryParam = new URLSearchParams(
         "project=https://gist.github.com/test/bad",
       );
