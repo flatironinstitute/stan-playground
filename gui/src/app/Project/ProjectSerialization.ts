@@ -138,9 +138,8 @@ const loadFileFromString = (
   data: ProjectDataModel,
   field: ProjectKnownFiles,
   contents: string,
-  replaceProject: boolean = false,
 ): ProjectDataModel => {
-  const newData = replaceProject ? { ...initialDataModel } : { ...data };
+  const newData = { ...data };
   newData[field] = contents;
   return newData;
 };

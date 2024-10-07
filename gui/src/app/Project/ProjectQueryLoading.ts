@@ -88,6 +88,7 @@ export const fetchRemoteProject = async (query: QueryParams) => {
         false,
       );
       data.meta.title = contentLoadedFromGist.description;
+      return persistStateToEphemera(data);
     } else {
       // right now we only support loading from a gist
       console.error("Unsupported project URI", projectUri);
@@ -105,7 +106,7 @@ export const fetchRemoteProject = async (query: QueryParams) => {
     : Promise.resolve(data.analysisPyFileContent);
   const analysisRFilePromise = query["analysis_r"]
     ? tryFetch(query["analysis_r"])
-    : Promise.resolve(data.analysisPyFileContent);
+    : Promise.resolve(data.analysisRFileContent);
   const dataPyFilePromise = query["data_py"]
     ? tryFetch(query["data_py"])
     : Promise.resolve(data.dataPyFileContent);
