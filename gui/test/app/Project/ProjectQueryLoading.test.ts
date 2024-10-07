@@ -47,6 +47,13 @@ const hoistedMocks = vi.hoisted(() => {
     description: "gist discription",
     files: {
       "main.stan": "gist stan code",
+      "data.json": '{"data": "gist data"}',
+      "analysis.py": "gist analysis.py",
+      "analysis.R": "gist analysis.R",
+      "data.py": "gist data.py",
+      "data.R": "gist data.R",
+      "sampling_opts.json": JSON.stringify(mockedSamplingOpts),
+      "extra.txt": "gist extra",
     },
   };
 
@@ -297,6 +304,25 @@ describe("Query fetching", () => {
       expect(project.stanFileContent).toEqual("gist stan code");
       expect(project.ephemera.stanFileContent).toEqual("gist stan code");
       expect(project.meta.title).toEqual("gist discription");
+
+      expect(project.dataFileContent).toEqual('{"data": "gist data"}');
+      expect(project.ephemera.dataFileContent).toEqual('{"data": "gist data"}');
+
+      expect(project.analysisPyFileContent).toEqual("gist analysis.py");
+      expect(project.ephemera.analysisPyFileContent).toEqual(
+        "gist analysis.py",
+      );
+
+      expect(project.analysisRFileContent).toEqual("gist analysis.R");
+      expect(project.ephemera.analysisRFileContent).toEqual("gist analysis.R");
+
+      expect(project.dataPyFileContent).toEqual("gist data.py");
+      expect(project.ephemera.dataPyFileContent).toEqual("gist data.py");
+
+      expect(project.dataRFileContent).toEqual("gist data.R");
+      expect(project.ephemera.dataRFileContent).toEqual("gist data.R");
+
+      expect(project.samplingOpts).toEqual(hoistedMocks.mockedSamplingOpts);
     });
   });
 });

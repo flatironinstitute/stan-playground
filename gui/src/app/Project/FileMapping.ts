@@ -102,7 +102,10 @@ export const mapFileContentsToModel = (
 
   fields.forEach((f) => {
     // Don't do anything for unrecognized filenames
-    if (!isFileName(f)) return;
+    if (!isFileName(f)) {
+      console.warn(`Unrecognized filename: ${f}`);
+      return;
+    }
 
     switch (f) {
       case FileNames.META: {
