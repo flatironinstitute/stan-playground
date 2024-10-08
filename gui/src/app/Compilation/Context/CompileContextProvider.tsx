@@ -1,5 +1,4 @@
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
-import compileStanProgram from "@SpCompileContext/compileStanProgram";
 import {
   FunctionComponent,
   PropsWithChildren,
@@ -8,8 +7,9 @@ import {
   useEffect,
   useState,
 } from "react";
-import { CompileContext, CompileStatus } from "./CompileContext";
-import { publicCompilationServerUrl } from "@SpStanc/CompilationServerConnectionControl";
+import { CompileContext, CompileStatus } from "@SpCompilation/CompileContext";
+import { publicCompilationServerUrl } from "@SpCompilation/Constants";
+import compileStanProgram from "./compileStanProgram";
 
 type CompileContextProviderProps = {
   // none

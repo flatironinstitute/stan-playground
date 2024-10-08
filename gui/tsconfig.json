@@ -5,7 +5,6 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable", "webworker"],
     "module": "ESNext",
     "skipLibCheck": true,
-
     "types": ["vite/client"],
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -14,13 +13,11 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-
     /* Imports */
     "baseUrl": "./src",
     "paths": {
@@ -37,14 +34,21 @@
       "@SpCore/gists/*": ["app/gists/*"],
       /* We are playing a bit fast and loose with the distinction */
       "@SpPages/*": ["app/pages/HomePage/*"],
-      "@SpStanc/*": ["app/Stanc/*", "app/CompilationServerConnectionControl/*"],
+      "@SpStanc/*": ["app/Stanc/*"],
       "@SpStanSampler/*": ["app/StanSampler/*"],
       "@SpUtil/*": ["app/util/*"],
       "@SpStanStats/*": ["app/util/stan_stats/*"],
       "@SpScripting/*": ["app/Scripting/*"],
-      "@SpCompileContext/*": ["app/CompileContext/*"]
+      "@SpCompilation/*": [
+        "app/Compilation/Context/*",
+        "app/Compilation/Control/*"
+      ]
     }
   },
   "include": ["src", "test"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
 }

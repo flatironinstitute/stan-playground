@@ -1,9 +1,9 @@
+import { CompileContextProvider } from "@SpCompilation/CompileContextProvider";
 import ToggleableThemeProvider from "./ToggleableThemeProvider";
 import ProjectContextProvider from "@SpCore/ProjectContextProvider";
 import HomePage from "@SpPages/HomePage";
 import { Analytics } from "@vercel/analytics/react";
 import { BrowserRouter } from "react-router-dom";
-import { CompileContextProvider } from "./CompileContext/CompileContextProvider";
 
 const App = () => {
   return (

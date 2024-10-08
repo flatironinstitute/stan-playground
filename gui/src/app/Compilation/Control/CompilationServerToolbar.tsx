@@ -4,16 +4,15 @@ import CloseableDialog, {
   useDialogControls,
 } from "@SpComponents/CloseableDialog";
 import { FunctionComponent, useCallback, useContext } from "react";
-import ConfigureCompilationServerDialog from "./ConfigureCompilationServerDialog";
+import ConfigureCompilationServerDialog from "./CompilationServerDialog";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import { CompileContext } from "@SpCompileContext/CompileContext";
-
-export const publicCompilationServerUrl =
-  "https://stan-wasm.flatironinstitute.org";
-export const localCompilationServerUrl = "http://localhost:8083";
-
-type ServerType = "public" | "local" | "custom";
+import { CompileContext } from "@SpCompilation/CompileContext";
+import {
+  ServerType,
+  publicCompilationServerUrl,
+  localCompilationServerUrl,
+} from "./Constants";
 
 type CompilationServerConnectionControlProps = {
   // none

@@ -5,7 +5,7 @@ import TextEditor from "@SpComponents/TextEditor";
 import { ToolbarItem } from "@SpComponents/ToolBar";
 import { stancErrorsToCodeMarkers } from "@SpStanc/Linting";
 import useStanc from "@SpStanc/useStanc";
-import { CompileContext } from "@SpCompileContext/CompileContext";
+import { CompileContext } from "@SpCompilation/CompileContext";
 import { FunctionComponent, useContext, useMemo, useState } from "react";
 
 type Props = {
