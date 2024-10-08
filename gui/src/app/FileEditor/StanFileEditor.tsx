@@ -5,7 +5,7 @@ import TextEditor from "@SpComponents/TextEditor";
 import { ToolbarItem } from "@SpComponents/ToolBar";
 import { stancErrorsToCodeMarkers } from "@SpStanc/Linting";
 import useStanc from "@SpStanc/useStanc";
-import { CompileContext } from "@SpCompileContext/CompileContext";
+import { CompileContext } from "@SpCompilation/CompileContext";
 import { FunctionComponent, useContext, useMemo, useState } from "react";
 
 type Props = {
@@ -32,7 +32,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
     setEditedFileContent,
   );
 
-  const { compileStatus, compileMessage, compile, validSyntax } =
+  const { compileStatus, compileMessage, compile, validSyntax, isConnected } =
     useContext(CompileContext);
 
   const hasWarnings = useMemo(() => {
@@ -89,17 +89,15 @@ const StanFileEditor: FunctionComponent<Props> = ({
       });
     }
     if (editedFileContent && editedFileContent === fileContent) {
-      if (compileStatus !== "compiling") {
-        if (validSyntax) {
-          ret.push({
-            type: "button",
-            tooltip: "Compile Stan model",
-            label: "Compile",
-            icon: <Settings />,
-            onClick: compile,
-            color: "info.dark",
-          });
-        }
+      if (compileStatus !== "compiling" && validSyntax && isConnected) {
+        ret.push({
+          type: "button",
+          tooltip: "Compile Stan model",
+          label: "Compile",
+          icon: <Settings />,
+          onClick: compile,
+          color: "info.dark",
+        });
       }
       if (compileStatus !== "") {
         ret.push({
@@ -118,15 +116,16 @@ const StanFileEditor: FunctionComponent<Props> = ({
 
     return ret;
   }, [
-    editedFileContent,
-    fileContent,
-    compile,
-    requestFormat,
     validSyntax,
-    compileStatus,
-    compileMessage,
-    readOnly,
+    editedFileContent,
     hasWarnings,
+    readOnly,
+    fileContent,
+    requestFormat,
+    compileStatus,
+    isConnected,
+    compile,
+    compileMessage,
   ]);
 
   const isCompiling = compileStatus === "compiling";

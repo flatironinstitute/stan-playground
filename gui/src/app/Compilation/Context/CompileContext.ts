@@ -16,6 +16,8 @@ type CompileContextType = {
   setValidSyntax: (valid: boolean) => void;
   stanWasmServerUrl: string;
   setStanWasmServerUrl: (url: string) => void;
+  isConnected: boolean;
+  retryConnection: () => void;
 };
 
 export const CompileContext = createContext<CompileContextType>({
@@ -26,4 +28,6 @@ export const CompileContext = createContext<CompileContextType>({
   setValidSyntax: () => {},
   stanWasmServerUrl: "",
   setStanWasmServerUrl: () => {},
+  isConnected: false,
+  retryConnection: () => {},
 });

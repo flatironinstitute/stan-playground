@@ -7,7 +7,7 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 // https://vitejs.dev/guide/assets#importing-script-as-a-worker
 // https://vitejs.dev/guide/assets#importing-asset-as-url
 import stancWorkerURL from "@SpStanc/stancWorker?worker&url";
-import { CompileContext } from "@SpCompileContext/CompileContext";
+import { CompileContext } from "@SpCompilation/CompileContext";
 
 const useStanc = (
   modelName: string,

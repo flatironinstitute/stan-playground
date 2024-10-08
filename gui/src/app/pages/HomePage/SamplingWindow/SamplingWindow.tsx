@@ -15,7 +15,7 @@ import {
 import AnalysisPyWindow from "@SpScripting/Analysis/AnalysisPyWindow";
 import useStanSampler, { StanRun } from "@SpStanSampler/useStanSampler";
 import AnalysisRWindow from "@SpScripting/Analysis/AnalysisRWindow";
-import { CompileContext } from "@SpCompileContext/CompileContext";
+import { CompileContext } from "@SpCompilation/CompileContext";
 
 type SamplingWindowProps = {
   // none

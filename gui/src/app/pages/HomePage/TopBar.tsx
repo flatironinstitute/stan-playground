@@ -1,4 +1,4 @@
-import CompilationServerConnectionControl from "@SpStanc/CompilationServerConnectionControl";
+import CompilationServerConnectionControl from "@SpCompilation/CompilationServerToolbar";
 import { Brightness7, DarkMode, Menu, QuestionMark } from "@mui/icons-material";
 import AppBar from "@mui/material/AppBar";
 import IconButton from "@mui/material/IconButton";

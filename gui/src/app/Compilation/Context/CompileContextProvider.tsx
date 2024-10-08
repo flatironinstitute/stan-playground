@@ -1,5 +1,4 @@
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
-import compileStanProgram from "@SpCompileContext/compileStanProgram";
 import {
   FunctionComponent,
   PropsWithChildren,
@@ -8,11 +7,40 @@ import {
   useEffect,
   useState,
 } from "react";
-import { CompileContext, CompileStatus } from "./CompileContext";
-import { publicCompilationServerUrl } from "@SpStanc/CompilationServerConnectionControl";
+import { CompileContext, CompileStatus } from "@SpCompilation/CompileContext";
+import { publicCompilationServerUrl } from "@SpCompilation/Constants";
+import compileStanProgram from "./compileStanProgram";
 
 type CompileContextProviderProps = {
   // none
+};
+
+const useIsConnected = (stanWasmServerUrl: string) => {
+  const probeUrl = `${stanWasmServerUrl}/probe`;
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [retryCode, setRetryCode] = useState<number>(0);
+  const retryConnection = useCallback(() => {
+    setRetryCode((r) => r + 1);
+  }, []);
+  useEffect(() => {
+    setIsConnected(false);
+    if (!probeUrl.startsWith("http://") && !probeUrl.startsWith("https://")) {
+      // important to do this check because otherwise fetch may succeed because
+      // the server of this web app may respond with success
+      return;
+    }
+    (async () => {
+      try {
+        const response = await fetch(probeUrl);
+        if (response.status === 200) {
+          setIsConnected(true);
+        }
+      } catch (err) {
+        setIsConnected(false);
+      }
+    })();
+  }, [probeUrl, retryCode]);
+  return { isConnected, retryConnection };
 };
 
 const initialStanWasmServerUrl =
@@ -83,6 +111,8 @@ export const CompileContextProvider: FunctionComponent<
     stanWasmServerUrl,
   ]);
 
+  const { isConnected, retryConnection } = useIsConnected(stanWasmServerUrl);
+
   return (
     <CompileContext.Provider
       value={{
@@ -94,6 +124,8 @@ export const CompileContextProvider: FunctionComponent<
         setValidSyntax,
         stanWasmServerUrl,
         setStanWasmServerUrl,
+        isConnected,
+        retryConnection,
       }}
     >
       {children}
