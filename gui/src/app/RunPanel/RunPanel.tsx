@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FunctionComponent, useCallback, useContext } from "react";
+import { FunctionComponent, useCallback, useContext, useMemo } from "react";
 
 import Button from "@mui/material/Button";
 import { CompileContext } from "@SpCompileContext/CompileContext";
@@ -13,6 +13,7 @@ import StanSampler from "@SpStanSampler/StanSampler";
 import { StanRun } from "@SpStanSampler/useStanSampler";
 import CompiledRunPanel from "./CompiledRunPanel";
 import CircularProgress from "@mui/material/CircularProgress";
+import Tooltip from "@mui/material/Tooltip";
 
 type RunPanelProps = {
   sampler?: StanSampler;
@@ -41,9 +42,18 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
     sampler.cancel();
   }, [sampler]);
 
-  const { compile, compileStatus, validSyntax } = useContext(CompileContext);
+  const { compile, compileStatus, validSyntax, isConnected } =
+    useContext(CompileContext);
 
   const { data: projectData } = useContext(ProjectContext);
+
+  const tooltip = useMemo(() => {
+    if (!validSyntax) return "Syntax error";
+    if (!isConnected) return "Not connected to compilation server";
+    if (!projectData.stanFileContent.trim()) return "No model to compile";
+    if (modelHasUnsavedChanges(projectData)) return "Model has unsaved changes";
+    return "";
+  }, [isConnected, projectData, validSyntax]);
 
   if (!dataIsSaved) {
     return <div className="RunPanelPadded">Data not saved</div>;
@@ -51,13 +61,17 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
 
   const compileDiv = (
     <div>
-      <Button
-        variant="contained"
-        onClick={compile}
-        disabled={isCompileModelDisabled(projectData, validSyntax)}
-      >
-        compile model
-      </Button>
+      <Tooltip title={tooltip}>
+        <span>
+          <Button
+            variant="contained"
+            onClick={compile}
+            disabled={tooltip != ""}
+          >
+            compile model
+          </Button>
+        </span>
+      </Tooltip>
     </div>
   );
 
@@ -87,16 +101,6 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
       </div>
     </div>
   );
-};
-
-const isCompileModelDisabled = (
-  projectData: ProjectDataModel,
-  validSyntax: boolean,
-) => {
-  if (!validSyntax) return true;
-  if (!projectData.stanFileContent.trim()) return true;
-  if (modelHasUnsavedChanges(projectData)) return true;
-  return false;
 };
 
 export default RunPanel;
