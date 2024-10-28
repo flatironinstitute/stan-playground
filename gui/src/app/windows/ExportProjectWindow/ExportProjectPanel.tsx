@@ -8,10 +8,13 @@ import { mapModelToFileManifest } from "@SpCore/Project/FileMapping";
 import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
 import { triggerDownload } from "@SpUtil/triggerDownload";
 import Button from "@mui/material/Button";
-import { serializeAsZip } from "@SpCore/Project/ProjectSerialization";
 import TextField from "@mui/material/TextField";
 import GistExportPanel from "./GistExportPanel";
 import GistUpdatePanel from "./GistUpdatePanel";
+
+import makePyRuntimeScript from "@SpCore/Scripting/Runtime/makePyRuntime";
+import { replaceSpacesWithUnderscores } from "@SpUtil/replaceSpaces";
+import { serializeAsZip } from "@SpUtil/serializeAsZip";
 
 type ExportProjectProps = {
   onClose: () => void;
@@ -25,6 +28,8 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
 
   const [exportingToGist, setExportingToGist] = useState(false);
   const [updatingExistingGist, setUpdatingExistingGist] = useState(false);
+
+  const [includeRunPy, setIncludeRunPy] = useState(false);
 
   return (
     <div className="dialogWrapper">
@@ -60,6 +65,18 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
                 ),
             )}
           </TableBody>
+          <AlternatingTableRow hover>
+              <TableCell>
+                Include a run.py file for use with CmdStanPy?
+              </TableCell>
+              <TableCell>
+                <input
+                  type="checkbox"
+                  checked={includeRunPy}
+                  onChange={(e) => setIncludeRunPy(e.target.checked)}
+                />
+              </TableCell>
+            </AlternatingTableRow>
         </Table>
       </TableContainer>
       <div>&nbsp;</div>
@@ -67,7 +84,13 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
         <div>
           <Button
             onClick={async () => {
-              serializeAsZip(data).then(([zipBlob, name]) =>
+              const fileManifest: { [key: string]: string } =
+              mapModelToFileManifest(data);
+            const folderName = replaceSpacesWithUnderscores(data.meta.title);
+            if (includeRunPy) {
+              fileManifest["run.py"] = makePyRuntimeScript(data);
+            }
+            serializeAsZip(folderName, fileManifest).then(([zipBlob, name]) =>
                 triggerDownload(zipBlob, `SP-${name}.zip`, onClose),
               );
             }}
