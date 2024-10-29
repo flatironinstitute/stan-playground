@@ -2,14 +2,14 @@
 import { FunctionComponent, useCallback, useContext, useMemo } from "react";
 
 import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import Tooltip from "@mui/material/Tooltip";
 import { CompileContext } from "@SpCompilation/CompileContext";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import { SamplingOpts, modelHasUnsavedChanges } from "@SpCore/ProjectDataModel";
 import StanSampler from "@SpStanSampler/StanSampler";
 import { StanRun } from "@SpStanSampler/useStanSampler";
 import CompiledRunPanel from "./CompiledRunPanel";
-import CircularProgress from "@mui/material/CircularProgress";
-import Tooltip from "@mui/material/Tooltip";
 
 type RunPanelProps = {
   sampler?: StanSampler;
@@ -32,6 +32,11 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
     if (!sampler) return;
     sampler.sample(data, samplingOpts);
   }, [sampler, data, samplingOpts]);
+
+  const possiblyHandleRun = useMemo(() => {
+    if (data === undefined) return undefined;
+    return handleRun;
+  }, [data, handleRun])
 
   const cancelRun = useCallback(() => {
     if (!sampler) return;
@@ -82,7 +87,7 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
       <div className="RunPanelPadded">
         {compileStatus === "compiled" ? (
           <CompiledRunPanel
-            handleRun={handleRun}
+            handleRun={possiblyHandleRun}
             cancelRun={cancelRun}
             runStatus={runStatus}
             progress={progress}

@@ -2,8 +2,9 @@ import Box from "@mui/material/Box";
 import LinearProgress, {
   LinearProgressProps,
 } from "@mui/material/LinearProgress";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import { FunctionComponent } from "react";
+import { FunctionComponent, useMemo } from "react";
 
 import Button from "@mui/material/Button";
 import { SamplingOpts } from "@SpCore/ProjectDataModel";
@@ -11,7 +12,7 @@ import { Progress } from "@SpStanSampler/StanModelWorker";
 import { StanSamplerStatus } from "@SpStanSampler/StanSampler";
 
 type CompiledRunPanelProps = {
-  handleRun: () => Promise<void>;
+  handleRun: undefined | (() => Promise<void>);
   cancelRun: () => void;
   runStatus: StanSamplerStatus;
   progress: Progress | undefined;
@@ -72,16 +73,29 @@ const CompiledRunPanel: FunctionComponent<CompiledRunPanelProps> = ({
     </div>
   );
 
+  const tooltip = useMemo(() => {
+    if (handleRun === undefined) return "Data must be validly formatted JSON";
+    return "Run sampling";
+  }, [handleRun]);
+
   return (
     <div>
-      <Button
-        variant="contained"
-        color="success"
-        onClick={handleRun}
-        disabled={runStatus === "sampling" || runStatus === "loading"}
-      >
-        run sampling
-      </Button>
+      <Tooltip title={tooltip}>
+        <span>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={handleRun}
+            disabled={
+              runStatus === "sampling" ||
+              runStatus === "loading" ||
+              handleRun === undefined
+            }
+          >
+            run sampling
+          </Button>
+        </span>
+      </Tooltip>
       &nbsp;
       {runStatus === "loading" ? (
         loadingDiv
