@@ -3,6 +3,7 @@ import { FunctionComponent, useCallback, useContext, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Grid from "@mui/material/Grid";
+import { CompileContext } from "@SpCompilation/CompileContext";
 import RunPanel from "@SpComponents/RunPanel";
 import SamplerOutputView from "@SpComponents/SamplerOutputView";
 import SamplingOptsPanel from "@SpComponents/SamplingOptsPanel";
@@ -13,9 +14,8 @@ import {
   SamplingOpts,
 } from "@SpCore/ProjectDataModel";
 import AnalysisPyWindow from "@SpScripting/Analysis/AnalysisPyWindow";
-import useStanSampler, { StanRun } from "@SpStanSampler/useStanSampler";
 import AnalysisRWindow from "@SpScripting/Analysis/AnalysisRWindow";
-import { CompileContext } from "@SpCompilation/CompileContext";
+import useStanSampler, { StanRun } from "@SpStanSampler/useStanSampler";
 
 type SamplingWindowProps = {
   // none
@@ -27,7 +27,7 @@ const SamplingWindow: FunctionComponent<SamplingWindowProps> = () => {
     try {
       return JSON.parse(data.dataFileContent);
     } catch (e) {
-      return undefined;
+      return "";
     }
   }, [data.dataFileContent]);
 
