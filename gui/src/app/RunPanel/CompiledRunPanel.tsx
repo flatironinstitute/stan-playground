@@ -75,8 +75,9 @@ const CompiledRunPanel: FunctionComponent<CompiledRunPanelProps> = ({
 
   const tooltip = useMemo(() => {
     if (handleRun === undefined) return "Data must be validly formatted JSON";
+    if (runStatus === "sampling") return "Sampling is in progress";
     return "Run sampling";
-  }, [handleRun]);
+  }, [handleRun, runStatus]);
 
   return (
     <div>
