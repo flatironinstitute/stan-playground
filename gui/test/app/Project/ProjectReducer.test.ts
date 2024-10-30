@@ -1,4 +1,5 @@
 import {
+  DataSource,
   getStringKnownFileKeys,
   initialDataModel,
   ProjectDataModel,
@@ -130,6 +131,7 @@ describe("Project reducer", () => {
     const initialState = {
       ...permanentFiles,
       ephemera: { ...ephemeralFiles },
+      meta: { dataSource: DataSource.GENERATED_BY_PYTHON },
     } as any as ProjectDataModel;
     const commitAction: ProjectReducerAction = {
       type: "commitFile",
@@ -143,6 +145,7 @@ describe("Project reducer", () => {
       expect(result[ProjectKnownFiles.DATAFILE]).toEqual(
         result.ephemera[ProjectKnownFiles.DATAFILE],
       );
+      expect(result.meta.dataSource).toBeUndefined();
     });
     test("Save action does not save non-chosen files", () => {
       const result = ProjectReducer(initialState, commitAction);
@@ -218,6 +221,26 @@ describe("Project reducer", () => {
       const clearAction: ProjectReducerAction = { type: "clear" };
       const result = ProjectReducer(fakeEmptyProjectData, clearAction);
       expect(result).toBe(initialDataModel);
+    });
+  });
+
+  describe("Generate data", () => {
+    test("Updates data file and ephemera with new data", () => {
+      const initialState = {
+        ...permanentFiles,
+        ephemera: { ...ephemeralFiles },
+        meta: { dataSource: DataSource.GENERATED_BY_R },
+      } as any as ProjectDataModel;
+      const newData = "generated data";
+      const generateAction: ProjectReducerAction = {
+        type: "generateData",
+        content: newData,
+        dataSource: DataSource.GENERATED_BY_PYTHON,
+      };
+      const result = ProjectReducer(initialState, generateAction);
+      expect(result[ProjectKnownFiles.DATAFILE]).toEqual(newData);
+      expect(result.ephemera[ProjectKnownFiles.DATAFILE]).toEqual(newData);
+      expect(result.meta.dataSource).toEqual(DataSource.GENERATED_BY_PYTHON);
     });
   });
 });

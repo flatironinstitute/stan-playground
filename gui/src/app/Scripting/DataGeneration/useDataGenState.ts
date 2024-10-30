@@ -1,5 +1,5 @@
 import { useCallback, useContext, useRef, useState } from "react";
-import { DataSource, ProjectKnownFiles } from "@SpCore/ProjectDataModel";
+import { DataSource } from "@SpCore/ProjectDataModel";
 import { writeConsoleOutToDiv } from "@SpScripting/OutputDivUtils";
 import { InterpreterStatus } from "@SpScripting/InterpreterTypes";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
@@ -21,13 +21,8 @@ const useDataGenState = (source: "python" | "r") => {
       if (dataJson !== lastData.current) {
         lastData.current = dataJson;
         update({
-          type: "editFile",
+          type: "generateData",
           content: dataJson,
-          filename: ProjectKnownFiles.DATAFILE,
-        });
-        update({ type: "commitFile", filename: ProjectKnownFiles.DATAFILE });
-        update({
-          type: "setDataSource",
           dataSource:
             source === "python"
               ? DataSource.GENERATED_BY_PYTHON

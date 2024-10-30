@@ -25,7 +25,7 @@ export type ProjectReducerAction =
       type: "retitle";
       title: string;
     }
-  | { type: "setDataSource"; dataSource: DataSource | undefined }
+  | { type: "generateData"; content: string; dataSource: DataSource }
   | {
       type: "editFile";
       content: string;
@@ -71,8 +71,22 @@ const ProjectReducer = (s: ProjectDataModel, a: ProjectReducerAction) => {
     }
     case "commitFile": {
       const newState = { ...s };
+      if (a.filename === ProjectKnownFiles.DATAFILE) {
+        newState.meta = { ...s.meta, dataSource: undefined };
+      }
       newState[a.filename] = s.ephemera[a.filename];
       return newState;
+    }
+    case "generateData": {
+      return {
+        ...s,
+        [ProjectKnownFiles.DATAFILE]: a.content,
+        ephemera: {
+          ...s.ephemera,
+          [ProjectKnownFiles.DATAFILE]: a.content,
+        },
+        meta: { ...s.meta, dataSource: a.dataSource },
+      };
     }
     case "setSamplingOpts": {
       return { ...s, samplingOpts: { ...s.samplingOpts, ...a.opts } };
@@ -82,9 +96,6 @@ const ProjectReducer = (s: ProjectDataModel, a: ProjectReducerAction) => {
     }
     case "clear": {
       return initialDataModel;
-    }
-    case "setDataSource": {
-      return { ...s, meta: { ...s.meta, dataSource: a.dataSource } };
     }
     default:
       return unreachable(a);

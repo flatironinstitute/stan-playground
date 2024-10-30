@@ -165,10 +165,6 @@ const DataEditor: FunctionComponent<{}> = () => {
       type: "commitFile",
       filename: ProjectKnownFiles.DATAFILE,
     });
-    update({
-      type: "setDataSource",
-      dataSource: undefined,
-    });
   }, [update]);
 
   return (
