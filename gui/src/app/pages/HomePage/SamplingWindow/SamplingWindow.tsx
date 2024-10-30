@@ -1,4 +1,4 @@
-import { FunctionComponent, useCallback, useContext, useMemo } from "react";
+import { FunctionComponent, useCallback, useContext } from "react";
 
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
@@ -23,13 +23,6 @@ type SamplingWindowProps = {
 
 const SamplingWindow: FunctionComponent<SamplingWindowProps> = () => {
   const { data, update } = useContext(ProjectContext);
-  const parsedData = useMemo(() => {
-    try {
-      return JSON.parse(data.dataFileContent);
-    } catch (e) {
-      return "";
-    }
-  }, [data.dataFileContent]);
 
   const setSamplingOpts = useCallback(
     (opts: SamplingOpts) => {
@@ -55,7 +48,7 @@ const SamplingWindow: FunctionComponent<SamplingWindowProps> = () => {
           <RunPanel
             sampler={sampler}
             latestRun={latestRun}
-            data={parsedData}
+            data={data.dataFileContent}
             dataIsSaved={!modelHasUnsavedDataFileChanges(data)}
             samplingOpts={data.samplingOpts}
           />
