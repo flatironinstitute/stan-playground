@@ -90,13 +90,24 @@ const isProjectBase = (x: any): x is ProjectBase => {
   return true;
 };
 
+export enum DataSource {
+  GENERATED_BY_R = "generated_by_r",
+  GENERATED_BY_PYTHON = "generated_by_python",
+}
+
 type ProjectMetadata = {
   title: string;
+  dataSource?: DataSource;
 };
 
 export const isProjectMetaData = (x: any): x is ProjectMetadata => {
   if (!baseObjectCheck(x)) return false;
   if (typeof x.title !== "string") return false;
+  if (
+    x.dataSource !== undefined && // allow undefined for backwards compatibility
+    !Object.values(DataSource).includes(x.dataSource)
+  )
+    return false;
   return true;
 };
 
@@ -128,7 +139,7 @@ export const isProjectDataModel = (x: any): x is ProjectDataModel => {
 export type ProjectPersistentDataModel = Omit<ProjectDataModel, "ephemera">;
 
 export const initialDataModel: ProjectDataModel = {
-  meta: { title: "Untitled" },
+  meta: { title: "Untitled", dataSource: undefined },
   ephemera: {
     stanFileContent: "",
     dataFileContent: "",

@@ -22,7 +22,7 @@ const handleHelp = () =>
   );
 
 const DataPyWindow: FunctionComponent<Props> = () => {
-  const { consoleRef, status, onStatus, onData } = useDataGenState();
+  const { consoleRef, status, onStatus, onData } = useDataGenState("python");
 
   const callbacks = useMemo(
     () => ({
