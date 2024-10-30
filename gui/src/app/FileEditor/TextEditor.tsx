@@ -165,6 +165,7 @@ const TextEditor: FunctionComponent<Props> = ({
           domReadOnly: readOnly,
           wordWrap: "on",
           minimap: { enabled: false },
+          tabSize: 2,
         }}
         theme={theme}
       />
