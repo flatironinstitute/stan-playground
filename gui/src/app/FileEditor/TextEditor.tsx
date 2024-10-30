@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Editor, loader, useMonaco } from "@monaco-editor/react";
 import { useTheme } from "@mui/material/styles";
 

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FunctionComponent, useCallback, useContext, useMemo } from "react";
 
 import Button from "@mui/material/Button";
@@ -14,7 +13,7 @@ import Tooltip from "@mui/material/Tooltip";
 type RunPanelProps = {
   sampler?: StanSampler;
   latestRun: StanRun;
-  data: any | undefined;
+  data: string;
   dataIsSaved: boolean;
   samplingOpts: SamplingOpts;
 };
