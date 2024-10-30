@@ -19,10 +19,9 @@ Forum post: [Stan Playground: Stan without installing Stan](https://discourse.mc
 
 ## Preparing links to existing models or projects
 
-In addition to the built-in sharing feature which integrates with [Github Gists](https://docs.github.com/en/get-started/writing-on-github/editing-and-sharing-content-with-gists), you can also manually prepare links which will pre-populate each portion of Stan Playground when clicked by using [URL Parameters](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/Web_mechanics/What_is_a_URL#parameters).
+Stan Playground offers a built-in sharing feature which integrates with [Github Gists](https://docs.github.com/en/get-started/writing-on-github/editing-and-sharing-content-with-gists). This feature provides an easy way to share your work with collaborators, students, forum users, and many other audiences.
 
-For more information, see [URL Parameters](./docs/url_parameters.md).
-
+Additionally, you can also prepare links which will pre-populate each portion of Stan Playground when clicked by using [URL Parameters](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/Web_mechanics/What_is_a_URL#parameters). For more information, see [URL Parameters](./docs/url_parameters.md).
 
 ## Compilation server setup
 
