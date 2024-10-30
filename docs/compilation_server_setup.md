@@ -1,6 +1,6 @@
 # Compilation server setup
 
-These instructions are only required if you want to set up your own compilation server. If you are content with using the public server, you can skip this section.
+These instructions are only required if you want to set up your own compilation server.
 
 To run your own server locally using Docker, execute the following command:
 
