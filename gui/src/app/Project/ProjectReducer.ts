@@ -1,5 +1,6 @@
 import { FieldsContentsMap } from "@SpCore/FileMapping";
 import {
+  DataSource,
   initialDataModel,
   ProjectDataModel,
   ProjectKnownFiles,
@@ -24,6 +25,7 @@ export type ProjectReducerAction =
       type: "retitle";
       title: string;
     }
+  | { type: "setDataSource"; dataSource: DataSource | undefined }
   | {
       type: "editFile";
       content: string;
@@ -80,6 +82,9 @@ const ProjectReducer = (s: ProjectDataModel, a: ProjectReducerAction) => {
     }
     case "clear": {
       return initialDataModel;
+    }
+    case "setDataSource": {
+      return { ...s, meta: { ...s.meta, dataSource: a.dataSource } };
     }
     default:
       return unreachable(a);

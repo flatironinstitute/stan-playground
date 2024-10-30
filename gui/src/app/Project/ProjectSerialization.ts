@@ -112,7 +112,7 @@ const loadMetaFromString = (
   json: string,
   clearExisting: boolean = false,
 ): ProjectDataModel => {
-  const newMeta = JSON.parse(json);
+  let newMeta = JSON.parse(json);
   if (!isProjectMetaData(newMeta)) {
     throw Error("Deserialized meta is not valid");
   }

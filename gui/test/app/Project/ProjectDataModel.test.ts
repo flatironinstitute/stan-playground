@@ -1,4 +1,5 @@
 import {
+  DataSource,
   defaultSamplingOpts,
   exportedForTesting,
   getStringKnownFileKeys,
@@ -247,6 +248,23 @@ describe("Project data model type guards", () => {
     test("Returns false on non-string title", () => {
       expect(isProjectMetaData({ title: 6 })).toBe(false);
       expect(isProjectMetaData({ no_title: "title" })).toBe(false);
+    });
+    test("Returns true for valid data source", () => {
+      expect(
+        isProjectMetaData({
+          title: "title",
+          dataSource: DataSource.GENERATED_BY_PYTHON,
+        }),
+      ).toBe(true);
+      expect(
+        isProjectMetaData({
+          title: "title",
+          dataSource: DataSource.GENERATED_BY_R,
+        }),
+      ).toBe(true);
+    });
+    test("Returns false on bad data source", () => {
+      expect(isProjectMetaData({ title: "title", dataSource: 1 })).toBe(false);
     });
   });
   describe("Project ephemeral-data typeguard", () => {

@@ -19,7 +19,7 @@ const handleHelp = () =>
   );
 
 const DataRWindow: FunctionComponent<Props> = () => {
-  const { consoleRef, status, onStatus, onData } = useDataGenState();
+  const { consoleRef, status, onStatus, onData } = useDataGenState("r");
 
   const { run } = useWebR({ consoleRef, onStatus, onData });
   const handleRun = useCallback(
