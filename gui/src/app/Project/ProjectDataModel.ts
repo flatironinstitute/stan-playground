@@ -92,7 +92,9 @@ const isProjectBase = (x: any): x is ProjectBase => {
 
 export enum DataSource {
   GENERATED_BY_R = "generated_by_r",
+  GENERATED_BY_STALE_R = "generated_by_stale_r",
   GENERATED_BY_PYTHON = "generated_by_python",
+  GENERATED_BY_STALE_PYTHON = "generated_by_stale_python",
 }
 
 type ProjectMetadata = {
@@ -104,7 +106,7 @@ export const isProjectMetaData = (x: any): x is ProjectMetadata => {
   if (!baseObjectCheck(x)) return false;
   if (typeof x.title !== "string") return false;
   if (
-    x.dataSource !== undefined && // allow undefined for backwards compatibility
+    x.dataSource !== undefined && // undefined = manually edited or unknown provenance
     !Object.values(DataSource).includes(x.dataSource)
   )
     return false;
