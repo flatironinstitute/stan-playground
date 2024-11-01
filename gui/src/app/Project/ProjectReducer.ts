@@ -71,8 +71,12 @@ const ProjectReducer = (s: ProjectDataModel, a: ProjectReducerAction) => {
     }
     case "commitFile": {
       const newState = { ...s };
-      if (a.filename === ProjectKnownFiles.DATAFILE) {
-        newState.meta = { ...s.meta, dataSource: undefined };
+      const newDataSource = confirmDataSourceForCommit(
+        s.meta.dataSource,
+        a.filename,
+      );
+      if (newDataSource !== s.meta.dataSource) {
+        newState.meta = { ...s.meta, dataSource: newDataSource };
       }
       newState[a.filename] = s.ephemera[a.filename];
       return newState;
@@ -100,6 +104,27 @@ const ProjectReducer = (s: ProjectDataModel, a: ProjectReducerAction) => {
     default:
       return unreachable(a);
   }
+};
+
+const confirmDataSourceForCommit = (
+  currentSource: DataSource | undefined,
+  editedFile: ProjectKnownFiles,
+): DataSource | undefined => {
+  if (editedFile === ProjectKnownFiles.DATAFILE) return undefined;
+  if (
+    editedFile === ProjectKnownFiles.DATAPYFILE &&
+    currentSource === DataSource.GENERATED_BY_PYTHON
+  ) {
+    return DataSource.GENERATED_BY_STALE_PYTHON;
+  }
+  if (
+    editedFile === ProjectKnownFiles.DATARFILE &&
+    currentSource === DataSource.GENERATED_BY_R
+  ) {
+    return DataSource.GENERATED_BY_STALE_R;
+  }
+
+  return currentSource;
 };
 
 export default ProjectReducer;
