@@ -97,6 +97,11 @@ export enum DataSource {
   GENERATED_BY_STALE_PYTHON = "generated_by_stale_python",
 }
 
+export const dataSourcesNeedingWarning = [
+  DataSource.GENERATED_BY_STALE_PYTHON,
+  DataSource.GENERATED_BY_STALE_R
+];
+
 type ProjectMetadata = {
   title: string;
   dataSource?: DataSource;
