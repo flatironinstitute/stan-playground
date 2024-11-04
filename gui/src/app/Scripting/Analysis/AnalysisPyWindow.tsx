@@ -34,6 +34,7 @@ const AnalysisPyWindow: FunctionComponent<AnalysisWindowProps> = ({
     onStatus,
     runnable,
     notRunnableReason,
+    files,
   } = useAnalysisState(latestRun);
 
   const callbacks = useMemo(
@@ -51,13 +52,18 @@ const AnalysisPyWindow: FunctionComponent<AnalysisWindowProps> = ({
   const handleRun = useCallback(
     (code: string) => {
       clearOutputDivs(consoleRef, imagesRef);
-      run(code, spData, {
-        loadsDraws: true,
-        showsPlots: true,
-        producesData: false,
+      run({
+        code,
+        spData,
+        spRunSettings: {
+          loadsDraws: true,
+          showsPlots: true,
+          producesData: false,
+        },
+        files,
       });
     },
-    [consoleRef, imagesRef, run, spData],
+    [consoleRef, imagesRef, run, spData, files],
   );
 
   const contentOnEmpty = useTemplatedFillerText(

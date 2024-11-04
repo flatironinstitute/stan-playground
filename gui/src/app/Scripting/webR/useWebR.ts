@@ -23,6 +23,7 @@ type useWebRProps = {
 type RunRProps = {
   code: string;
   spData?: Record<string, any>;
+  files?: Record<string, string>;
 };
 
 const useWebR = ({ imagesRef, consoleRef, onStatus, onData }: useWebRProps) => {
@@ -63,7 +64,7 @@ const useWebR = ({ imagesRef, consoleRef, onStatus, onData }: useWebRProps) => {
   }, [consoleRef, imagesRef, onStatus, webR]);
 
   const run = useCallback(
-    async ({ code, spData }: RunRProps) => {
+    async ({ code, spData, files }: RunRProps) => {
       try {
         const webR = await loadWebRInstance();
         const shelter = await new webR.Shelter();
@@ -86,6 +87,12 @@ const useWebR = ({ imagesRef, consoleRef, onStatus, onData }: useWebRProps) => {
 
           const options = { ...captureOutputOptions, env };
 
+          if (files) {
+            const encoder = new TextEncoder();
+            for (const [name, content] of Object.entries(files)) {
+              await webR.FS.writeFile(name, encoder.encode(content + "\n"));
+            }
+          }
           // setup
           await webR.evalRVoid(webRPreamble, options);
           await webR.evalRVoid(code, options);
@@ -98,6 +105,11 @@ const useWebR = ({ imagesRef, consoleRef, onStatus, onData }: useWebRProps) => {
           }
         } finally {
           shelter.purge();
+          if (files) {
+            for (const [name] of Object.entries(files)) {
+              await webR.FS.unlink(name);
+            }
+          }
         }
         onStatus("completed");
       } catch (e: any) {

@@ -39,15 +39,14 @@ const DataPyWindow: FunctionComponent<Props> = () => {
   const handleRun = useCallback(
     (code: string) => {
       clearOutputDivs(consoleRef);
-      run(
+      run({
         code,
-        {},
-        {
+        spRunSettings: {
           loadsDraws: false,
           showsPlots: false,
           producesData: true,
         },
-      );
+      });
     },
     [consoleRef, run],
   );

@@ -11,6 +11,7 @@ export type StanRun = {
   errorMessage: string;
   progress?: Progress;
   samplingOpts?: SamplingOpts;
+  data?: string;
   draws?: number[][];
   paramNames?: string[];
   computeTimeSec?: number;
@@ -35,6 +36,7 @@ export type StanRunAction =
   | {
       type: "startSampling";
       samplingOpts: SamplingOpts;
+      data: string;
     }
   | {
       type: "samplerReturn";
@@ -65,6 +67,7 @@ export const StanRunReducer = (
         status: "sampling",
         errorMessage: "",
         samplingOpts: action.samplingOpts,
+        data: action.data,
       };
     case "samplerReturn":
       return {

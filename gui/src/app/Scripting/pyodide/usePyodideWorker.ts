@@ -18,6 +18,13 @@ type PyodideWorkerCallbacks = {
   onImage?: (image: string) => void;
 };
 
+type RunPyProps = {
+  code: string;
+  spData?: Record<string, any>;
+  spRunSettings: PyodideRunSettings;
+  files?: Record<string, string>;
+};
+
 class PyodideWorkerInterface {
   #worker: Worker | undefined;
 
@@ -71,16 +78,13 @@ class PyodideWorkerInterface {
     return { worker, cleanup };
   }
 
-  run(
-    code: string,
-    spData: Record<string, any> | undefined,
-    spRunSettings: PyodideRunSettings,
-  ) {
+  run({ code, spData, spRunSettings, files }: RunPyProps) {
     const msg: MessageToPyodideWorker = {
       type: "run",
       code,
       spData,
       spRunSettings,
+      files,
     };
     if (this.#worker) {
       this.#worker.postMessage(msg);
@@ -114,13 +118,9 @@ const usePyodideWorker = (callbacks: {
   }, [callbacks]);
 
   const run = useCallback(
-    (
-      code: string,
-      spData: Record<string, any> | undefined,
-      spRunSettings: PyodideRunSettings,
-    ) => {
+    (p: RunPyProps) => {
       if (worker) {
-        worker.run(code, spData, spRunSettings);
+        worker.run(p);
       } else {
         throw new Error("pyodide worker is not defined");
       }

@@ -100,7 +100,7 @@ class StanSampler {
     };
     if (!this.#stanWorker) throw new Error("model worker is undefined");
 
-    this.update({ type: "startSampling", samplingOpts });
+    this.update({ type: "startSampling", samplingOpts, data });
 
     this.#samplingStartTimeSec = Date.now() / 1000;
     this.postMessage({ purpose: Requests.Sample, sampleConfig });

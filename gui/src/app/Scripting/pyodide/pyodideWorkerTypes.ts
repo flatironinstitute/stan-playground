@@ -15,6 +15,7 @@ export type MessageToPyodideWorker = {
   code: string;
   spData: Record<string, any> | undefined;
   spRunSettings: PyodideRunSettings;
+  files: Record<string, string> | undefined;
 };
 
 export const isMessageToPyodideWorker = (
