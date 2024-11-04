@@ -133,6 +133,12 @@ describe("Project reducer", () => {
       ephemera: { ...ephemeralFiles },
       meta: { dataSource: DataSource.GENERATED_BY_PYTHON },
     } as any as ProjectDataModel;
+
+    const editAction: ProjectReducerAction = {
+      type: "editFile",
+      content: "new content",
+      filename: ProjectKnownFiles.DATAFILE,
+    };
     const commitAction: ProjectReducerAction = {
       type: "commitFile",
       filename: ProjectKnownFiles.DATAFILE,
@@ -181,9 +187,34 @@ describe("Project reducer", () => {
           ...initialState,
           meta: { dataSource: p.source },
         } as any as ProjectDataModel;
+        const edit = { ...editAction, filename: p.file };
+        const edited = ProjectReducer(initial, edit);
+        const commit = { ...commitAction, filename: p.file };
+        const result = ProjectReducer(edited, commit);
+        expect(result.meta.dataSource).toEqual(p.newSource);
+      });
+    });
+
+    test("Commiting identical data generation script does not change status", () => {
+      const pairs = [
+        {
+          source: DataSource.GENERATED_BY_PYTHON,
+          file: ProjectKnownFiles.DATAPYFILE,
+        },
+        {
+          source: DataSource.GENERATED_BY_R,
+          file: ProjectKnownFiles.DATARFILE,
+        },
+      ];
+      pairs.forEach((p) => {
+        const initial = {
+          ...initialState,
+          meta: { dataSource: p.source },
+        } as any as ProjectDataModel;
+
         const commit = { ...commitAction, filename: p.file };
         const result = ProjectReducer(initial, commit);
-        expect(result.meta.dataSource).toEqual(p.newSource);
+        expect(result.meta.dataSource).toEqual(p.source);
       });
     });
     test("Saving data generation script does not change status for data.json it didn't generate", () => {
