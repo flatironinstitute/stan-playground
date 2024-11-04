@@ -70,6 +70,9 @@ const ProjectReducer = (s: ProjectDataModel, a: ProjectReducerAction) => {
       return { ...s, ephemera: newEphemera };
     }
     case "commitFile": {
+      if (s[a.filename] === s.ephemera[a.filename]) {
+        return s;
+      }
       const newState = { ...s };
       const newDataSource = confirmDataSourceForCommit(
         s.meta.dataSource,
