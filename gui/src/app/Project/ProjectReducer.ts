@@ -1,5 +1,6 @@
 import { FieldsContentsMap } from "@SpCore/FileMapping";
 import {
+  DataSource,
   initialDataModel,
   ProjectDataModel,
   ProjectKnownFiles,
@@ -24,6 +25,7 @@ export type ProjectReducerAction =
       type: "retitle";
       title: string;
     }
+  | { type: "generateData"; content: string; dataSource: DataSource }
   | {
       type: "editFile";
       content: string;
@@ -69,8 +71,26 @@ const ProjectReducer = (s: ProjectDataModel, a: ProjectReducerAction) => {
     }
     case "commitFile": {
       const newState = { ...s };
+      const newDataSource = confirmDataSourceForCommit(
+        s.meta.dataSource,
+        a.filename,
+      );
+      if (newDataSource !== s.meta.dataSource) {
+        newState.meta = { ...s.meta, dataSource: newDataSource };
+      }
       newState[a.filename] = s.ephemera[a.filename];
       return newState;
+    }
+    case "generateData": {
+      return {
+        ...s,
+        [ProjectKnownFiles.DATAFILE]: a.content,
+        ephemera: {
+          ...s.ephemera,
+          [ProjectKnownFiles.DATAFILE]: a.content,
+        },
+        meta: { ...s.meta, dataSource: a.dataSource },
+      };
     }
     case "setSamplingOpts": {
       return { ...s, samplingOpts: { ...s.samplingOpts, ...a.opts } };
@@ -84,6 +104,27 @@ const ProjectReducer = (s: ProjectDataModel, a: ProjectReducerAction) => {
     default:
       return unreachable(a);
   }
+};
+
+const confirmDataSourceForCommit = (
+  currentSource: DataSource | undefined,
+  editedFile: ProjectKnownFiles,
+): DataSource | undefined => {
+  if (editedFile === ProjectKnownFiles.DATAFILE) return undefined;
+  if (
+    editedFile === ProjectKnownFiles.DATAPYFILE &&
+    currentSource === DataSource.GENERATED_BY_PYTHON
+  ) {
+    return DataSource.GENERATED_BY_STALE_PYTHON;
+  }
+  if (
+    editedFile === ProjectKnownFiles.DATARFILE &&
+    currentSource === DataSource.GENERATED_BY_R
+  ) {
+    return DataSource.GENERATED_BY_STALE_R;
+  }
+
+  return currentSource;
 };
 
 export default ProjectReducer;

@@ -1,4 +1,5 @@
 import {
+  DataSource,
   getStringKnownFileKeys,
   initialDataModel,
   ProjectDataModel,
@@ -130,6 +131,7 @@ describe("Project reducer", () => {
     const initialState = {
       ...permanentFiles,
       ephemera: { ...ephemeralFiles },
+      meta: { dataSource: DataSource.GENERATED_BY_PYTHON },
     } as any as ProjectDataModel;
     const commitAction: ProjectReducerAction = {
       type: "commitFile",
@@ -144,6 +146,13 @@ describe("Project reducer", () => {
         result.ephemera[ProjectKnownFiles.DATAFILE],
       );
     });
+    test("Saving data.json clears data source", () => {
+      expect(initialState[ProjectKnownFiles.DATAFILE]).not.toEqual(
+        initialState.ephemera[ProjectKnownFiles.DATAFILE],
+      );
+      const result = ProjectReducer(initialState, commitAction);
+      expect(result.meta.dataSource).toBeUndefined();
+    });
     test("Save action does not save non-chosen files", () => {
       const result = ProjectReducer(initialState, commitAction);
       expect(result[ProjectKnownFiles.STANFILE]).not.toEqual(
@@ -153,6 +162,55 @@ describe("Project reducer", () => {
     test("Save action does not alter existing ephemera", () => {
       const result = ProjectReducer(initialState, commitAction);
       expect(result.ephemera).toEqual(initialState.ephemera);
+    });
+    test("Saving data generation script updates status on data it generated", () => {
+      const pairs = [
+        {
+          source: DataSource.GENERATED_BY_PYTHON,
+          newSource: DataSource.GENERATED_BY_STALE_PYTHON,
+          file: ProjectKnownFiles.DATAPYFILE,
+        },
+        {
+          source: DataSource.GENERATED_BY_R,
+          newSource: DataSource.GENERATED_BY_STALE_R,
+          file: ProjectKnownFiles.DATARFILE,
+        },
+      ];
+      pairs.forEach((p) => {
+        const initial = {
+          ...initialState,
+          meta: { dataSource: p.source },
+        } as any as ProjectDataModel;
+        const commit = { ...commitAction, filename: p.file };
+        const result = ProjectReducer(initial, commit);
+        expect(result.meta.dataSource).toEqual(p.newSource);
+      });
+    });
+    test("Saving data generation script does not change status for data.json it didn't generate", () => {
+      const pairs = [
+        {
+          source: DataSource.GENERATED_BY_PYTHON,
+          file: ProjectKnownFiles.DATAPYFILE,
+        },
+        {
+          source: DataSource.GENERATED_BY_R,
+          file: ProjectKnownFiles.DATARFILE,
+        },
+      ];
+      const sources = Object.entries(DataSource);
+      pairs.forEach((p) => {
+        sources
+          .filter(([, value]) => value !== p.source)
+          .forEach((s) => {
+            const initial = {
+              ...initialState,
+              meta: { dataSource: s },
+            } as any as ProjectDataModel;
+            const commit = { ...commitAction, filename: p.file };
+            const result = ProjectReducer(initial, commit);
+            expect(result.meta.dataSource).toEqual(s);
+          });
+      });
     });
   });
 
@@ -218,6 +276,26 @@ describe("Project reducer", () => {
       const clearAction: ProjectReducerAction = { type: "clear" };
       const result = ProjectReducer(fakeEmptyProjectData, clearAction);
       expect(result).toBe(initialDataModel);
+    });
+  });
+
+  describe("Generate data", () => {
+    test("Updates data file and ephemera with new data", () => {
+      const initialState = {
+        ...permanentFiles,
+        ephemera: { ...ephemeralFiles },
+        meta: { dataSource: DataSource.GENERATED_BY_R },
+      } as any as ProjectDataModel;
+      const newData = "generated data";
+      const generateAction: ProjectReducerAction = {
+        type: "generateData",
+        content: newData,
+        dataSource: DataSource.GENERATED_BY_PYTHON,
+      };
+      const result = ProjectReducer(initialState, generateAction);
+      expect(result[ProjectKnownFiles.DATAFILE]).toEqual(newData);
+      expect(result.ephemera[ProjectKnownFiles.DATAFILE]).toEqual(newData);
+      expect(result.meta.dataSource).toEqual(DataSource.GENERATED_BY_PYTHON);
     });
   });
 });

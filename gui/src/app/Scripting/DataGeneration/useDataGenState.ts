@@ -1,12 +1,12 @@
 import { useCallback, useContext, useRef, useState } from "react";
-import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
+import { DataSource } from "@SpCore/ProjectDataModel";
 import { writeConsoleOutToDiv } from "@SpScripting/OutputDivUtils";
 import { InterpreterStatus } from "@SpScripting/InterpreterTypes";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 
 // A custom hook to share logic between the Python and R data generation windows
 // This contains the output div ref, the interpreter state, and the callback to update the data.
-const useDataGenState = () => {
+const useDataGenState = (source: "python" | "r") => {
   const [status, setStatus] = useState<InterpreterStatus>("idle");
   const consoleRef = useRef<HTMLDivElement>(null);
 
@@ -21,11 +21,13 @@ const useDataGenState = () => {
       if (dataJson !== lastData.current) {
         lastData.current = dataJson;
         update({
-          type: "editFile",
+          type: "generateData",
           content: dataJson,
-          filename: ProjectKnownFiles.DATAFILE,
+          dataSource:
+            source === "python"
+              ? DataSource.GENERATED_BY_PYTHON
+              : DataSource.GENERATED_BY_R,
         });
-        update({ type: "commitFile", filename: ProjectKnownFiles.DATAFILE });
         // Use "stan-playground" prefix to distinguish from console output of the running code
         writeConsoleOutToDiv(
           consoleRef,
