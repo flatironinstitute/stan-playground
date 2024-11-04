@@ -46,6 +46,29 @@ const useIsConnected = (stanWasmServerUrl: string) => {
 const initialStanWasmServerUrl =
   localStorage.getItem("stanWasmServerUrl") || publicCompilationServerUrl;
 
+const showOneTimeMessage = (url: string) => {
+  if (url !== publicCompilationServerUrl) {
+    // if the user opted in to a custom URL, we assume they are good with it...
+    return true;
+  }
+
+  const alreadyConfirmed = "compileModelUploadMessage";
+  if (localStorage.getItem(alreadyConfirmed) === "true") {
+    return true;
+  }
+  if (
+    window.confirm(
+      "This will upload the main.stan file to the server " +
+        "for compilation. All other files remain local.\n" +
+        "Do you want to continue? (This message will not be shown again.)",
+    )
+  ) {
+    localStorage.setItem(alreadyConfirmed, "true");
+    return true;
+  }
+  return false;
+};
+
 export const CompileContextProvider: FunctionComponent<
   PropsWithChildren<CompileContextProviderProps>
 > = ({ children }) => {
@@ -86,6 +109,10 @@ export const CompileContextProvider: FunctionComponent<
   }, [stanWasmServerUrl]);
 
   const handleCompile = useCallback(async () => {
+    if (!showOneTimeMessage(stanWasmServerUrl)) {
+      return;
+    }
+
     setCompileStatus("compiling");
     await new Promise((resolve) => setTimeout(resolve, 500)); // for effect
     const onStatus = (msg: string) => {
