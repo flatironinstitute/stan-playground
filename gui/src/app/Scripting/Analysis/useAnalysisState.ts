@@ -1,3 +1,4 @@
+import { FileNames } from "@SpCore/FileMapping";
 import {
   InterpreterStatus,
   isInterpreterBusy,
@@ -44,6 +45,16 @@ const useAnalysisState = (latestRun: StanRun) => {
 
   const isDataDefined = useMemo(() => spData !== undefined, [spData]);
 
+  const files = useMemo(() => {
+    if (latestRun.data === undefined) {
+      return undefined;
+    } else {
+      return {
+        [FileNames.DATAFILE]: latestRun.data,
+      };
+    }
+  }, [latestRun.data]);
+
   useEffect(() => {
     if (!isDataDefined) {
       setRunnable(false);
@@ -65,6 +76,7 @@ const useAnalysisState = (latestRun: StanRun) => {
     onStatus: setStatus,
     runnable,
     notRunnableReason,
+    files,
   };
 };
 

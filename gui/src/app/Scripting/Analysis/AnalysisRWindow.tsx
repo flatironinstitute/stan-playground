@@ -26,16 +26,18 @@ const AnalysisRWindow: FunctionComponent<AnalysisWindowProps> = ({
     onStatus,
     runnable,
     notRunnableReason,
+    files,
   } = useAnalysisState(latestRun);
 
   const { run } = useWebR({ consoleRef, imagesRef, onStatus });
+
   const handleRun = useCallback(
     async (userCode: string) => {
       clearOutputDivs(consoleRef, imagesRef);
       const code = loadDrawsCode + userCode;
-      await run({ code, spData });
+      await run({ code, spData, files });
     },
-    [consoleRef, imagesRef, run, spData],
+    [consoleRef, imagesRef, run, spData, files],
   );
 
   const contentOnEmpty = useTemplatedFillerText(

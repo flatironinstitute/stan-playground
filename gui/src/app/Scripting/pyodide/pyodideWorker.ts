@@ -67,13 +67,14 @@ self.onmessage = async (e) => {
     return;
   }
   const message = e.data;
-  await run(message.code, message.spData, message.spRunSettings);
+  await run(message.code, message.spData, message.spRunSettings, message.files);
 };
 
 const run = async (
   code: string,
   spData: Record<string, any> | undefined,
   spPySettings: PyodideRunSettings,
+  files: Record<string, string> | undefined,
 ) => {
   setStatus("loading");
   try {
@@ -113,12 +114,25 @@ const run = async (
         await f;
       }
 
+      if (files) {
+        const encoder = new TextEncoder();
+        for (const [filename, content] of Object.entries(files)) {
+          await pyodide.FS.writeFile(filename, encoder.encode(content + "\n"));
+        }
+      }
+
       setStatus("running");
       pyodide.runPython(script, { globals });
       succeeded = true;
     } catch (e: any) {
       console.error(e);
       sendStderr(e.toString());
+    } finally {
+      if (files) {
+        for (const filename of Object.keys(files)) {
+          await pyodide.FS.unlink(filename);
+        }
+      }
     }
 
     if (spPySettings.producesData) {
