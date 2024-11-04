@@ -60,7 +60,7 @@ const showOneTimeMessage = (url: string) => {
     window.confirm(
       "This will upload the main.stan file to the server " +
         "for compilation. All other files remain local.\n" +
-        "Do you want to continue? (This message will not be shown again.)",
+        "Do you want to continue? (If you accept, this message will not be shown again.)",
     )
   ) {
     localStorage.setItem(alreadyConfirmed, "true");
