@@ -45,6 +45,7 @@ const DataPyWindow: FunctionComponent<Props> = () => {
           loadsDraws: false,
           showsPlots: false,
           producesData: true,
+          filenameForErrors: FileNames.DATAPYFILE,
         },
       });
     },

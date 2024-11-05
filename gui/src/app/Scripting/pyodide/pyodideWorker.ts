@@ -122,7 +122,10 @@ const run = async (
       }
 
       setStatus("running");
-      pyodide.runPython(script, { globals });
+      await pyodide.runPythonAsync(script, {
+        globals,
+        filename: spPySettings.filenameForErrors,
+      });
       succeeded = true;
     } catch (e: any) {
       console.error(e);
