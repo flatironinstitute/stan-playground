@@ -8,6 +8,7 @@ export type PyodideRunSettings = Partial<{
   loadsDraws: boolean;
   showsPlots: boolean;
   producesData: boolean;
+  filenameForErrors: string;
 }>;
 
 export type MessageToPyodideWorker = {

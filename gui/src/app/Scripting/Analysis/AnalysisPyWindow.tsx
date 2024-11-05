@@ -59,6 +59,7 @@ const AnalysisPyWindow: FunctionComponent<AnalysisWindowProps> = ({
           loadsDraws: true,
           showsPlots: true,
           producesData: false,
+          filenameForErrors: FileNames.ANALYSISPYFILE,
         },
         files,
       });
