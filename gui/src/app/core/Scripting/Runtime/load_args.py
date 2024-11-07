@@ -12,6 +12,8 @@ def rename_sampling_options(k):
         return "iter_sampling"
     if k == "num_chains":
         return "chains"
+    if k == "seed":
+        return "seed"
 
     raise ValueError(f"Unknown sampling option: {k}")
 

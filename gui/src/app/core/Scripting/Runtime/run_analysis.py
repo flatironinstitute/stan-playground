@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 print("executing analysis.py")
 
 sp_data = {
-    "draws": fit.draws(concat_chains=True),
+    "draws": fit.draws(concat_chains=True).transpose(),
     "paramNames": fit.metadata.cmdstan_config["raw_header"].split(","),
     "numChains": fit.chains,
 }
