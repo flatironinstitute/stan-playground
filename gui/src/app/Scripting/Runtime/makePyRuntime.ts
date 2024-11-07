@@ -35,7 +35,7 @@ const makePyRuntimeScript = (project: ProjectDataModel) => {
     script += `if args.ignore_saved_data:\n`;
     script += indent(spRunData);
     script += `\nelse:\n`;
-    script += `    print("Loading data from data.json, pass --ignore--saved-data to run data.py instead")\n`;
+    script += `    print("Loading data from data.json, pass --ignore-saved-data to run data.py instead")\n`;
     script += `    data = os.path.join(HERE, 'data.json')\n\n`;
   } else if (hasDataJson) {
     script += `data = os.path.join(HERE, 'data.json')\n\n`;

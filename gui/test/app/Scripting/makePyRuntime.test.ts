@@ -33,7 +33,7 @@ if args.ignore_saved_data:
     if "data" not in locals():
         raise ValueError("data variable not defined in data.py")
 else:
-    print("Loading data from data.json, pass --ignore--saved-data to run data.py instead")
+    print("Loading data from data.json, pass --ignore-saved-data to run data.py instead")
     data = os.path.join(HERE, 'data.json')
 
 def rename_sampling_options(k):
@@ -50,6 +50,8 @@ def rename_sampling_options(k):
         return "iter_sampling"
     if k == "num_chains":
         return "chains"
+    if k == "seed":
+        return "seed"
 
     raise ValueError(f"Unknown sampling option: {k}")
 
@@ -170,7 +172,7 @@ import matplotlib.pyplot as plt
 print("executing analysis.py")
 
 sp_data = {
-    "draws": fit.draws(concat_chains=True),
+    "draws": fit.draws(concat_chains=True).transpose(),
     "paramNames": fit.metadata.cmdstan_config["raw_header"].split(","),
     "numChains": fit.chains,
 }
@@ -217,7 +219,7 @@ describe("Python runtime", () => {
     const runPy = makePyRuntimeScript(noAnalysis);
 
     // we expect the same output, truncated after the sampling part
-    const analysisless = full.split("\n").slice(0, 65).join("\n") + "\n";
+    const analysisless = full.split("\n").slice(0, 67).join("\n") + "\n";
 
     expect(runPy).toEqual(analysisless);
   });
