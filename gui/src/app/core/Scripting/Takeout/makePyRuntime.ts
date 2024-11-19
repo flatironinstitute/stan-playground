@@ -1,12 +1,12 @@
-import { ProjectDataModel } from "@SpCore/ProjectDataModel";
+import { ProjectDataModel } from "@SpCore/Project/ProjectDataModel";
 
-import spPreamble from "./preamble.py?raw";
-import spRunData from "./run_data.py?raw";
-import spLoadConfig from "./load_args.py?raw";
-import spCmdStan from "./cmdstan.py?raw";
-import spRunSampling from "./sample.py?raw";
+import spPreamble from "./py/preamble.py?raw";
+import spRunData from "./py/run_data.py?raw";
+import spLoadConfig from "./py/load_args.py?raw";
+import spCmdStan from "./py/cmdstan.py?raw";
+import spRunSampling from "./py/sample.py?raw";
 import spDrawsScript from "../pyodide/sp_load_draws.py?raw";
-import spRunAnalysis from "./run_analysis.py?raw";
+import spRunAnalysis from "./py/run_analysis.py?raw";
 
 const indent = (s: string) => {
   return s

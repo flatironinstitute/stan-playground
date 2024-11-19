@@ -2,8 +2,8 @@ import {
   initialDataModel,
   ProjectDataModel,
   ProjectKnownFiles,
-} from "@SpCore/ProjectDataModel";
-import makePyRuntimeScript from "@SpScripting/Runtime/makePyRuntime";
+} from "@SpCore/Project/ProjectDataModel";
+import makePyRuntimeScript from "@SpCore/Scripting/Takeout/makePyRuntime";
 import { describe, expect, test } from "vitest";
 
 const testDataModel: ProjectDataModel = structuredClone(initialDataModel);
@@ -36,31 +36,18 @@ else:
     print("Loading data from data.json, pass --ignore-saved-data to run data.py instead")
     data = os.path.join(HERE, 'data.json')
 
-def rename_sampling_options(k):
-    """
-    convert between names used in
-    Stan-Playground and CmdStanPy
-    """
-
-    if k == "init_radius":
-        return "inits"
-    if k == "num_warmup":
-        return "iter_warmup"
-    if k == "num_samples":
-        return "iter_sampling"
-    if k == "num_chains":
-        return "chains"
-    if k == "seed":
-        return "seed"
-
-    raise ValueError(f"Unknown sampling option: {k}")
-
+_option_names_map = {
+    "init_radius": "inits",
+    "num_warmup": "iter_warmup",
+    "num_samples": "iter_sampling",
+    "num_chains": "chains",
+}
 
 if os.path.isfile(os.path.join(HERE, "sampling_opts.json")):
     print("loading sampling_opts.json")
     with open(os.path.join(HERE, "sampling_opts.json")) as f:
         s = json.load(f)
-    sampling_opts = {rename_sampling_options(k): v for k, v in s.items()}
+    sampling_opts = {_option_names_map.get(k, k): v for k, v in s.items()}
 else:
     sampling_opts = {}
 
@@ -219,7 +206,7 @@ describe("Python runtime", () => {
     const runPy = makePyRuntimeScript(noAnalysis);
 
     // we expect the same output, truncated after the sampling part
-    const analysisless = full.split("\n").slice(0, 67).join("\n") + "\n";
+    const analysisless = full.split("\n").slice(0, 54).join("\n") + "\n";
 
     expect(runPy).toEqual(analysisless);
   });

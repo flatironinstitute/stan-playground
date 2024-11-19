@@ -12,9 +12,9 @@ import TextField from "@mui/material/TextField";
 import GistExportPanel from "./GistExportPanel";
 import GistUpdatePanel from "./GistUpdatePanel";
 
-import makePyRuntimeScript from "@SpCore/Scripting/Runtime/makePyRuntime";
 import { replaceSpacesWithUnderscores } from "@SpUtil/replaceSpaces";
 import { serializeAsZip } from "@SpUtil/serializeAsZip";
+import makePyRuntimeScript from "@SpCore/Scripting/Takeout/makePyRuntime";
 
 type ExportProjectProps = {
   onClose: () => void;
@@ -66,17 +66,15 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
             )}
           </TableBody>
           <AlternatingTableRow hover>
-              <TableCell>
-                Include a run.py file for use with CmdStanPy?
-              </TableCell>
-              <TableCell>
-                <input
-                  type="checkbox"
-                  checked={includeRunPy}
-                  onChange={(e) => setIncludeRunPy(e.target.checked)}
-                />
-              </TableCell>
-            </AlternatingTableRow>
+            <TableCell>Include a run.py file for use with CmdStanPy?</TableCell>
+            <TableCell>
+              <input
+                type="checkbox"
+                checked={includeRunPy}
+                onChange={(e) => setIncludeRunPy(e.target.checked)}
+              />
+            </TableCell>
+          </AlternatingTableRow>
         </Table>
       </TableContainer>
       <div>&nbsp;</div>
@@ -85,12 +83,12 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
           <Button
             onClick={async () => {
               const fileManifest: { [key: string]: string } =
-              mapModelToFileManifest(data);
-            const folderName = replaceSpacesWithUnderscores(data.meta.title);
-            if (includeRunPy) {
-              fileManifest["run.py"] = makePyRuntimeScript(data);
-            }
-            serializeAsZip(folderName, fileManifest).then(([zipBlob, name]) =>
+                mapModelToFileManifest(data);
+              const folderName = replaceSpacesWithUnderscores(data.meta.title);
+              if (includeRunPy) {
+                fileManifest["run.py"] = makePyRuntimeScript(data);
+              }
+              serializeAsZip(folderName, fileManifest).then(([zipBlob, name]) =>
                 triggerDownload(zipBlob, `SP-${name}.zip`, onClose),
               );
             }}
