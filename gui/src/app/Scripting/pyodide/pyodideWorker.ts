@@ -105,7 +105,7 @@ const run = async (
         packageFutures.push(pyodide.loadPackage("matplotlib"));
 
         if (script.includes("arviz")) {
-          packageFutures.push(micropip.install("arviz<0.18"));
+          packageFutures.push(micropip.install("arviz"));
         }
       }
       packageFutures.push(micropip.install("stanio"));
