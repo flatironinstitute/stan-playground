@@ -5,6 +5,7 @@ import { ColorOptions, ToolbarItem } from "@SpComponents/ToolBar";
 import { FileNames } from "@SpCore/FileMapping";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
+import { normalizeLineEndings } from "@SpUtil/normalizeLineEndings";
 import {
   FunctionComponent,
   RefObject,
@@ -67,7 +68,7 @@ const ScriptEditor: FunctionComponent<ScriptEditorProps> = ({
   }, [dataKey, update]);
 
   const runCode = useCallback(() => {
-    onRun(content);
+    onRun(normalizeLineEndings(content));
   }, [content, onRun]);
 
   const unsavedChanges = useMemo(() => {
