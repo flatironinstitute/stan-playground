@@ -1,7 +1,7 @@
 import { FunctionComponent, useCallback, useContext } from "react";
 
+import { Split } from "@geoffcox/react-splitter";
 import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
 import Grid from "@mui/material/Grid";
 import { CompileContext } from "@SpCompilation/CompileContext";
 import RunPanel from "@SpComponents/RunPanel";
@@ -36,7 +36,7 @@ const SamplingWindow: FunctionComponent<SamplingWindowProps> = () => {
   const { sampler, latestRun } = useStanSampler(compiledMainJsUrl);
   const isSampling = latestRun.status === "sampling";
   return (
-    <Box height="100%" display="flex" flexDirection="column">
+    <Split horizontal initialPrimarySize="30%" minSecondarySize="10%">
       <Grid container>
         <Grid item xs={12} sm={4}>
           <SamplingOptsPanel
@@ -54,11 +54,12 @@ const SamplingWindow: FunctionComponent<SamplingWindowProps> = () => {
           />
         </Grid>
       </Grid>
-      <Divider />
-      <Box flex="1" overflow="hidden">
-        <SamplingResultsArea latestRun={latestRun} />
+      <Box height="100%" display="flex" flexDirection="column">
+        <Box flex="1" overflow="hidden">
+          <SamplingResultsArea latestRun={latestRun} />
+        </Box>
       </Box>
-    </Box>
+    </Split>
   );
 };
 
