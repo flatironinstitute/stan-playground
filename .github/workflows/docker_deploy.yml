@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - update/stan-2.36.0 # debug
     paths:
       - "backend/**"
   workflow_dispatch:
