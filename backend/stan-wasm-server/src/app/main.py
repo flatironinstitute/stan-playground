@@ -154,3 +154,20 @@ async def run_job(job_id: str, settings: DependsOnSettings) -> DictResponse:
     )
 
     return {"success": True}
+
+
+@app.post("/restart")
+async def restart(
+    settings: DependsOnSettings, authorization: str = Header(None)
+) -> None:
+    if settings.restart_token is None:
+        raise StanPlaygroundAuthenticationException("Restart token not set at startup")
+    check_authorization(authorization, settings.restart_token)
+
+    import os
+    import signal
+
+    # send an interrupt signal to the parent process
+    # uvicorn interprets this like Ctrl-C, and gracefully shuts down
+    os.kill(os.getppid(), signal.SIGINT)
+    # actual restart is handled by the orchestrator
