@@ -113,7 +113,8 @@ const ConfigureCompilationServerDialog: FunctionComponent<
           </p>
           <div>
             <pre>
-              docker run -p 8083:8080 -it magland/stan-wasm-server:latest
+              docker run -p 8083:8080 -it
+              ghcr.io/flatironinstitute/stan-wasm-server:latest
             </pre>
           </div>
         </div>
