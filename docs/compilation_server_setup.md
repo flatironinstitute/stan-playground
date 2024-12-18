@@ -5,7 +5,7 @@ These instructions are only required if you want to set up your own compilation 
 To run your own server locally using Docker, execute the following command:
 
 ```
-docker run -p 8083:8080 -it magland/stan-wasm-server:latest
+docker run -p 8083:8080 -it ghcr.io/flatironinstitute/stan-wasm-server:latest
 ```
 
 After setting up the server, navigate to https://stan-playground.flatironinstitute.org.
