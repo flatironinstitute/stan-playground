@@ -7,16 +7,18 @@ import { AlternatingTableRow } from "@SpComponents/StyledTables";
 import { FileRegistry, mapModelToFileManifest } from "@SpCore/FileMapping";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import { triggerDownload } from "@SpUtil/triggerDownload";
-import Button from "@mui/material/Button";
+import makePyRuntimeScript from "@SpScripting/Runtime/makePyRuntime";
 import loadFilesFromGist from "@SpCore/gists/loadFilesFromGist";
-import { serializeAsZip } from "@SpCore/ProjectSerialization";
 import saveAsGitHubGist, {
   createPatchForUpdatingGist,
   updateGitHubGist,
 } from "@SpCore/gists/saveAsGitHubGist";
+import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import TableRow from "@mui/material/TableRow";
 import Link from "@mui/material/Link";
+import { replaceSpacesWithUnderscores } from "@SpUtil/replaceSpaces";
+import { serializeAsZip } from "@SpUtil/serializeAsZip";
 
 type SaveProjectWindowProps = {
   onClose: () => void;
@@ -30,6 +32,8 @@ const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
 
   const [exportingToGist, setExportingToGist] = useState(false);
   const [updatingExistingGist, setUpdatingExistingGist] = useState(false);
+
+  const [includeRunPy, setIncludeRunPy] = useState(false);
 
   return (
     <div className="dialogWrapper">
@@ -64,6 +68,18 @@ const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
                   </AlternatingTableRow>
                 ),
             )}
+            <AlternatingTableRow hover>
+              <TableCell>
+                Include a run.py file for use with CmdStanPy?
+              </TableCell>
+              <TableCell>
+                <input
+                  type="checkbox"
+                  checked={includeRunPy}
+                  onChange={(e) => setIncludeRunPy(e.target.checked)}
+                />
+              </TableCell>
+            </AlternatingTableRow>
           </TableBody>
         </Table>
       </TableContainer>
@@ -72,7 +88,13 @@ const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
         <div>
           <Button
             onClick={async () => {
-              serializeAsZip(data).then(([zipBlob, name]) =>
+              const fileManifest: { [key: string]: string } =
+                mapModelToFileManifest(data);
+              const folderName = replaceSpacesWithUnderscores(data.meta.title);
+              if (includeRunPy) {
+                fileManifest["run.py"] = makePyRuntimeScript(data);
+              }
+              serializeAsZip(folderName, fileManifest).then(([zipBlob, name]) =>
                 triggerDownload(zipBlob, `SP-${name}.zip`, onClose),
               );
             }}
