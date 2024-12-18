@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - update/stan-2.36.0 # debug
     paths:
       - "backend/**"
   workflow_dispatch:
@@ -14,8 +15,8 @@ on:
         default: 'latest'
 
 jobs:
-  vercel-deploy:
-    name: Vercel deploy
+  docker-deploy:
+    name: Docker deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
