@@ -38,6 +38,6 @@ jobs:
           docker build -t ghcr.io/flatironinstitute/stan-wasm-server:$TAG .
           docker push ghcr.io/flatironinstitute/stan-wasm-server:$TAG
 
-      - Name: Ping public server to restart
+      - name: Ping public server to restart
         run: |
           curl -X POST https://stan-wasm.flatironinstitute.org/restart -H "Authorization: Bearer ${{ secrets.PUBLIC_SERVER_RESTART_TOKEN }}"
