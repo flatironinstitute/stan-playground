@@ -1,7 +1,7 @@
 import logging
 from functools import lru_cache
 from pathlib import Path
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Optional
 
 from pydantic import (
     AliasChoices,
@@ -23,6 +23,7 @@ class StanWasmServerSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="SWS_")
 
     passcode: SecretStr
+    restart_token: Optional[SecretStr] = None
     job_dir: Path = Path("/jobs")
     built_model_dir: Path = Path("/compiled_models")
     compilation_timeout: PositiveInt = 60 * 5
