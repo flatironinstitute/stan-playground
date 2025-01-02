@@ -1,4 +1,6 @@
+import logging
 from pathlib import Path
+from shutil import rmtree
 from string import hexdigits
 from uuid import uuid4
 
@@ -9,6 +11,8 @@ from .exceptions import (
     StanPlaygroundJobNotFoundException,
 )
 from .file_validation.compilation_files import write_stan_code_file
+
+logger = logging.getLogger(__name__)
 
 
 def create_compilation_job(base_dir: Path) -> str:
@@ -41,6 +45,11 @@ def get_compilation_job_dir(
         if not job_dir.is_dir():
             raise StanPlaygroundJobNotFoundException(job_id)
     return job_dir
+
+
+def delete_compilation_job(job_dir: Path) -> None:
+    logger.info("Deleting %s", job_dir.absolute())
+    rmtree(job_dir)
 
 
 def get_job_source_file(job_dir: Path, for_writing: bool = False) -> Path:

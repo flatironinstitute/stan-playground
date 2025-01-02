@@ -9,6 +9,7 @@ from logic.authorization import check_authorization
 from logic.compilation import compile_and_cache, make_canonical_model_dir
 from logic.compilation_job_mgmt import (
     create_compilation_job,
+    delete_compilation_job,
     get_compilation_job_dir,
     get_job_source_file,
     upload_stan_code_file,
@@ -119,18 +120,16 @@ async def upload_stan_source_file(
     return {"success": True}
 
 
-@app.get("/job/{job_id}/download/{filename}")
+# HEAD is not automatically added for GET: https://github.com/fastapi/fastapi/issues/1773
+@app.head("/download/{model_id}/{filename}")
+@app.get("/download/{model_id}/{filename}")
 async def download_file(
-    job_id: str, filename: str, settings: DependsOnSettings
+    model_id: str, filename: str, settings: DependsOnSettings
 ) -> FileResponse:
     if filename not in COMPILATION_OUTPUTS:
         raise StanPlaygroundInvalidFileException(f"Invalid file name {filename}")
 
-    job_dir = get_compilation_job_dir(job_id, base_dir=settings.job_dir)
-    src_file = get_job_source_file(job_dir)
-    model_dir = make_canonical_model_dir(
-        src_file=src_file, built_model_dir=settings.built_model_dir
-    )
+    model_dir = settings.built_model_dir / model_id
 
     file_path = model_dir / filename
     if not file_path.is_file():
@@ -153,7 +152,9 @@ async def run_job(job_id: str, settings: DependsOnSettings) -> DictResponse:
         timeout=settings.compilation_timeout,
     )
 
-    return {"success": True}
+    delete_compilation_job(job_dir)
+
+    return {"model_id": model_dir.name}
 
 
 @app.post("/restart")

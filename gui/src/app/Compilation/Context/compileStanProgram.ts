@@ -75,8 +75,8 @@ const compileStanProgram = async (
       );
       return {};
     }
-
-    const mainJsUrl = `${stanWasmServerUrl}/job/${job_id}/download/main.js`;
+    const compileResp = await runCompile.json();
+    const mainJsUrl = `${stanWasmServerUrl}/download/${compileResp.model_id}/main.js`;
 
     setToMainJsUrlCache(stanProgram, mainJsUrl);
 
