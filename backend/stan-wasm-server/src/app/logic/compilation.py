@@ -5,7 +5,6 @@ from hashlib import sha1
 from pathlib import Path
 from shutil import copy2
 
-from .compilation_job_mgmt import get_job_source_file
 from .exceptions import (
     StanPlaygroundCompilationException,
     StanPlaygroundCompilationTimeoutException,
@@ -49,18 +48,18 @@ def copy_compiled_files_to_cache(job_dir: Path, model_dir: Path) -> None:
 
 
 async def compile_and_cache(
-    *, job_dir: Path, model_dir: Path, tinystan_dir: Path, timeout: int
+    *, src_file: Path, model_dir: Path, tinystan_dir: Path, timeout: int
 ) -> None:
     if compilation_files_exist(model_dir):
         # if there's a cache hit, make sure any copying is already complete,
         # then return without compiling
         await wait_until_free(model_dir)
-        logger.info("Cache hit for %s: %s", job_dir, model_dir)
+        logger.info("Cache hit for %s: %s", src_file, model_dir)
         return
 
     # otherwise, compile in our job-specific folder
     await compile_stan_program(
-        job_dir=job_dir, tinystan_dir=tinystan_dir, timeout=timeout
+        src_file=src_file, tinystan_dir=tinystan_dir, timeout=timeout
     )
 
     # then, try to copy into the cache
@@ -71,7 +70,7 @@ async def compile_and_cache(
         # we were compiling (and we don't need to copy).
         if exclusive:
             if not compilation_files_exist(model_dir):
-                copy_compiled_files_to_cache(job_dir, model_dir)
+                copy_compiled_files_to_cache(src_file.parent, model_dir)
         # if we failed in getting the lock, it means
         # another thread is currently copying, and we wait for them.
         # We do not need to copy, because their version will be
@@ -81,21 +80,20 @@ async def compile_and_cache(
 
 
 async def compile_stan_program(
-    *, job_dir: Path, tinystan_dir: Path, timeout: int
+    *, src_file: Path, tinystan_dir: Path, timeout: int
 ) -> None:
     """
     Compiles the Stan program in the job directory
 
     Args:
-        job_dir: Job directory for the incoming job
+        src_file: Stan file to be compiled
         tinystan_dir: Location of the tinystan installation (with compilation tools)
         timeout: Maximum number of seconds to allow compilation to take
     """
     try:
-        job_main = get_job_source_file(job_dir)
-        cmd = f"emmake make STANCFLAGS=--filename-in-msg=main.stan {job_main.with_suffix('.js')} \
-            && emstrip {job_main.with_suffix('.wasm')}"
-        logger.info("Compiling in %s", job_dir)
+        cmd = f"emmake make STANCFLAGS=--filename-in-msg=main.stan {src_file.with_suffix('.js')} \
+            && emstrip {src_file.with_suffix('.wasm')}"
+        logger.info("Compiling in %s", src_file.parent)
         before = time.time()
         process = await asyncio.create_subprocess_shell(
             cmd,
