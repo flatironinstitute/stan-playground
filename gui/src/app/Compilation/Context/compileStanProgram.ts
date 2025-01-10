@@ -1,5 +1,3 @@
-import { checkMainJsUrlCache, setToMainJsUrlCache } from "./mainJsUrlCache";
-
 const compileStanProgram = async (
   stanWasmServerUrl: string,
   stanProgram: string,
@@ -11,16 +9,6 @@ const compileStanProgram = async (
   };
 
   try {
-    onStatus("checking cache");
-    const downloadMainJsUrlFromCache = await checkMainJsUrlCache(
-      stanProgram,
-      stanWasmServerUrl,
-    );
-    if (downloadMainJsUrlFromCache) {
-      onStatus("compiled");
-      return { mainJsUrl: downloadMainJsUrlFromCache };
-    }
-
     onStatus("compiling...");
 
     const compileURL = `${stanWasmServerUrl}/compile`;
@@ -40,8 +28,6 @@ const compileStanProgram = async (
     }
     const compileResp = await runCompile.json();
     const mainJsUrl = `${stanWasmServerUrl}/download/${compileResp.model_id}/main.js`;
-
-    setToMainJsUrlCache(stanProgram, mainJsUrl);
 
     // download to make sure it is there
     onStatus("Checking download of main.js");
