@@ -8,14 +8,13 @@ import {
   SecondaryColoredTableHead,
 } from "@SpComponents/StyledTables";
 import {
-  compute_effective_sample_size,
-  compute_split_potential_scale_reduction,
-} from "@SpUtil/stan_stats/stan_stats";
-import {
-  computeMean,
-  computePercentile,
-  computeStdDev,
-} from "@SpUtil/stan_stats/summaryStats";
+  effective_sample_size,
+  split_potential_scale_reduction,
+  percentile,
+  mean,
+  std_deviation,
+} from "mcmc-stats";
+
 import { FunctionComponent, useMemo } from "react";
 
 const columns = [
@@ -94,20 +93,20 @@ const SummaryPanel: FunctionComponent<SummaryProps> = ({
       const pDrawsSorted = [...pDraws].sort((a, b) => a - b);
       const ess = computeEss(pDraws, drawChainIds);
       const rhat = computeRhat(pDraws, drawChainIds);
-      const stdDev = computeStdDev(pDraws);
+      const stdDev = std_deviation(pDraws);
       const values = columns.map((column) => {
         if (column.key === "mean") {
-          return computeMean(pDraws);
+          return mean(pDraws);
         } else if (column.key === "mcse") {
           return stdDev / Math.sqrt(ess);
         } else if (column.key === "stdDev") {
           return stdDev;
         } else if (column.key === "5%") {
-          return computePercentile(pDrawsSorted, 0.05);
+          return percentile(pDrawsSorted, 0.05);
         } else if (column.key === "50%") {
-          return computePercentile(pDrawsSorted, 0.5);
+          return percentile(pDrawsSorted, 0.5);
         } else if (column.key === "95%") {
-          return computePercentile(pDrawsSorted, 0.95);
+          return percentile(pDrawsSorted, 0.95);
         } else if (column.key === "nEff") {
           return ess;
         } else if (column.key === "nEff/s") {
@@ -177,13 +176,13 @@ const drawsByChain = (draws: number[], chainIds: number[]): number[][] => {
 
 const computeEss = (x: number[], chainIds: number[]) => {
   const draws = drawsByChain(x, chainIds);
-  const ess = compute_effective_sample_size(draws);
+  const ess = effective_sample_size(draws);
   return ess;
 };
 
 const computeRhat = (x: number[], chainIds: number[]) => {
   const draws = drawsByChain(x, chainIds);
-  const rhat = compute_split_potential_scale_reduction(draws);
+  const rhat = split_potential_scale_reduction(draws);
   return rhat;
 };
 
