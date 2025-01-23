@@ -22,7 +22,7 @@ const TopBar: FunctionComponent<TopBarProps> = ({ title, onSetCollapsed }) => {
   const {
     toggleTheme,
     theme,
-    settingsWindow: { handleOpen },
+    settingsWindow: { openSettings },
   } = useContext(UserSettingsContext);
   const isLight = useMemo(() => theme === "light", [theme]);
 
@@ -60,7 +60,11 @@ const TopBar: FunctionComponent<TopBarProps> = ({ title, onSetCollapsed }) => {
             )}
           </IconButton>
           <CompilationServerConnectionControl />
-          <IconButton title="Settings" size="small" onClick={handleOpen}>
+          <IconButton
+            title="Settings"
+            size="small"
+            onClick={() => openSettings("personalization")}
+          >
             <Settings fontSize="inherit" htmlColor="white" />
           </IconButton>
           <IconButton

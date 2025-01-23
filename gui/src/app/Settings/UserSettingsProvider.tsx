@@ -13,6 +13,7 @@ import {
 
 import { useDialogControls } from "@SpComponents/CloseableDialog";
 
+import { SettingsTab } from "./SettingsWindow";
 import {
   publicCompilationServerUrl,
   ThemeSetting,
@@ -40,7 +41,21 @@ const UserSettingsProvider: FunctionComponent<PropsWithChildren> = ({
   children,
 }) => {
   // ------------------- Settings window -------------------
-  const settingsWindow = useDialogControls();
+  const {
+    open: isOpen,
+    handleOpen,
+    handleClose: closeSettings,
+  } = useDialogControls();
+
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>("compilation");
+
+  const openSettings = useCallback(
+    (tab: SettingsTab) => {
+      setSettingsTab(tab);
+      handleOpen();
+    },
+    [handleOpen],
+  );
 
   // ------------------- Theme -------------------
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
@@ -115,7 +130,12 @@ const UserSettingsProvider: FunctionComponent<PropsWithChildren> = ({
   return (
     <UserSettingsContext.Provider
       value={{
-        settingsWindow,
+        settingsWindow: {
+          isOpen,
+          openSettings,
+          closeSettings,
+          settingsTab,
+        },
         theme: themeMode,
         toggleTheme,
         pedantic,

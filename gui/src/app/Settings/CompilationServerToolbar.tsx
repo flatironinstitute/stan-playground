@@ -19,7 +19,7 @@ const CompilationServerConnectionControl: FunctionComponent<
   CompilationServerConnectionControlProps
 > = () => {
   const {
-    settingsWindow: { handleOpen },
+    settingsWindow: { openSettings },
     stanWasmServerUrl,
   } = useContext(UserSettingsContext);
 
@@ -29,7 +29,11 @@ const CompilationServerConnectionControl: FunctionComponent<
 
   return (
     <>
-      <IconButton onClick={handleOpen} color="inherit" size="small">
+      <IconButton
+        onClick={() => openSettings("compilation")}
+        color="inherit"
+        size="small"
+      >
         {isConnected ? (
           <Check htmlColor="lightgreen" fontSize="inherit" />
         ) : (
