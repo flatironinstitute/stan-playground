@@ -1,6 +1,6 @@
 import UserSettingsProvider from "@SpSettings/UserSettingsProvider";
 import ProjectContextProvider from "@SpCore/ProjectContextProvider";
-import CompileContextProvider from "app/Compile/CompileContextProvider";
+import CompileContextProvider from "@SpCompilation/CompileContextProvider";
 
 import HomePage from "@SpPages/HomePage";
 import { Analytics } from "@vercel/analytics/react";

@@ -1,6 +1,6 @@
+import Button from "@mui/material/Button";
 import ResponsiveGrid from "@SpComponents/ResponsiveGrid";
 import SequenceHistogramWidget from "@SpComponents/SequenceHistogramWidget";
-import { Button } from "@mui/material";
 import { FunctionComponent, useMemo, useState } from "react";
 
 type HistsViewProps = {

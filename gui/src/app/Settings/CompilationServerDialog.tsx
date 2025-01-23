@@ -3,6 +3,7 @@ import Divider from "@mui/material/Divider";
 import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormLabel from "@mui/material/FormLabel";
+import FormHelperText from "@mui/material/FormHelperText";
 import IconButton from "@mui/material/IconButton";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
@@ -11,15 +12,14 @@ import Typography from "@mui/material/Typography";
 
 import { FunctionComponent, useCallback, useContext } from "react";
 
-import { serverTypeForUrl } from "./CompilationServerToolbar";
-
 import {
   localCompilationServerUrl,
   publicCompilationServerUrl,
   UserSettingsContext,
 } from "@SpSettings/UserSettings";
-import { CompileContext } from "../Compile/CompileContextProvider";
-import { FormHelperText } from "@mui/material";
+import { CompileContext } from "@SpCompilation/CompileContextProvider";
+
+import { serverTypeForUrl } from "./CompilationServerToolbar";
 
 type ConfigureCompilationServerDialogProps = {
   // none

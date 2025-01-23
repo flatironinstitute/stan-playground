@@ -9,7 +9,7 @@ import {
   ServerType,
   UserSettingsContext,
 } from "@SpSettings/UserSettings";
-import { CompileContext } from "../Compile/CompileContextProvider";
+import { CompileContext } from "@SpCompilation/CompileContextProvider";
 
 type CompilationServerConnectionControlProps = {
   // none

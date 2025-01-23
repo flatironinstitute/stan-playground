@@ -5,7 +5,7 @@ import {
   StancWorkerRequests,
 } from "@SpStanc/Types";
 import { UserSettingsContext } from "@SpSettings/UserSettings";
-import { CompileContext } from "app/Compile/CompileContextProvider";
+import { CompileContext } from "@SpCompilation/CompileContextProvider";
 
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 // https://vitejs.dev/guide/assets#importing-script-as-a-worker

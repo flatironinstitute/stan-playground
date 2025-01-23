@@ -1,7 +1,7 @@
 import { FunctionComponent, useCallback, useContext, useMemo } from "react";
 
 import Button from "@mui/material/Button";
-import { CompileContext } from "app/Compile/CompileContextProvider";
+import { CompileContext } from "@SpCompilation/CompileContextProvider";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import { SamplingOpts, modelHasUnsavedChanges } from "@SpCore/ProjectDataModel";
 import StanSampler from "@SpStanSampler/StanSampler";
