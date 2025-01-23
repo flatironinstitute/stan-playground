@@ -7,9 +7,42 @@ import {
   useEffect,
   useState,
 } from "react";
-import { CompileContext, CompileStatus } from "@SpCompilation/CompileContext";
-import { publicCompilationServerUrl } from "@SpCompilation/Constants";
+import { publicCompilationServerUrl } from "./Constants";
+
+import { createContext } from "react";
 import compileStanProgram from "./compileStanProgram";
+
+export type CompileStatus =
+  | "preparing"
+  | "compiling"
+  | "compiled"
+  | "failed"
+  | "";
+
+type CompileContextType = {
+  compileStatus: CompileStatus;
+  compileMessage: string;
+  compiledMainJsUrl?: string;
+  validSyntax: boolean;
+  compile: () => void;
+  setValidSyntax: (valid: boolean) => void;
+  stanWasmServerUrl: string;
+  setStanWasmServerUrl: (url: string) => void;
+  isConnected: boolean;
+  retryConnection: () => void;
+};
+
+export const CompileContext = createContext<CompileContextType>({
+  compileStatus: "",
+  compileMessage: "",
+  validSyntax: false,
+  compile: () => {},
+  setValidSyntax: () => {},
+  stanWasmServerUrl: "",
+  setStanWasmServerUrl: () => {},
+  isConnected: false,
+  retryConnection: () => {},
+});
 
 type CompileContextProviderProps = {
   // none
@@ -69,7 +102,7 @@ const showOneTimeMessage = (url: string) => {
   return false;
 };
 
-export const CompileContextProvider: FunctionComponent<
+const CompileContextProvider: FunctionComponent<
   PropsWithChildren<CompileContextProviderProps>
 > = ({ children }) => {
   const { data } = useContext(ProjectContext);
@@ -159,3 +192,5 @@ export const CompileContextProvider: FunctionComponent<
     </CompileContext.Provider>
   );
 };
+
+export default CompileContextProvider;

@@ -1,4 +1,3 @@
-import { CompileContext } from "@SpCompilation/CompileContext";
 import { Refresh } from "@mui/icons-material";
 import Divider from "@mui/material/Divider";
 import FormControl from "@mui/material/FormControl";
@@ -9,8 +8,11 @@ import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+
 import { FunctionComponent, useCallback, useContext } from "react";
+
 import { serverTypeForUrl } from "./CompilationServerToolbar";
+import { CompileContext } from "./CompileContextProvider";
 import {
   localCompilationServerUrl,
   publicCompilationServerUrl,

@@ -3,12 +3,13 @@ import { Cancel, Check } from "@mui/icons-material";
 import { FunctionComponent, useContext } from "react";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import { CompileContext } from "@SpCompilation/CompileContext";
 import {
   ServerType,
-  publicCompilationServerUrl,
   localCompilationServerUrl,
+  publicCompilationServerUrl,
 } from "./Constants";
+
+import { CompileContext } from "./CompileContextProvider";
 
 type CompilationServerConnectionControlProps = {
   openSettings: () => void;

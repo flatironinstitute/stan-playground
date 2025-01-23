@@ -38,7 +38,7 @@ const Sidebar: FunctionComponent<Sidebar> = ({
   collapsed,
 }) => {
   // note: this is close enough to pass in directly if we wish
-  const { data, update } = useContext(ProjectContext);
+  const { data } = useContext(ProjectContext);
 
   const navigate = useNavigate();
 

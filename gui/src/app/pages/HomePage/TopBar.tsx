@@ -1,4 +1,4 @@
-import CompilationServerConnectionControl from "@SpCompilation/CompilationServerToolbar";
+import CompilationServerConnectionControl from "@SpSettings/Compilation/CompilationServerToolbar";
 import {
   Brightness7,
   DarkMode,
@@ -10,7 +10,7 @@ import AppBar from "@mui/material/AppBar";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import { useTheme } from "@mui/material/styles";
-import { LightDarkContext } from "@SpSettings/ToggleableThemeProvider";
+import { LightDarkContext } from "@SpSettings/Personalization/ToggleableThemeProvider";
 import { FunctionComponent, useContext } from "react";
 import { useDialogControls } from "@SpComponents/CloseableDialog";
 import SettingsWindow from "@SpSettings/SettingsWindow";

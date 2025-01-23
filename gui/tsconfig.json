@@ -39,10 +39,6 @@
       "@SpUtil/*": ["app/util/*"],
       "@SpStanStats/*": ["app/util/stan_stats/*"],
       "@SpScripting/*": ["app/Scripting/*"],
-      "@SpCompilation/*": [
-        "app/Compilation/Context/*",
-        "app/Compilation/Control/*"
-      ],
       "@SpSettings/*": ["app/Settings/*"]
     }
   },

@@ -1,26 +1,20 @@
-import { CompileContextProvider } from "@SpCompilation/CompileContextProvider";
-import ToggleableThemeProvider from "./Settings/ToggleableThemeProvider";
 import ProjectContextProvider from "@SpCore/ProjectContextProvider";
 import HomePage from "@SpPages/HomePage";
 import { Analytics } from "@vercel/analytics/react";
 import { BrowserRouter } from "react-router-dom";
-import PedanticSettingProvider from "@SpSettings/PedanticSettingProvider";
+import UserSettingsProvider from "@SpSettings/UserSettingsProvider";
 
 const App = () => {
   return (
     <BrowserRouter>
-      <ToggleableThemeProvider>
+      <UserSettingsProvider>
         <div className="MainWindow">
           <ProjectContextProvider>
-            <CompileContextProvider>
-              <PedanticSettingProvider>
-                <HomePage />
-              </PedanticSettingProvider>
-            </CompileContextProvider>
+            <HomePage />
           </ProjectContextProvider>
           <Analytics />
         </div>
-      </ToggleableThemeProvider>
+      </UserSettingsProvider>
     </BrowserRouter>
   );
 };

@@ -5,8 +5,8 @@ import Switch from "@mui/material/Switch";
 
 import { useContext } from "react";
 
-import { LightDarkContext } from "@SpSettings/ToggleableThemeProvider";
-import { PedanticContext } from "@SpSettings/PedanticSettingProvider";
+import { LightDarkContext } from "@SpSettings/Personalization/ToggleableThemeProvider";
+import { PedanticContext } from "@SpSettings/Personalization/PedanticSettingProvider";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 
 const PersonalSettingsDialogue = () => {

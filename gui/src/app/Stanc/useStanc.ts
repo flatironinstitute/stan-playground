@@ -4,8 +4,8 @@ import {
   StancRequestMessage,
   StancWorkerRequests,
 } from "@SpStanc/Types";
-import { PedanticContext } from "@SpSettings/PedanticSettingProvider";
-import { CompileContext } from "@SpCompilation/CompileContext";
+import { PedanticContext } from "@SpSettings/Personalization/PedanticSettingProvider";
+import { CompileContext } from "@SpSettings/Compilation/CompileContextProvider";
 
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 // https://vitejs.dev/guide/assets#importing-script-as-a-worker
