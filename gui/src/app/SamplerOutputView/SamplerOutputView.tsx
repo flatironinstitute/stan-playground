@@ -1,4 +1,7 @@
 import { Download } from "@mui/icons-material";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -7,8 +10,6 @@ import {
   SuccessBorderedTableRow,
   SuccessColoredTableHead,
 } from "@SpComponents/StyledTables";
-import Button from "@mui/material/Button";
-import { IconButton } from "@mui/material";
 import HistsView from "@SpComponents/HistsView";
 import SummaryView from "@SpComponents/SummaryView";
 import TabWidget from "@SpComponents/TabWidget";
@@ -26,15 +27,17 @@ type SamplerOutputViewProps = {
 const SamplerOutputView: FunctionComponent<SamplerOutputViewProps> = ({
   latestRun,
 }) => {
-  const { draws, paramNames, computeTimeSec, samplingOpts } = latestRun;
+  const { draws, paramNames, computeTimeSec, samplingOpts, consoleText } =
+    latestRun;
 
-  if (!draws || !paramNames || !samplingOpts) return <span />;
+  if (!draws || !paramNames || !samplingOpts || !consoleText) return <span />;
   return (
     <DrawsDisplay
       draws={draws}
       paramNames={paramNames}
       computeTimeSec={computeTimeSec}
       samplingOpts={samplingOpts}
+      consoleText={consoleText}
     />
   );
 };
@@ -44,6 +47,7 @@ type DrawsDisplayProps = {
   paramNames: string[];
   computeTimeSec: number | undefined;
   samplingOpts: SamplingOpts;
+  consoleText: string;
 };
 
 const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({
@@ -51,6 +55,7 @@ const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({
   paramNames,
   computeTimeSec,
   samplingOpts,
+  consoleText,
 }) => {
   const numChains = samplingOpts.num_chains;
 
@@ -68,7 +73,9 @@ const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({
   }, [draws, numChains]);
 
   return (
-    <TabWidget labels={["Summary", "Draws", "Histograms", "Trace plots"]}>
+    <TabWidget
+      labels={["Summary", "Draws", "Histograms", "Trace plots", "Console"]}
+    >
       <SummaryView
         draws={draws}
         paramNames={paramNames}
@@ -92,7 +99,20 @@ const DrawsDisplay: FunctionComponent<DrawsDisplayProps> = ({
         paramNames={paramNames}
         drawChainIds={drawChainIds}
       />
+      <ConsoleOutput text={consoleText} />
     </TabWidget>
+  );
+};
+
+type ConsoleOutputProps = {
+  text: string;
+};
+
+const ConsoleOutput: FunctionComponent<ConsoleOutputProps> = ({ text }) => {
+  return (
+    <Box className="stdout" color="info.dark">
+      <pre>{text}</pre>
+    </Box>
   );
 };
 

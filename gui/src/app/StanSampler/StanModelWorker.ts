@@ -41,6 +41,7 @@ export type StanModelReplyMessage =
       draws: number[][];
       paramNames: string[];
       error: null;
+      consoleText: string;
     }
   | {
       purpose: Replies.Progress;
@@ -77,8 +78,16 @@ const parseProgress = (msg: string): Progress => {
   return { chain, iteration, totalIterations, percent, warmup };
 };
 
+let consoleText = "";
 const progressPrintCallback = (msg: string) => {
+  if (!msg) {
+    return;
+  }
   if (!msg.startsWith("Chain") && !msg.startsWith("Iteration:")) {
+    // storing this has a not-insignificant overhead when a model
+    // has print statements, but is much faster than posting
+    // every single line to the main thread
+    consoleText += msg + "\n";
     console.log(msg);
     return;
   }
@@ -116,6 +125,7 @@ self.onmessage = (e: MessageEvent<StanModelRequestMessage>) => {
         return;
       }
       try {
+        consoleText = "";
         const { paramNames, draws } = model.sample(e.data.sampleConfig);
         // TODO? use an ArrayBuffer so we can transfer without serialization cost
         postReply({
@@ -123,6 +133,7 @@ self.onmessage = (e: MessageEvent<StanModelRequestMessage>) => {
           draws,
           paramNames,
           error: null,
+          consoleText,
         });
       } catch (e: any) {
         postReply({ purpose: Replies.StanReturn, error: e.toString() });
@@ -138,6 +149,7 @@ self.onmessage = (e: MessageEvent<StanModelRequestMessage>) => {
         return;
       }
       try {
+        consoleText = "";
         const { draws, paramNames } = model.pathfinder(e.data.pathfinderConfig);
         // TODO? use an ArrayBuffer so we can transfer without serialization cost
         postReply({
@@ -145,6 +157,7 @@ self.onmessage = (e: MessageEvent<StanModelRequestMessage>) => {
           draws,
           paramNames,
           error: null,
+          consoleText,
         });
       } catch (e: any) {
         postReply({ purpose: Replies.StanReturn, error: e.toString() });
