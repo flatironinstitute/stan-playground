@@ -11,6 +11,12 @@ type CloseableDialogProps = {
   handleClose: () => void;
 };
 
+export type DialogControls = {
+  open: boolean;
+  handleOpen: () => void;
+  handleClose: () => void;
+};
+
 export const useDialogControls = () => {
   const [open, setOpen] = useState(false);
 

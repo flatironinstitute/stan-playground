@@ -3,7 +3,7 @@ import { FunctionComponent, useCallback, useContext } from "react";
 import { Split } from "@geoffcox/react-splitter";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import { CompileContext } from "@SpSettings/Compilation/CompileContextProvider";
+import { CompileContext } from "app/Compile/CompileContextProvider";
 import RunPanel from "@SpComponents/RunPanel";
 import SamplerOutputView from "@SpComponents/SamplerOutputView";
 import SamplingOptsPanel from "@SpComponents/SamplingOptsPanel";

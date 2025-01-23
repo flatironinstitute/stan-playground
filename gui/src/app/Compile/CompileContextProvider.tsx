@@ -7,10 +7,13 @@ import {
   useEffect,
   useState,
 } from "react";
-import { publicCompilationServerUrl } from "./Constants";
 
 import { createContext } from "react";
 import compileStanProgram from "./compileStanProgram";
+import {
+  publicCompilationServerUrl,
+  UserSettingsContext,
+} from "@SpSettings/UserSettings";
 
 export type CompileStatus =
   | "preparing"
@@ -26,8 +29,6 @@ type CompileContextType = {
   validSyntax: boolean;
   compile: () => void;
   setValidSyntax: (valid: boolean) => void;
-  stanWasmServerUrl: string;
-  setStanWasmServerUrl: (url: string) => void;
   isConnected: boolean;
   retryConnection: () => void;
 };
@@ -38,8 +39,6 @@ export const CompileContext = createContext<CompileContextType>({
   validSyntax: false,
   compile: () => {},
   setValidSyntax: () => {},
-  stanWasmServerUrl: "",
-  setStanWasmServerUrl: () => {},
   isConnected: false,
   retryConnection: () => {},
 });
@@ -75,9 +74,6 @@ const useIsConnected = (stanWasmServerUrl: string) => {
   }, [probeUrl, retryCode]);
   return { isConnected, retryConnection };
 };
-
-const initialStanWasmServerUrl =
-  localStorage.getItem("stanWasmServerUrl") || publicCompilationServerUrl;
 
 const showOneTimeMessage = (url: string) => {
   if (url !== publicCompilationServerUrl) {
@@ -133,13 +129,7 @@ const CompileContextProvider: FunctionComponent<
     setCompiledMainJsUrl,
   ]);
 
-  const [stanWasmServerUrl, setStanWasmServerUrl] = useState<string>(
-    initialStanWasmServerUrl,
-  );
-  useEffect(() => {
-    // persist to local storage
-    localStorage.setItem("stanWasmServerUrl", stanWasmServerUrl);
-  }, [stanWasmServerUrl]);
+  const { stanWasmServerUrl } = useContext(UserSettingsContext);
 
   const handleCompile = useCallback(async () => {
     if (!showOneTimeMessage(stanWasmServerUrl)) {
@@ -182,8 +172,6 @@ const CompileContextProvider: FunctionComponent<
         validSyntax,
         compile: handleCompile,
         setValidSyntax,
-        stanWasmServerUrl,
-        setStanWasmServerUrl,
         isConnected,
         retryConnection,
       }}

@@ -5,16 +5,16 @@ import Switch from "@mui/material/Switch";
 
 import { useContext } from "react";
 
-import { LightDarkContext } from "@SpSettings/Personalization/ToggleableThemeProvider";
-import { PedanticContext } from "@SpSettings/Personalization/PedanticSettingProvider";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
+import { UserSettingsContext } from "./UserSettings";
 
 const PersonalSettingsDialogue = () => {
   const theme = useTheme();
   const isLight = theme.palette.mode === "light";
-  const { toggleMode } = useContext(LightDarkContext);
+
   const { update } = useContext(ProjectContext);
-  const { pedantic, togglePedantic } = useContext(PedanticContext);
+  const { pedantic, togglePedantic, toggleTheme } =
+    useContext(UserSettingsContext);
 
   return (
     <div className="dialogWrapper">
@@ -22,7 +22,7 @@ const PersonalSettingsDialogue = () => {
       <Button
         title="Toggle light/dark"
         variant="contained"
-        onClick={toggleMode}
+        onClick={toggleTheme}
         startIcon={
           isLight ? (
             <DarkMode fontSize="inherit" />

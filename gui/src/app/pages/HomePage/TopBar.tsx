@@ -1,4 +1,4 @@
-import CompilationServerConnectionControl from "@SpSettings/Compilation/CompilationServerToolbar";
+import CompilationServerConnectionControl from "@SpSettings/CompilationServerToolbar";
 import {
   Brightness7,
   DarkMode,
@@ -9,11 +9,9 @@ import {
 import AppBar from "@mui/material/AppBar";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
-import { useTheme } from "@mui/material/styles";
-import { LightDarkContext } from "@SpSettings/Personalization/ToggleableThemeProvider";
-import { FunctionComponent, useContext } from "react";
-import { useDialogControls } from "@SpComponents/CloseableDialog";
+import { FunctionComponent, useContext, useMemo } from "react";
 import SettingsWindow from "@SpSettings/SettingsWindow";
+import { UserSettingsContext } from "@SpSettings/UserSettings";
 
 type TopBarProps = {
   title: string;
@@ -21,15 +19,12 @@ type TopBarProps = {
 };
 
 const TopBar: FunctionComponent<TopBarProps> = ({ title, onSetCollapsed }) => {
-  const theme = useTheme();
-  const isLight = theme.palette.mode === "light";
-  const { toggleMode } = useContext(LightDarkContext);
-
   const {
-    handleOpen: openSettings,
-    handleClose: closeSettings,
-    open,
-  } = useDialogControls();
+    toggleTheme,
+    theme,
+    settingsWindow: { handleOpen },
+  } = useContext(UserSettingsContext);
+  const isLight = useMemo(() => theme === "light", [theme]);
 
   return (
     <>
@@ -56,7 +51,7 @@ const TopBar: FunctionComponent<TopBarProps> = ({ title, onSetCollapsed }) => {
           <IconButton
             title="Toggle light/dark"
             size="small"
-            onClick={toggleMode}
+            onClick={toggleTheme}
           >
             {isLight ? (
               <DarkMode fontSize="inherit" htmlColor="white" />
@@ -64,8 +59,8 @@ const TopBar: FunctionComponent<TopBarProps> = ({ title, onSetCollapsed }) => {
               <Brightness7 fontSize="inherit" />
             )}
           </IconButton>
-          <CompilationServerConnectionControl openSettings={openSettings} />
-          <IconButton title="Settings" size="small" onClick={openSettings}>
+          <CompilationServerConnectionControl />
+          <IconButton title="Settings" size="small" onClick={handleOpen}>
             <Settings fontSize="inherit" htmlColor="white" />
           </IconButton>
           <IconButton
@@ -83,7 +78,7 @@ const TopBar: FunctionComponent<TopBarProps> = ({ title, onSetCollapsed }) => {
         </Toolbar>
       </AppBar>
 
-      <SettingsWindow open={open} close={closeSettings} />
+      <SettingsWindow />
     </>
   );
 };

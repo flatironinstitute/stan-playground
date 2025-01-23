@@ -12,11 +12,13 @@ import Typography from "@mui/material/Typography";
 import { FunctionComponent, useCallback, useContext } from "react";
 
 import { serverTypeForUrl } from "./CompilationServerToolbar";
-import { CompileContext } from "./CompileContextProvider";
+
 import {
   localCompilationServerUrl,
   publicCompilationServerUrl,
-} from "./Constants";
+  UserSettingsContext,
+} from "@SpSettings/UserSettings";
+import { CompileContext } from "../Compile/CompileContextProvider";
 
 type ConfigureCompilationServerDialogProps = {
   // none
@@ -25,12 +27,9 @@ type ConfigureCompilationServerDialogProps = {
 const ConfigureCompilationServerDialog: FunctionComponent<
   ConfigureCompilationServerDialogProps
 > = () => {
-  const {
-    stanWasmServerUrl,
-    setStanWasmServerUrl,
-    isConnected,
-    retryConnection,
-  } = useContext(CompileContext);
+  const { stanWasmServerUrl, setStanWasmServerUrl } =
+    useContext(UserSettingsContext);
+  const { isConnected, retryConnection } = useContext(CompileContext);
 
   const serverType = serverTypeForUrl(stanWasmServerUrl);
 

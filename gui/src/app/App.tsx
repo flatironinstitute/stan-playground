@@ -1,8 +1,10 @@
+import UserSettingsProvider from "@SpSettings/UserSettingsProvider";
 import ProjectContextProvider from "@SpCore/ProjectContextProvider";
+import CompileContextProvider from "app/Compile/CompileContextProvider";
+
 import HomePage from "@SpPages/HomePage";
 import { Analytics } from "@vercel/analytics/react";
 import { BrowserRouter } from "react-router-dom";
-import UserSettingsProvider from "@SpSettings/UserSettingsProvider";
 
 const App = () => {
   return (
@@ -10,7 +12,9 @@ const App = () => {
       <UserSettingsProvider>
         <div className="MainWindow">
           <ProjectContextProvider>
-            <HomePage />
+            <CompileContextProvider>
+              <HomePage />
+            </CompileContextProvider>
           </ProjectContextProvider>
           <Analytics />
         </div>

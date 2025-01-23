@@ -4,27 +4,32 @@ import { FunctionComponent, useContext } from "react";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import {
-  ServerType,
   localCompilationServerUrl,
   publicCompilationServerUrl,
-} from "./Constants";
-
-import { CompileContext } from "./CompileContextProvider";
+  ServerType,
+  UserSettingsContext,
+} from "@SpSettings/UserSettings";
+import { CompileContext } from "../Compile/CompileContextProvider";
 
 type CompilationServerConnectionControlProps = {
-  openSettings: () => void;
+  // none
 };
 
 const CompilationServerConnectionControl: FunctionComponent<
   CompilationServerConnectionControlProps
-> = ({ openSettings }) => {
-  const { stanWasmServerUrl, isConnected } = useContext(CompileContext);
+> = () => {
+  const {
+    settingsWindow: { handleOpen },
+    stanWasmServerUrl,
+  } = useContext(UserSettingsContext);
+
+  const { isConnected } = useContext(CompileContext);
 
   const serverType = serverTypeForUrl(stanWasmServerUrl);
 
   return (
     <>
-      <IconButton onClick={openSettings} color="inherit" size="small">
+      <IconButton onClick={handleOpen} color="inherit" size="small">
         {isConnected ? (
           <Check htmlColor="lightgreen" fontSize="inherit" />
         ) : (

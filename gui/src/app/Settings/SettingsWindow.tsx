@@ -1,24 +1,25 @@
-import ConfigureCompilationServerDialog from "@SpSettings/Compilation/CompilationServerDialog";
+import ConfigureCompilationServerDialog from "@SpSettings/CompilationServerDialog";
 import CloseableDialog from "@SpComponents/CloseableDialog";
-import { FunctionComponent } from "react";
-import PersonalSettingsDialogue from "./Personalization/PersonalSettingsDialogue";
+import { FunctionComponent, useContext } from "react";
+import PersonalSettingsDialogue from "./PersonalSettingsDialogue";
 import TabWidget from "@SpComponents/TabWidget";
+import { UserSettingsContext } from "./UserSettings";
 
 type SettingsWindowProps = {
-  open: boolean;
-  close: () => void;
+  // none
 };
 
-const SettingsWindow: FunctionComponent<SettingsWindowProps> = ({
-  open,
-  close,
-}) => {
+const SettingsWindow: FunctionComponent<SettingsWindowProps> = () => {
+  const {
+    settingsWindow: { open, handleClose },
+  } = useContext(UserSettingsContext);
+
   return (
     <CloseableDialog
       title="Settings"
       id="settingsDialogue"
       open={open}
-      handleClose={close}
+      handleClose={handleClose}
     >
       <TabWidget labels={["Compilation Server", "Personalization Settings"]}>
         <ConfigureCompilationServerDialog />

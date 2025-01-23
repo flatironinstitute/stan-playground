@@ -4,8 +4,8 @@ import {
   StancRequestMessage,
   StancWorkerRequests,
 } from "@SpStanc/Types";
-import { PedanticContext } from "@SpSettings/Personalization/PedanticSettingProvider";
-import { CompileContext } from "@SpSettings/Compilation/CompileContextProvider";
+import { UserSettingsContext } from "@SpSettings/UserSettings";
+import { CompileContext } from "app/Compile/CompileContextProvider";
 
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 // https://vitejs.dev/guide/assets#importing-script-as-a-worker
@@ -19,7 +19,7 @@ const useStanc = (
 ) => {
   const [stancErrors, setStancErrors] = useState<StancErrors>({});
   const [stancWorker, setStancWorker] = useState<Worker | undefined>(undefined);
-  const { pedantic } = useContext(PedanticContext);
+  const { pedantic } = useContext(UserSettingsContext);
 
   const post = useCallback(
     (message: StancRequestMessage) => {
