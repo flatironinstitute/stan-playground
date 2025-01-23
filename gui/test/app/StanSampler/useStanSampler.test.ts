@@ -131,7 +131,9 @@ describe("useStanSampler", () => {
 
       await waitFor(() => {
         expect(result.current.latestRun.status).toBe("completed");
-        expect(result.current.latestRun.paramNames).toEqual(mockedParamNames);
+        expect(result.current.latestRun.runResult?.paramNames).toEqual(
+          mockedParamNames,
+        );
       });
       expect(mockedStderr).not.toHaveBeenCalled();
     });
@@ -178,7 +180,9 @@ describe("useStanSampler", () => {
 
       await waitFor(() => {
         expect(result.current.latestRun.status).toBe("completed");
-        expect(result.current.latestRun.paramNames).toEqual(mockedParamNames);
+        expect(result.current.latestRun.runResult?.paramNames).toEqual(
+          mockedParamNames,
+        );
       });
 
       expect(mockedStderr).not.toHaveBeenCalled();
@@ -206,17 +210,21 @@ describe("useStanSampler", () => {
   describe("outputs", () => {
     test("undefined sampler returns undefined", () => {
       const { result } = renderHook(() => useStanSampler(undefined));
-      expect(result.current.latestRun.draws).toBeUndefined();
-      expect(result.current.latestRun.paramNames).toBeUndefined();
-      expect(result.current.latestRun.computeTimeSec).toBeUndefined();
+      expect(result.current.latestRun.runResult?.draws).toBeUndefined();
+      expect(result.current.latestRun.runResult?.paramNames).toBeUndefined();
+      expect(
+        result.current.latestRun.runResult?.computeTimeSec,
+      ).toBeUndefined();
     });
 
     test("sampling changes output", async () => {
       const { result } = await loadedSampler();
 
-      expect(result.current.latestRun.draws).toBeUndefined();
-      expect(result.current.latestRun.paramNames).toBeUndefined();
-      expect(result.current.latestRun.computeTimeSec).toBeUndefined();
+      expect(result.current.latestRun.runResult?.draws).toBeUndefined();
+      expect(result.current.latestRun.runResult?.paramNames).toBeUndefined();
+      expect(
+        result.current.latestRun.runResult?.computeTimeSec,
+      ).toBeUndefined();
       expect(result.current.latestRun.samplingOpts).toBeUndefined();
 
       const testingSamplingOpts = {
@@ -229,10 +237,15 @@ describe("useStanSampler", () => {
       });
 
       await waitFor(() => {
-        expect(result.current.latestRun.draws).toEqual(mockedDraws);
-        expect(result.current.latestRun.paramNames).toEqual(mockedParamNames);
         expect(result.current.latestRun.samplingOpts).toBe(testingSamplingOpts);
-        expect(result.current.latestRun.computeTimeSec).toBeDefined();
+        expect(result.current.latestRun.runResult).toBeDefined();
+        expect(result.current.latestRun.runResult?.draws).toEqual(mockedDraws);
+        expect(result.current.latestRun.runResult?.paramNames).toEqual(
+          mockedParamNames,
+        );
+        expect(
+          result.current.latestRun.runResult?.computeTimeSec,
+        ).toBeDefined();
       });
 
       expect(result.current.latestRun.status).toBe("completed");

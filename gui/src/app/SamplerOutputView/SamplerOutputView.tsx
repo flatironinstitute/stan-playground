@@ -27,10 +27,10 @@ type SamplerOutputViewProps = {
 const SamplerOutputView: FunctionComponent<SamplerOutputViewProps> = ({
   latestRun,
 }) => {
-  const { draws, paramNames, computeTimeSec, samplingOpts, consoleText } =
-    latestRun;
+  const { samplingOpts, runResult } = latestRun;
+  if (!runResult || !samplingOpts) return <span />;
+  const { draws, paramNames, computeTimeSec, consoleText } = runResult;
 
-  if (!draws || !paramNames || !samplingOpts || !consoleText) return <span />;
   return (
     <DrawsDisplay
       draws={draws}
