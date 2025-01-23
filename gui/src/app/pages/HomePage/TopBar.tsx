@@ -4,7 +4,7 @@ import AppBar from "@mui/material/AppBar";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import { useTheme } from "@mui/material/styles";
-import { LightDarkContext } from "app/ToggleableThemeProvider";
+import { LightDarkContext } from "@SpSettings/ToggleableThemeProvider";
 import { FunctionComponent, useContext } from "react";
 
 type TopBarProps = {

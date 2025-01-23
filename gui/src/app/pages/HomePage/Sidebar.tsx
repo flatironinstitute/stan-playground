@@ -118,23 +118,6 @@ const Sidebar: FunctionComponent<Sidebar> = ({
               Save project
             </Button>
           </ListItem>
-
-          {/* This will probably be removed or replaced in the future. It's just for convenience during development. */}
-          <ListItem key="clear-all">
-            <Button
-              variant="outlined"
-              color="error"
-              onClick={() => {
-                const ok = window.confirm(
-                  "Are you sure you want to clear all data in the editors?",
-                );
-                if (!ok) return;
-                update({ type: "clear" });
-              }}
-            >
-              Clear all
-            </Button>
-          </ListItem>
         </List>
       </div>
 

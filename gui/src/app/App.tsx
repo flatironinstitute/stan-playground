@@ -1,9 +1,10 @@
 import { CompileContextProvider } from "@SpCompilation/CompileContextProvider";
-import ToggleableThemeProvider from "./ToggleableThemeProvider";
+import ToggleableThemeProvider from "./Settings/ToggleableThemeProvider";
 import ProjectContextProvider from "@SpCore/ProjectContextProvider";
 import HomePage from "@SpPages/HomePage";
 import { Analytics } from "@vercel/analytics/react";
 import { BrowserRouter } from "react-router-dom";
+import PedanticSettingProvider from "@SpSettings/PedanticSettingProvider";
 
 const App = () => {
   return (
@@ -12,7 +13,9 @@ const App = () => {
         <div className="MainWindow">
           <ProjectContextProvider>
             <CompileContextProvider>
-              <HomePage />
+              <PedanticSettingProvider>
+                <HomePage />
+              </PedanticSettingProvider>
             </CompileContextProvider>
           </ProjectContextProvider>
           <Analytics />

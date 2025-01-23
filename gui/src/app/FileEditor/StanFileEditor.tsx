@@ -68,9 +68,9 @@ const StanFileEditor: FunctionComponent<Props> = ({
       ret.push({
         type: "button",
         icon: <Cancel />,
-        label: "Syntax warning",
+        label: "Compiler warning",
         color: "info.dark",
-        tooltip: "Syntax warning in Stan file",
+        tooltip: "Warning in Stan file",
         onClick: () => {
           setSyntaxWindowVisible((v) => !v);
         },

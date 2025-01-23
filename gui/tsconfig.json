@@ -42,7 +42,8 @@
       "@SpCompilation/*": [
         "app/Compilation/Context/*",
         "app/Compilation/Control/*"
-      ]
+      ],
+      "@SpSettings/*": ["app/Settings/*"]
     }
   },
   "include": ["src", "test"],

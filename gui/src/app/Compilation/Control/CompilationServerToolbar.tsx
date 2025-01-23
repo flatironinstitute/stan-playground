@@ -13,6 +13,8 @@ import {
   publicCompilationServerUrl,
   localCompilationServerUrl,
 } from "./Constants";
+import TabWidget from "@SpComponents/TabWidget";
+import PersonalSettingsDialogue from "@SpSettings/PersonalSettingsDialogue";
 
 type CompilationServerConnectionControlProps = {
   // none
@@ -51,15 +53,18 @@ const CompilationServerConnectionControl: FunctionComponent<
         </Typography>
       </IconButton>
       <CloseableDialog
-        title="Select a compilation server"
+        title="Settings"
         id="compilationDialog"
         open={open}
         handleClose={closeDialog}
       >
-        <ConfigureCompilationServerDialog
-          isConnected={isConnected}
-          onRetry={handleRetry}
-        />
+        <TabWidget labels={["Compilation Server", "Personalization Settings"]}>
+          <ConfigureCompilationServerDialog
+            isConnected={isConnected}
+            onRetry={handleRetry}
+          />
+          <PersonalSettingsDialogue />
+        </TabWidget>
       </CloseableDialog>
     </>
   );
