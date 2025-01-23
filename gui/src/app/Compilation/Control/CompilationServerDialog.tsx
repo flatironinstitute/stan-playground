@@ -17,15 +17,18 @@ import {
 } from "./Constants";
 
 type ConfigureCompilationServerDialogProps = {
-  isConnected: boolean;
-  onRetry: () => void;
+  // none
 };
 
 const ConfigureCompilationServerDialog: FunctionComponent<
   ConfigureCompilationServerDialogProps
-> = ({ isConnected, onRetry }) => {
-  const { stanWasmServerUrl, setStanWasmServerUrl } =
-    useContext(CompileContext);
+> = () => {
+  const {
+    stanWasmServerUrl,
+    setStanWasmServerUrl,
+    isConnected,
+    retryConnection,
+  } = useContext(CompileContext);
 
   const serverType = serverTypeForUrl(stanWasmServerUrl);
 
@@ -62,7 +65,11 @@ const ConfigureCompilationServerDialog: FunctionComponent<
           </Typography>
         )}
         &nbsp;
-        <IconButton onClick={onRetry} size="small" title="Retry connection">
+        <IconButton
+          onClick={retryConnection}
+          size="small"
+          title="Retry connection"
+        >
           <Refresh fontSize="inherit" />
         </IconButton>
       </p>

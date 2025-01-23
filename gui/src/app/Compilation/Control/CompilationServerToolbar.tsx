@@ -1,10 +1,7 @@
 import { Cancel, Check } from "@mui/icons-material";
 
-import CloseableDialog, {
-  useDialogControls,
-} from "@SpComponents/CloseableDialog";
-import { FunctionComponent, useCallback, useContext } from "react";
-import ConfigureCompilationServerDialog from "./CompilationServerDialog";
+import { useDialogControls } from "@SpComponents/CloseableDialog";
+import { FunctionComponent, useContext } from "react";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import { CompileContext } from "@SpCompilation/CompileContext";
@@ -13,8 +10,7 @@ import {
   publicCompilationServerUrl,
   localCompilationServerUrl,
 } from "./Constants";
-import TabWidget from "@SpComponents/TabWidget";
-import PersonalSettingsDialogue from "@SpSettings/PersonalSettingsDialogue";
+import SettingsWindow from "@SpSettings/SettingsWindow";
 
 type CompilationServerConnectionControlProps = {
   // none
@@ -23,18 +19,13 @@ type CompilationServerConnectionControlProps = {
 const CompilationServerConnectionControl: FunctionComponent<
   CompilationServerConnectionControlProps
 > = () => {
-  const { stanWasmServerUrl, isConnected, retryConnection } =
-    useContext(CompileContext);
+  const { stanWasmServerUrl, isConnected } = useContext(CompileContext);
 
   const {
     handleOpen: openDialog,
     handleClose: closeDialog,
     open,
   } = useDialogControls();
-
-  const handleRetry = useCallback(() => {
-    retryConnection();
-  }, [retryConnection]);
 
   const serverType = serverTypeForUrl(stanWasmServerUrl);
 
@@ -52,20 +43,7 @@ const CompilationServerConnectionControl: FunctionComponent<
           {serverType}
         </Typography>
       </IconButton>
-      <CloseableDialog
-        title="Settings"
-        id="compilationDialog"
-        open={open}
-        handleClose={closeDialog}
-      >
-        <TabWidget labels={["Compilation Server", "Personalization Settings"]}>
-          <ConfigureCompilationServerDialog
-            isConnected={isConnected}
-            onRetry={handleRetry}
-          />
-          <PersonalSettingsDialogue />
-        </TabWidget>
-      </CloseableDialog>
+      <SettingsWindow open={open} close={closeDialog} />
     </>
   );
 };
