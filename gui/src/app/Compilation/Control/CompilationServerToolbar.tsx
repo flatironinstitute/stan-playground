@@ -1,6 +1,5 @@
 import { Cancel, Check } from "@mui/icons-material";
 
-import { useDialogControls } from "@SpComponents/CloseableDialog";
 import { FunctionComponent, useContext } from "react";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
@@ -10,28 +9,21 @@ import {
   publicCompilationServerUrl,
   localCompilationServerUrl,
 } from "./Constants";
-import SettingsWindow from "@SpSettings/SettingsWindow";
 
 type CompilationServerConnectionControlProps = {
-  // none
+  openSettings: () => void;
 };
 
 const CompilationServerConnectionControl: FunctionComponent<
   CompilationServerConnectionControlProps
-> = () => {
+> = ({ openSettings }) => {
   const { stanWasmServerUrl, isConnected } = useContext(CompileContext);
-
-  const {
-    handleOpen: openDialog,
-    handleClose: closeDialog,
-    open,
-  } = useDialogControls();
 
   const serverType = serverTypeForUrl(stanWasmServerUrl);
 
   return (
     <>
-      <IconButton onClick={openDialog} color="inherit" size="small">
+      <IconButton onClick={openSettings} color="inherit" size="small">
         {isConnected ? (
           <Check htmlColor="lightgreen" fontSize="inherit" />
         ) : (
@@ -43,7 +35,6 @@ const CompilationServerConnectionControl: FunctionComponent<
           {serverType}
         </Typography>
       </IconButton>
-      <SettingsWindow open={open} close={closeDialog} />
     </>
   );
 };
