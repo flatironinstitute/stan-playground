@@ -22,9 +22,10 @@ const useAnalysisState = (latestRun: StanRun) => {
 
   useEffect(() => {
     clearOutputDivs(consoleRef, imagesRef);
-  }, [latestRun.draws]);
+  }, [latestRun.runResult?.draws]);
 
-  const { draws, paramNames, samplingOpts, status: samplerStatus } = latestRun;
+  const { runResult, samplingOpts, status: samplerStatus } = latestRun;
+  const { draws, paramNames } = runResult || {};
   const numChains = samplingOpts?.num_chains;
   const spData = useMemo(() => {
     if (samplerStatus === "completed" && draws && numChains && paramNames) {

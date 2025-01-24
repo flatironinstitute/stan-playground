@@ -12,9 +12,12 @@ export type StanRun = {
   progress?: Progress;
   samplingOpts?: SamplingOpts;
   data?: string;
-  draws?: number[][];
-  paramNames?: string[];
-  computeTimeSec?: number;
+  runResult?: {
+    consoleText: string;
+    draws: number[][];
+    paramNames: string[];
+    computeTimeSec: number;
+  };
 };
 
 const initialStanRun: StanRun = {
@@ -43,6 +46,7 @@ export type StanRunAction =
       draws: number[][];
       paramNames: string[];
       computeTimeSec: number;
+      consoleText: string;
     };
 
 export const StanRunReducer = (
@@ -73,9 +77,12 @@ export const StanRunReducer = (
       return {
         ...state,
         status: "completed",
-        draws: action.draws,
-        paramNames: action.paramNames,
-        computeTimeSec: action.computeTimeSec,
+        runResult: {
+          draws: action.draws,
+          paramNames: action.paramNames,
+          computeTimeSec: action.computeTimeSec,
+          consoleText: action.consoleText,
+        },
       };
     default:
       return unreachable(action);

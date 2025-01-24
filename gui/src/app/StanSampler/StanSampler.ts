@@ -78,6 +78,7 @@ class StanSampler {
               draws: e.data.draws,
               paramNames: e.data.paramNames,
               computeTimeSec: Date.now() / 1000 - this.#samplingStartTimeSec,
+              consoleText: e.data.consoleText,
             });
           }
           break;
