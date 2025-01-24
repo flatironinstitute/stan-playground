@@ -8,10 +8,7 @@ import {
   fromQueryParams,
   queryStringHasParameters,
 } from "@SpCore/ProjectQueryLoading";
-import ProjectReducer, {
-  ProjectReducerAction,
-  ProjectReducerType,
-} from "@SpCore/ProjectReducer";
+import ProjectReducer, { ProjectReducerAction } from "@SpCore/ProjectReducer";
 import {
   deserializeProjectFromLocalStorage,
   serializeProjectToLocalStorage,
@@ -42,10 +39,7 @@ export const ProjectContext = createContext<ProjectContextType>({
 const ProjectContextProvider: FunctionComponent<
   PropsWithChildren<ProjectContextProviderProps>
 > = ({ children }) => {
-  const [data, update] = useReducer<ProjectReducerType>(
-    ProjectReducer,
-    initialDataModel,
-  );
+  const [data, update] = useReducer(ProjectReducer, initialDataModel);
 
   const [searchParams, setSearchParams] = useSearchParams();
 

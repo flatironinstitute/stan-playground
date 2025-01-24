@@ -29,7 +29,7 @@ export type ScriptEditorProps = {
   notRunnableReason?: string;
   onHelp?: () => void;
   contentOnEmpty?: string | HTMLSpanElement;
-  consoleRef: RefObject<HTMLDivElement>;
+  consoleRef: RefObject<HTMLDivElement | null>;
 };
 
 const ScriptEditor: FunctionComponent<ScriptEditorProps> = ({
@@ -196,7 +196,7 @@ const makeToolbar = (o: {
 };
 
 type ConsoleOutputWindowProps = {
-  consoleRef: RefObject<HTMLDivElement>;
+  consoleRef: RefObject<HTMLDivElement | null>;
 };
 
 const ConsoleOutputWindow: FunctionComponent<ConsoleOutputWindowProps> = ({

@@ -14,8 +14,8 @@ const captureOutputOptions = {
 } as const;
 
 type useWebRProps = {
-  consoleRef: RefObject<HTMLDivElement>;
-  imagesRef?: RefObject<HTMLDivElement>;
+  consoleRef: RefObject<HTMLDivElement | null>;
+  imagesRef?: RefObject<HTMLDivElement | null>;
   onStatus: (status: InterpreterStatus) => void;
   onData?: (data: any) => void;
 };
@@ -138,8 +138,8 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 //
 const outputLoop = async (
   webR: WebR,
-  consoleRef: RefObject<HTMLDivElement>,
-  imagesRef: RefObject<HTMLDivElement> | undefined,
+  consoleRef: RefObject<HTMLDivElement | null>,
+  imagesRef: RefObject<HTMLDivElement | null> | undefined,
   closedHandle: { closed: boolean },
 ) => {
   // ignore startup messages from R repl
