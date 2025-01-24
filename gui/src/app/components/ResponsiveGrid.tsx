@@ -3,7 +3,7 @@
 // https://github.com/mui/material-ui/issues/25189#issuecomment-1321236185
 
 import { styled } from "@mui/material/styles";
-import { FunctionComponent } from "react";
+import { FunctionComponent, JSX } from "react";
 
 const Container = styled("div")({
   display: "flex",

@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
-import { FunctionComponent, useEffect, useState } from "react";
+import { FunctionComponent, JSX, useEffect, useState } from "react";
 
 type TabWidgetProps = {
   labels: string[];
