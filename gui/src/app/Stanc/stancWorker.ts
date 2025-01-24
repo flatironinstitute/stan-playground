@@ -39,7 +39,7 @@ self.onmessage = (e: MessageEvent<StancRequestMessage>) => {
     return;
   }
 
-  const { purpose, name, code } = e.data;
+  const { purpose, name, code, pedantic } = e.data;
 
   if (!stanc) {
     postReply({ fatal: "stanc.js not loaded!" });
@@ -49,7 +49,15 @@ self.onmessage = (e: MessageEvent<StancRequestMessage>) => {
   // stanc accepts the name (unused for our purposes, affects C++ code generation),
   // model code, and arguments. These arguments are the same as supported by the
   // stanc CLI, just without the leading "--".
-  const args = [`filename-in-msg=${name}`, "auto-format", "max-line-length=78"];
+  const args = [`filename-in-msg=${name}`];
+
+  if (purpose === StancWorkerRequests.FormatStanCode) {
+    args.push("auto-format");
+    args.push("max-line-length=78");
+  } else if (pedantic) {
+    args.push("warn-pedantic");
+  }
+
   // The return will include 'warnings', a list of compiler warnings, and then one of
   // 'result' which is either the generated C++ code or the formatted model, or
   // 'errors', which is a list of compiler errors. In practice, 'errors' only contains

@@ -5,7 +5,7 @@ import TextEditor from "@SpComponents/TextEditor";
 import { ToolbarItem } from "@SpComponents/ToolBar";
 import { stancErrorsToCodeMarkers } from "@SpStanc/Linting";
 import useStanc from "@SpStanc/useStanc";
-import { CompileContext } from "@SpCompilation/CompileContext";
+import { CompileContext } from "@SpCompilation/CompileContextProvider";
 import { FunctionComponent, useContext, useMemo, useState } from "react";
 
 type Props = {
@@ -68,9 +68,9 @@ const StanFileEditor: FunctionComponent<Props> = ({
       ret.push({
         type: "button",
         icon: <Cancel />,
-        label: "Syntax warning",
+        label: "Compiler warning",
         color: "info.dark",
-        tooltip: "Syntax warning in Stan file",
+        tooltip: "Warning in Stan file",
         onClick: () => {
           setSyntaxWindowVisible((v) => !v);
         },

@@ -22,4 +22,5 @@ export type StancRequestMessage = {
   purpose: StancWorkerRequests;
   name: string;
   code: string;
+  pedantic: boolean;
 };

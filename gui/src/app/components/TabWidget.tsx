@@ -1,19 +1,31 @@
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
-import { FunctionComponent, useState } from "react";
+import { FunctionComponent, useEffect, useState } from "react";
 
 type TabWidgetProps = {
   labels: string[];
   children: JSX.Element[];
+  forcedSelection?: number;
 };
 
-const TabWidget: FunctionComponent<TabWidgetProps> = ({ labels, children }) => {
+const TabWidget: FunctionComponent<TabWidgetProps> = ({
+  labels,
+  children,
+  forcedSelection,
+}) => {
   if (labels.length !== children.length) {
     throw new Error("Number of labels and children must match");
   }
 
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(forcedSelection ?? 0);
+
+  useEffect(() => {
+    if (forcedSelection !== undefined) {
+      setIndex(forcedSelection);
+    }
+  }, [forcedSelection]);
+
   const [tabsThatHaveBeenViewed, setTabsThatHaveBeenViewed] = useState<
     number[]
   >([index]);

@@ -9,6 +9,11 @@
   font-size: smaller;
 }
 
+.dockerRun {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
 .SamplerError {
   color: inherit;
   white-space: pre-wrap;
