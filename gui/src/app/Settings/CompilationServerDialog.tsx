@@ -1,31 +1,36 @@
-import { CompileContext } from "@SpCompilation/CompileContext";
 import { Refresh } from "@mui/icons-material";
 import Divider from "@mui/material/Divider";
 import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormLabel from "@mui/material/FormLabel";
+import FormHelperText from "@mui/material/FormHelperText";
 import IconButton from "@mui/material/IconButton";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+
 import { FunctionComponent, useCallback, useContext } from "react";
-import { serverTypeForUrl } from "./CompilationServerToolbar";
+
 import {
   localCompilationServerUrl,
   publicCompilationServerUrl,
-} from "./Constants";
+  UserSettingsContext,
+} from "@SpSettings/UserSettings";
+import { CompileContext } from "@SpCompilation/CompileContextProvider";
+
+import { serverTypeForUrl } from "./CompilationServerToolbar";
 
 type ConfigureCompilationServerDialogProps = {
-  isConnected: boolean;
-  onRetry: () => void;
+  // none
 };
 
 const ConfigureCompilationServerDialog: FunctionComponent<
   ConfigureCompilationServerDialogProps
-> = ({ isConnected, onRetry }) => {
+> = () => {
   const { stanWasmServerUrl, setStanWasmServerUrl } =
-    useContext(CompileContext);
+    useContext(UserSettingsContext);
+  const { isConnected, retryConnection } = useContext(CompileContext);
 
   const serverType = serverTypeForUrl(stanWasmServerUrl);
 
@@ -46,50 +51,51 @@ const ConfigureCompilationServerDialog: FunctionComponent<
 
   return (
     <div className="dialogWrapper">
-      <p>
-        While the sampling is performed locally in the browser, a compilation
-        server is required to compile the Stan programs.
-      </p>
-      <Divider />
-      <p>
-        {isConnected ? (
-          <Typography component="span" color="success.main">
-            Connected
-          </Typography>
-        ) : (
-          <Typography component="span" color="error.main">
-            Not connected
-          </Typography>
-        )}
-        &nbsp;
-        <IconButton onClick={onRetry} size="small" title="Retry connection">
-          <Refresh fontSize="inherit" />
-        </IconButton>
-      </p>
-      <Divider />
-
       <FormControl>
         <FormLabel id="compilation-server-selection">
-          Compilation server
+          <h3>Compilation server</h3>
         </FormLabel>
+
+        <p>
+          While the sampling is performed locally in the browser, a compilation
+          server is required to compile the Stan programs.
+        </p>
+
         <RadioGroup value={serverType} onChange={makeChoice}>
           <FormControlLabel
             value="public"
             control={<Radio />}
             label="Public server"
           />
+          {serverType === "public" && (
+            <FormHelperText>
+              The public server{" "}
+              <span className="details">({publicCompilationServerUrl})</span> is
+              provided for convenience, but may not be as reliable as a local
+              server, depending on the current load and availability.
+            </FormHelperText>
+          )}
           <FormControlLabel
             value="local"
             control={<Radio />}
             label="Local server"
           />
+          {serverType === "local" && (
+            <FormHelperText>
+              To start a local compilation server{" "}
+              <span className="details">({localCompilationServerUrl})</span>:
+              <pre className="dockerRun">
+                docker run -p 8083:8080 -it
+                ghcr.io/flatironinstitute/stan-wasm-server:latest
+              </pre>
+            </FormHelperText>
+          )}
           <FormControlLabel
             value="custom"
             control={<Radio />}
             label="Custom server"
           />
         </RadioGroup>
-
         {serverType === "custom" && (
           <div>
             <TextField
@@ -104,31 +110,26 @@ const ConfigureCompilationServerDialog: FunctionComponent<
           </div>
         )}
       </FormControl>
-
-      {serverType === "local" && (
-        <div>
-          <p>
-            To start a local compilation server{" "}
-            <span className="details">({localCompilationServerUrl})</span>:
-          </p>
-          <div>
-            <pre>
-              docker run -p 8083:8080 -it
-              ghcr.io/flatironinstitute/stan-wasm-server:latest
-            </pre>
-          </div>
-        </div>
-      )}
-      {serverType === "public" && (
-        <div>
-          <p>
-            The public server{" "}
-            <span className="details">({publicCompilationServerUrl})</span> is
-            provided for convenience, but may not be as reliable as a local
-            server, depending on the current load and availability.
-          </p>
-        </div>
-      )}
+      <Divider />
+      <p>
+        {isConnected ? (
+          <Typography component="span" color="success.main">
+            Connected
+          </Typography>
+        ) : (
+          <Typography component="span" color="error.main">
+            Not connected
+          </Typography>
+        )}
+        &nbsp;
+        <IconButton
+          onClick={retryConnection}
+          size="small"
+          title="Retry connection"
+        >
+          <Refresh fontSize="inherit" />
+        </IconButton>
+      </p>
     </div>
   );
 };

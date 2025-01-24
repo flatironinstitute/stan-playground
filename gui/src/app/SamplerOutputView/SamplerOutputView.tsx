@@ -1,22 +1,25 @@
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
 import { Download } from "@mui/icons-material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
+
+import { FunctionComponent, useCallback, useMemo, useState } from "react";
+
+import JSZip from "jszip";
+
 import {
   SuccessBorderedTableRow,
   SuccessColoredTableHead,
 } from "@SpComponents/StyledTables";
-import Button from "@mui/material/Button";
-import { IconButton } from "@mui/material";
 import HistsView from "@SpComponents/HistsView";
 import SummaryView from "@SpComponents/SummaryView";
 import TabWidget from "@SpComponents/TabWidget";
 import { SamplingOpts } from "@SpCore/ProjectDataModel";
 import { StanRun } from "@SpStanSampler/useStanSampler";
 import { triggerDownload } from "@SpUtil/triggerDownload";
-import JSZip from "jszip";
-import { FunctionComponent, useCallback, useMemo, useState } from "react";
 import TracePlotsView from "./TracePlotsView";
 
 type SamplerOutputViewProps = {

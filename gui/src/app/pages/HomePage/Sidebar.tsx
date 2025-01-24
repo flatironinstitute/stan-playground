@@ -38,7 +38,7 @@ const Sidebar: FunctionComponent<Sidebar> = ({
   collapsed,
 }) => {
   // note: this is close enough to pass in directly if we wish
-  const { data, update } = useContext(ProjectContext);
+  const { data } = useContext(ProjectContext);
 
   const navigate = useNavigate();
 
@@ -116,23 +116,6 @@ const Sidebar: FunctionComponent<Sidebar> = ({
               disabled={hasUnsavedChanges}
             >
               Save project
-            </Button>
-          </ListItem>
-
-          {/* This will probably be removed or replaced in the future. It's just for convenience during development. */}
-          <ListItem key="clear-all">
-            <Button
-              variant="outlined"
-              color="error"
-              onClick={() => {
-                const ok = window.confirm(
-                  "Are you sure you want to clear all data in the editors?",
-                );
-                if (!ok) return;
-                update({ type: "clear" });
-              }}
-            >
-              Clear all
             </Button>
           </ListItem>
         </List>

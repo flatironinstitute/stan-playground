@@ -1,18 +1,15 @@
 import { Cancel, Check } from "@mui/icons-material";
 
-import CloseableDialog, {
-  useDialogControls,
-} from "@SpComponents/CloseableDialog";
-import { FunctionComponent, useCallback, useContext } from "react";
-import ConfigureCompilationServerDialog from "./CompilationServerDialog";
+import { FunctionComponent, useContext } from "react";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import { CompileContext } from "@SpCompilation/CompileContext";
 import {
-  ServerType,
-  publicCompilationServerUrl,
   localCompilationServerUrl,
-} from "./Constants";
+  publicCompilationServerUrl,
+  ServerType,
+  UserSettingsContext,
+} from "@SpSettings/UserSettings";
+import { CompileContext } from "@SpCompilation/CompileContextProvider";
 
 type CompilationServerConnectionControlProps = {
   // none
@@ -21,24 +18,22 @@ type CompilationServerConnectionControlProps = {
 const CompilationServerConnectionControl: FunctionComponent<
   CompilationServerConnectionControlProps
 > = () => {
-  const { stanWasmServerUrl, isConnected, retryConnection } =
-    useContext(CompileContext);
-
   const {
-    handleOpen: openDialog,
-    handleClose: closeDialog,
-    open,
-  } = useDialogControls();
+    settingsWindow: { openSettings },
+    stanWasmServerUrl,
+  } = useContext(UserSettingsContext);
 
-  const handleRetry = useCallback(() => {
-    retryConnection();
-  }, [retryConnection]);
+  const { isConnected } = useContext(CompileContext);
 
   const serverType = serverTypeForUrl(stanWasmServerUrl);
 
   return (
     <>
-      <IconButton onClick={openDialog} color="inherit" size="small">
+      <IconButton
+        onClick={() => openSettings("compilation")}
+        color="inherit"
+        size="small"
+      >
         {isConnected ? (
           <Check htmlColor="lightgreen" fontSize="inherit" />
         ) : (
@@ -50,17 +45,6 @@ const CompilationServerConnectionControl: FunctionComponent<
           {serverType}
         </Typography>
       </IconButton>
-      <CloseableDialog
-        title="Select a compilation server"
-        id="compilationDialog"
-        open={open}
-        handleClose={closeDialog}
-      >
-        <ConfigureCompilationServerDialog
-          isConnected={isConnected}
-          onRetry={handleRetry}
-        />
-      </CloseableDialog>
     </>
   );
 };

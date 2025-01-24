@@ -7,9 +7,41 @@ import {
   useEffect,
   useState,
 } from "react";
-import { CompileContext, CompileStatus } from "@SpCompilation/CompileContext";
-import { publicCompilationServerUrl } from "@SpCompilation/Constants";
+
+import { createContext } from "react";
 import compileStanProgram from "./compileStanProgram";
+import {
+  publicCompilationServerUrl,
+  UserSettingsContext,
+} from "@SpSettings/UserSettings";
+
+export type CompileStatus =
+  | "preparing"
+  | "compiling"
+  | "compiled"
+  | "failed"
+  | "";
+
+type CompileContextType = {
+  compileStatus: CompileStatus;
+  compileMessage: string;
+  compiledMainJsUrl?: string;
+  validSyntax: boolean;
+  compile: () => void;
+  setValidSyntax: (valid: boolean) => void;
+  isConnected: boolean;
+  retryConnection: () => void;
+};
+
+export const CompileContext = createContext<CompileContextType>({
+  compileStatus: "",
+  compileMessage: "",
+  validSyntax: false,
+  compile: () => {},
+  setValidSyntax: () => {},
+  isConnected: false,
+  retryConnection: () => {},
+});
 
 type CompileContextProviderProps = {
   // none
@@ -43,9 +75,6 @@ const useIsConnected = (stanWasmServerUrl: string) => {
   return { isConnected, retryConnection };
 };
 
-const initialStanWasmServerUrl =
-  localStorage.getItem("stanWasmServerUrl") || publicCompilationServerUrl;
-
 const showOneTimeMessage = (url: string) => {
   if (url !== publicCompilationServerUrl) {
     // if the user opted in to a custom URL, we assume they are good with it...
@@ -69,7 +98,7 @@ const showOneTimeMessage = (url: string) => {
   return false;
 };
 
-export const CompileContextProvider: FunctionComponent<
+const CompileContextProvider: FunctionComponent<
   PropsWithChildren<CompileContextProviderProps>
 > = ({ children }) => {
   const { data } = useContext(ProjectContext);
@@ -100,13 +129,7 @@ export const CompileContextProvider: FunctionComponent<
     setCompiledMainJsUrl,
   ]);
 
-  const [stanWasmServerUrl, setStanWasmServerUrl] = useState<string>(
-    initialStanWasmServerUrl,
-  );
-  useEffect(() => {
-    // persist to local storage
-    localStorage.setItem("stanWasmServerUrl", stanWasmServerUrl);
-  }, [stanWasmServerUrl]);
+  const { stanWasmServerUrl } = useContext(UserSettingsContext);
 
   const handleCompile = useCallback(async () => {
     if (!showOneTimeMessage(stanWasmServerUrl)) {
@@ -149,8 +172,6 @@ export const CompileContextProvider: FunctionComponent<
         validSyntax,
         compile: handleCompile,
         setValidSyntax,
-        stanWasmServerUrl,
-        setStanWasmServerUrl,
         isConnected,
         retryConnection,
       }}
@@ -159,3 +180,5 @@ export const CompileContextProvider: FunctionComponent<
     </CompileContext.Provider>
   );
 };
+
+export default CompileContextProvider;

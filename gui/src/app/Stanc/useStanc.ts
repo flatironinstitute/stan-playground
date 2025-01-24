@@ -1,13 +1,16 @@
 import {
   StancErrors,
   StancReplyMessage,
+  StancRequestMessage,
   StancWorkerRequests,
 } from "@SpStanc/Types";
+import { UserSettingsContext } from "@SpSettings/UserSettings";
+import { CompileContext } from "@SpCompilation/CompileContextProvider";
+
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 // https://vitejs.dev/guide/assets#importing-script-as-a-worker
 // https://vitejs.dev/guide/assets#importing-asset-as-url
 import stancWorkerURL from "@SpStanc/stancWorker?worker&url";
-import { CompileContext } from "@SpCompilation/CompileContext";
 
 const useStanc = (
   modelName: string,
@@ -16,6 +19,14 @@ const useStanc = (
 ) => {
   const [stancErrors, setStancErrors] = useState<StancErrors>({});
   const [stancWorker, setStancWorker] = useState<Worker | undefined>(undefined);
+  const { pedantic } = useContext(UserSettingsContext);
+
+  const post = useCallback(
+    (message: StancRequestMessage) => {
+      stancWorker?.postMessage(message);
+    },
+    [stancWorker],
+  );
 
   // worker creation
   useEffect(() => {
@@ -52,21 +63,23 @@ const useStanc = (
 
   // automatic syntax checking
   useEffect(() => {
-    stancWorker?.postMessage({
+    post({
       purpose: StancWorkerRequests.CheckSyntax,
       name: modelName,
       code,
+      pedantic,
     });
-  }, [modelName, code, stancWorker]);
+  }, [modelName, code, post, pedantic]);
 
   // requesting formatting
   const requestFormat = useCallback(() => {
-    stancWorker?.postMessage({
+    post({
       purpose: StancWorkerRequests.FormatStanCode,
       name: modelName,
       code,
+      pedantic,
     });
-  }, [modelName, code, stancWorker]);
+  }, [post, modelName, code, pedantic]);
 
   const { setValidSyntax } = useContext(CompileContext);
   const validSyntax = useMemo(() => {
