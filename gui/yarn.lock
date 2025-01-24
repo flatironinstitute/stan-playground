@@ -3294,6 +3294,11 @@ p-locate@^5.0.0:
   dependencies:
     p-limit "^3.0.2"
 
+pako@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/pako/-/pako-2.1.0.tgz#266cc37f98c7d883545d11335c00fbd4062c9a86"
+  integrity sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==
+
 pako@~1.0.2:
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/pako/-/pako-1.0.11.tgz#6c9599d340d54dfd3946380252a35705a6b992bf"
@@ -4284,10 +4289,10 @@ webidl-conversions@^7.0.0:
   resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-7.0.0.tgz#256b4e1882be7debbf01d05f0aa2039778ea080a"
   integrity sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==
 
-webr@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/webr/-/webr-0.4.0.tgz#a470aa96c9ff57c160c0c165c743de2bbdf05f5a"
-  integrity sha512-vDggYyMJHEv/X7mViz9kalFd56+D4fVwWREAVF+EqKVkyETNI/tFCOLdp+R16C1rhnMA/QMZvyXrcK/tb79WUA==
+webr@^0.4.2:
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/webr/-/webr-0.4.2.tgz#0577f457fd6d1f8b139bf665300b13afcc557f2e"
+  integrity sha512-zCPYi/DDh+pzOsrE7LJkA9mUoBARCyh35a3jlnXt6zg6ul96KLComA+CMsT8QbnkI7pskfdgaMljTq8vAf/ONg==
   dependencies:
     "@codemirror/autocomplete" "^6.8.1"
     "@codemirror/commands" "^6.2.4"
@@ -4300,6 +4305,7 @@ webr@^0.4.0:
     jszip "^3.10.1"
     lezer-r "^0.1.1"
     lightningcss "^1.21.5"
+    pako "^2.1.0"
     prop-types "^15.7.2"
     react "^18.2.0"
     react-accessible-treeview "^2.6.1"
