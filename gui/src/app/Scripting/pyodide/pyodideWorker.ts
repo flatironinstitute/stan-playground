@@ -12,7 +12,7 @@ let pyodide: PyodideInterface | null = null;
 const loadPyodideInstance = async () => {
   if (pyodide === null) {
     pyodide = await loadPyodide({
-      indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.1/full",
+      indexURL: "https://cdn.jsdelivr.net/pyodide/v0.27.2/full",
       stdout: (x: string) => {
         sendStdout(x);
       },
