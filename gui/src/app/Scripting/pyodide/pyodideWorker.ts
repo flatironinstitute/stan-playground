@@ -23,12 +23,8 @@ const loadPyodideInstance = async () => {
     });
     setStatus("installing");
 
-    pyodide.FS.writeFile("sp_load_draws.py", spDrawsScript, {
-      encoding: "utf-8",
-    });
-    pyodide.FS.writeFile("sp_patch_matplotlib.py", spMPLScript, {
-      encoding: "utf-8",
-    });
+    pyodide.FS.writeFile("sp_load_draws.py", spDrawsScript);
+    pyodide.FS.writeFile("sp_patch_matplotlib.py", spMPLScript);
 
     return pyodide;
   } else {
