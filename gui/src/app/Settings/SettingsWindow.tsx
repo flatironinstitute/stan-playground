@@ -16,7 +16,7 @@ const SettingsWindow: FunctionComponent<SettingsWindowProps> = () => {
     settingsWindow: { isOpen, closeSettings, settingsTab },
   } = useContext(UserSettingsContext);
 
-  let override = useMemo(() => {
+  const override = useMemo(() => {
     return settingsTab === "compilation" ? 0 : 1;
   }, [settingsTab]);
 

@@ -29,25 +29,73 @@ const colorPalette = {
   },
 } as const;
 
-const defaultSettings = JSON.parse(
-  localStorage.getItem("settings") ?? "null",
-) as {
-  theme: ThemeSetting;
-  pedantic: boolean;
-  serverUrl: string;
-} | null;
+const defaultSettings = {
+  theme: "light",
+  pedantic: false,
+  serverUrl: publicCompilationServerUrl,
+} as const;
+
+const loadStoredSettings = () => {
+  const storedSettings = JSON.parse(localStorage.getItem("settings") ?? "null");
+  if (storedSettings === null) {
+    return null;
+  }
+  return {
+    // apply defaults for forward compatibility
+    ...defaultSettings,
+    ...storedSettings,
+  };
+};
+
+const storedSettings = loadStoredSettings();
+
+const useStoredOrDefaultSettings = () => {
+  const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+
+  if (storedSettings) {
+    return storedSettings;
+  }
+
+  return {
+    ...defaultSettings,
+    theme: prefersDarkMode ? "dark" : "light",
+  };
+};
 
 const UserSettingsProvider: FunctionComponent<PropsWithChildren> = ({
   children,
 }) => {
+  const {
+    theme: defaultTheme,
+    pedantic: defaultPedantic,
+    serverUrl: defaultStanWasmServerUrl,
+  } = useStoredOrDefaultSettings();
+
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>("compilation");
+  const [themeMode, setThemeMode] = useState<ThemeSetting>(defaultTheme);
+  const [pedantic, setPedantic] = useState<boolean>(defaultPedantic);
+  const [stanWasmServerUrl, setStanWasmServerUrl] = useState<string>(
+    defaultStanWasmServerUrl,
+  );
+
+  // persist to local storage
+  useEffect(() => {
+    localStorage.setItem(
+      "settings",
+      JSON.stringify({
+        theme: themeMode,
+        pedantic,
+        serverUrl: stanWasmServerUrl,
+      }),
+    );
+  }, [stanWasmServerUrl, themeMode, pedantic]);
+
   // ------------------- Settings window -------------------
   const {
     open: isOpen,
     handleOpen,
     handleClose: closeSettings,
   } = useDialogControls();
-
-  const [settingsTab, setSettingsTab] = useState<SettingsTab>("compilation");
 
   const openSettings = useCallback(
     (tab: SettingsTab) => {
@@ -58,19 +106,6 @@ const UserSettingsProvider: FunctionComponent<PropsWithChildren> = ({
   );
 
   // ------------------- Theme -------------------
-  const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
-
-  const defaultTheme = useMemo(() => {
-    if (defaultSettings) {
-      return defaultSettings.theme;
-    }
-    if (prefersDarkMode) {
-      return "dark";
-    }
-    return "light";
-  }, [prefersDarkMode]);
-
-  const [themeMode, setThemeMode] = useState<"light" | "dark">(defaultTheme);
 
   const muiTheme = useMemo(
     () =>
@@ -88,44 +123,10 @@ const UserSettingsProvider: FunctionComponent<PropsWithChildren> = ({
   }, []);
 
   // ------------------- Pedantic -------------------
-  const defaultPedantic = useMemo(() => {
-    if (defaultSettings?.pedantic) {
-      return true;
-    }
-
-    return false;
-  }, []);
-
-  const [pedantic, setPedantic] = useState<boolean>(defaultPedantic);
 
   const togglePedantic = useCallback(() => {
     setPedantic((prev) => !prev);
   }, []);
-
-  // ------------------- Compilation server -------------------
-  const defaultStanWasmServerUrl = useMemo(() => {
-    if (defaultSettings) {
-      return defaultSettings.serverUrl;
-    }
-
-    return publicCompilationServerUrl;
-  }, []);
-
-  const [stanWasmServerUrl, setStanWasmServerUrl] = useState<string>(
-    defaultStanWasmServerUrl,
-  );
-
-  // persist to local storage
-  useEffect(() => {
-    localStorage.setItem(
-      "settings",
-      JSON.stringify({
-        theme: themeMode,
-        pedantic,
-        serverUrl: stanWasmServerUrl,
-      }),
-    );
-  }, [stanWasmServerUrl, themeMode, pedantic]);
 
   return (
     <UserSettingsContext.Provider

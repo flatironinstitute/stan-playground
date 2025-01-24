@@ -1,5 +1,6 @@
 import Button from "@mui/material/Button";
 import Switch from "@mui/material/Switch";
+import Link from "@mui/material/Link";
 import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormHelperText from "@mui/material/FormHelperText";
@@ -47,13 +48,13 @@ const PersonalSettingsDialogue = () => {
           title="Enable Pedantic mode"
         />
         <FormHelperText>
-          <a
+          <Link
             href="https://mc-stan.org/docs/stan-users-guide/using-stanc.html#pedantic-mode"
             target="_blank"
             rel="noreferrer"
           >
             &quot;Pedantic mode&quot;
-          </a>{" "}
+          </Link>{" "}
           is an option in the Stan compiler to enable additional warnings. These
           can be instructive, but they can also lead to false positives. Be
           prepared to take them with a grain of salt.
