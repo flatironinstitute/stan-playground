@@ -42,7 +42,7 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
   }, [projectData.stanFileContent]);
 
   const modelIsSaved = useMemo(() => {
-    return projectData.stanFileContent !== projectData.ephemera.stanFileContent;
+    return projectData.stanFileContent === projectData.ephemera.stanFileContent;
   }, [projectData.ephemera.stanFileContent, projectData.stanFileContent]);
 
   const tooltip = useMemo(() => {
@@ -54,7 +54,7 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
   }, [isConnected, modelIsPresent, modelIsSaved, validSyntax]);
 
   const dataIsSaved = useMemo(() => {
-    return projectData.dataFileContent !== projectData.ephemera.dataFileContent;
+    return projectData.dataFileContent === projectData.ephemera.dataFileContent;
   }, [projectData.dataFileContent, projectData.ephemera.dataFileContent]);
 
   if (!dataIsSaved) {
