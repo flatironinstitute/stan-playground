@@ -59,16 +59,17 @@
 
 .Sidebar h3 {
   padding: 0px;
-  margin-left: 12px;
+  padding-left: 10px;
   margin-bottom: 0px;
   margin-top: 0px;
 }
 
 .Sidebar li {
-  margin-left: 12px;
   margin-top: 0px;
   margin-bottom: 5px;
   padding: 0px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 /* File Upload */

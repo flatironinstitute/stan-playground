@@ -2,9 +2,9 @@ import CloseableDialog, {
   useDialogControls,
 } from "@SpComponents/CloseableDialog";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
-import { modelHasUnsavedChanges } from "@SpCore/ProjectDataModel";
+import { unsavedChangesString } from "@SpCore/ProjectDataModel";
 import LoadProjectWindow from "@SpPages/LoadProjectWindow";
-import SaveProjectWindow from "@SpPages/SaveProjectWindow";
+import ExportProjectWindow from "@SpPages/ExportProjectWindow";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
@@ -12,11 +12,11 @@ import Link from "@mui/material/Link";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import Toolbar from "@mui/material/Toolbar";
+import Tooltip from "@mui/material/Tooltip";
 import { FunctionComponent, useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
-type Sidebar = {
-  hasUnsavedChanges: boolean;
+type SidebarProps = {
   collapsed: boolean;
 };
 
@@ -33,21 +33,27 @@ const exampleLinks = [
 
 export const drawerWidth = 180;
 
-const Sidebar: FunctionComponent<Sidebar> = ({
-  hasUnsavedChanges,
-  collapsed,
-}) => {
+const Sidebar: FunctionComponent<SidebarProps> = ({ collapsed }) => {
   // note: this is close enough to pass in directly if we wish
   const { data } = useContext(ProjectContext);
 
   const navigate = useNavigate();
 
-  const dataModified = useMemo(() => modelHasUnsavedChanges(data), [data]);
+  const { dataModified, unsavedString } = useMemo(() => {
+    const s = unsavedChangesString(data);
+    if (s.length === 0) {
+      return { dataModified: false, unsavedString: "" };
+    }
+    return {
+      dataModified: true,
+      unsavedString: `The following files have unsaved changes: ${s}`,
+    };
+  }, [data]);
 
   const {
-    open: saveProjectVisible,
-    handleOpen: saveProjectOpen,
-    handleClose: saveProjectClose,
+    open: exportProjectVisible,
+    handleOpen: exportProjectOpen,
+    handleClose: exportProjectClose,
   } = useDialogControls();
   const {
     open: loadProjectVisible,
@@ -100,23 +106,34 @@ const Sidebar: FunctionComponent<Sidebar> = ({
 
         <List>
           <ListItem key="load-project">
-            <Button
-              variant="outlined"
-              onClick={loadProjectOpen}
-              disabled={hasUnsavedChanges}
-            >
-              Load project
-            </Button>
+            <Tooltip title={unsavedString}>
+              <span style={{ width: "100%" }}>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  onClick={loadProjectOpen}
+                  disabled={dataModified}
+                >
+                  Load project
+                </Button>
+              </span>
+            </Tooltip>
           </ListItem>
 
-          <ListItem key="save-project">
-            <Button
-              variant="outlined"
-              onClick={saveProjectOpen}
-              disabled={hasUnsavedChanges}
-            >
-              Save project
-            </Button>
+          <ListItem key="export-project">
+            <Tooltip title={unsavedString}>
+              {/* span only exists so that this is still hover-able when disabled */}
+              <span style={{ width: "100%" }}>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  onClick={exportProjectOpen}
+                  disabled={dataModified}
+                >
+                  Export project
+                </Button>
+              </span>
+            </Tooltip>
           </ListItem>
         </List>
       </div>
@@ -130,12 +147,12 @@ const Sidebar: FunctionComponent<Sidebar> = ({
         <LoadProjectWindow onClose={loadProjectClose} />
       </CloseableDialog>
       <CloseableDialog
-        title="Save this project"
-        id="saveProjectDialog"
-        open={saveProjectVisible}
-        handleClose={saveProjectClose}
+        title="Export this project"
+        id="exportProjectDialog"
+        open={exportProjectVisible}
+        handleClose={exportProjectClose}
       >
-        <SaveProjectWindow onClose={saveProjectClose} />
+        <ExportProjectWindow onClose={exportProjectClose} />
       </CloseableDialog>
     </Drawer>
   );

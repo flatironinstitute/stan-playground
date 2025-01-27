@@ -3,7 +3,7 @@ import { FunctionComponent, useCallback, useContext, useMemo } from "react";
 import Button from "@mui/material/Button";
 import { CompileContext } from "@SpCompilation/CompileContextProvider";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
-import { SamplingOpts, modelHasUnsavedChanges } from "@SpCore/ProjectDataModel";
+import { SamplingOpts } from "@SpCore/ProjectDataModel";
 import StanSampler from "@SpStanSampler/StanSampler";
 import { StanRun } from "@SpStanSampler/useStanSampler";
 import CompiledRunPanel from "./CompiledRunPanel";
@@ -13,24 +13,21 @@ import Tooltip from "@mui/material/Tooltip";
 type RunPanelProps = {
   sampler?: StanSampler;
   latestRun: StanRun;
-  data: string;
-  dataIsSaved: boolean;
   samplingOpts: SamplingOpts;
 };
 
 const RunPanel: FunctionComponent<RunPanelProps> = ({
   sampler,
   latestRun,
-  data,
-  dataIsSaved,
   samplingOpts,
 }) => {
   const { status: runStatus, errorMessage, progress } = latestRun;
+  const { data: projectData } = useContext(ProjectContext);
 
   const handleRun = useCallback(async () => {
     if (!sampler) return;
-    sampler.sample(data, samplingOpts);
-  }, [sampler, data, samplingOpts]);
+    sampler.sample(projectData.dataFileContent, samplingOpts);
+  }, [sampler, projectData.dataFileContent, samplingOpts]);
 
   const cancelRun = useCallback(() => {
     if (!sampler) return;
@@ -40,15 +37,25 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
   const { compile, compileStatus, validSyntax, isConnected } =
     useContext(CompileContext);
 
-  const { data: projectData } = useContext(ProjectContext);
+  const modelIsPresent = useMemo(() => {
+    return projectData.stanFileContent.trim();
+  }, [projectData.stanFileContent]);
+
+  const modelIsSaved = useMemo(() => {
+    return projectData.stanFileContent === projectData.ephemera.stanFileContent;
+  }, [projectData.ephemera.stanFileContent, projectData.stanFileContent]);
 
   const tooltip = useMemo(() => {
     if (!validSyntax) return "Syntax error";
     if (!isConnected) return "Not connected to compilation server";
-    if (!projectData.stanFileContent.trim()) return "No model to compile";
-    if (modelHasUnsavedChanges(projectData)) return "Model has unsaved changes";
+    if (!modelIsPresent) return "No model to compile";
+    if (!modelIsSaved) return "Model has unsaved changes";
     return "";
-  }, [isConnected, projectData, validSyntax]);
+  }, [isConnected, modelIsPresent, modelIsSaved, validSyntax]);
+
+  const dataIsSaved = useMemo(() => {
+    return projectData.dataFileContent === projectData.ephemera.dataFileContent;
+  }, [projectData.dataFileContent, projectData.ephemera.dataFileContent]);
 
   if (!dataIsSaved) {
     return <div className="RunPanelPadded">Data not saved</div>;

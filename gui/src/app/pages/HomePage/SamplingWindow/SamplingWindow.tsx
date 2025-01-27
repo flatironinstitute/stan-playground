@@ -9,10 +9,7 @@ import SamplerOutputView from "@SpComponents/SamplerOutputView";
 import SamplingOptsPanel from "@SpComponents/SamplingOptsPanel";
 import TabWidget from "@SpComponents/TabWidget";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
-import {
-  modelHasUnsavedDataFileChanges,
-  SamplingOpts,
-} from "@SpCore/ProjectDataModel";
+import { SamplingOpts } from "@SpCore/ProjectDataModel";
 import AnalysisPyWindow from "@SpScripting/Analysis/AnalysisPyWindow";
 import AnalysisRWindow from "@SpScripting/Analysis/AnalysisRWindow";
 import useStanSampler, { StanRun } from "@SpStanSampler/useStanSampler";
@@ -48,8 +45,6 @@ const SamplingWindow: FunctionComponent<SamplingWindowProps> = () => {
           <RunPanel
             sampler={sampler}
             latestRun={latestRun}
-            data={data.dataFileContent}
-            dataIsSaved={!modelHasUnsavedDataFileChanges(data)}
             samplingOpts={data.samplingOpts}
           />
         </Grid>

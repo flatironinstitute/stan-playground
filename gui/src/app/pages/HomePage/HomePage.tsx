@@ -8,11 +8,7 @@ import TextEditor from "@SpComponents/TextEditor";
 import { ColorOptions, ToolbarItem } from "@SpComponents/ToolBar";
 import { FileNames } from "@SpCore/FileMapping";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
-import {
-  DataSource,
-  modelHasUnsavedChanges,
-  ProjectKnownFiles,
-} from "@SpCore/ProjectDataModel";
+import { DataSource, ProjectKnownFiles } from "@SpCore/ProjectDataModel";
 import Sidebar, { drawerWidth } from "@SpPages/Sidebar";
 import TopBar from "@SpPages/TopBar";
 import DataPyWindow from "@SpScripting/DataGeneration/DataPyWindow";
@@ -60,10 +56,7 @@ const HomePage: FunctionComponent<Props> = () => {
     <Box display="flex" flexDirection="column" height="100%">
       <TopBar title={data.meta.title} onSetCollapsed={setLeftPanelCollapsed} />
 
-      <Sidebar
-        collapsed={leftPanelCollapsed}
-        hasUnsavedChanges={modelHasUnsavedChanges(data)}
-      />
+      <Sidebar collapsed={leftPanelCollapsed} />
 
       <MovingBox open={leftPanelCollapsed} flex="1" minHeight="0">
         <Split minPrimarySize="80px" minSecondarySize="120px">

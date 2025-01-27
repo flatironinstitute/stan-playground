@@ -18,11 +18,11 @@ import TextField from "@mui/material/TextField";
 import TableRow from "@mui/material/TableRow";
 import Link from "@mui/material/Link";
 
-type SaveProjectWindowProps = {
+type ExportProjectWindowProps = {
   onClose: () => void;
 };
 
-const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
+const ExportProjectWindow: FunctionComponent<ExportProjectWindowProps> = ({
   onClose,
 }) => {
   const { data, update } = useContext(ProjectContext);
@@ -77,7 +77,7 @@ const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
               );
             }}
           >
-            Save to .zip file
+            Export to .zip file
           </Button>
           &nbsp;
           <Button
@@ -85,7 +85,7 @@ const SaveProjectWindow: FunctionComponent<SaveProjectWindowProps> = ({
               setExportingToGist(true);
             }}
           >
-            Save to GitHub Gist
+            Export to GitHub Gist
           </Button>
           <Button
             onClick={() => {
@@ -143,13 +143,13 @@ const GistExportView: FunctionComponent<GistExportViewProps> = ({
 
   return (
     <div className="GistExplainer">
-      <h3>Save to GitHub Gist</h3>
+      <h3>Export to GitHub Gist</h3>
       <p>
-        In order to save this project as a GitHub Gist, you will need to provide
-        a GitHub Personal Access Token. This token will be used to authenticate
-        with GitHub and create a new Gist with the files in this project. To
-        create a new Personal Access Token granting permission to read/write
-        your Gists,{" "}
+        In order to export this project as a GitHub Gist, you will need to
+        provide a GitHub Personal Access Token. This token will be used to
+        authenticate with GitHub and create a new Gist with the files in this
+        project. To create a new Personal Access Token granting permission to
+        read/write your Gists,{" "}
         <Link
           href="https://github.com/settings/tokens/new?description=Stan%20Playground&scopes=gist"
           target="_blank"
@@ -183,7 +183,7 @@ const GistExportView: FunctionComponent<GistExportViewProps> = ({
       {!gistUrl && (
         <div>
           <Button onClick={handleExport} disabled={!gitHubPersonalAccessToken}>
-            Save to GitHub Gist
+            Export to GitHub Gist
           </Button>
           &nbsp;
           <Button onClick={onClose}>Cancel</Button>
@@ -192,7 +192,7 @@ const GistExportView: FunctionComponent<GistExportViewProps> = ({
       {gistUrl && (
         <div>
           <p>
-            Successfully saved to GitHub Gist:{" "}
+            Successfully exported to GitHub Gist:{" "}
             <Link href={gistUrl} target="_blank" rel="noreferrer">
               {gistUrl}
             </Link>
@@ -395,4 +395,4 @@ const makeSPShareableLinkFromGistUrl = (gistUrl: string) => {
   return url;
 };
 
-export default SaveProjectWindow;
+export default ExportProjectWindow;
