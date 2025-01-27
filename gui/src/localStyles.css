@@ -5,7 +5,7 @@
 }
 
 .details {
-  color: gray;
+  color: var(--mui-palette-grey-500);
   font-size: smaller;
 }
 
@@ -222,12 +222,12 @@ span.EditorTitle {
 
 .EditorHintText {
   font-style: italic;
-  color: #aaa;
+  color: var(--mui-palette-grey-500);
   pointer-events: none;
 }
 
 .EditorHintText a {
-  color: gray;
+  color: var(--mui-palette-grey-600);
   text-decoration: underline;
   pointer-events: all;
 }
