@@ -4,7 +4,7 @@ import CloseableDialog, {
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import { unsavedChangesString } from "@SpCore/ProjectDataModel";
 import LoadProjectWindow from "@SpPages/LoadProjectWindow";
-import SaveProjectWindow from "@SpPages/SaveProjectWindow";
+import ExportProjectWindow from "@SpPages/ExportProjectWindow";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
@@ -51,9 +51,9 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ collapsed }) => {
   }, [data]);
 
   const {
-    open: saveProjectVisible,
-    handleOpen: saveProjectOpen,
-    handleClose: saveProjectClose,
+    open: exportProjectVisible,
+    handleOpen: exportProjectOpen,
+    handleClose: exportProjectClose,
   } = useDialogControls();
   const {
     open: loadProjectVisible,
@@ -107,8 +107,9 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ collapsed }) => {
         <List>
           <ListItem key="load-project">
             <Tooltip title={unsavedString}>
-              <span>
+              <span style={{ width: "100%" }}>
                 <Button
+                  fullWidth
                   variant="outlined"
                   onClick={loadProjectOpen}
                   disabled={dataModified}
@@ -119,15 +120,17 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ collapsed }) => {
             </Tooltip>
           </ListItem>
 
-          <ListItem key="save-project">
+          <ListItem key="export-project">
             <Tooltip title={unsavedString}>
-              <span>
+              {/* span only exists so that this is still hover-able when disabled */}
+              <span style={{ width: "100%" }}>
                 <Button
+                  fullWidth
                   variant="outlined"
-                  onClick={saveProjectOpen}
+                  onClick={exportProjectOpen}
                   disabled={dataModified}
                 >
-                  Save project
+                  Export project
                 </Button>
               </span>
             </Tooltip>
@@ -144,12 +147,12 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ collapsed }) => {
         <LoadProjectWindow onClose={loadProjectClose} />
       </CloseableDialog>
       <CloseableDialog
-        title="Save this project"
-        id="saveProjectDialog"
-        open={saveProjectVisible}
-        handleClose={saveProjectClose}
+        title="Export this project"
+        id="exportProjectDialog"
+        open={exportProjectVisible}
+        handleClose={exportProjectClose}
       >
-        <SaveProjectWindow onClose={saveProjectClose} />
+        <ExportProjectWindow onClose={exportProjectClose} />
       </CloseableDialog>
     </Drawer>
   );
