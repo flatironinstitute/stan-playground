@@ -14,8 +14,6 @@ const StanCompileResultWindow: FunctionComponent<Props> = ({
   stancErrors,
   onClose,
 }) => {
-  const { pedantic } = use(UserSettingsContext);
-
   let content: any;
   if (stancErrors.errors && stancErrors.errors.length > 0) {
     content = (
@@ -29,6 +27,7 @@ const StanCompileResultWindow: FunctionComponent<Props> = ({
       </Box>
     );
   } else if (stancErrors.warnings && stancErrors.warnings.length > 0) {
+    const { pedantic } = use(UserSettingsContext);
     content = (
       <Box color="info.dark">
         <h3>Warnings {pedantic ? "(pedantic)" : ""}</h3>
