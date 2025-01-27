@@ -60,18 +60,20 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
         for (const file of filesUploaded) {
           if (file.name.endsWith(".stan")) {
             if (stanFileName !== "") {
-              throw Error("Only one .stan file can be uploaded at a time");
+              throw new Error("Only one .stan file can be uploaded at a time");
             }
             files["main.stan"] = parseFile(file.content);
             stanFileName = file.name;
             continue;
           }
           if (file.name.endsWith(".zip")) {
-            throw Error(".zip files cannot be uploaded alongside other files");
+            throw new Error(
+              ".zip files cannot be uploaded alongside other files",
+            );
           }
 
           if (!Object.values(FileNames).includes(file.name as any)) {
-            throw Error(`Unsupported file name: ${file.name}`);
+            throw new Error(`Unsupported file name: ${file.name}`);
           }
           files[file.name as FileNames] = parseFile(file.content);
         }
