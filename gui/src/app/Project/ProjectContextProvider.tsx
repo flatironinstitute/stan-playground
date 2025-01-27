@@ -88,11 +88,7 @@ const ProjectContextProvider: FunctionComponent<
     localStorage.removeItem("stan-playground-saved-state");
   }, [searchParams, setSearchParams]);
 
-  return (
-    <ProjectContext.Provider value={{ data, update }}>
-      {children}
-    </ProjectContext.Provider>
-  );
+  return <ProjectContext value={{ data, update }}>{children}</ProjectContext>;
 };
 
 export default ProjectContextProvider;

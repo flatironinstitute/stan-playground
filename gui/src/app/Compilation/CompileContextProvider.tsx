@@ -164,7 +164,7 @@ const CompileContextProvider: FunctionComponent<
   const { isConnected, retryConnection } = useIsConnected(stanWasmServerUrl);
 
   return (
-    <CompileContext.Provider
+    <CompileContext
       value={{
         compileStatus,
         compileMessage,
@@ -177,7 +177,7 @@ const CompileContextProvider: FunctionComponent<
       }}
     >
       {children}
-    </CompileContext.Provider>
+    </CompileContext>
   );
 };
 

@@ -129,7 +129,7 @@ const UserSettingsProvider: FunctionComponent<PropsWithChildren> = ({
   }, []);
 
   return (
-    <UserSettingsContext.Provider
+    <UserSettingsContext
       value={{
         settingsWindow: {
           isOpen,
@@ -149,7 +149,7 @@ const UserSettingsProvider: FunctionComponent<PropsWithChildren> = ({
         <CssBaseline />
         {children}
       </ThemeProvider>
-    </UserSettingsContext.Provider>
+    </UserSettingsContext>
   );
 };
 
