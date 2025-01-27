@@ -10,7 +10,7 @@ import RadioGroup from "@mui/material/RadioGroup";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
-import { FunctionComponent, useCallback, useContext } from "react";
+import { FunctionComponent, useCallback, use } from "react";
 
 import {
   localCompilationServerUrl,
@@ -28,9 +28,8 @@ type ConfigureCompilationServerDialogProps = {
 const ConfigureCompilationServerDialog: FunctionComponent<
   ConfigureCompilationServerDialogProps
 > = () => {
-  const { stanWasmServerUrl, setStanWasmServerUrl } =
-    useContext(UserSettingsContext);
-  const { isConnected, retryConnection } = useContext(CompileContext);
+  const { stanWasmServerUrl, setStanWasmServerUrl } = use(UserSettingsContext);
+  const { isConnected, retryConnection } = use(CompileContext);
 
   const serverType = serverTypeForUrl(stanWasmServerUrl);
 

@@ -1,4 +1,4 @@
-import { FunctionComponent, useCallback, useContext } from "react";
+import { FunctionComponent, useCallback, use } from "react";
 
 import { Split } from "@geoffcox/react-splitter";
 import Box from "@mui/material/Box";
@@ -19,7 +19,7 @@ type SamplingWindowProps = {
 };
 
 const SamplingWindow: FunctionComponent<SamplingWindowProps> = () => {
-  const { data, update } = useContext(ProjectContext);
+  const { data, update } = use(ProjectContext);
 
   const setSamplingOpts = useCallback(
     (opts: SamplingOpts) => {
@@ -28,7 +28,7 @@ const SamplingWindow: FunctionComponent<SamplingWindowProps> = () => {
     [update],
   );
 
-  const { compiledMainJsUrl } = useContext(CompileContext);
+  const { compiledMainJsUrl } = use(CompileContext);
 
   const { sampler, latestRun } = useStanSampler(compiledMainJsUrl);
   const isSampling = latestRun.status === "sampling";

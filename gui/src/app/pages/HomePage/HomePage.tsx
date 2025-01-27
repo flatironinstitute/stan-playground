@@ -17,7 +17,7 @@ import { unreachable } from "@SpUtil/unreachable";
 import {
   FunctionComponent,
   useCallback,
-  useContext,
+  use,
   useEffect,
   useMemo,
   useRef,
@@ -30,7 +30,7 @@ type Props = {
 };
 
 const HomePage: FunctionComponent<Props> = () => {
-  const { data } = useContext(ProjectContext);
+  const { data } = use(ProjectContext);
 
   const smallScreen = useMediaQuery("(max-width:600px)");
 
@@ -89,7 +89,7 @@ type LeftViewProps = {
 };
 
 const LeftView: FunctionComponent<LeftViewProps> = () => {
-  const { data, update } = useContext(ProjectContext);
+  const { data, update } = use(ProjectContext);
 
   return (
     <Split horizontal>
@@ -119,7 +119,7 @@ const LeftView: FunctionComponent<LeftViewProps> = () => {
 };
 
 const DataEditor: FunctionComponent<unknown> = () => {
-  const { data, update } = useContext(ProjectContext);
+  const { data, update } = use(ProjectContext);
 
   const dataIsEdited = useMemo(() => {
     return data.dataFileContent !== data.ephemera.dataFileContent;

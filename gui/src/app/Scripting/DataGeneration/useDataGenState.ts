@@ -1,4 +1,4 @@
-import { useCallback, useContext, useRef, useState } from "react";
+import { useCallback, use, useRef, useState } from "react";
 import { DataSource } from "@SpCore/ProjectDataModel";
 import { writeConsoleOutToDiv } from "@SpScripting/OutputDivUtils";
 import { InterpreterStatus } from "@SpScripting/InterpreterTypes";
@@ -10,7 +10,7 @@ const useDataGenState = (source: "python" | "r") => {
   const [status, setStatus] = useState<InterpreterStatus>("idle");
   const consoleRef = useRef<HTMLDivElement | null>(null);
 
-  const { update } = useContext(ProjectContext);
+  const { update } = use(ProjectContext);
 
   const onData = useCallback(
     (newData: unknown) => {

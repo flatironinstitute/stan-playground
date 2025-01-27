@@ -17,7 +17,7 @@ import {
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import { deserializeZipToFiles, parseFile } from "@SpCore/ProjectSerialization";
 import UploadFilesArea from "@SpPages/UploadFilesArea";
-import { FunctionComponent, useCallback, useContext, useState } from "react";
+import { FunctionComponent, useCallback, use, useState } from "react";
 
 type File = { name: string; content: ArrayBuffer };
 
@@ -28,7 +28,7 @@ type LoadProjectWindowProps = {
 const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
   onClose,
 }) => {
-  const { update } = useContext(ProjectContext);
+  const { update } = use(ProjectContext);
   const [errorText, setErrorText] = useState<string>("");
   const [filesUploaded, setFilesUploaded] = useState<File[]>([]);
 

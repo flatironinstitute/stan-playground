@@ -3,7 +3,7 @@ import {
   FunctionComponent,
   PropsWithChildren,
   useCallback,
-  useContext,
+  use,
   useEffect,
   useState,
 } from "react";
@@ -101,7 +101,7 @@ const showOneTimeMessage = (url: string) => {
 const CompileContextProvider: FunctionComponent<
   PropsWithChildren<CompileContextProviderProps>
 > = ({ children }) => {
-  const { data } = useContext(ProjectContext);
+  const { data } = use(ProjectContext);
   const [compileStatus, setCompileStatus] = useState<CompileStatus>("");
   const [
     theStanFileContentThasHasBeenCompiled,
@@ -129,7 +129,7 @@ const CompileContextProvider: FunctionComponent<
     setCompiledMainJsUrl,
   ]);
 
-  const { stanWasmServerUrl } = useContext(UserSettingsContext);
+  const { stanWasmServerUrl } = use(UserSettingsContext);
 
   const handleCompile = useCallback(async () => {
     if (!showOneTimeMessage(stanWasmServerUrl)) {

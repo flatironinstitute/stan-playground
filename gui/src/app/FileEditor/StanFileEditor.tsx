@@ -6,7 +6,7 @@ import { ToolbarItem } from "@SpComponents/ToolBar";
 import { stancErrorsToCodeMarkers } from "@SpStanc/Linting";
 import useStanc from "@SpStanc/useStanc";
 import { CompileContext } from "@SpCompilation/CompileContextProvider";
-import { FunctionComponent, useContext, useMemo, useState } from "react";
+import { FunctionComponent, use, useMemo, useState } from "react";
 
 type Props = {
   fileName: string;
@@ -33,7 +33,7 @@ const StanFileEditor: FunctionComponent<Props> = ({
   );
 
   const { compileStatus, compileMessage, compile, validSyntax, isConnected } =
-    useContext(CompileContext);
+    use(CompileContext);
 
   const hasWarnings = useMemo(() => {
     return stancErrors.warnings && stancErrors.warnings.length > 0;
