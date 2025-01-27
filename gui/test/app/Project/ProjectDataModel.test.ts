@@ -7,7 +7,6 @@ import {
   isProjectMetaData,
   isSamplingOpts,
   modelHasUnsavedChanges,
-  modelHasUnsavedDataFileChanges,
   parseSamplingOpts,
   persistStateToEphemera,
   ProjectKnownFiles,
@@ -319,18 +318,7 @@ describe("Model saving and save state", () => {
       });
     });
   });
-  describe("model has unsaved data file changes", () => {
-    test("Returns false if data file matches ephemeral", () => {
-      expect(modelHasUnsavedDataFileChanges(goodDataModel as any)).toBe(false);
-    });
-    test("Returns true if data file does not match ephemeral", () => {
-      const discrepant = {
-        ...goodDataModel,
-        ephemera: { ...goodDataModel.ephemera, dataFileContent: "foo" },
-      };
-      expect(modelHasUnsavedDataFileChanges(discrepant as any)).toBe(true);
-    });
-  });
+
   describe("Persisting state to ephemera", () => {
     test("After executing, ephemera state matches data state", () => {
       const start: any = {

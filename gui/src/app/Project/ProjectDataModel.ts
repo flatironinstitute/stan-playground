@@ -1,4 +1,5 @@
 import baseObjectCheck from "@SpUtil/baseObjectCheck";
+import { ProjectFileMap } from "@SpCore/FileMapping";
 
 export enum ProjectKnownFiles {
   STANFILE = "stanFileContent",
@@ -177,10 +178,12 @@ export const modelHasUnsavedChanges = (data: ProjectDataModel): boolean => {
   return stringFileKeys.some((k) => data[k] !== data.ephemera[k]);
 };
 
-export const modelHasUnsavedDataFileChanges = (
-  data: ProjectDataModel,
-): boolean => {
-  return data.dataFileContent !== data.ephemera.dataFileContent;
+export const unsavedChangesString = (data: ProjectDataModel): string => {
+  const stringFileKeys = getStringKnownFileKeys();
+  return stringFileKeys
+    .filter((k) => data[k] !== data.ephemera[k])
+    .map((k) => ProjectFileMap[k])
+    .join(", ");
 };
 
 export const stringifyField = (
