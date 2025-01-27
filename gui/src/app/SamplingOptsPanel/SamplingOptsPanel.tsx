@@ -1,4 +1,4 @@
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import Link from "@mui/material/Link";
 import { defaultSamplingOpts, SamplingOpts } from "@SpCore/ProjectDataModel";
 import { unreachable } from "@SpUtil/unreachable";
@@ -39,15 +39,12 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({
       <Grid container spacing={sp1}>
         <Grid
           container
-          item
-          xs={12}
+          size={{ xs: 12 }}
           spacing={sp2}
           title="Number of sampling chains"
         >
-          <Grid item xs={6}>
-            # chains
-          </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}># chains</Grid>
+          <Grid size={{ xs: 6 }}>
             <NumberEdit
               value={num_chains}
               onChange={(value) =>
@@ -66,15 +63,12 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({
         </Grid>
         <Grid
           container
-          item
-          xs={12}
+          size={{ xs: 12 }}
           spacing={sp2}
           title="Number of warmup draws per chain"
         >
-          <Grid item xs={6}>
-            # warmup
-          </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}># warmup</Grid>
+          <Grid size={{ xs: 6 }}>
             <NumberEdit
               value={samplingOpts.num_warmup}
               onChange={(value) =>
@@ -92,15 +86,12 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({
         </Grid>
         <Grid
           container
-          item
-          xs={12}
+          size={{ xs: 12 }}
           spacing={sp2}
           title="Number of regular draws per chain"
         >
-          <Grid item xs={6}>
-            # samples
-          </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}># samples</Grid>
+          <Grid size={{ xs: 6 }}>
             <NumberEdit
               value={samplingOpts.num_samples}
               onChange={(value) =>
@@ -118,15 +109,12 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({
         </Grid>
         <Grid
           container
-          item
-          xs={12}
+          size={{ xs: 12 }}
           spacing={sp2}
           title="Radius of the hypercube from which initial values for the model parameters are drawn"
         >
-          <Grid item xs={6}>
-            init radius
-          </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>init radius</Grid>
+          <Grid size={{ xs: 6 }}>
             <NumberEdit
               value={samplingOpts.init_radius}
               onChange={(value) =>
@@ -144,15 +132,12 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({
         </Grid>
         <Grid
           container
-          item
-          xs={12}
+          size={{ xs: 12 }}
           spacing={sp2}
           title="Random seed for the sampler. Leave blank (not 0) for a random seed."
         >
-          <Grid item xs={6}>
-            seed
-          </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>seed</Grid>
+          <Grid size={{ xs: 6 }}>
             <NumberEdit
               value={samplingOpts.seed}
               onChange={(value) =>

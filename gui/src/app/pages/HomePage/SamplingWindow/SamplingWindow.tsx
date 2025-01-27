@@ -2,7 +2,7 @@ import { FunctionComponent, useCallback, use } from "react";
 
 import { Split } from "@geoffcox/react-splitter";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import { CompileContext } from "@SpCompilation/CompileContextProvider";
 import RunPanel from "@SpComponents/RunPanel";
 import SamplerOutputView from "@SpComponents/SamplerOutputView";
@@ -35,13 +35,13 @@ const SamplingWindow: FunctionComponent<SamplingWindowProps> = () => {
   return (
     <Split horizontal initialPrimarySize="30%" minSecondarySize="10%">
       <Grid container>
-        <Grid item xs={12} sm={4}>
+        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <SamplingOptsPanel
             samplingOpts={data.samplingOpts}
             setSamplingOpts={!isSampling ? setSamplingOpts : undefined}
           />
         </Grid>
-        <Grid item xs={12} sm>
+        <Grid size={{ xs: 12, md: 6 }}>
           <RunPanel
             sampler={sampler}
             latestRun={latestRun}

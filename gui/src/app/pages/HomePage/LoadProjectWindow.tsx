@@ -1,6 +1,6 @@
 import { Delete } from "@mui/icons-material";
 import Button from "@mui/material/Button";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -168,14 +168,14 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
               </Table>
             </TableContainer>
             <Grid container justifyContent="center" spacing={1}>
-              <Grid item>
+              <Grid>
                 <Button
                   onClick={() => importUploadedFiles({ replaceProject: true })}
                 >
                   Load into a NEW project
                 </Button>
               </Grid>
-              <Grid item>
+              <Grid>
                 <Button
                   onClick={() => importUploadedFiles({ replaceProject: false })}
                 >
