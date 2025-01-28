@@ -1,8 +1,9 @@
-import { FunctionComponent, useMemo } from "react";
+import { FunctionComponent, use, useMemo } from "react";
 import { Save } from "@mui/icons-material";
 import Link from "@mui/material/Link";
 import IconButton from "@mui/material/IconButton";
-import { useTheme } from "@mui/material/styles";
+import { styled, useTheme } from "@mui/material/styles";
+import { UserSettingsContext } from "@SpSettings/UserSettings";
 
 type Palletes =
   | "primary"
@@ -39,6 +40,15 @@ type ToolbarProps = {
   readOnly: boolean;
 };
 
+const EditorMenuBar = styled("div")(({ theme }) => [
+  {
+    backgroundColor: theme.palette.grey[300],
+  },
+  theme.applyStyles("dark", {
+    backgroundColor: theme.palette.grey[800],
+  }),
+]);
+
 export const ToolBar: FunctionComponent<ToolbarProps> = ({
   items,
   label,
@@ -72,22 +82,15 @@ export const ToolBar: FunctionComponent<ToolbarProps> = ({
     return editorItems.concat(items);
   }, [edited, items, onSaveText, readOnly]);
 
-  const theme = useTheme();
-  const backgroundColor = useMemo(() => {
-    return theme.palette.mode === "light"
-      ? theme.palette.grey[300]
-      : theme.palette.grey[800];
-  }, [theme.palette.grey, theme.palette.mode]);
-
   return (
     <div className="NotSelectable">
-      <div className="EditorMenuBar" style={{ backgroundColor }}>
+      <EditorMenuBar className="EditorMenuBar">
         <span className="EditorTitle">{label}</span>
         {toolBarItems &&
           toolBarItems.map((item, i) => (
             <ToolbarItemComponent key={i} item={item} />
           ))}
-      </div>
+      </EditorMenuBar>
     </div>
   );
 };
@@ -97,14 +100,13 @@ const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
 }) => {
   const theme = useTheme();
 
+  const { theme: userTheme } = use(UserSettingsContext);
   let color =
-    theme.palette.mode === "light"
-      ? theme.palette.grey[700]
-      : theme.palette.grey[400];
+    userTheme === "light" ? theme.palette.grey[700] : theme.palette.grey[400];
 
   if (item.color) {
     const [pallete_color, color_variant] = item.color.split(".");
-    const pallete = theme.palette[pallete_color as Palletes];
+    const pallete = theme.vars.palette[pallete_color as Palletes];
     color = pallete[(color_variant ?? "main") as Variant];
   }
 

@@ -1,8 +1,8 @@
 import { Editor, loader, useMonaco } from "@monaco-editor/react";
-import { useTheme } from "@mui/material/styles";
 
 import monacoAddStanLang from "@SpComponents/stanLang";
 import { ToolBar, ToolbarItem } from "@SpComponents/ToolBar";
+import { UserSettingsContext } from "@SpSettings/UserSettings";
 import { CodeMarker } from "@SpStanc/Linting";
 import {
   editor,
@@ -13,6 +13,7 @@ import {
 } from "monaco-editor";
 import {
   FunctionComponent,
+  use,
   useCallback,
   useEffect,
   useMemo,
@@ -140,11 +141,11 @@ const TextEditor: FunctionComponent<Props> = ({
     return editedText !== text;
   }, [editedText, text]);
 
-  const muiTheme = useTheme();
+  const { theme: userTheme } = use(UserSettingsContext);
 
   const theme = useMemo(
-    () => (muiTheme.palette.mode === "dark" ? "vs-dark" : "vs"),
-    [muiTheme.palette.mode],
+    () => (userTheme === "dark" ? "vs-dark" : "vs"),
+    [userTheme],
   );
 
   return (

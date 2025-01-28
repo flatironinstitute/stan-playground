@@ -89,7 +89,10 @@ const AnalysisPyWindow: FunctionComponent<AnalysisWindowProps> = ({
   );
 };
 
-const addImageToDiv = (imagesRef: RefObject<HTMLDivElement>, b64: string) => {
+const addImageToDiv = (
+  imagesRef: RefObject<HTMLDivElement | null>,
+  b64: string,
+) => {
   const imageUrl = `data:image/png;base64,${b64}`;
 
   const img = document.createElement("img");

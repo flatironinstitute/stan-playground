@@ -9,7 +9,7 @@ import {
 import AppBar from "@mui/material/AppBar";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
-import { FunctionComponent, useContext, useMemo } from "react";
+import { FunctionComponent, use, useMemo } from "react";
 import SettingsWindow from "@SpSettings/SettingsWindow";
 import { UserSettingsContext } from "@SpSettings/UserSettings";
 
@@ -23,7 +23,7 @@ const TopBar: FunctionComponent<TopBarProps> = ({ title, onSetCollapsed }) => {
     toggleTheme,
     theme,
     settingsWindow: { openSettings },
-  } = useContext(UserSettingsContext);
+  } = use(UserSettingsContext);
   const isLight = useMemo(() => theme === "light", [theme]);
 
   return (

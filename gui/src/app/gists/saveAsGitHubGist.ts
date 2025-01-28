@@ -15,7 +15,7 @@ const saveAsGitHubGist = async (
     defaultDescription,
   );
   if (!description) {
-    throw Error("No description provided");
+    throw new Error("No description provided");
   }
   const octokit = new Octokit({
     auth: personalAccessToken,

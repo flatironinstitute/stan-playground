@@ -1,6 +1,6 @@
 import { Delete } from "@mui/icons-material";
 import Button from "@mui/material/Button";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -17,7 +17,7 @@ import {
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import { deserializeZipToFiles, parseFile } from "@SpCore/ProjectSerialization";
 import UploadFilesArea from "@SpPages/UploadFilesArea";
-import { FunctionComponent, useCallback, useContext, useState } from "react";
+import { FunctionComponent, useCallback, use, useState } from "react";
 
 type File = { name: string; content: ArrayBuffer };
 
@@ -28,7 +28,7 @@ type LoadProjectWindowProps = {
 const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
   onClose,
 }) => {
-  const { update } = useContext(ProjectContext);
+  const { update } = use(ProjectContext);
   const [errorText, setErrorText] = useState<string>("");
   const [filesUploaded, setFilesUploaded] = useState<File[]>([]);
 
@@ -60,18 +60,20 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
         for (const file of filesUploaded) {
           if (file.name.endsWith(".stan")) {
             if (stanFileName !== "") {
-              throw Error("Only one .stan file can be uploaded at a time");
+              throw new Error("Only one .stan file can be uploaded at a time");
             }
             files["main.stan"] = parseFile(file.content);
             stanFileName = file.name;
             continue;
           }
           if (file.name.endsWith(".zip")) {
-            throw Error(".zip files cannot be uploaded alongside other files");
+            throw new Error(
+              ".zip files cannot be uploaded alongside other files",
+            );
           }
 
           if (!Object.values(FileNames).includes(file.name as any)) {
-            throw Error(`Unsupported file name: ${file.name}`);
+            throw new Error(`Unsupported file name: ${file.name}`);
           }
           files[file.name as FileNames] = parseFile(file.content);
         }
@@ -166,14 +168,14 @@ const LoadProjectWindow: FunctionComponent<LoadProjectWindowProps> = ({
               </Table>
             </TableContainer>
             <Grid container justifyContent="center" spacing={1}>
-              <Grid item>
+              <Grid>
                 <Button
                   onClick={() => importUploadedFiles({ replaceProject: true })}
                 >
                   Load into a NEW project
                 </Button>
               </Grid>
-              <Grid item>
+              <Grid>
                 <Button
                   onClick={() => importUploadedFiles({ replaceProject: false })}
                 >

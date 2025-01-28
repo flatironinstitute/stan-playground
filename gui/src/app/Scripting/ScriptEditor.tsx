@@ -6,13 +6,7 @@ import { FileNames } from "@SpCore/FileMapping";
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import { ProjectKnownFiles } from "@SpCore/ProjectDataModel";
 import { normalizeLineEndings } from "@SpUtil/normalizeLineEndings";
-import {
-  FunctionComponent,
-  RefObject,
-  useCallback,
-  useContext,
-  useMemo,
-} from "react";
+import { FunctionComponent, RefObject, useCallback, use, useMemo } from "react";
 import { InterpreterStatus } from "./InterpreterTypes";
 import { Split } from "@geoffcox/react-splitter";
 import { editor, KeyCode, KeyMod } from "monaco-editor";
@@ -29,7 +23,7 @@ export type ScriptEditorProps = {
   notRunnableReason?: string;
   onHelp?: () => void;
   contentOnEmpty?: string | HTMLSpanElement;
-  consoleRef: RefObject<HTMLDivElement>;
+  consoleRef: RefObject<HTMLDivElement | null>;
 };
 
 const ScriptEditor: FunctionComponent<ScriptEditorProps> = ({
@@ -44,7 +38,7 @@ const ScriptEditor: FunctionComponent<ScriptEditorProps> = ({
   contentOnEmpty,
   consoleRef,
 }) => {
-  const { data, update } = useContext(ProjectContext);
+  const { data, update } = use(ProjectContext);
 
   const content = data[dataKey];
   const editedContent = data.ephemera[dataKey];
@@ -196,7 +190,7 @@ const makeToolbar = (o: {
 };
 
 type ConsoleOutputWindowProps = {
-  consoleRef: RefObject<HTMLDivElement>;
+  consoleRef: RefObject<HTMLDivElement | null>;
 };
 
 const ConsoleOutputWindow: FunctionComponent<ConsoleOutputWindowProps> = ({

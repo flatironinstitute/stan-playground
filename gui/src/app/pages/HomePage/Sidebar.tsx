@@ -13,7 +13,7 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
-import { FunctionComponent, useContext, useMemo } from "react";
+import { FunctionComponent, use, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 type SidebarProps = {
@@ -35,7 +35,7 @@ export const drawerWidth = 180;
 
 const Sidebar: FunctionComponent<SidebarProps> = ({ collapsed }) => {
   // note: this is close enough to pass in directly if we wish
-  const { data } = useContext(ProjectContext);
+  const { data } = use(ProjectContext);
 
   const navigate = useNavigate();
 

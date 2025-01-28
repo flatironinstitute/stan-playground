@@ -3,7 +3,7 @@
 // https://github.com/mui/material-ui/issues/25189#issuecomment-1321236185
 
 import { styled } from "@mui/material/styles";
-import { FunctionComponent } from "react";
+import { FunctionComponent, JSX } from "react";
 
 const Container = styled("div")({
   display: "flex",
@@ -15,10 +15,10 @@ const Container = styled("div")({
 const Item = styled("div")(({ theme }) => ({
   width: "95%",
   margin: "0 auto",
-  [theme.breakpoints.up("md").replace("@media", "@container")]: {
+  [theme.containerQueries.up("md")]: {
     width: "calc(50% - 4px)",
   },
-  [theme.breakpoints.up("lg").replace("@media", "@container")]: {
+  [theme.containerQueries.up("lg")]: {
     width: "calc(100% / 4 - 12px)",
   },
 }));

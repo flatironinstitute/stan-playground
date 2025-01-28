@@ -1,8 +1,8 @@
-import { FunctionComponent, useCallback, useContext } from "react";
+import { FunctionComponent, useCallback, use } from "react";
 
 import { Split } from "@geoffcox/react-splitter";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import { CompileContext } from "@SpCompilation/CompileContextProvider";
 import RunPanel from "@SpComponents/RunPanel";
 import SamplerOutputView from "@SpComponents/SamplerOutputView";
@@ -19,7 +19,7 @@ type SamplingWindowProps = {
 };
 
 const SamplingWindow: FunctionComponent<SamplingWindowProps> = () => {
-  const { data, update } = useContext(ProjectContext);
+  const { data, update } = use(ProjectContext);
 
   const setSamplingOpts = useCallback(
     (opts: SamplingOpts) => {
@@ -28,20 +28,20 @@ const SamplingWindow: FunctionComponent<SamplingWindowProps> = () => {
     [update],
   );
 
-  const { compiledMainJsUrl } = useContext(CompileContext);
+  const { compiledMainJsUrl } = use(CompileContext);
 
   const { sampler, latestRun } = useStanSampler(compiledMainJsUrl);
   const isSampling = latestRun.status === "sampling";
   return (
     <Split horizontal initialPrimarySize="30%" minSecondarySize="10%">
       <Grid container>
-        <Grid item xs={12} sm={4}>
+        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <SamplingOptsPanel
             samplingOpts={data.samplingOpts}
             setSamplingOpts={!isSampling ? setSamplingOpts : undefined}
           />
         </Grid>
-        <Grid item xs={12} sm>
+        <Grid size={{ xs: 12, md: 6 }}>
           <RunPanel
             sampler={sampler}
             latestRun={latestRun}

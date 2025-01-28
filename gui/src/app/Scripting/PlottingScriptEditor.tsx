@@ -3,7 +3,7 @@ import ScriptEditor, { ScriptEditorProps } from "./ScriptEditor";
 import { Split } from "@geoffcox/react-splitter";
 
 const PlottingScriptEditor: FunctionComponent<
-  ScriptEditorProps & { imagesRef: RefObject<HTMLDivElement> }
+  ScriptEditorProps & { imagesRef: RefObject<HTMLDivElement | null> }
 > = (props) => {
   return (
     <Split>
@@ -14,7 +14,7 @@ const PlottingScriptEditor: FunctionComponent<
 };
 
 type ImageOutputWindowProps = {
-  imagesRef: RefObject<HTMLDivElement>;
+  imagesRef: RefObject<HTMLDivElement | null>;
 };
 
 const ImageOutputWindow: FunctionComponent<ImageOutputWindowProps> = ({

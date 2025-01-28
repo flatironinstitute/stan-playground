@@ -1,4 +1,4 @@
-import { FunctionComponent, useCallback, useContext, useMemo } from "react";
+import { FunctionComponent, useCallback, use, useMemo } from "react";
 
 import Button from "@mui/material/Button";
 import { CompileContext } from "@SpCompilation/CompileContextProvider";
@@ -22,7 +22,7 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
   samplingOpts,
 }) => {
   const { status: runStatus, errorMessage, progress } = latestRun;
-  const { data: projectData } = useContext(ProjectContext);
+  const { data: projectData } = use(ProjectContext);
 
   const handleRun = useCallback(async () => {
     if (!sampler) return;
@@ -35,7 +35,7 @@ const RunPanel: FunctionComponent<RunPanelProps> = ({
   }, [sampler]);
 
   const { compile, compileStatus, validSyntax, isConnected } =
-    useContext(CompileContext);
+    use(CompileContext);
 
   const modelIsPresent = useMemo(() => {
     return projectData.stanFileContent.trim();

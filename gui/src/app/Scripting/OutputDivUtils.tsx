@@ -3,7 +3,7 @@ import { RefObject } from "react";
 type ConsoleOutType = "stdout" | "stderr";
 
 export const writeConsoleOutToDiv = (
-  parentDiv: RefObject<HTMLDivElement>,
+  parentDiv: RefObject<HTMLDivElement | null>,
   x: string,
   type: ConsoleOutType,
 ) => {
@@ -17,7 +17,9 @@ export const writeConsoleOutToDiv = (
   parentDiv.current.appendChild(divElement);
 };
 
-export const clearOutputDivs = (...parentDiv: RefObject<HTMLDivElement>[]) => {
+export const clearOutputDivs = (
+  ...parentDiv: RefObject<HTMLDivElement | null>[]
+) => {
   for (const div of parentDiv) {
     if (div.current) div.current.innerHTML = "";
   }

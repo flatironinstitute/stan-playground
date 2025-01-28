@@ -7,7 +7,7 @@ import {
 import { UserSettingsContext } from "@SpSettings/UserSettings";
 import { CompileContext } from "@SpCompilation/CompileContextProvider";
 
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, use, useEffect, useMemo, useState } from "react";
 // https://vitejs.dev/guide/assets#importing-script-as-a-worker
 // https://vitejs.dev/guide/assets#importing-asset-as-url
 import stancWorkerURL from "@SpStanc/stancWorker?worker&url";
@@ -19,7 +19,7 @@ const useStanc = (
 ) => {
   const [stancErrors, setStancErrors] = useState<StancErrors>({});
   const [stancWorker, setStancWorker] = useState<Worker | undefined>(undefined);
-  const { pedantic } = useContext(UserSettingsContext);
+  const { pedantic } = use(UserSettingsContext);
 
   const post = useCallback(
     (message: StancRequestMessage) => {
@@ -81,7 +81,7 @@ const useStanc = (
     });
   }, [post, modelName, code, pedantic]);
 
-  const { setValidSyntax } = useContext(CompileContext);
+  const { setValidSyntax } = use(CompileContext);
   const validSyntax = useMemo(() => {
     return stancErrors.errors === undefined;
   }, [stancErrors]);

@@ -6,15 +6,15 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormHelperText from "@mui/material/FormHelperText";
 import FormLabel from "@mui/material/FormLabel";
 
-import { useContext } from "react";
+import { use } from "react";
 
 import { ProjectContext } from "@SpCore/ProjectContextProvider";
 import { UserSettingsContext } from "./UserSettings";
 
 const PersonalSettingsDialogue = () => {
-  const { update } = useContext(ProjectContext);
+  const { update } = use(ProjectContext);
   const { pedantic, togglePedantic, theme, toggleTheme } =
-    useContext(UserSettingsContext);
+    use(UserSettingsContext);
 
   return (
     <div className="dialogWrapper">

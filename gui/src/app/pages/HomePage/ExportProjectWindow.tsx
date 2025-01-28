@@ -1,4 +1,4 @@
-import { FunctionComponent, useCallback, useContext, useState } from "react";
+import { FunctionComponent, useCallback, use, useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -25,7 +25,7 @@ type ExportProjectWindowProps = {
 const ExportProjectWindow: FunctionComponent<ExportProjectWindowProps> = ({
   onClose,
 }) => {
-  const { data, update } = useContext(ProjectContext);
+  const { data, update } = use(ProjectContext);
   const fileManifest = mapModelToFileManifest(data);
 
   const [exportingToGist, setExportingToGist] = useState(false);

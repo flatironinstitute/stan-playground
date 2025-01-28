@@ -1,3 +1,4 @@
+import CustomTheming from "@SpPages/CustomTheming";
 import UserSettingsProvider from "@SpSettings/UserSettingsProvider";
 import ProjectContextProvider from "@SpCore/ProjectContextProvider";
 import CompileContextProvider from "@SpCompilation/CompileContextProvider";
@@ -9,16 +10,18 @@ import { BrowserRouter } from "react-router-dom";
 const App = () => {
   return (
     <BrowserRouter>
-      <UserSettingsProvider>
-        <div className="MainWindow">
-          <ProjectContextProvider>
-            <CompileContextProvider>
-              <HomePage />
-            </CompileContextProvider>
-          </ProjectContextProvider>
-          <Analytics />
-        </div>
-      </UserSettingsProvider>
+      <CustomTheming>
+        <UserSettingsProvider>
+          <div className="MainWindow">
+            <ProjectContextProvider>
+              <CompileContextProvider>
+                <HomePage />
+              </CompileContextProvider>
+            </ProjectContextProvider>
+            <Analytics />
+          </div>
+        </UserSettingsProvider>
+      </CustomTheming>
     </BrowserRouter>
   );
 };

@@ -3,7 +3,7 @@ import { StancErrors } from "@SpStanc/Types";
 import { Close, Done } from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
-import { FunctionComponent, useContext } from "react";
+import { FunctionComponent, use } from "react";
 
 type Props = {
   stancErrors: StancErrors;
@@ -14,8 +14,6 @@ const StanCompileResultWindow: FunctionComponent<Props> = ({
   stancErrors,
   onClose,
 }) => {
-  const { pedantic } = useContext(UserSettingsContext);
-
   let content: any;
   if (stancErrors.errors && stancErrors.errors.length > 0) {
     content = (
@@ -29,6 +27,7 @@ const StanCompileResultWindow: FunctionComponent<Props> = ({
       </Box>
     );
   } else if (stancErrors.warnings && stancErrors.warnings.length > 0) {
+    const { pedantic } = use(UserSettingsContext);
     content = (
       <Box color="info.dark">
         <h3>Warnings {pedantic ? "(pedantic)" : ""}</h3>

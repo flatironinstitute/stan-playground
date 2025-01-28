@@ -8,12 +8,6 @@ import {
 } from "@SpCore/ProjectDataModel";
 import { loadFromProjectFiles } from "@SpCore/ProjectSerialization";
 import { unreachable } from "@SpUtil/unreachable";
-import { Reducer } from "react";
-
-export type ProjectReducerType = Reducer<
-  ProjectDataModel,
-  ProjectReducerAction
->;
 
 export type ProjectReducerAction =
   | {

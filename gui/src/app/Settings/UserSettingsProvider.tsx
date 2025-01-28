@@ -1,6 +1,4 @@
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import CssBaseline from "@mui/material/CssBaseline";
-import useMediaQuery from "@mui/material/useMediaQuery";
+import { useColorScheme } from "@mui/material/styles";
 
 import {
   FunctionComponent,
@@ -16,21 +14,10 @@ import { useDialogControls } from "@SpComponents/CloseableDialog";
 import { SettingsTab } from "./SettingsWindow";
 import {
   publicCompilationServerUrl,
-  ThemeSetting,
   UserSettingsContext,
 } from "./UserSettings";
 
-const colorPalette = {
-  primary: {
-    main: "#E16D44",
-  },
-  secondary: {
-    main: "#44B8E1",
-  },
-} as const;
-
 const defaultSettings = {
-  theme: "light",
   pedantic: false,
   serverUrl: publicCompilationServerUrl,
 } as const;
@@ -38,7 +25,7 @@ const defaultSettings = {
 const loadStoredSettings = () => {
   const storedSettings = JSON.parse(localStorage.getItem("settings") ?? "null");
   if (storedSettings === null) {
-    return null;
+    return defaultSettings;
   }
   return {
     // apply defaults for forward compatibility
@@ -47,32 +34,13 @@ const loadStoredSettings = () => {
   };
 };
 
-const storedSettings = loadStoredSettings();
-
-const useStoredOrDefaultSettings = () => {
-  const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
-
-  if (storedSettings) {
-    return storedSettings;
-  }
-
-  return {
-    ...defaultSettings,
-    theme: prefersDarkMode ? "dark" : "light",
-  };
-};
+const { pedantic: defaultPedantic, serverUrl: defaultStanWasmServerUrl } =
+  loadStoredSettings();
 
 const UserSettingsProvider: FunctionComponent<PropsWithChildren> = ({
   children,
 }) => {
-  const {
-    theme: defaultTheme,
-    pedantic: defaultPedantic,
-    serverUrl: defaultStanWasmServerUrl,
-  } = useStoredOrDefaultSettings();
-
   const [settingsTab, setSettingsTab] = useState<SettingsTab>("compilation");
-  const [themeMode, setThemeMode] = useState<ThemeSetting>(defaultTheme);
   const [pedantic, setPedantic] = useState<boolean>(defaultPedantic);
   const [stanWasmServerUrl, setStanWasmServerUrl] = useState<string>(
     defaultStanWasmServerUrl,
@@ -83,12 +51,11 @@ const UserSettingsProvider: FunctionComponent<PropsWithChildren> = ({
     localStorage.setItem(
       "settings",
       JSON.stringify({
-        theme: themeMode,
         pedantic,
         serverUrl: stanWasmServerUrl,
       }),
     );
-  }, [stanWasmServerUrl, themeMode, pedantic]);
+  }, [stanWasmServerUrl, pedantic]);
 
   // ------------------- Settings window -------------------
   const {
@@ -105,31 +72,27 @@ const UserSettingsProvider: FunctionComponent<PropsWithChildren> = ({
     [handleOpen],
   );
 
-  // ------------------- Theme -------------------
-
-  const muiTheme = useMemo(
-    () =>
-      createTheme({
-        palette: { ...colorPalette, mode: themeMode },
-      }),
-    [themeMode],
-  );
-
-  const toggleTheme = useCallback(() => {
-    setThemeMode((prev) => {
-      const newTheme = prev === "light" ? "dark" : "light";
-      return newTheme;
-    });
-  }, []);
-
   // ------------------- Pedantic -------------------
 
   const togglePedantic = useCallback(() => {
     setPedantic((prev) => !prev);
   }, []);
 
+  // ------------------- Theme -------------------
+  // defaults and storage handled by mui
+  const { mode, setMode, systemMode } = useColorScheme();
+  const theme = useMemo(
+    () => (mode === "system" ? systemMode : mode) ?? "light",
+    [mode, systemMode],
+  );
+  const isLight = useMemo(() => theme === "light", [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setMode(isLight ? "dark" : "light");
+  }, [isLight, setMode]);
+
   return (
-    <UserSettingsContext.Provider
+    <UserSettingsContext
       value={{
         settingsWindow: {
           isOpen,
@@ -137,7 +100,7 @@ const UserSettingsProvider: FunctionComponent<PropsWithChildren> = ({
           closeSettings,
           settingsTab,
         },
-        theme: themeMode,
+        theme,
         toggleTheme,
         pedantic,
         togglePedantic,
@@ -145,11 +108,8 @@ const UserSettingsProvider: FunctionComponent<PropsWithChildren> = ({
         setStanWasmServerUrl,
       }}
     >
-      <ThemeProvider theme={muiTheme}>
-        <CssBaseline />
-        {children}
-      </ThemeProvider>
-    </UserSettingsContext.Provider>
+      {children}
+    </UserSettingsContext>
   );
 };
 

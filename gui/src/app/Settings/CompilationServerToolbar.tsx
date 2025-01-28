@@ -1,6 +1,6 @@
 import { Cancel, Check } from "@mui/icons-material";
 
-import { FunctionComponent, useContext } from "react";
+import { FunctionComponent, use } from "react";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import {
@@ -21,9 +21,9 @@ const CompilationServerConnectionControl: FunctionComponent<
   const {
     settingsWindow: { openSettings },
     stanWasmServerUrl,
-  } = useContext(UserSettingsContext);
+  } = use(UserSettingsContext);
 
-  const { isConnected } = useContext(CompileContext);
+  const { isConnected } = use(CompileContext);
 
   const serverType = serverTypeForUrl(stanWasmServerUrl);
 

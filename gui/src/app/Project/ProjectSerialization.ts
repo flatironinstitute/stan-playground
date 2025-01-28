@@ -40,7 +40,7 @@ export const deserializeProjectFromLocalStorage = (
     stringFileKeys.forEach((k) => (intermediary.ephemera[k] = intermediary[k]));
     if (!isProjectDataModel(intermediary)) {
       console.warn(intermediary);
-      throw Error("Deserialized data is not a valid ProjectDataModel");
+      throw new Error("Deserialized data is not a valid ProjectDataModel");
     }
     return intermediary;
   } catch (e) {
@@ -114,7 +114,7 @@ const loadMetaFromString = (
 ): ProjectDataModel => {
   const newMeta = JSON.parse(json);
   if (!isProjectMetaData(newMeta)) {
-    throw Error("Deserialized meta is not valid");
+    throw new Error("Deserialized meta is not valid");
   }
   const newMetaMember = clearExisting
     ? { ...newMeta }
