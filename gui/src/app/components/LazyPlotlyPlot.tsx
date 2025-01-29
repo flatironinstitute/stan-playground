@@ -22,18 +22,18 @@ const LazyPlotlyPlot: FunctionComponent<PlotParams> = ({ data, layout }) => {
   );
 
   return (
-    <Suspense
-      fallback={
-        <div className="PlotLoader">
-          <CircularProgress color="info" />
-          <p className="details">Loading Plotly.js</p>
-        </div>
-      }
-    >
-      <div ref={ref}>
+    <div ref={ref}>
+      <Suspense
+        fallback={
+          <div className="PlotLoader">
+            <CircularProgress color="info" />
+            <p className="details">Loading Plotly.js</p>
+          </div>
+        }
+      >
         <Plot data={data} layout={layoutWithWidth} />
-      </div>
-    </Suspense>
+      </Suspense>
+    </div>
   );
 };
 
