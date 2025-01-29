@@ -27,8 +27,9 @@
   margin: 0px;
   padding: 1px;
 }
+
 /* Compilation Results (StanCompileResultWindow) */
-.ErrorsWindow {
+.CompileResultPanel {
   height: 100%;
   width: 100%;
   overflow: auto;

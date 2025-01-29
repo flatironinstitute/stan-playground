@@ -14,7 +14,7 @@ const HomePage: FunctionComponent = () => {
 
   const smallScreen = useMediaQuery("(max-width:600px)");
 
-  const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(smallScreen);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(smallScreen);
 
   // We automatically collapse the panel if user has resized the window to be
   // too small but we only want to do this right when we cross the threshold,
@@ -24,7 +24,7 @@ const HomePage: FunctionComponent = () => {
   useEffect(() => {
     if (smallScreen !== lastShouldBeCollapsed.current) {
       lastShouldBeCollapsed.current = smallScreen;
-      setLeftPanelCollapsed(smallScreen);
+      setSidebarCollapsed(smallScreen);
     }
   }, [smallScreen]);
 
@@ -34,11 +34,11 @@ const HomePage: FunctionComponent = () => {
 
   return (
     <Box display="flex" flexDirection="column" height="100%">
-      <TopBar title={data.meta.title} onSetCollapsed={setLeftPanelCollapsed} />
+      <TopBar title={data.meta.title} onSetCollapsed={setSidebarCollapsed} />
 
-      <Sidebar collapsed={leftPanelCollapsed} />
+      <Sidebar collapsed={sidebarCollapsed} />
 
-      <MovingBox open={leftPanelCollapsed} flex="1" minHeight="0">
+      <MovingBox open={sidebarCollapsed} flex="1" minHeight="0">
         <Split minPrimarySize="80px" minSecondarySize="120px">
           <ModelDataArea />
           <ControlArea />

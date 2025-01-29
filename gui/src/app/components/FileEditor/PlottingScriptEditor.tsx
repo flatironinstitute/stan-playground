@@ -8,16 +8,16 @@ const PlottingScriptEditor: FunctionComponent<
   return (
     <Split>
       <ScriptEditor {...props} />
-      <ImageOutputWindow imagesRef={props.imagesRef} />
+      <ImageOutputPanel imagesRef={props.imagesRef} />
     </Split>
   );
 };
 
-type ImageOutputWindowProps = {
+type ImageOutputProps = {
   imagesRef: RefObject<HTMLDivElement | null>;
 };
 
-const ImageOutputWindow: FunctionComponent<ImageOutputWindowProps> = ({
+const ImageOutputPanel: FunctionComponent<ImageOutputProps> = ({
   imagesRef,
 }) => {
   return <div className="ImageOutputArea" ref={imagesRef} />;

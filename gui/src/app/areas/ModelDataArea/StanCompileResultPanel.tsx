@@ -47,7 +47,7 @@ const StanCompileResultPanel: FunctionComponent<StanCompileResultProps> = ({
   }
 
   return (
-    <div className="ErrorsWindow">
+    <div className="CompileResultPanel">
       <IconButton size="small" onClick={onClose} title="Close">
         <Close fontSize="inherit" />
       </IconButton>

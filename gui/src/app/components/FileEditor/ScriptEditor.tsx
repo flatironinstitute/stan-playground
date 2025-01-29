@@ -117,7 +117,7 @@ const ScriptEditor: FunctionComponent<ScriptEditorProps> = ({
         contentOnEmpty={contentOnEmpty}
         actions={runCtrlEnter}
       />
-      <ConsoleOutputWindow consoleRef={consoleRef} />
+      <ConsoleOutputPanel consoleRef={consoleRef} />
     </Split>
   );
 };
@@ -189,11 +189,11 @@ const makeToolbar = (o: {
   return ret;
 };
 
-type ConsoleOutputWindowProps = {
+type ConsoleOutputProps = {
   consoleRef: RefObject<HTMLDivElement | null>;
 };
 
-const ConsoleOutputWindow: FunctionComponent<ConsoleOutputWindowProps> = ({
+const ConsoleOutputPanel: FunctionComponent<ConsoleOutputProps> = ({
   consoleRef,
 }) => {
   return (
