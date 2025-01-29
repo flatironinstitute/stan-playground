@@ -1,9 +1,9 @@
 import CircularProgress from "@mui/material/CircularProgress";
-import React, { FunctionComponent, Suspense } from "react";
+import React, { FunctionComponent, Suspense, useMemo } from "react";
+import useMeasure from "react-use-measure";
 
 import type { PlotParams } from "react-plotly.js";
 import createPlotlyComponent from "react-plotly.js/factory";
-import useMeasure from "react-use-measure";
 const Plot = React.lazy(async () => {
   const plotly = await import("plotly.js-cartesian-dist");
   return { default: createPlotlyComponent(plotly) };
@@ -11,21 +11,24 @@ const Plot = React.lazy(async () => {
 
 const LazyPlotlyPlot: FunctionComponent<PlotParams> = ({ data, layout }) => {
   // plotly has a reactive setting, but it is buggy
-  const [ref, { width }] = useMeasure();
+  const [ref, { width }] = useMeasure({ debounce: 100 });
 
-  const layoutWithWidth = {
-    ...layout,
-    width: width,
-  };
+  const layoutWithWidth = useMemo(
+    () => ({
+      ...layout,
+      width: width,
+    }),
+    [layout, width],
+  );
 
   return (
     <div ref={ref}>
       <Suspense
         fallback={
-          <>
-            <CircularProgress />
-            <p>Loading Plotly.js</p>
-          </>
+          <div className="PlotLoader">
+            <CircularProgress color="info" />
+            <p className="details">Loading Plotly.js</p>
+          </div>
         }
       >
         <Plot data={data} layout={layoutWithWidth} />
