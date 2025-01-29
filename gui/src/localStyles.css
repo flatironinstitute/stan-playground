@@ -160,10 +160,6 @@ span.EditorTitle {
   width: 85%;
 }
 
-/* Summary View */
-.SummaryViewWrapper {
-}
-
 /* Draws */
 
 .DrawAbbreviationToggle {
@@ -174,18 +170,6 @@ span.EditorTitle {
 
 .PlotAbbreviationToggle {
   padding: 5px;
-}
-
-/* Trace Plots */
-.TracePlotsView {
-}
-
-.SequencePlotChild {
-  position: relative;
-}
-
-.SequencePlotPadding {
-  height: 4px;
 }
 
 .PlotLoader {
