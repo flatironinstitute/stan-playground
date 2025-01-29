@@ -188,6 +188,12 @@ span.EditorTitle {
   height: 4px;
 }
 
+.PlotLoader {
+  padding: 10px;
+  display: grid;
+  place-items: center;
+}
+
 /* Sampling Opts ------ */
 .SamplingOptsWrapper {
   padding: 10px;
