@@ -21,6 +21,12 @@ import monacoAddStanLang from "./monacoStanLanguage";
 // importantly, it downloads from a CDN, so we need to make sure we
 // only depend on types from the monaco-editor package to avoid
 // downloading twice.
+
+loader.config({
+  paths: {
+    vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs",
+  },
+});
 loader.init().then(monacoAddStanLang);
 
 type Props = {
@@ -170,6 +176,7 @@ const TextEditor: FunctionComponent<Props> = ({
       />
       <Editor
         defaultLanguage={language}
+        aria-label={label}
         onChange={handleChange}
         onMount={(editor, _) => setEditor(editor)}
         options={{
