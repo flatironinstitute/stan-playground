@@ -8,8 +8,8 @@ to invent some of our own nomeclature to describe the sub-units of UI:
 - **Pages** (`gui/src/app/pages`) are web pages. We only have one, `HomePage`.
   A page is made up of Areas, and may be covered by Windows.
 
-- **Areas** (`gui/src/app/areas`) are subdivisions of a page _with a_ unique
-  _purpose_. An area can contain other areas which serve distinct sub-purposes,
+- **Areas** (`gui/src/app/areas`) are subdivisions of a page with a _unique
+  purpose_. An Area can contain other Areas which serve distinct sub-purposes,
   or one or more Panels.
 
   For example, the left half of the screen when you load Stan Playground
@@ -20,16 +20,17 @@ to invent some of our own nomeclature to describe the sub-units of UI:
 - **Windows** (`gui/src/app/windows`) are Areas that use `CloseableDialogue`
   to pop in and out rather than occupying real estate of the Page.
 
-- **Panels** are subdivisions of an area. Sibling panels should all be pushing
+- **Panels** are subdivisions of an area. Sibling Panels should all be pushing
   "in the same direction".
 
-  For example, the `SamplerOutputArea` area contains tabs for different views of the output.
-  Each of these tabs is one Panel -- while the draws as a table and the draws as
-  histograms are quite different from each other, they serve the same greater purpose
-  of allowing the user to explore the result of the Stan run, which is their parent Areas
+  For example, the `SamplerOutputArea` Area contains tabs for different views of the output.
+  Each of these tabs is one Panel -- while the Panel that displays the draws as a table is
+  quite different from the Panel that displays the draws as histograms,
+they serve the same greater purpose
+  of allowing the user to explore the result of the Stan run, which is their parent Area's
   goal.
 
-- **Components** are the defined in the standard sense of React components. We make the distinction
+- **Components** are defined in the standard sense of React components. We make the distinction
   between reusable components, which live in the top level `src/app/components` folder, and
   components which exist just to implement a specific Area or Panel, and live in a folder closer
   to their use site.
