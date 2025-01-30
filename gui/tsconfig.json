@@ -26,8 +26,7 @@
       "@SpWindows/*": ["app/windows/*"],
       "@SpCore/*": ["app/core/*"],
       "@SpUtil/*": ["app/util/*"],
-      "@SpPages/*": ["app/pages/*"],
-      "@SpStanStats/*": ["app/util/stan_stats/*"]
+      "@SpPages/*": ["app/pages/*"]
     }
   },
   "include": ["src", "test"],

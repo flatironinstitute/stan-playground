@@ -10,12 +10,12 @@ import {
 import {
   compute_effective_sample_size,
   compute_split_potential_scale_reduction,
-} from "@SpStanStats/stan_stats";
+} from "@SpUtil/stan_stats/stan_stats";
 import {
   computeMean,
   computePercentile,
   computeStdDev,
-} from "@SpStanStats/summaryStats";
+} from "@SpUtil/stan_stats/summaryStats";
 import { FunctionComponent, useMemo } from "react";
 
 const columns = [

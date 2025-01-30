@@ -1,13 +1,14 @@
 import { FunctionComponent, useMemo } from "react";
 
-import DrawsTablePanel from "@SpAreas/ControlArea/SamplingArea/ResultsArea/SamplerOutputArea/DrawsTablePanel";
-import HistogramsPanel from "@SpAreas/ControlArea/SamplingArea/ResultsArea/SamplerOutputArea/HistogramsPanel";
-import SummaryPanel from "@SpAreas/ControlArea/SamplingArea/ResultsArea/SamplerOutputArea/SummaryPanel";
 import TabWidget from "@SpComponents/TabWidget";
-import TracePlotsPanel from "@SpAreas/ControlArea/SamplingArea/ResultsArea/SamplerOutputArea/TracePlotsPanel";
-import ConsolePanel from "@SpAreas/ControlArea/SamplingArea/ResultsArea/SamplerOutputArea/ConsolePanel";
 import { SamplingOpts } from "@SpCore/Project/ProjectDataModel";
 import { NeedsLatestRun } from "@SpCore/StanSampler/useStanSampler";
+
+import SummaryPanel from "./SamplerOutputArea/SummaryPanel";
+import DrawsTablePanel from "./SamplerOutputArea/DrawsTablePanel";
+import HistogramsPanel from "./SamplerOutputArea/HistogramsPanel";
+import TracePlotsPanel from "./SamplerOutputArea/TracePlotsPanel";
+import ConsolePanel from "./SamplerOutputArea/ConsolePanel";
 
 const SamplerOutputArea: FunctionComponent<NeedsLatestRun> = ({
   latestRun,

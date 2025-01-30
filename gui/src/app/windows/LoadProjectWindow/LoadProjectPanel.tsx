@@ -1,3 +1,5 @@
+import { FunctionComponent, useCallback, use, useState } from "react";
+
 import { Delete } from "@mui/icons-material";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid2";
@@ -8,6 +10,7 @@ import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
+
 import { AlternatingTableRow } from "@SpComponents/StyledTables";
 import {
   FileNames,
@@ -19,8 +22,7 @@ import {
   deserializeZipToFiles,
   parseFile,
 } from "@SpCore/Project/ProjectSerialization";
-import UploadFiles from "@SpWindows/LoadProjectWindow/UploadFiles";
-import { FunctionComponent, useCallback, use, useState } from "react";
+import UploadFiles from "./UploadFiles";
 
 type File = { name: string; content: ArrayBuffer };
 

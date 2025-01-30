@@ -1,6 +1,5 @@
 import { Split } from "@geoffcox/react-splitter";
 import { AutoFixHigh, Cancel, Help, Settings } from "@mui/icons-material";
-import StanCompileResultPanel from "@SpAreas/ModelDataArea/StanCompileResultPanel";
 import TextEditor from "@SpComponents/FileEditor/TextEditor";
 import { ToolbarItem } from "@SpComponents/FileEditor/ToolBar";
 import { stancErrorsToCodeMarkers } from "@SpCore/Stanc/Linting";
@@ -10,6 +9,8 @@ import { FunctionComponent, use, useCallback, useMemo, useState } from "react";
 import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
 import { ProjectKnownFiles } from "@SpCore/Project/ProjectDataModel";
 import { FileNames } from "@SpCore/Project/FileMapping";
+
+import StanCompileResultPanel from "./StanCompileResultPanel";
 
 const ModelEditorPanel: FunctionComponent = () => {
   const { data, update } = use(ProjectContext);

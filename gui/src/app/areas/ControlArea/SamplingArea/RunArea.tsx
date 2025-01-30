@@ -2,12 +2,12 @@ import { FunctionComponent, use, useCallback } from "react";
 import type { StanRun } from "@SpCore/StanSampler/useStanSampler";
 
 import Grid from "@mui/material/Grid2";
-import RunOrCompilePanel from "@SpAreas/ControlArea/SamplingArea/RunArea/RunOrCompilePanel";
 import { SamplingOpts } from "@SpCore/Project/ProjectDataModel";
 import StanSampler from "@SpCore/StanSampler/StanSampler";
 import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
 
 import SamplingOptsPanel from "./RunArea/SamplingOptsPanel";
+import RunOrCompilePanel from "./RunArea/RunOrCompilePanel";
 
 type RunAreaProps = {
   sampler: StanSampler | undefined;
