@@ -97,20 +97,28 @@ const TextEditor: FunctionComponent<Props> = ({
   }, [codeMarkers, monacoInstance, editorInstance]);
 
   useEffect(() => {
-    if (!editorInstance) return;
+    if (!editorInstance || !monacoInstance) return;
     if (!contentOnEmpty) return;
     if (text || editedText) {
       return;
     }
-    const contentWidget = createHintTextContentWidget(contentOnEmpty);
+    const widgetPosition = {
+      position: { lineNumber: 1, column: 1 },
+      preference: [monacoInstance.editor.ContentWidgetPositionPreference.EXACT],
+    };
+    const contentWidget = createHintTextContentWidget(
+      contentOnEmpty,
+      widgetPosition,
+    );
     editorInstance.addContentWidget(contentWidget);
     return () => {
       editorInstance.removeContentWidget(contentWidget);
     };
-  }, [text, editorInstance, editedText, contentOnEmpty]);
+  }, [text, editorInstance, editedText, contentOnEmpty, monacoInstance]);
 
   useEffect(() => {
     if (!editorInstance || !monacoInstance) return;
+
     const disposable = editorInstance.addAction({
       id: "save",
       label: "Save",
@@ -195,7 +203,10 @@ const toMonacoMarkerSeverity = (
   }
 };
 
-const createHintTextContentWidget = (content: string | HTMLSpanElement) => {
+const createHintTextContentWidget = (
+  content: string | HTMLSpanElement,
+  position: editor.IContentWidgetPosition,
+) => {
   return {
     getDomNode: () => {
       const node = document.createElement("div");
@@ -210,12 +221,7 @@ const createHintTextContentWidget = (content: string | HTMLSpanElement) => {
       return node;
     },
     getId: () => "hintText",
-    getPosition: () => {
-      return {
-        position: { lineNumber: 1, column: 1 },
-        preference: [0 /* editor.ContentWidgetPositionPreference.EXACT */],
-      };
-    },
+    getPosition: () => position,
   };
 };
 
