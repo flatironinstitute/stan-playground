@@ -1,14 +1,3 @@
-import { Editor, loader, useMonaco } from "@monaco-editor/react";
-
-import { UserSettingsContext } from "@SpCore/Settings/UserSettings";
-import { CodeMarker } from "@SpCore/Stanc/Linting";
-import {
-  editor,
-  IDisposable,
-  KeyCode,
-  KeyMod,
-  MarkerSeverity,
-} from "monaco-editor";
 import {
   FunctionComponent,
   use,
@@ -18,9 +7,20 @@ import {
   useState,
 } from "react";
 
-import monacoAddStanLang from "./monacoStanLanguage";
+import { UserSettingsContext } from "@SpCore/Settings/UserSettings";
+import { CodeMarker } from "@SpCore/Stanc/Linting";
+import { unreachable } from "@SpUtil/unreachable";
+
+import { Editor, loader, useMonaco, type Monaco } from "@monaco-editor/react";
+import type { editor, IDisposable } from "monaco-editor";
+
 import { ToolBar, ToolbarItem } from "./ToolBar";
 
+import monacoAddStanLang from "./monacoStanLanguage";
+// loader from @monaco-editor/react handles the loading of the monaco editor
+// importantly, it downloads from a CDN, so we need to make sure we
+// only depend on types from the monaco-editor package to avoid
+// downloading twice.
 loader.init().then(monacoAddStanLang);
 
 type Props = {
@@ -86,7 +86,7 @@ const TextEditor: FunctionComponent<Props> = ({
 
     const modelMarkers = codeMarkers.map((marker) => ({
       ...marker,
-      severity: toMonacoMarkerSeverity[marker.severity],
+      severity: toMonacoMarkerSeverity(marker.severity, monacoInstance),
     }));
 
     monacoInstance.editor.setModelMarkers(
@@ -110,11 +110,13 @@ const TextEditor: FunctionComponent<Props> = ({
   }, [text, editorInstance, editedText, contentOnEmpty]);
 
   useEffect(() => {
-    if (!editorInstance) return;
+    if (!editorInstance || !monacoInstance) return;
     const disposable = editorInstance.addAction({
       id: "save",
       label: "Save",
-      keybindings: [KeyMod.CtrlCmd | KeyCode.KeyS],
+      keybindings: [
+        monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.KeyS,
+      ],
       run: () => {
         if (!readOnly) {
           onSaveText();
@@ -124,7 +126,7 @@ const TextEditor: FunctionComponent<Props> = ({
     return () => {
       disposable.dispose();
     };
-  }, [editorInstance, onSaveText, readOnly]);
+  }, [editorInstance, monacoInstance, onSaveText, readOnly]);
 
   useEffect(() => {
     if (!editorInstance) return;
@@ -175,12 +177,23 @@ const TextEditor: FunctionComponent<Props> = ({
   );
 };
 
-const toMonacoMarkerSeverity = {
-  error: MarkerSeverity.Error,
-  warning: MarkerSeverity.Warning,
-  hint: MarkerSeverity.Hint,
-  info: MarkerSeverity.Info,
-} as const;
+const toMonacoMarkerSeverity = (
+  severity: CodeMarker["severity"],
+  monacoInstance: Monaco,
+) => {
+  switch (severity) {
+    case "error":
+      return monacoInstance.MarkerSeverity.Error;
+    case "warning":
+      return monacoInstance.MarkerSeverity.Warning;
+    case "hint":
+      return monacoInstance.MarkerSeverity.Hint;
+    case "info":
+      return monacoInstance.MarkerSeverity.Info;
+    default:
+      return unreachable(severity);
+  }
+};
 
 const createHintTextContentWidget = (content: string | HTMLSpanElement) => {
   return {
@@ -200,7 +213,7 @@ const createHintTextContentWidget = (content: string | HTMLSpanElement) => {
     getPosition: () => {
       return {
         position: { lineNumber: 1, column: 1 },
-        preference: [editor.ContentWidgetPositionPreference.EXACT],
+        preference: [0 /* editor.ContentWidgetPositionPreference.EXACT */],
       };
     },
   };

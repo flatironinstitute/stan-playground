@@ -3,8 +3,8 @@
 // See https://microsoft.github.io/monaco-editor/monarch.html
 // Adapted in part from https://github.com/WardBrian/vscode-stan-extension/blob/main/lang/syntaxes/stan.json
 
-import { Monaco } from "@monaco-editor/react";
-import { languages } from "monaco-editor";
+import type { Monaco } from "@monaco-editor/react";
+import type { languages } from "monaco-editor";
 
 const BLOCKS = [
   "functions",

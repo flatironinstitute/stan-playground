@@ -1,15 +1,18 @@
+import { FunctionComponent, RefObject, useCallback, use, useMemo } from "react";
+
 import { Help, PlayArrow } from "@mui/icons-material";
 import Box from "@mui/material/Box";
-import TextEditor from "@SpComponents/FileEditor/TextEditor";
+import { Split } from "@geoffcox/react-splitter";
+import { useMonaco } from "@monaco-editor/react";
+import { type editor } from "monaco-editor";
+
 import { ColorOptions, ToolbarItem } from "@SpComponents/FileEditor/ToolBar";
 import { FileNames } from "@SpCore/Project/FileMapping";
 import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
 import { ProjectKnownFiles } from "@SpCore/Project/ProjectDataModel";
 import { normalizeLineEndings } from "@SpUtil/normalizeLineEndings";
-import { FunctionComponent, RefObject, useCallback, use, useMemo } from "react";
 import { InterpreterStatus } from "@SpCore/Scripting/InterpreterTypes";
-import { Split } from "@geoffcox/react-splitter";
-import { editor, KeyCode, KeyMod } from "monaco-editor";
+import TextEditor from "@SpComponents/FileEditor/TextEditor";
 
 const interpreterNames = { python: "pyodide", r: "webR" } as const;
 
@@ -69,21 +72,27 @@ const ScriptEditor: FunctionComponent<ScriptEditorProps> = ({
     return content !== editedContent;
   }, [content, editedContent]);
 
-  const runCtrlEnter: editor.IActionDescriptor[] = useMemo(
-    () => [
+  const monacoInstance = useMonaco();
+
+  const runCtrlEnter: editor.IActionDescriptor[] = useMemo(() => {
+    if (!monacoInstance) {
+      return [];
+    }
+    return [
       {
         id: "run-script",
         label: "Run Script",
-        keybindings: [KeyMod.CtrlCmd | KeyCode.Enter],
+        keybindings: [
+          monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.Enter,
+        ],
         run: () => {
           if (runnable && !unsavedChanges) {
             runCode();
           }
         },
       },
-    ],
-    [runCode, runnable, unsavedChanges],
-  );
+    ];
+  }, [monacoInstance, runCode, runnable, unsavedChanges]);
 
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     return makeToolbar({
