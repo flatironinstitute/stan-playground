@@ -1,5 +1,3 @@
-import { useColorScheme } from "@mui/material/styles";
-
 import {
   FunctionComponent,
   PropsWithChildren,
@@ -9,9 +7,10 @@ import {
   useState,
 } from "react";
 
-import { useDialogControls } from "@SpComponents/CloseableDialog";
+import { useColorScheme } from "@mui/material/styles";
 
-import { SettingsTab } from "@SpWindows/SettingsWindow";
+import { useDialogControls } from "@SpComponents/CloseableDialog";
+import type { SettingsTab } from "@SpWindows/SettingsWindow";
 import {
   publicCompilationServerUrl,
   UserSettingsContext,

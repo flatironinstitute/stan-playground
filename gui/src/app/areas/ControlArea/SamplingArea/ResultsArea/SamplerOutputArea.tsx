@@ -1,7 +1,6 @@
 import { FunctionComponent, useMemo } from "react";
 
 import TabWidget from "@SpComponents/TabWidget";
-import { SamplingOpts } from "@SpCore/Project/ProjectDataModel";
 import { NeedsLatestRun } from "@SpCore/StanSampler/useStanSampler";
 
 import SummaryPanel from "./SamplerOutputArea/SummaryPanel";
@@ -13,6 +12,25 @@ import ConsolePanel from "./SamplerOutputArea/ConsolePanel";
 const SamplerOutputArea: FunctionComponent<NeedsLatestRun> = ({
   latestRun,
 }) => {
+  const drawChainIds = useMemo(() => {
+    if (!latestRun.runResult || !latestRun.samplingOpts) return [];
+    const numChains = latestRun.samplingOpts.num_chains;
+    const draws = latestRun.runResult.draws;
+    return [...new Array(draws[0].length).keys()].map(
+      (i) => 1 + Math.floor((i / draws[0].length) * numChains),
+    );
+  }, [latestRun.runResult, latestRun.samplingOpts]);
+
+  const drawNumbers: number[] = useMemo(() => {
+    if (!latestRun.runResult || !latestRun.samplingOpts) return [];
+    const numChains = latestRun.samplingOpts.num_chains;
+    const draws = latestRun.runResult.draws;
+    const numDrawsPerChain = Math.floor(draws[0].length / numChains);
+    return [...new Array(draws[0].length).keys()].map(
+      (i) => 1 + (i % numDrawsPerChain),
+    );
+  }, [latestRun.runResult, latestRun.samplingOpts]);
+
   // handle case where there is no latest run yet
   if (!latestRun.runResult || !latestRun.samplingOpts) return <span />;
 
@@ -20,47 +38,6 @@ const SamplerOutputArea: FunctionComponent<NeedsLatestRun> = ({
     samplingOpts,
     runResult: { draws, paramNames, computeTimeSec, consoleText },
   } = latestRun;
-
-  return (
-    <SamplerOutputInnerArea
-      draws={draws}
-      paramNames={paramNames}
-      computeTimeSec={computeTimeSec}
-      samplingOpts={samplingOpts}
-      consoleText={consoleText}
-    />
-  );
-};
-
-type InnerProps = {
-  draws: number[][];
-  paramNames: string[];
-  computeTimeSec: number | undefined;
-  samplingOpts: SamplingOpts;
-  consoleText: string;
-};
-
-const SamplerOutputInnerArea: FunctionComponent<InnerProps> = ({
-  draws,
-  paramNames,
-  computeTimeSec,
-  samplingOpts,
-  consoleText,
-}) => {
-  const numChains = samplingOpts.num_chains;
-
-  const drawChainIds = useMemo(() => {
-    return [...new Array(draws[0].length).keys()].map(
-      (i) => 1 + Math.floor((i / draws[0].length) * numChains),
-    );
-  }, [draws, numChains]);
-
-  const drawNumbers: number[] = useMemo(() => {
-    const numDrawsPerChain = Math.floor(draws[0].length / numChains);
-    return [...new Array(draws[0].length).keys()].map(
-      (i) => 1 + (i % numDrawsPerChain),
-    );
-  }, [draws, numChains]);
 
   return (
     <TabWidget

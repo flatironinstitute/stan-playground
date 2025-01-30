@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { SettingsTab } from "@SpWindows/SettingsWindow";
+import type { SettingsTab } from "@SpWindows/SettingsWindow";
 
 export type ThemeSetting = "light" | "dark";
 
