@@ -1,7 +1,7 @@
 import CustomTheming from "@SpPages/CustomTheming";
-import UserSettingsProvider from "@SpSettings/UserSettingsProvider";
-import ProjectContextProvider from "@SpCore/ProjectContextProvider";
-import CompileContextProvider from "@SpCompilation/CompileContextProvider";
+import UserSettingsProvider from "@SpCore/Settings/UserSettingsProvider";
+import ProjectContextProvider from "@SpCore/Project/ProjectContextProvider";
+import CompileContextProvider from "@SpCore/Compilation/CompileContextProvider";
 
 import HomePage from "@SpPages/HomePage";
 import { Analytics } from "@vercel/analytics/react";

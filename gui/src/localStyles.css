@@ -27,8 +27,9 @@
   margin: 0px;
   padding: 1px;
 }
+
 /* Compilation Results (StanCompileResultWindow) */
-.ErrorsWindow {
+.CompileResultPanel {
   height: 100%;
   width: 100%;
   overflow: auto;
@@ -160,10 +161,6 @@ span.EditorTitle {
   width: 85%;
 }
 
-/* Summary View */
-.SummaryViewWrapper {
-}
-
 /* Draws */
 
 .DrawAbbreviationToggle {
@@ -174,18 +171,6 @@ span.EditorTitle {
 
 .PlotAbbreviationToggle {
   padding: 5px;
-}
-
-/* Trace Plots */
-.TracePlotsView {
-}
-
-.SequencePlotChild {
-  position: relative;
-}
-
-.SequencePlotPadding {
-  height: 4px;
 }
 
 .PlotLoader {
