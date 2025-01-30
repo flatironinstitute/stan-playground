@@ -20,13 +20,13 @@ to invent some of our own nomeclature to describe the sub-units of UI:
 - **Windows** (`gui/src/app/windows`) are Areas that use `CloseableDialogue`
   to pop in and out rather than occupying real estate of the Page.
 
-- **Panels** are subdivisions of an area. Sibling Panels should all be pushing
-  "in the same direction".
+- **Panels** are subdivisions of an area. Sibling Panels should all be serving
+  the same purpose (as far as an end-user is concerned) in the UI.
 
   For example, the `SamplerOutputArea` Area contains tabs for different views of the output.
   Each of these tabs is one Panel -- while the Panel that displays the draws as a table is
   quite different from the Panel that displays the draws as histograms,
-they serve the same greater purpose
+  they serve the same greater purpose
   of allowing the user to explore the result of the Stan run, which is their parent Area's
   goal.
 
