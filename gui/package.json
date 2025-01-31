@@ -45,6 +45,7 @@
     "@testing-library/dom": "^10.1.0",
     "@testing-library/react": "^16.0.0",
     "@types/node": "^20.12.11",
+    "@types/plotly.js": "^2.35.2",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@types/react-plotly.js": "^2.6.3",

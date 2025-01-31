@@ -13,27 +13,29 @@ const Histogram: FunctionComponent<HistogramProps> = ({
   variableName,
 }) => {
   const data = useMemo(
-    () =>
-      ({
+    () => [
+      {
         x: histData,
         type: "histogram",
         nbinsx: Math.ceil(1.5 * Math.sqrt(histData.length)),
         marker: { color: "#505060" },
         histnorm: "probability",
-      }) as const,
+      } as const,
+    ],
     [histData],
   );
-  return (
-    <LazyPlotlyPlot
-      data={[data]}
-      layout={{
-        title: { text: title, font: { size: 12 } },
-        xaxis: { title: variableName },
-        yaxis: { title: "Count" },
-        margin: { r: 0 },
-      }}
-    />
+
+  const layout = useMemo(
+    () => ({
+      title: { text: title, font: { size: 12 } },
+      xaxis: { title: { text: variableName } },
+      yaxis: { title: { text: "Count" } },
+      margin: { r: 0 },
+    }),
+    [title, variableName],
   );
+
+  return <LazyPlotlyPlot data={data} layout={layout} />;
 };
 
 export default Histogram;

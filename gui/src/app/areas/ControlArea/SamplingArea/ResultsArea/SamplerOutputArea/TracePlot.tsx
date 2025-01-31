@@ -18,41 +18,43 @@ const TracePlot: FunctionComponent<TracePlotProps> = ({
   const plotSequences = useMemo(() => {
     const uniqueChainIds = Array.from(new Set(drawChainIds)).sort();
     return uniqueChainIds.map(
-      (chainId, ii) => {
+      (chainId) => {
         return {
           label: `Chain ${chainId}`,
           data: draws[columnIndex].filter(
             (_, i) => drawChainIds[i] === chainId,
           ),
-          color: chainColorForIndex(ii),
         };
       },
       [draws, columnIndex],
     );
   }, [draws, columnIndex, drawChainIds]);
 
-  const data: any[] = useMemo(
+  const data = useMemo(
     () =>
-      plotSequences.map((ps) => ({
-        x: [...new Array(ps.data.length).keys()].map((i) => i + 1),
-        y: ps.data,
-        type: "scatter",
-        mode: "lines+markers",
-        marker: { color: ps.color },
-      })),
+      plotSequences.map(
+        (ps) =>
+          ({
+            x: [...new Array(ps.data.length).keys()].map((i) => i + 1),
+            y: ps.data,
+            type: "scatter",
+            mode: "lines+markers",
+          }) as const,
+      ),
     [plotSequences],
   );
   const layout = useMemo(
     () => ({
-      title: "",
-      yaxis: { title: variableName },
-      xaxis: { title: "draw" },
+      title: { text: "" },
+      yaxis: { title: { text: variableName } },
+      xaxis: { title: { text: "draw" } },
       margin: {
         t: 30,
         b: 40,
         r: 0,
       },
       showlegend: false,
+      colorway: chainColorList,
     }),
     [variableName],
   );
@@ -163,9 +165,5 @@ const chainColorList: string[] = [
   "#1e94cf",
   "#06f6c9",
 ];
-
-const chainColorForIndex = (i: number) => {
-  return chainColorList[i % chainColorList.length];
-};
 
 export default TracePlot;
