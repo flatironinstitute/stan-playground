@@ -1,6 +1,7 @@
-import CircularProgress from "@mui/material/CircularProgress";
 import React, { FunctionComponent, Suspense, useMemo } from "react";
 import useMeasure from "react-use-measure";
+
+import Loading from "@SpComponents/Loading";
 
 import type { PlotParams } from "react-plotly.js";
 import createPlotlyComponent from "react-plotly.js/factory";
@@ -23,14 +24,7 @@ const LazyPlotlyPlot: FunctionComponent<PlotParams> = ({ data, layout }) => {
 
   return (
     <div ref={ref}>
-      <Suspense
-        fallback={
-          <div className="PlotLoader">
-            <CircularProgress color="info" />
-            <p className="details">Loading Plotly.js</p>
-          </div>
-        }
-      >
+      <Suspense fallback={<Loading name="Plotly.js" />}>
         <Plot data={data} layout={layoutWithWidth} />
       </Suspense>
     </div>

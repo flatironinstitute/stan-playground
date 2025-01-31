@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 
+import Loading from "@SpComponents/Loading";
 import { UserSettingsContext } from "@SpCore/Settings/UserSettings";
 import { CodeMarker } from "@SpCore/Stanc/Linting";
 import { unreachable } from "@SpUtil/unreachable";
@@ -179,6 +180,7 @@ const TextEditor: FunctionComponent<Props> = ({
         aria-label={label}
         onChange={handleChange}
         onMount={(editor, _) => setEditor(editor)}
+        loading={<Loading name="Monaco Editor" />}
         options={{
           readOnly,
           domReadOnly: readOnly,
