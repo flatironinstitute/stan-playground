@@ -12,6 +12,7 @@ export const SecondaryColoredTableHead = styled(TableHead)(({ theme }) => ({
   backgroundColor: theme.palette.secondary.light,
   th: {
     color: theme.palette.secondary.contrastText,
+    backgroundColor: theme.palette.secondary.light,
     whiteSpace: "nowrap",
     paddingRight: "0.5rem",
   },
@@ -20,9 +21,11 @@ export const SecondaryColoredTableHead = styled(TableHead)(({ theme }) => ({
 export const SuccessColoredTableHead = styled(TableHead)(({ theme }) => ({
   backgroundColor: theme.palette.success.light,
   th: {
+    backgroundColor: theme.palette.success.light,
     color: theme.palette.success.contrastText,
     whiteSpace: "nowrap",
     paddingRight: "0.5rem",
+    borderBottom: "2px solid " + theme.palette.success.main,
   },
 }));
 
