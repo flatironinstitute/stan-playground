@@ -173,7 +173,7 @@ span.EditorTitle {
   padding: 5px;
 }
 
-.PlotLoader {
+.Loading {
   padding: 10px;
   display: grid;
   place-items: center;

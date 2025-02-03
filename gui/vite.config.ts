@@ -10,8 +10,14 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          monaco: ["monaco-editor", "@monaco-editor/react"],
-          utilities: ["jszip", "@octokit/rest"],
+          utilities: [
+            "jszip",
+            "@octokit/rest",
+            "react-dropzone",
+            "pyodide",
+            "webr",
+          ],
+          mui: ["@mui/material", "@mui/icons-material"],
         },
       },
     },
