@@ -45,6 +45,11 @@ export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   server: {
     host: "127.0.0.1",
+    headers: {
+      "Cross-Origin-Resource-Policy": "same-origin",
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Cross-Origin-Embedder-Policy": "require-corp",
+    },
   },
   worker: {
     format: "es",

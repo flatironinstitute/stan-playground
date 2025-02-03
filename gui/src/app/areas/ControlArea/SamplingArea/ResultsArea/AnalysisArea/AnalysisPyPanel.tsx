@@ -36,7 +36,7 @@ const AnalysisPyPanel: FunctionComponent<NeedsLatestRun> = ({ latestRun }) => {
     [consoleRef, imagesRef, onStatus],
   );
 
-  const { run } = usePyodideWorker(callbacks);
+  const { run, cancel } = usePyodideWorker(callbacks);
 
   const handleRun = useCallback(
     (code: string) => {
@@ -69,6 +69,7 @@ const AnalysisPyPanel: FunctionComponent<NeedsLatestRun> = ({ latestRun }) => {
       language="python"
       status={status}
       onRun={handleRun}
+      onCancel={cancel}
       runnable={runnable}
       notRunnableReason={notRunnableReason}
       imagesRef={imagesRef}

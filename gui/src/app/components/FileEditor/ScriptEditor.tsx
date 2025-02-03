@@ -1,6 +1,6 @@
 import { FunctionComponent, RefObject, useCallback, use, useMemo } from "react";
 
-import { Help, PlayArrow } from "@mui/icons-material";
+import { Close, Help, PlayArrow } from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import { Split } from "@geoffcox/react-splitter";
 import { useMonaco } from "@monaco-editor/react";
@@ -22,6 +22,7 @@ export type ScriptEditorProps = {
   filename: FileNames;
   dataKey: ProjectKnownFiles;
   onRun: (code: string) => void;
+  onCancel?: () => void;
   runnable: boolean;
   notRunnableReason?: string;
   onHelp?: () => void;
@@ -35,6 +36,7 @@ const ScriptEditor: FunctionComponent<ScriptEditorProps> = ({
   filename,
   dataKey,
   onRun,
+  onCancel,
   runnable,
   notRunnableReason,
   onHelp,
@@ -74,11 +76,12 @@ const ScriptEditor: FunctionComponent<ScriptEditorProps> = ({
 
   const monacoInstance = useMonaco();
 
-  const runCtrlEnter: editor.IActionDescriptor[] = useMemo(() => {
+  const scriptShortcuts: editor.IActionDescriptor[] = useMemo(() => {
     if (!monacoInstance) {
       return [];
     }
-    return [
+    const actions = [
+      // Ctrl-Enter to run
       {
         id: "run-script",
         label: "Run Script",
@@ -92,7 +95,19 @@ const ScriptEditor: FunctionComponent<ScriptEditorProps> = ({
         },
       },
     ];
-  }, [monacoInstance, runCode, runnable, unsavedChanges]);
+    if (onCancel) {
+      // Ctrl-C to cancel
+      actions.push({
+        id: "cancel-script",
+        label: "Cancel Script",
+        keybindings: [
+          monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.KeyC,
+        ],
+        run: onCancel,
+      });
+    }
+    return actions;
+  }, [monacoInstance, onCancel, runCode, runnable, unsavedChanges]);
 
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     return makeToolbar({
@@ -101,11 +116,13 @@ const ScriptEditor: FunctionComponent<ScriptEditorProps> = ({
       runnable: runnable && !unsavedChanges,
       notRunnableReason,
       onRun: runCode,
+      onCancel,
       onHelp,
     });
   }, [
     language,
     notRunnableReason,
+    onCancel,
     onHelp,
     runCode,
     runnable,
@@ -124,7 +141,7 @@ const ScriptEditor: FunctionComponent<ScriptEditorProps> = ({
         onSaveText={onSaveText}
         toolbarItems={toolbarItems}
         contentOnEmpty={contentOnEmpty}
-        actions={runCtrlEnter}
+        actions={scriptShortcuts}
       />
       <ConsoleOutputPanel consoleRef={consoleRef} />
     </Split>
@@ -138,8 +155,9 @@ const makeToolbar = (o: {
   notRunnableReason?: string;
   onRun: () => void;
   onHelp?: () => void;
+  onCancel?: () => void;
 }): ToolbarItem[] => {
-  const { status, onRun, runnable, onHelp, name } = o;
+  const { status, onRun, runnable, onHelp, name, onCancel } = o;
   const ret: ToolbarItem[] = [];
   if (onHelp !== undefined) {
     ret.push({
@@ -162,6 +180,17 @@ const makeToolbar = (o: {
     ret.push({
       type: "text",
       label: o.notRunnableReason,
+      color: "error",
+    });
+  }
+
+  if (onCancel && ["running", "loading", "installing"].includes(status)) {
+    ret.push({
+      type: "button",
+      tooltip: "Cancel",
+      label: "Cancel",
+      icon: <Close />,
+      onClick: onCancel,
       color: "error",
     });
   }

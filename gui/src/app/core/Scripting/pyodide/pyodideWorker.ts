@@ -3,6 +3,7 @@ import { isMonacoWorkerNoise } from "@SpUtil/isMonacoWorkerNoise";
 import { InterpreterStatus } from "@SpCore/Scripting/InterpreterTypes";
 import {
   MessageFromPyodideWorker,
+  MessageToPyodideWorker,
   PyodideRunSettings,
 } from "./pyodideWorkerTypes";
 import spDrawsScript from "./sp_load_draws.py?raw";
@@ -58,12 +59,18 @@ const addImage = (image: any) => {
 
 console.log("pyodide worker loaded");
 
-self.onmessage = async (e) => {
+self.onmessage = async (e: MessageEvent<MessageToPyodideWorker>) => {
   if (isMonacoWorkerNoise(e.data)) {
     return;
   }
   const message = e.data;
-  await run(message.code, message.spData, message.spRunSettings, message.files);
+  await run(
+    message.code,
+    message.spData,
+    message.spRunSettings,
+    message.files,
+    message.interruptBuffer,
+  );
 };
 
 const run = async (
@@ -71,10 +78,14 @@ const run = async (
   spData: Record<string, any> | undefined,
   spPySettings: PyodideRunSettings,
   files: Record<string, string> | undefined,
+  interruptBuffer: Uint8Array | undefined,
 ) => {
   setStatus("loading");
   try {
     const pyodide = await loadPyodideInstance();
+    if (interruptBuffer) {
+      pyodide.setInterruptBuffer(interruptBuffer);
+    }
 
     const [scriptPreamble, scriptPostamble] = getScriptParts(spPySettings);
 
