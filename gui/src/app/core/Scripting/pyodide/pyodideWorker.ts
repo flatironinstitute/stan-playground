@@ -9,28 +9,23 @@ import {
 import spDrawsScript from "./sp_load_draws.py?raw";
 import spMPLScript from "./sp_patch_matplotlib.py?raw";
 
-let pyodide: PyodideInterface | null = null;
 const loadPyodideInstance = async () => {
-  if (pyodide === null) {
-    pyodide = await loadPyodide({
-      indexURL: "https://cdn.jsdelivr.net/pyodide/v0.27.2/full",
-      stdout: (x: string) => {
-        sendStdout(x);
-      },
-      stderr: (x: string) => {
-        sendStderr(x);
-      },
-      packages: ["numpy", "micropip", "pandas"],
-    });
-    setStatus("installing");
+  const pyodide = await loadPyodide({
+    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.27.2/full",
+    stdout: (x: string) => {
+      sendStdout(x);
+    },
+    stderr: (x: string) => {
+      sendStderr(x);
+    },
+    packages: ["numpy", "micropip", "pandas"],
+  });
+  console.log("pyodide loaded");
 
-    pyodide.FS.writeFile("sp_load_draws.py", spDrawsScript);
-    pyodide.FS.writeFile("sp_patch_matplotlib.py", spMPLScript);
+  pyodide.FS.writeFile("sp_load_draws.py", spDrawsScript);
+  pyodide.FS.writeFile("sp_patch_matplotlib.py", spMPLScript);
 
-    return pyodide;
-  } else {
-    return pyodide;
-  }
+  return pyodide;
 };
 
 const sendMessageToMain = (message: MessageFromPyodideWorker) => {
@@ -57,8 +52,6 @@ const addImage = (image: any) => {
   sendMessageToMain({ type: "addImage", image });
 };
 
-console.log("pyodide worker loaded");
-
 self.onmessage = async (e: MessageEvent<MessageToPyodideWorker>) => {
   if (isMonacoWorkerNoise(e.data)) {
     return;
@@ -72,6 +65,10 @@ self.onmessage = async (e: MessageEvent<MessageToPyodideWorker>) => {
     message.interruptBuffer,
   );
 };
+console.log("pyodide worker initialized");
+
+console.log("opportunistically loading pyodide");
+const pyodidePromise: Promise<PyodideInterface> = loadPyodideInstance();
 
 const run = async (
   code: string,
@@ -82,10 +79,11 @@ const run = async (
 ) => {
   setStatus("loading");
   try {
-    const pyodide = await loadPyodideInstance();
+    const pyodide = await pyodidePromise;
     if (interruptBuffer) {
       pyodide.setInterruptBuffer(interruptBuffer);
     }
+    setStatus("installing");
 
     const [scriptPreamble, scriptPostamble] = getScriptParts(spPySettings);
 
