@@ -73,7 +73,7 @@ const CompilationServerArea: FunctionComponent = () => {
             label="Local server"
           />
           {serverType === "local" && (
-            <FormHelperText>
+            <FormHelperText component="div">
               To start a local compilation server{" "}
               <span className="details">({localCompilationServerUrl})</span>:
               <pre className="dockerRun">
