@@ -1,10 +1,12 @@
 import { Download } from "@mui/icons-material";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
+import TableRow from "@mui/material/TableRow";
 import {
   SuccessBorderedTableRow,
   SuccessColoredTableHead,
@@ -70,8 +72,8 @@ const DrawsTablePanel: FunctionComponent<DrawsTableProps> = ({
   }, [draws, paramNames, drawChainIds, samplingOpts]);
 
   return (
-    <>
-      <div>
+    <Box display="flex" height="100%" width="100%" flexDirection="column">
+      <Box flex="1" marginBottom="0.75rem">
         <IconButton size="small" title="Download" onClick={handleExportToCsv}>
           <Download fontSize="inherit" />
           &nbsp;Export to single .csv
@@ -85,18 +87,17 @@ const DrawsTablePanel: FunctionComponent<DrawsTableProps> = ({
           <Download fontSize="inherit" />
           &nbsp;Export to multiple .csv
         </IconButton>
-      </div>
-      <br />
-      <TableContainer>
-        <Table size="small" padding="none">
+      </Box>
+      <TableContainer sx={{ flex: "0 1 auto", overflow: "auto" }}>
+        <Table stickyHeader size="small" padding="none">
           <SuccessColoredTableHead>
-            <SuccessBorderedTableRow>
+            <TableRow>
               <TableCell key="chain">Chain</TableCell>
               <TableCell key="draw">Draw</TableCell>
               {paramNames.map((name, i) => (
                 <TableCell key={i}>{name}</TableCell>
               ))}
-            </SuccessBorderedTableRow>
+            </TableRow>
           </SuccessColoredTableHead>
           <TableBody>
             {formattedDraws[0].map((_, i) => (
@@ -123,7 +124,7 @@ const DrawsTablePanel: FunctionComponent<DrawsTableProps> = ({
             </div>
           )}
       </TableContainer>
-    </>
+    </Box>
   );
 };
 

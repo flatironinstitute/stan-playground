@@ -126,8 +126,8 @@ const SummaryPanel: FunctionComponent<SummaryProps> = ({
   }, [draws, paramNames, drawChainIds, computeTimeSec]);
 
   return (
-    <TableContainer>
-      <Table>
+    <TableContainer sx={{ maxHeight: "100%", overflow: "auto" }}>
+      <Table stickyHeader>
         <SecondaryColoredTableHead>
           <TableRow>
             <TableCell>Parameter</TableCell>
