@@ -19,9 +19,9 @@ import { ToolBar, ToolbarItem } from "./ToolBar";
 
 import monacoAddStanLang from "./monacoStanLanguage";
 // loader from @monaco-editor/react handles the loading of the monaco editor
-// importantly, it downloads from a CDN, so we need to make sure we
-// only depend on types from the monaco-editor package to avoid
-// downloading twice.
+// importantly, it downloads from a CDN, so we need to make sure our
+// dependency on the monaco-editor package is limited to types only,
+// to avoid downloading twice.
 
 loader.config({
   paths: {
