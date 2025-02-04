@@ -104,6 +104,7 @@ const run = async (
     let succeeded = false;
     try {
       const packageFutures = [];
+      let patch_http = false;
       const micropip = pyodide.pyimport("micropip");
 
       if (spPySettings.showsPlots) {
@@ -113,10 +114,20 @@ const run = async (
           packageFutures.push(micropip.install("arviz"));
         }
       }
+      if (script.includes("requests")) {
+        patch_http = true;
+        packageFutures.push(
+          micropip.install(["requests", "lzma", "pyodide-http"]),
+        );
+      }
       packageFutures.push(micropip.install("stanio"));
       packageFutures.push(pyodide.loadPackagesFromImports(script));
-      for (const f of packageFutures) {
-        await f;
+      await Promise.all(packageFutures);
+      if (patch_http) {
+        await pyodide.runPythonAsync(`
+        from pyodide_http import patch_all
+        patch_all()
+        `);
       }
 
       if (files) {
