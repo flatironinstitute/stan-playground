@@ -1,4 +1,10 @@
-import { FunctionComponent, useCallback, use, useState } from "react";
+import {
+  FunctionComponent,
+  useCallback,
+  use,
+  useState,
+  useEffect,
+} from "react";
 
 import { Delete } from "@mui/icons-material";
 import Button from "@mui/material/Button";
@@ -23,6 +29,10 @@ import {
   parseFile,
 } from "@SpCore/Project/ProjectSerialization";
 import UploadFiles from "./UploadFiles";
+import FormControl from "@mui/material/FormControl";
+import TextField from "@mui/material/TextField";
+import FormHelperText from "@mui/material/FormHelperText";
+import { useNavigate } from "react-router-dom";
 
 type File = { name: string; content: ArrayBuffer };
 
@@ -119,25 +129,63 @@ const LoadProjectPanel: FunctionComponent<LoadProjectProps> = ({ onClose }) => {
     [importUploadedZip],
   );
 
+  const [urlToLoad, setUrlToLoad] = useState("");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (urlToLoad === "") return;
+    if (urlToLoad.startsWith("https://gist.github.com/")) {
+      // TODO test if gist exists first?
+      navigate(`/?project=${urlToLoad}`);
+      onClose();
+    } else if (
+      urlToLoad.startsWith("https://stan-playground.flatironinstitute.org/")
+    ) {
+      // TODO test if valid first?
+      navigate(
+        `/{urlToLoad.replace("https://stan-playground.flatironinstitute.org/", "")}`,
+      );
+      onClose();
+    } else {
+      setErrorText("Unsupported URL: " + urlToLoad);
+    }
+  }, [navigate, onClose, urlToLoad]);
+
   return (
     <div className="dialogWrapper">
       <Stack spacing={2}>
-        <div>
-          You can upload:
-          <ul>
-            <li>A .zip file that was previously exported</li>
-            <li>
-              A directory of files that were extracted from an exported .zip
-              file
-            </li>
-            <li>An individual *.stan file</li>
-            <li>
-              Other individual project files (data.json, meta.json, data.py,
-              etc.)
-            </li>
-          </ul>
-        </div>
-        <UploadFiles height={300} onUpload={onUpload} />
+        <FormControl margin="normal">
+          <TextField
+            variant="standard"
+            label="Project URL"
+            value={urlToLoad}
+            onChange={(e) => setUrlToLoad(e.target.value)}
+          ></TextField>
+          <FormHelperText component="div">
+            You can supply a URL to load a project from:
+            <ul style={{ margin: 0 }}>
+              <li>A Stan-Playground URL</li>
+              <li>A GitHub Gist URL</li>
+            </ul>
+          </FormHelperText>
+          <UploadFiles height={300} onUpload={onUpload} />
+          <FormHelperText component="div">
+            You can upload:
+            <ul style={{ margin: 0 }}>
+              <li>A .zip file that was previously exported</li>
+              <li>
+                A directory of files that were extracted from an exported .zip
+                file
+              </li>
+              <li>An individual *.stan file</li>
+              <li>
+                Other individual project files (data.json, meta.json, data.py,
+                etc.)
+              </li>
+            </ul>
+          </FormHelperText>
+        </FormControl>
+
         {errorText !== "" && (
           <Typography color="error.main">{errorText}</Typography>
         )}
