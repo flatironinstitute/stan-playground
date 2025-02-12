@@ -18,8 +18,7 @@ const handleHelp = () =>
 const DataRPanel: FunctionComponent = () => {
   const { consoleRef, status, onStatus, onData } = useDataGenState("r");
 
-  const { run, cancel } = useWebR({ consoleRef, onStatus, onData });
-
+  const { run } = useWebR({ consoleRef, onStatus, onData });
   const handleRun = useCallback(
     async (code: string) => {
       clearOutputDivs(consoleRef);
@@ -41,7 +40,6 @@ const DataRPanel: FunctionComponent = () => {
       language="r"
       status={status}
       onRun={handleRun}
-      onCancel={cancel}
       runnable={true}
       notRunnableReason=""
       onHelp={handleHelp}

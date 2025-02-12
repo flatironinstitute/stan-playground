@@ -95,9 +95,7 @@ const DrawsTablePanel: FunctionComponent<DrawsTableProps> = ({
               <TableCell key="chain">Chain</TableCell>
               <TableCell key="draw">Draw</TableCell>
               {paramNames.map((name, i) => (
-                <TableCell padding="checkbox" key={i}>
-                  {name}
-                </TableCell>
+                <TableCell key={i}>{name}</TableCell>
               ))}
             </TableRow>
           </SuccessColoredTableHead>
@@ -107,9 +105,7 @@ const DrawsTablePanel: FunctionComponent<DrawsTableProps> = ({
                 <TableCell>{drawChainIds[i]}</TableCell>
                 <TableCell>{drawNumbers[i]}</TableCell>
                 {formattedDraws.map((draw, j) => (
-                  <TableCell padding="checkbox" key={j}>
-                    {draw[i]}
-                  </TableCell>
+                  <TableCell key={j}>{draw[i]}</TableCell>
                 ))}
               </SuccessBorderedTableRow>
             ))}

@@ -24,7 +24,7 @@ const AnalysisRPanel: FunctionComponent<NeedsLatestRun> = ({ latestRun }) => {
     files,
   } = useAnalysisState(latestRun);
 
-  const { run, cancel } = useWebR({ consoleRef, imagesRef, onStatus });
+  const { run } = useWebR({ consoleRef, imagesRef, onStatus });
 
   const handleRun = useCallback(
     async (userCode: string) => {
@@ -48,7 +48,6 @@ const AnalysisRPanel: FunctionComponent<NeedsLatestRun> = ({ latestRun }) => {
       language="r"
       status={status}
       onRun={handleRun}
-      onCancel={cancel}
       runnable={runnable}
       notRunnableReason={notRunnableReason}
       imagesRef={imagesRef}
