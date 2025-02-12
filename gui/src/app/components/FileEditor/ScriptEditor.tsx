@@ -184,7 +184,7 @@ const makeToolbar = (o: {
     });
   }
 
-  if (onCancel && ["running", "loading", "installing"].includes(status)) {
+  if (onCancel && status === "running") {
     ret.push({
       type: "button",
       tooltip: "Cancel",
