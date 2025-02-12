@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import time
+from functools import lru_cache
 from hashlib import sha1
 from pathlib import Path
 from shutil import copy2
@@ -18,10 +19,27 @@ from .locking import compilation_output_lock, wait_until_free
 logger = logging.getLogger(__name__)
 
 
+@lru_cache
+def _get_salt() -> bytes:
+    """
+    Returns a salt to use when hashing Stan programs if one was set during the Docker build.
+    This helps ensure that models don't get cached by the browser across different deployments.
+    """
+    salt_file = Path(__file__).parent.parent.parent.parent / "hash-salt.txt"
+    if not salt_file.exists():
+        logger.warning("No hash salt file found at %s", salt_file)
+        salt = b""
+    else:
+        salt = salt_file.read_bytes().strip()
+        logger.info("Using hash salt from %s: %s", salt_file, repr(salt))
+    return salt
+
+
 def _compute_stan_program_hash(program_file: Path) -> str:
     stan_program = program_file.read_text()
-    # MAYBE: replace stan_program with a canonical form?
-    return sha1(stan_program.encode()).hexdigest()
+    hasher = sha1(_get_salt())
+    hasher.update(stan_program.encode())
+    return hasher.hexdigest()
 
 
 def make_canonical_model_dir(src_file: Path, built_model_dir: Path) -> Path:
