@@ -5,6 +5,7 @@ import {
   useState,
   useEffect,
 } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { Delete } from "@mui/icons-material";
 import Button from "@mui/material/Button";
@@ -16,6 +17,9 @@ import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
+import FormControl from "@mui/material/FormControl";
+import TextField from "@mui/material/TextField";
+import FormHelperText from "@mui/material/FormHelperText";
 
 import { AlternatingTableRow } from "@SpComponents/StyledTables";
 import {
@@ -28,11 +32,13 @@ import {
   deserializeZipToFiles,
   parseFile,
 } from "@SpCore/Project/ProjectSerialization";
+import doesGistExist from "@SpUtil/gists/doesGistExist";
+
 import UploadFiles from "./UploadFiles";
-import FormControl from "@mui/material/FormControl";
-import TextField from "@mui/material/TextField";
-import FormHelperText from "@mui/material/FormHelperText";
-import { useNavigate } from "react-router-dom";
+import {
+  fromQueryParams,
+  queryStringHasParameters,
+} from "@SpCore/Project/ProjectQueryLoading";
 
 type File = { name: string; content: ArrayBuffer };
 
@@ -134,22 +140,41 @@ const LoadProjectPanel: FunctionComponent<LoadProjectProps> = ({ onClose }) => {
 
   useEffect(() => {
     if (urlToLoad === "") return;
-    if (urlToLoad.startsWith("https://gist.github.com/")) {
-      // TODO test if gist exists first?
-      navigate(`/?project=${urlToLoad}`);
-      onClose();
-    } else if (
+    if (
       urlToLoad.startsWith("https://stan-playground.flatironinstitute.org/")
     ) {
-      // TODO test if valid first?
-      navigate(
-        `/{urlToLoad.replace("https://stan-playground.flatironinstitute.org/", "")}`,
-      );
-      onClose();
+      const queriesOnly = new URLSearchParams(urlToLoad.split("?", 2)[1]);
+      if (queryStringHasParameters(fromQueryParams(queriesOnly))) {
+        navigate(`?${queriesOnly.toString()}`);
+        setUrlToLoad("");
+        onClose();
+      }
+    } else if (urlToLoad.startsWith("https://gist.github.com/")) {
+      let cancelled = false;
+
+      doesGistExist(urlToLoad).then((exists) => {
+        if (exists) {
+          if (cancelled) return;
+          navigate(`?project=${urlToLoad}`);
+          setUrlToLoad("");
+          onClose();
+        } else {
+          if (cancelled) return;
+          setErrorText("Gist not found: " + urlToLoad);
+        }
+      });
+
+      return () => {
+        cancelled = true;
+      };
     } else {
-      setErrorText("Unsupported URL: " + urlToLoad);
+      setErrorText(
+        "Unsupported URL: " +
+          urlToLoad +
+          " (must be a Stan-Playground URL or a GitHub Gist URL)",
+      );
     }
-  }, [navigate, onClose, urlToLoad]);
+  }, [navigate, onClose, urlToLoad, setErrorText]);
 
   return (
     <div className="dialogWrapper">
@@ -159,7 +184,7 @@ const LoadProjectPanel: FunctionComponent<LoadProjectProps> = ({ onClose }) => {
             variant="standard"
             label="Project URL"
             value={urlToLoad}
-            onChange={(e) => setUrlToLoad(e.target.value)}
+            onChange={(e) => setUrlToLoad(e.target.value.trim())}
           ></TextField>
           <FormHelperText component="div">
             You can supply a URL to load a project from:
