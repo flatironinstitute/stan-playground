@@ -135,46 +135,7 @@ const LoadProjectPanel: FunctionComponent<LoadProjectProps> = ({ onClose }) => {
     [importUploadedZip],
   );
 
-  const [urlToLoad, setUrlToLoad] = useState("");
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (urlToLoad === "") return;
-    if (
-      urlToLoad.startsWith("https://stan-playground.flatironinstitute.org/")
-    ) {
-      const queriesOnly = new URLSearchParams(urlToLoad.split("?", 2)[1]);
-      if (queryStringHasParameters(fromQueryParams(queriesOnly))) {
-        navigate(`?${queriesOnly.toString()}`);
-        setUrlToLoad("");
-        onClose();
-      }
-    } else if (urlToLoad.startsWith("https://gist.github.com/")) {
-      let cancelled = false;
-
-      doesGistExist(urlToLoad).then((exists) => {
-        if (exists) {
-          if (cancelled) return;
-          navigate(`?project=${urlToLoad}`);
-          setUrlToLoad("");
-          onClose();
-        } else {
-          if (cancelled) return;
-          setErrorText("Gist not found: " + urlToLoad);
-        }
-      });
-
-      return () => {
-        cancelled = true;
-      };
-    } else {
-      setErrorText(
-        "Unsupported URL: " +
-          urlToLoad +
-          " (must be a Stan-Playground URL or a GitHub Gist URL)",
-      );
-    }
-  }, [navigate, onClose, urlToLoad, setErrorText]);
+  const { urlToLoad, setUrlToLoad } = useUrlLoader({ onClose, setErrorText });
 
   return (
     <div className="dialogWrapper">
@@ -264,6 +225,55 @@ const LoadProjectPanel: FunctionComponent<LoadProjectProps> = ({ onClose }) => {
       </Stack>
     </div>
   );
+};
+
+const useUrlLoader = (params: {
+  onClose: () => void;
+  setErrorText: (text: string) => void;
+}) => {
+  const { onClose, setErrorText } = params;
+  const [urlToLoad, setUrlToLoad] = useState("");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (urlToLoad === "") return;
+    if (
+      urlToLoad.startsWith("https://stan-playground.flatironinstitute.org/")
+    ) {
+      const queriesOnly = new URLSearchParams(urlToLoad.split("?", 2)[1]);
+      if (queryStringHasParameters(fromQueryParams(queriesOnly))) {
+        navigate(`?${queriesOnly.toString()}`);
+        setUrlToLoad("");
+        onClose();
+      }
+    } else if (urlToLoad.startsWith("https://gist.github.com/")) {
+      let cancelled = false;
+
+      doesGistExist(urlToLoad).then((exists) => {
+        if (exists) {
+          if (cancelled) return;
+          navigate(`?project=${urlToLoad}`);
+          setUrlToLoad("");
+          onClose();
+        } else {
+          if (cancelled) return;
+          setErrorText("Gist not found: " + urlToLoad);
+        }
+      });
+
+      return () => {
+        cancelled = true;
+      };
+    } else {
+      setErrorText(
+        "Unsupported URL: " +
+          urlToLoad +
+          " (must be a Stan-Playground URL or a GitHub Gist URL)",
+      );
+    }
+  }, [navigate, onClose, setErrorText, urlToLoad]);
+
+  return { urlToLoad, setUrlToLoad };
 };
 
 export default LoadProjectPanel;
