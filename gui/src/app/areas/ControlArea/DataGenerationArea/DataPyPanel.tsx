@@ -31,7 +31,7 @@ const DataPyPanel: FunctionComponent = () => {
     [consoleRef, onData, onStatus],
   );
 
-  const { run } = usePyodideWorker(callbacks);
+  const { run, cancel } = usePyodideWorker(callbacks);
 
   const handleRun = useCallback(
     (code: string) => {
@@ -62,6 +62,7 @@ const DataPyPanel: FunctionComponent = () => {
       language="python"
       status={status}
       onRun={handleRun}
+      onCancel={cancel}
       runnable={true}
       notRunnableReason=""
       onHelp={handleHelp}

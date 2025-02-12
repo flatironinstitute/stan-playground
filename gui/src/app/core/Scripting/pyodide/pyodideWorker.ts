@@ -3,33 +3,29 @@ import { isMonacoWorkerNoise } from "@SpUtil/isMonacoWorkerNoise";
 import { InterpreterStatus } from "@SpCore/Scripting/InterpreterTypes";
 import {
   MessageFromPyodideWorker,
+  MessageToPyodideWorker,
   PyodideRunSettings,
 } from "./pyodideWorkerTypes";
 import spDrawsScript from "./sp_load_draws.py?raw";
 import spMPLScript from "./sp_patch_matplotlib.py?raw";
 
-let pyodide: PyodideInterface | null = null;
 const loadPyodideInstance = async () => {
-  if (pyodide === null) {
-    pyodide = await loadPyodide({
-      indexURL: "https://cdn.jsdelivr.net/pyodide/v0.27.2/full",
-      stdout: (x: string) => {
-        sendStdout(x);
-      },
-      stderr: (x: string) => {
-        sendStderr(x);
-      },
-      packages: ["numpy", "micropip", "pandas"],
-    });
-    setStatus("installing");
+  const pyodide = await loadPyodide({
+    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.27.2/full",
+    stdout: (x: string) => {
+      sendStdout(x);
+    },
+    stderr: (x: string) => {
+      sendStderr(x);
+    },
+    packages: ["numpy", "micropip", "pandas"],
+  });
+  console.log("pyodide loaded");
 
-    pyodide.FS.writeFile("sp_load_draws.py", spDrawsScript);
-    pyodide.FS.writeFile("sp_patch_matplotlib.py", spMPLScript);
+  pyodide.FS.writeFile("sp_load_draws.py", spDrawsScript);
+  pyodide.FS.writeFile("sp_patch_matplotlib.py", spMPLScript);
 
-    return pyodide;
-  } else {
-    return pyodide;
-  }
+  return pyodide;
 };
 
 const sendMessageToMain = (message: MessageFromPyodideWorker) => {
@@ -56,25 +52,38 @@ const addImage = (image: any) => {
   sendMessageToMain({ type: "addImage", image });
 };
 
-console.log("pyodide worker loaded");
-
-self.onmessage = async (e) => {
+self.onmessage = async (e: MessageEvent<MessageToPyodideWorker>) => {
   if (isMonacoWorkerNoise(e.data)) {
     return;
   }
   const message = e.data;
-  await run(message.code, message.spData, message.spRunSettings, message.files);
+  await run(
+    message.code,
+    message.spData,
+    message.spRunSettings,
+    message.files,
+    message.interruptBuffer,
+  );
 };
+console.log("pyodide worker initialized");
+
+console.log("opportunistically loading pyodide");
+const pyodidePromise: Promise<PyodideInterface> = loadPyodideInstance();
 
 const run = async (
   code: string,
   spData: Record<string, any> | undefined,
   spPySettings: PyodideRunSettings,
   files: Record<string, string> | undefined,
+  interruptBuffer: Uint8Array | undefined,
 ) => {
   setStatus("loading");
   try {
-    const pyodide = await loadPyodideInstance();
+    const pyodide = await pyodidePromise;
+    if (interruptBuffer) {
+      pyodide.setInterruptBuffer(interruptBuffer);
+    }
+    setStatus("installing");
 
     const [scriptPreamble, scriptPostamble] = getScriptParts(spPySettings);
 
@@ -95,6 +104,7 @@ const run = async (
     let succeeded = false;
     try {
       const packageFutures = [];
+      let patch_http = false;
       const micropip = pyodide.pyimport("micropip");
 
       if (spPySettings.showsPlots) {
@@ -104,10 +114,20 @@ const run = async (
           packageFutures.push(micropip.install("arviz"));
         }
       }
+      if (script.includes("requests")) {
+        patch_http = true;
+        packageFutures.push(
+          micropip.install(["requests", "lzma", "pyodide-http"]),
+        );
+      }
       packageFutures.push(micropip.install("stanio"));
       packageFutures.push(pyodide.loadPackagesFromImports(script));
-      for (const f of packageFutures) {
-        await f;
+      await Promise.all(packageFutures);
+      if (patch_http) {
+        await pyodide.runPythonAsync(`
+        from pyodide_http import patch_all
+        patch_all()
+        `);
       }
 
       if (files) {
