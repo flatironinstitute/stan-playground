@@ -1,0 +1,17 @@
+{
+  "headers": [
+    {
+      "source": "/",
+      "headers": [
+        {
+          "key": "Cross-Origin-Embedder-Policy-Report-Only",
+          "value": "require-corp"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy-Report-Only",
+          "value": "same-origin"
+        }
+      ]
+    }
+  ]
+}
