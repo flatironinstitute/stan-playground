@@ -52,8 +52,13 @@ RUN cd tinystan && \
     emmake make test_models/bernoulli/bernoulli.js -j$(nproc) && \
     emstrip test_models/bernoulli/bernoulli.wasm
 
-COPY stan-wasm-server /stan-wasm-server
-WORKDIR /stan-wasm-server
+COPY stan-wasm-server /app/stan-wasm-server
+
+# compute a hash of our app to make the model cache use unique URLS
+# (to avoid browsers caching across different versions)
+RUN find /app/ -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | cut -d' ' -f1 | tee /app/stan-wasm-server/hash-salt.txt
+
+WORKDIR /app/stan-wasm-server
 
 ENV SWS_PASSCODE=1234
 ENV SWS_LOG_LEVEL=debug
