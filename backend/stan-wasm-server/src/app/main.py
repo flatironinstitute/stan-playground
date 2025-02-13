@@ -50,6 +50,7 @@ app.add_middleware(
     allow_origins=[
         "https://stan-playground.flatironinstitute.org",
         "https://stan-playground.vercel.app",
+        "https://stan-playground-staging.vercel.app",
         "http://127.0.0.1:3000",  # yarn dev
         "http://127.0.0.1:4173",  # yarn preview
     ],
@@ -106,7 +107,13 @@ async def download_file(
     file_path = model_dir / filename
     if not file_path.is_file():
         raise FileNotFoundError(f"File not found: {file_path}")
-    return FileResponse(file_path)
+    return FileResponse(
+        file_path,
+        headers={
+            "Cross-Origin-Embedder-Policy": "require-corp",
+            "Cross-Origin-Opener-Policy": "same-origin",
+        },
+    )
 
 
 @app.post("/compile")
@@ -138,18 +145,28 @@ async def compile_stan(
     return {"model_id": model_dir.name}
 
 
+def send_interrupt() -> None:
+    """
+    Send an interrupt signal to the parent process.
+    uvicorn interprets this like Ctrl-C, and gracefully shuts down.
+    The orchestrator then restarts the server.
+    """
+    import os
+    import signal
+
+    os.kill(os.getppid(), signal.SIGINT)
+
+
 @app.post("/restart")
 async def restart(
-    settings: DependsOnSettings, authorization: str = Header(None)
-) -> None:
+    settings: DependsOnSettings,
+    background_tasks: BackgroundTasks,
+    authorization: str = Header(None),
+) -> DictResponse:
     if settings.restart_token is None:
         raise StanPlaygroundAuthenticationException("Restart token not set at startup")
     check_authorization(authorization, settings.restart_token)
 
-    import os
-    import signal
+    background_tasks.add_task(send_interrupt)
 
-    # send an interrupt signal to the parent process
-    # uvicorn interprets this like Ctrl-C, and gracefully shuts down
-    os.kill(os.getppid(), signal.SIGINT)
-    # actual restart is handled by the orchestrator
+    return {"status": "restarting"}

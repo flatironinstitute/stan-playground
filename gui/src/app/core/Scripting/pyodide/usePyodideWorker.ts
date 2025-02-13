@@ -27,6 +27,7 @@ type RunPyProps = {
 
 class PyodideWorkerInterface {
   #worker: Worker | undefined;
+  #interruptBuffer: Uint8Array | undefined;
 
   private constructor(private callbacks: PyodideWorkerCallbacks) {
     // do not call this directly, use create() instead
@@ -38,6 +39,15 @@ class PyodideWorkerInterface {
       name: "pyodideWorker",
       type: "module",
     });
+
+    if (window.crossOriginIsolated) {
+      this.#interruptBuffer = new Uint8Array(new SharedArrayBuffer(1));
+    } else {
+      console.warn(
+        "SharedArrayBuffer is not available, interrupting the Pyodide worker will not work",
+      );
+      this.#interruptBuffer = undefined;
+    }
 
     this.#worker.onmessage = (e: MessageEvent) => {
       const msg = e.data;
@@ -85,8 +95,13 @@ class PyodideWorkerInterface {
       spData,
       spRunSettings,
       files,
+      interruptBuffer: this.#interruptBuffer,
     };
     if (this.#worker) {
+      if (this.#interruptBuffer) {
+        // clear in case previous run was interrupted
+        this.#interruptBuffer[0] = 0;
+      }
       this.#worker.postMessage(msg);
     } else {
       throw new Error("pyodide worker is not defined");
@@ -94,8 +109,18 @@ class PyodideWorkerInterface {
   }
 
   cancel() {
-    this.#worker?.terminate();
-    this.#initialize();
+    if (this.#interruptBuffer && this.#interruptBuffer[0] === 0) {
+      // SIGINT
+      this.#interruptBuffer[0] = 2;
+    } else {
+      // if the interrupt buffer doesn't exist, or has already been set
+      // (and the user is requesting cancellation still)
+      // we can just terminate the worker
+      this.#worker?.terminate();
+      this.callbacks.onStatus("failed");
+      this.callbacks.onStderr("Python execution cancelled by user");
+      this.#initialize();
+    }
   }
 }
 
