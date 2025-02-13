@@ -1,10 +1,4 @@
-import {
-  FunctionComponent,
-  useCallback,
-  use,
-  useState,
-  useEffect,
-} from "react";
+import { FunctionComponent, useCallback, use, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Delete } from "@mui/icons-material";
@@ -135,7 +129,10 @@ const LoadProjectPanel: FunctionComponent<LoadProjectProps> = ({ onClose }) => {
     [importUploadedZip],
   );
 
-  const { urlToLoad, setUrlToLoad } = useUrlLoader({ onClose, setErrorText });
+  const { urlToLoad, setUrlToLoad, tryLoad } = useUrlLoader({
+    onClose,
+    setErrorText,
+  });
 
   return (
     <div className="dialogWrapper">
@@ -146,6 +143,12 @@ const LoadProjectPanel: FunctionComponent<LoadProjectProps> = ({ onClose }) => {
             label="Project URL"
             value={urlToLoad}
             onChange={(e) => setUrlToLoad(e.target.value.trim())}
+            onBlur={tryLoad}
+            onKeyUp={(e) => {
+              if (e.key === "Enter") {
+                tryLoad();
+              }
+            }}
           ></TextField>
           <FormHelperText component="div">
             You can supply a URL to load a project from:
@@ -235,7 +238,7 @@ const useUrlLoader = (params: {
   const [urlToLoad, setUrlToLoad] = useState("");
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const tryLoad = useCallback(() => {
     if (urlToLoad === "") return;
     if (
       urlToLoad.startsWith("https://stan-playground.flatironinstitute.org/")
@@ -247,23 +250,15 @@ const useUrlLoader = (params: {
         onClose();
       }
     } else if (urlToLoad.startsWith("https://gist.github.com/")) {
-      let cancelled = false;
-
       doesGistExist(urlToLoad).then((exists) => {
         if (exists) {
-          if (cancelled) return;
           navigate(`?project=${urlToLoad}`);
           setUrlToLoad("");
           onClose();
         } else {
-          if (cancelled) return;
           setErrorText("Gist not found: " + urlToLoad);
         }
       });
-
-      return () => {
-        cancelled = true;
-      };
     } else {
       setErrorText(
         "Unsupported URL: " +
@@ -273,7 +268,7 @@ const useUrlLoader = (params: {
     }
   }, [navigate, onClose, setErrorText, urlToLoad]);
 
-  return { urlToLoad, setUrlToLoad };
+  return { urlToLoad, setUrlToLoad, tryLoad };
 };
 
 export default LoadProjectPanel;
