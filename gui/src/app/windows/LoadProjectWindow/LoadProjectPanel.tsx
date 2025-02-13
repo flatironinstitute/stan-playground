@@ -1,4 +1,5 @@
 import { FunctionComponent, useCallback, use, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { Delete } from "@mui/icons-material";
 import Button from "@mui/material/Button";
@@ -10,6 +11,9 @@ import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
+import FormControl from "@mui/material/FormControl";
+import TextField from "@mui/material/TextField";
+import FormHelperText from "@mui/material/FormHelperText";
 
 import { AlternatingTableRow } from "@SpComponents/StyledTables";
 import {
@@ -22,7 +26,14 @@ import {
   deserializeZipToFiles,
   parseFile,
 } from "@SpCore/Project/ProjectSerialization";
+import doesGistExist from "@SpUtil/gists/doesGistExist";
+
 import UploadFiles from "./UploadFiles";
+import {
+  fromQueryParams,
+  QueryParamKeys,
+  queryStringHasParameters,
+} from "@SpCore/Project/ProjectQueryLoading";
 
 type File = { name: string; content: ArrayBuffer };
 
@@ -119,25 +130,53 @@ const LoadProjectPanel: FunctionComponent<LoadProjectProps> = ({ onClose }) => {
     [importUploadedZip],
   );
 
+  const { urlToLoad, setUrlToLoad, tryLoad } = useUrlLoader(setErrorText);
+
   return (
     <div className="dialogWrapper">
       <Stack spacing={2}>
-        <div>
-          You can upload:
-          <ul>
-            <li>A .zip file that was previously exported</li>
-            <li>
-              A directory of files that were extracted from an exported .zip
-              file
-            </li>
-            <li>An individual *.stan file</li>
-            <li>
-              Other individual project files (data.json, meta.json, data.py,
-              etc.)
-            </li>
-          </ul>
-        </div>
-        <UploadFiles height={300} onUpload={onUpload} />
+        <FormControl margin="normal">
+          <TextField
+            variant="standard"
+            label="Project URL"
+            value={urlToLoad}
+            onChange={(e) => setUrlToLoad(e.target.value.trim())}
+            onBlur={() => {
+              if (tryLoad()) {
+                onClose();
+              }
+            }}
+            onKeyUp={(e) => {
+              if (e.key === "Enter" && tryLoad()) {
+                onClose();
+              }
+            }}
+          ></TextField>
+          <FormHelperText component="div">
+            You can supply a URL to load a project from:
+            <ul style={{ margin: 0 }}>
+              <li>A Stan-Playground URL</li>
+              <li>A GitHub Gist URL</li>
+            </ul>
+          </FormHelperText>
+          <UploadFiles height={300} onUpload={onUpload} />
+          <FormHelperText component="div">
+            You can upload:
+            <ul style={{ margin: 0 }}>
+              <li>A .zip file that was previously exported</li>
+              <li>
+                A directory of files that were extracted from an exported .zip
+                file
+              </li>
+              <li>An individual *.stan file</li>
+              <li>
+                Other individual project files (data.json, meta.json, data.py,
+                etc.)
+              </li>
+            </ul>
+          </FormHelperText>
+        </FormControl>
+
         {errorText !== "" && (
           <Typography color="error.main">{errorText}</Typography>
         )}
@@ -191,6 +230,62 @@ const LoadProjectPanel: FunctionComponent<LoadProjectProps> = ({ onClose }) => {
       </Stack>
     </div>
   );
+};
+
+const useUrlLoader = (setErrorText: (text: string) => void) => {
+  const [urlToLoad, setURLRaw] = useState("");
+  const [query, setQuery] = useState("");
+
+  const setUrlToLoad = useCallback(
+    (url: string) => {
+      setURLRaw(url);
+      setQuery("");
+
+      if (url === "") return;
+      if (url.startsWith("https://stan-playground.flatironinstitute.org/")) {
+        const queriesOnly = new URLSearchParams(url.split("?", 2)[1]);
+        if (queryStringHasParameters(fromQueryParams(queriesOnly))) {
+          setQuery(`?${queriesOnly.toString()}`);
+          setErrorText("");
+        } else {
+          setErrorText(
+            "Stan-Playground URL does not contain any relevant data: " +
+              url +
+              " (should contain at least one of " +
+              Object.values(QueryParamKeys).join(", ") +
+              ")",
+          );
+        }
+      } else if (url.startsWith("https://gist.github.com/")) {
+        doesGistExist(url).then((exists) => {
+          if (exists) {
+            setQuery(`?project=${url}`);
+            setErrorText("");
+          } else {
+            setErrorText("Gist not found: " + url);
+          }
+        });
+      } else {
+        setErrorText(
+          "Unsupported URL: " +
+            url +
+            " (must be a Stan-Playground URL or a GitHub Gist URL)",
+        );
+      }
+    },
+    [setErrorText],
+  );
+
+  const navigate = useNavigate();
+
+  const tryLoad = useCallback(() => {
+    if (query === "") return false;
+    navigate(query, { replace: true });
+    setURLRaw("");
+    return true;
+  }, [navigate, query]);
+
+  return { urlToLoad, setUrlToLoad, tryLoad };
 };
 
 export default LoadProjectPanel;
