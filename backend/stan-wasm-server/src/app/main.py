@@ -50,6 +50,7 @@ app.add_middleware(
     allow_origins=[
         "https://stan-playground.flatironinstitute.org",
         "https://stan-playground.vercel.app",
+        "https://stan-playground-staging.vercel.app",
         "http://127.0.0.1:3000",  # yarn dev
         "http://127.0.0.1:4173",  # yarn preview
     ],
@@ -106,7 +107,13 @@ async def download_file(
     file_path = model_dir / filename
     if not file_path.is_file():
         raise FileNotFoundError(f"File not found: {file_path}")
-    return FileResponse(file_path)
+    return FileResponse(
+        file_path,
+        headers={
+            "Cross-Origin-Embedder-Policy": "require-corp",
+            "Cross-Origin-Opener-Policy": "same-origin",
+        },
+    )
 
 
 @app.post("/compile")

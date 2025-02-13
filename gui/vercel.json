@@ -1,14 +1,27 @@
 {
   "headers": [
     {
-      "source": "/",
+      "source": "**.(js|html)",
       "headers": [
         {
-          "key": "Cross-Origin-Embedder-Policy-Report-Only",
+          "key": "Cross-Origin-Embedder-Policy",
           "value": "require-corp"
         },
         {
-          "key": "Cross-Origin-Opener-Policy-Report-Only",
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "require-corp"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
           "value": "same-origin"
         }
       ]

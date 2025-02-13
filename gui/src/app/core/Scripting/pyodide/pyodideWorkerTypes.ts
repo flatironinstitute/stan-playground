@@ -17,6 +17,7 @@ export type MessageToPyodideWorker = {
   spData: Record<string, any> | undefined;
   spRunSettings: PyodideRunSettings;
   files: Record<string, string> | undefined;
+  interruptBuffer: Uint8Array | undefined;
 };
 
 export const isMessageToPyodideWorker = (
