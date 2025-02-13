@@ -31,6 +31,7 @@ import doesGistExist from "@SpUtil/gists/doesGistExist";
 import UploadFiles from "./UploadFiles";
 import {
   fromQueryParams,
+  QueryParamKeys,
   queryStringHasParameters,
 } from "@SpCore/Project/ProjectQueryLoading";
 
@@ -129,10 +130,7 @@ const LoadProjectPanel: FunctionComponent<LoadProjectProps> = ({ onClose }) => {
     [importUploadedZip],
   );
 
-  const { urlToLoad, setUrlToLoad, tryLoad } = useUrlLoader({
-    onClose,
-    setErrorText,
-  });
+  const { urlToLoad, setUrlToLoad, tryLoad } = useUrlLoader(setErrorText);
 
   return (
     <div className="dialogWrapper">
@@ -143,10 +141,14 @@ const LoadProjectPanel: FunctionComponent<LoadProjectProps> = ({ onClose }) => {
             label="Project URL"
             value={urlToLoad}
             onChange={(e) => setUrlToLoad(e.target.value.trim())}
-            onBlur={tryLoad}
+            onBlur={() => {
+              if (tryLoad()) {
+                onClose();
+              }
+            }}
             onKeyUp={(e) => {
-              if (e.key === "Enter") {
-                tryLoad();
+              if (e.key === "Enter" && tryLoad()) {
+                onClose();
               }
             }}
           ></TextField>
@@ -230,43 +232,58 @@ const LoadProjectPanel: FunctionComponent<LoadProjectProps> = ({ onClose }) => {
   );
 };
 
-const useUrlLoader = (params: {
-  onClose: () => void;
-  setErrorText: (text: string) => void;
-}) => {
-  const { onClose, setErrorText } = params;
-  const [urlToLoad, setUrlToLoad] = useState("");
+const useUrlLoader = (setErrorText: (text: string) => void) => {
+  const [urlToLoad, setURLRaw] = useState("");
+  const [query, setQuery] = useState("");
+
+  const setUrlToLoad = useCallback(
+    (url: string) => {
+      setURLRaw(url);
+      setQuery("");
+
+      if (url === "") return;
+      if (url.startsWith("https://stan-playground.flatironinstitute.org/")) {
+        const queriesOnly = new URLSearchParams(url.split("?", 2)[1]);
+        if (queryStringHasParameters(fromQueryParams(queriesOnly))) {
+          setQuery(`?${queriesOnly.toString()}`);
+          setErrorText("");
+        } else {
+          setErrorText(
+            "Stan-Playground URL does not contain any relevant data: " +
+              url +
+              " (should contain at least one of " +
+              Object.values(QueryParamKeys).join(", ") +
+              ")",
+          );
+        }
+      } else if (url.startsWith("https://gist.github.com/")) {
+        doesGistExist(url).then((exists) => {
+          if (exists) {
+            setQuery(`?project=${url}`);
+            setErrorText("");
+          } else {
+            setErrorText("Gist not found: " + url);
+          }
+        });
+      } else {
+        setErrorText(
+          "Unsupported URL: " +
+            url +
+            " (must be a Stan-Playground URL or a GitHub Gist URL)",
+        );
+      }
+    },
+    [setErrorText],
+  );
+
   const navigate = useNavigate();
 
   const tryLoad = useCallback(() => {
-    if (urlToLoad === "") return;
-    if (
-      urlToLoad.startsWith("https://stan-playground.flatironinstitute.org/")
-    ) {
-      const queriesOnly = new URLSearchParams(urlToLoad.split("?", 2)[1]);
-      if (queryStringHasParameters(fromQueryParams(queriesOnly))) {
-        navigate(`?${queriesOnly.toString()}`);
-        setUrlToLoad("");
-        onClose();
-      }
-    } else if (urlToLoad.startsWith("https://gist.github.com/")) {
-      doesGistExist(urlToLoad).then((exists) => {
-        if (exists) {
-          navigate(`?project=${urlToLoad}`);
-          setUrlToLoad("");
-          onClose();
-        } else {
-          setErrorText("Gist not found: " + urlToLoad);
-        }
-      });
-    } else {
-      setErrorText(
-        "Unsupported URL: " +
-          urlToLoad +
-          " (must be a Stan-Playground URL or a GitHub Gist URL)",
-      );
-    }
-  }, [navigate, onClose, setErrorText, urlToLoad]);
+    if (query === "") return false;
+    navigate(query, { replace: true });
+    setURLRaw("");
+    return true;
+  }, [navigate, query]);
 
   return { urlToLoad, setUrlToLoad, tryLoad };
 };
