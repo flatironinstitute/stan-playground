@@ -196,7 +196,7 @@ describe("Python runtime", () => {
       lines.slice(0, 11).join("\n") +
       "\n" +
       lines[12] +
-      "\n" +
+      '\n\ndata = ""' +
       lines.slice(23).join("\n");
     expect(runPy).toEqual(dataless);
   });
