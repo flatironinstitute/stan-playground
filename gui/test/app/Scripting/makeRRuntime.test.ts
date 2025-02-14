@@ -14,8 +14,15 @@ testDataModel.meta.title = "my title";
 
 const full = `TITLE <- "my title"
 options(repos = c('https://cloud.r-project.org/'))
-install.packages("posterior")
-install.packages("cmdstanr", repos = c('https://stan-dev.r-universe.dev', getOption("repos")))
+if (!require("posterior")) {
+    install.packages("posterior")
+}
+if (!require("cmdstanr")) {
+    install.packages("cmdstanr", repos = c('https://stan-dev.r-universe.dev', getOption("repos")))
+}
+if (!require("jsonlite")) {
+    install.packages("jsonlite")
+}
 
 library(cmdstanr)
 library(jsonlite)
@@ -25,13 +32,31 @@ if ("--ignore-saved-data" %in% args) {
     if (typeof(data) != "list") {
         stop("[stan-playground] data must be a list")
     }
+    data <- list(data)
 } else {
     print("Loading data from data.json, pass --ignore-saved-data to run data.R instead")
     data <- "./data.json"
 }
 
-# TODO: sampling arguments
-sampling_opts = c()
+.option_names_map = c(
+    init_radius="init",
+    num_warmup="iter_warmup",
+    num_samples="iter_sampling",
+    num_chains="chains"
+)
+
+sampling_opts <- list()
+
+if (file.exists("./sampling_opts.json")) {
+    opts <- jsonlite::fromJSON("./sampling_opts.json")
+    for (key in names(opts)) {
+        out_key <- key
+        if (key %in% names(.option_names_map)) {
+            out_key <- .option_names_map[[key]]
+        }
+        sampling_opts[[out_key]] <- opts[[key]]
+    }
+}
 
 tryCatch({
     cmdstanr::cmdstan_path()
@@ -62,7 +87,6 @@ describe("R runtime", () => {
 
   test("Export full", () => {
     const runR = makeRRuntimeScript(testDataModel);
-    console.log(runR);
     expect(runR).toEqual(full);
   });
 
@@ -77,9 +101,9 @@ describe("R runtime", () => {
     // we expect the same output minus the data loading part
     const lines = full.split("\n");
     const dataless =
-      lines.slice(0, 8).join("\n") +
-      '\ndata <- ""\n' +
-      lines.slice(17).join("\n");
+      lines.slice(0, 15).join("\n") +
+      '\ndata <- ""\n\n' +
+      lines.slice(26).join("\n");
     expect(runR).toEqual(dataless);
   });
 
@@ -88,7 +112,7 @@ describe("R runtime", () => {
     const runR = makeRRuntimeScript(noAnalysis);
 
     // we expect the same output, truncated after the sampling part
-    const analysisless = full.split("\n").slice(0, 38).join("\n") + "\n";
+    const analysisless = full.split("\n").slice(0, 63).join("\n") + "\n";
 
     expect(runR).toEqual(analysisless);
   });
