@@ -1,20 +1,22 @@
-import { FunctionComponent, use, useState } from "react";
+import { FunctionComponent, use, useEffect, useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+
 import { AlternatingTableRow } from "@SpComponents/StyledTables";
 import { mapModelToFileManifest } from "@SpCore/Project/FileMapping";
 import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
+import makePyRuntimeScript from "@SpCore/Scripting/Takeout/makePyRuntime";
+import makeRRuntimeScript from "@SpCore/Scripting/Takeout/makeRRuntime";
 import { triggerDownload } from "@SpUtil/triggerDownload";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import GistExportPanel from "./GistExportPanel";
-import GistUpdatePanel from "./GistUpdatePanel";
-
 import { replaceSpacesWithUnderscores } from "@SpUtil/replaceSpaces";
 import { serializeAsZip } from "@SpUtil/serializeAsZip";
-import makePyRuntimeScript from "@SpCore/Scripting/Takeout/makePyRuntime";
+
+import GistExportPanel from "./GistExportPanel";
+import GistUpdatePanel from "./GistUpdatePanel";
 
 type ExportProjectProps = {
   onClose: () => void;
@@ -29,7 +31,31 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
   const [exportingToGist, setExportingToGist] = useState(false);
   const [updatingExistingGist, setUpdatingExistingGist] = useState(false);
 
-  const [includeRunPy, setIncludeRunPy] = useState(false);
+  const [includeRunPy, setIncludeRunPy] = useState(
+    data.analysisPyFileContent.length > 0 || data.dataPyFileContent.length > 0,
+  );
+  const [runPy, setRunPy] = useState("");
+
+  const [includeRunR, setIncludeRunR] = useState(
+    data.analysisRFileContent.length > 0 || data.dataRFileContent.length > 0,
+  );
+  const [runR, setRunR] = useState("");
+
+  useEffect(() => {
+    if (includeRunPy) {
+      setRunPy(makePyRuntimeScript(data));
+    } else {
+      setRunPy("");
+    }
+  }, [includeRunPy, data]);
+
+  useEffect(() => {
+    if (includeRunR) {
+      setRunR(makeRRuntimeScript(data));
+    } else {
+      setRunR("");
+    }
+  }, [includeRunR, data]);
 
   return (
     <div className="dialogWrapper">
@@ -65,14 +91,36 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
                 ),
             )}
           </TableBody>
-          <AlternatingTableRow hover>
-            <TableCell>Include a run.py file for use with CmdStanPy?</TableCell>
+          <AlternatingTableRow
+            hover
+            title="An optional script file intended to be used locally with CmdStanPy"
+          >
+            <TableCell>
+              <strong className="HoverHelp">run.py</strong>
+            </TableCell>
             <TableCell>
               <input
                 type="checkbox"
                 checked={includeRunPy}
                 onChange={(e) => setIncludeRunPy(e.target.checked)}
               />
+              &nbsp; {runPy.length} bytes
+            </TableCell>
+          </AlternatingTableRow>
+          <AlternatingTableRow
+            hover
+            title="An optional script file intended to be used locally with CmdStanR"
+          >
+            <TableCell>
+              <strong className="HoverHelp">run.R</strong>
+            </TableCell>
+            <TableCell>
+              <input
+                type="checkbox"
+                checked={includeRunR}
+                onChange={(e) => setIncludeRunR(e.target.checked)}
+              />
+              &nbsp; {runR.length} bytes
             </TableCell>
           </AlternatingTableRow>
         </Table>
@@ -86,7 +134,10 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
                 mapModelToFileManifest(data);
               const folderName = replaceSpacesWithUnderscores(data.meta.title);
               if (includeRunPy) {
-                fileManifest["run.py"] = makePyRuntimeScript(data);
+                fileManifest["run.py"] = runPy;
+              }
+              if (includeRunR) {
+                fileManifest["run.R"] = runR;
               }
               serializeAsZip(folderName, fileManifest).then(([zipBlob, name]) =>
                 triggerDownload(zipBlob, `SP-${name}.zip`, onClose),

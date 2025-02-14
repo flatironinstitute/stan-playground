@@ -1,4 +1,5 @@
 import { ProjectDataModel } from "@SpCore/Project/ProjectDataModel";
+import indent from "@SpUtil/indent";
 
 import spPreamble from "./py/preamble.py?raw";
 import spRunData from "./py/run_data.py?raw";
@@ -7,14 +8,6 @@ import spCmdStan from "./py/cmdstan.py?raw";
 import spRunSampling from "./py/sample.py?raw";
 import spDrawsScript from "../pyodide/sp_load_draws.py?raw";
 import spRunAnalysis from "./py/run_analysis.py?raw";
-
-const indent = (s: string) => {
-  return s
-    .trim()
-    .split("\n")
-    .map((x) => "    " + x)
-    .join("\n");
-};
 
 const makePyRuntimeScript = (project: ProjectDataModel) => {
   const hasDataJson = project.dataFileContent.length > 0;
@@ -42,6 +35,8 @@ const makePyRuntimeScript = (project: ProjectDataModel) => {
   } else if (hasDataPy) {
     script += spRunData;
     script += `\n`;
+  } else {
+    script += `data = ""\n`;
   }
 
   // running sampler

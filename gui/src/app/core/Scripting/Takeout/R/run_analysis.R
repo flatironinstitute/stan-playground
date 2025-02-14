@@ -1,3 +1,4 @@
 draws <- fit$draws(format="draws_array")
 
-source("analysis.R")
+grDevices::pdf(onefile=FALSE)
+source("analysis.R", local=TRUE, print.eval=TRUE)
