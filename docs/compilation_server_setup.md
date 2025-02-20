@@ -2,7 +2,7 @@
 
 These instructions are only required if you want to set up your own compilation server.
 
-To run your own server locally using Docker, execute the following command:
+To run your own server locally using [Docker](https://www.docker.com/), execute the following command:
 
 ```
 docker run -p 8083:8080 -it ghcr.io/flatironinstitute/stan-wasm-server:latest

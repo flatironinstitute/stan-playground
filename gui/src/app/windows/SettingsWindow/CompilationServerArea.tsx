@@ -75,7 +75,16 @@ const CompilationServerArea: FunctionComponent = () => {
           {serverType === "local" && (
             <FormHelperText component="div">
               To start a local compilation server{" "}
-              <span className="details">({localCompilationServerUrl})</span>:
+              <span className="details">({localCompilationServerUrl})</span>,
+              install{" "}
+              <a
+                href="https://www.docker.com/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Docker
+              </a>{" "}
+              and run:
               <pre className="dockerRun">
                 docker run -p 8083:8080 -it
                 ghcr.io/flatironinstitute/stan-wasm-server:latest
