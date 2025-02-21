@@ -222,3 +222,8 @@ span.EditorTitle {
   text-decoration: underline;
   pointer-events: all;
 }
+
+.HoverHelp {
+  cursor: help;
+  text-decoration: underline;
+}

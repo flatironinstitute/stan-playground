@@ -4,7 +4,6 @@ import {
   FileRegistry,
   ProjectFileMap,
   mapFileContentsToModel,
-  mapModelToFileManifest,
 } from "@SpCore/Project/FileMapping";
 import {
   ProjectDataModel,
@@ -16,7 +15,6 @@ import {
   parseSamplingOpts,
   persistStateToEphemera,
 } from "@SpCore/Project/ProjectDataModel";
-import { replaceSpacesWithUnderscores } from "@SpUtil/replaceSpaces";
 import JSZip from "jszip";
 
 export const serializeProjectToLocalStorage = (
@@ -49,26 +47,6 @@ export const deserializeProjectFromLocalStorage = (
   }
 };
 
-export const serializeAsZip = async (
-  data: ProjectDataModel,
-): Promise<[Blob, string]> => {
-  const fileManifest = mapModelToFileManifest(data);
-  const folderName = replaceSpacesWithUnderscores(data.meta.title);
-  const zip = new JSZip();
-  const folder = zip.folder(folderName);
-  if (!folder) {
-    throw new Error("Error creating folder in zip file");
-  }
-  Object.entries(fileManifest).forEach(([name, content]) => {
-    if (content.trim() !== "") {
-      folder.file(name, content);
-    }
-  });
-  const zipBlob = await zip.generateAsync({ type: "blob" });
-
-  return [zipBlob, folderName];
-};
-
 export const parseFile = (fileBuffer: ArrayBuffer) => {
   const content = new TextDecoder().decode(fileBuffer);
   return content;
@@ -98,7 +76,7 @@ export const deserializeZipToFiles = async (zipBuffer: ArrayBuffer) => {
       const content = await file.async("arraybuffer");
       const decoded = new TextDecoder().decode(content);
       files[basename] = decoded;
-    } else {
+    } else if (!["run.R", "run.py"].includes(basename)) {
       throw new Error(
         `Unrecognized file in zip: ${file.name} (basename ${basename})`,
       );
