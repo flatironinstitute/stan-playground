@@ -9,8 +9,7 @@ import TextField from "@mui/material/TextField";
 import { AlternatingTableRow } from "@SpComponents/StyledTables";
 import { mapModelToFileManifest } from "@SpCore/Project/FileMapping";
 import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
-import makePyRuntimeScript from "@SpCore/Scripting/Takeout/makePyRuntime";
-import makeRRuntimeScript from "@SpCore/Scripting/Takeout/makeRRuntime";
+import makeRuntimeScript from "@SpCore/Scripting/Takeout/makeRuntime";
 import { triggerDownload } from "@SpUtil/triggerDownload";
 import { replaceSpacesWithUnderscores } from "@SpUtil/replaceSpaces";
 import { serializeAsZip } from "@SpUtil/serializeAsZip";
@@ -43,7 +42,7 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
 
   useEffect(() => {
     if (includeRunPy) {
-      setRunPy(makePyRuntimeScript(data));
+      makeRuntimeScript(data, "py").then(setRunPy);
     } else {
       setRunPy("");
     }
@@ -51,7 +50,7 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
 
   useEffect(() => {
     if (includeRunR) {
-      setRunR(makeRRuntimeScript(data));
+      makeRuntimeScript(data, "R").then(setRunR);
     } else {
       setRunR("");
     }
@@ -90,39 +89,39 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
                   </AlternatingTableRow>
                 ),
             )}
+            <AlternatingTableRow
+              hover
+              title="An optional script file intended to be used locally with CmdStanPy"
+            >
+              <TableCell>
+                <strong className="HoverHelp">run.py</strong>
+              </TableCell>
+              <TableCell>
+                <input
+                  type="checkbox"
+                  checked={includeRunPy}
+                  onChange={(e) => setIncludeRunPy(e.target.checked)}
+                />
+                &nbsp; {runPy.length} bytes
+              </TableCell>
+            </AlternatingTableRow>
+            <AlternatingTableRow
+              hover
+              title="An optional script file intended to be used locally with CmdStanR"
+            >
+              <TableCell>
+                <strong className="HoverHelp">run.R</strong>
+              </TableCell>
+              <TableCell>
+                <input
+                  type="checkbox"
+                  checked={includeRunR}
+                  onChange={(e) => setIncludeRunR(e.target.checked)}
+                />
+                &nbsp; {runR.length} bytes
+              </TableCell>
+            </AlternatingTableRow>
           </TableBody>
-          <AlternatingTableRow
-            hover
-            title="An optional script file intended to be used locally with CmdStanPy"
-          >
-            <TableCell>
-              <strong className="HoverHelp">run.py</strong>
-            </TableCell>
-            <TableCell>
-              <input
-                type="checkbox"
-                checked={includeRunPy}
-                onChange={(e) => setIncludeRunPy(e.target.checked)}
-              />
-              &nbsp; {runPy.length} bytes
-            </TableCell>
-          </AlternatingTableRow>
-          <AlternatingTableRow
-            hover
-            title="An optional script file intended to be used locally with CmdStanR"
-          >
-            <TableCell>
-              <strong className="HoverHelp">run.R</strong>
-            </TableCell>
-            <TableCell>
-              <input
-                type="checkbox"
-                checked={includeRunR}
-                onChange={(e) => setIncludeRunR(e.target.checked)}
-              />
-              &nbsp; {runR.length} bytes
-            </TableCell>
-          </AlternatingTableRow>
         </Table>
       </TableContainer>
       <div>&nbsp;</div>

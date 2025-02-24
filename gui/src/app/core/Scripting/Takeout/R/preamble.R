@@ -11,3 +11,5 @@ if (!require("jsonlite")) {
 
 library(cmdstanr)
 library(jsonlite)
+
+args <- commandArgs(trailingOnly = TRUE)

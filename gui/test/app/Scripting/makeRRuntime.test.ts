@@ -3,7 +3,7 @@ import {
   ProjectDataModel,
   ProjectKnownFiles,
 } from "@SpCore/Project/ProjectDataModel";
-import makeRRuntimeScript from "@SpCore/Scripting/Takeout/makeRRuntime";
+import makeRuntimeScript from "@SpCore/Scripting/Takeout/makeRuntime";
 import { describe, expect, test } from "vitest";
 
 const testDataModel: ProjectDataModel = structuredClone(initialDataModel);
@@ -12,7 +12,7 @@ Object.values(ProjectKnownFiles).forEach((f) => {
 });
 testDataModel.meta.title = "my title";
 
-const full = `TITLE <- "my title"
+const full = `TITLE = "my title"
 options(repos = c('https://cloud.r-project.org/'))
 if (!require("posterior")) {
     install.packages("posterior")
@@ -26,7 +26,9 @@ if (!require("jsonlite")) {
 
 library(cmdstanr)
 library(jsonlite)
+
 args <- commandArgs(trailingOnly = TRUE)
+
 if ("--ignore-saved-data" %in% args) {
     source("data.R", local=TRUE, print.eval=TRUE)
     if (typeof(data) != "list") {
@@ -76,6 +78,7 @@ fit = do.call(model$sample, as.list(c(data=data, sampling_opts)))
 
 print(fit$summary())
 
+
 draws <- fit$draws(format="draws_array")
 
 grDevices::pdf(onefile=FALSE)
@@ -85,34 +88,34 @@ source("analysis.R", local=TRUE, print.eval=TRUE)
 describe("R runtime", () => {
   // these serve as "golden" tests, just to make sure the output is as expected
 
-  test("Export full", () => {
-    const runR = makeRRuntimeScript(testDataModel);
+  test("Export full", async () => {
+    const runR = await makeRuntimeScript(testDataModel, "R");
     expect(runR).toEqual(full);
   });
 
-  test("Export without data", () => {
+  test("Export without data", async () => {
     const noData = {
       ...testDataModel,
       dataFileContent: "",
       dataRFileContent: "",
     };
-    const runR = makeRRuntimeScript(noData);
+    const runR = await makeRuntimeScript(noData, "R");
 
     // we expect the same output minus the data loading part
     const lines = full.split("\n");
     const dataless =
-      lines.slice(0, 15).join("\n") +
-      '\ndata <- ""\n\n' +
-      lines.slice(26).join("\n");
+      lines.slice(0, 16).join("\n") +
+      '\n\ndata = ""\n' +
+      lines.slice(27).join("\n");
     expect(runR).toEqual(dataless);
   });
 
-  test("Export without analysis", () => {
+  test("Export without analysis", async () => {
     const noAnalysis = { ...testDataModel, analysisRFileContent: "" };
-    const runR = makeRRuntimeScript(noAnalysis);
+    const runR = await makeRuntimeScript(noAnalysis, "R");
 
     // we expect the same output, truncated after the sampling part
-    const analysisless = full.split("\n").slice(0, 63).join("\n") + "\n";
+    const analysisless = full.split("\n").slice(0, 65).join("\n") + "\n";
 
     expect(runR).toEqual(analysisless);
   });

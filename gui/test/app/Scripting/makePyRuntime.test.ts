@@ -3,7 +3,7 @@ import {
   ProjectDataModel,
   ProjectKnownFiles,
 } from "@SpCore/Project/ProjectDataModel";
-import makePyRuntimeScript from "@SpCore/Scripting/Takeout/makePyRuntime";
+import makeRuntimeScript from "@SpCore/Scripting/Takeout/makeRuntime";
 import { describe, expect, test } from "vitest";
 
 const testDataModel: ProjectDataModel = structuredClone(initialDataModel);
@@ -12,7 +12,7 @@ Object.values(ProjectKnownFiles).forEach((f) => {
 });
 testDataModel.meta.title = "my title";
 
-const full = `TITLE="my title"
+const full = `TITLE = "my title"
 import argparse
 import json
 import os
@@ -177,33 +177,31 @@ if len(plt.gcf().get_children()) > 1:
 describe("Python runtime", () => {
   // these serve as "golden" tests, just to make sure the output is as expected
 
-  test("Export full", () => {
-    const runPy = makePyRuntimeScript(testDataModel);
+  test("Export full", async () => {
+    const runPy = await makeRuntimeScript(testDataModel, "py");
     expect(runPy).toEqual(full);
   });
 
-  test("Export without data", () => {
+  test("Export without data", async () => {
     const noData = {
       ...testDataModel,
       dataFileContent: "",
       dataPyFileContent: "",
     };
-    const runPy = makePyRuntimeScript(noData);
+    const runPy = await makeRuntimeScript(noData, "py");
 
     // we expect the same output minus the data loading part
     const lines = full.split("\n");
     const dataless =
-      lines.slice(0, 11).join("\n") +
-      "\n" +
-      lines[12] +
-      '\n\ndata = ""' +
-      lines.slice(23).join("\n");
+      lines.slice(0, 13).join("\n") +
+      '\n\ndata = ""\n\n' +
+      lines.slice(24).join("\n");
     expect(runPy).toEqual(dataless);
   });
 
-  test("Export without analysis", () => {
+  test("Export without analysis", async () => {
     const noAnalysis = { ...testDataModel, analysisPyFileContent: "" };
-    const runPy = makePyRuntimeScript(noAnalysis);
+    const runPy = await makeRuntimeScript(noAnalysis, "py");
 
     // we expect the same output, truncated after the sampling part
     const analysisless = full.split("\n").slice(0, 54).join("\n") + "\n";
