@@ -95,19 +95,8 @@ const ScriptEditor: FunctionComponent<ScriptEditorProps> = ({
         },
       },
     ];
-    if (onCancel) {
-      // Ctrl-C to cancel
-      actions.push({
-        id: "cancel-script",
-        label: "Cancel Script",
-        keybindings: [
-          monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.KeyC,
-        ],
-        run: onCancel,
-      });
-    }
     return actions;
-  }, [monacoInstance, onCancel, runCode, runnable, unsavedChanges]);
+  }, [monacoInstance, runCode, runnable, unsavedChanges]);
 
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     return makeToolbar({
