@@ -7,6 +7,7 @@ import {
   AlternatingTableRow,
   SecondaryColoredTableHead,
 } from "@SpComponents/StyledTables";
+import prettifyStanParamName from "@SpUtil/prettifyStanParamName";
 import {
   effective_sample_size,
   split_potential_scale_reduction,
@@ -88,8 +89,8 @@ const SummaryPanel: FunctionComponent<SummaryProps> = ({
 }) => {
   const rows = useMemo(() => {
     const rows: TableRow[] = [];
-    for (const pname of paramNames) {
-      const pDraws = draws[paramNames.indexOf(pname)];
+    for (const [index, pname] of paramNames.entries()) {
+      const pDraws = draws[index];
       const pDrawsSorted = [...pDraws].sort((a, b) => a - b);
       const ess = computeEss(pDraws, drawChainIds);
       const rhat = computeRhat(pDraws, drawChainIds);
@@ -118,7 +119,7 @@ const SummaryPanel: FunctionComponent<SummaryProps> = ({
         }
       });
       rows.push({
-        key: pname,
+        key: prettifyStanParamName(pname),
         values,
       });
     }

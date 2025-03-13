@@ -2,6 +2,7 @@ import type { FunctionComponent } from "react";
 
 import Collapsable from "@SpComponents/Collapsable";
 import TracePlot from "./TracePlot";
+import prettifyStanParamName from "@SpUtil/prettifyStanParamName";
 
 type TracePlotsProps = {
   draws: number[][];
@@ -16,7 +17,7 @@ const TracePlotsPanel: FunctionComponent<TracePlotsProps> = ({
 }) => {
   return (
     <>
-      {paramNames.map((paramName, i) => (
+      {paramNames.map(prettifyStanParamName).map((paramName, i) => (
         <Collapsable name={paramName} key={paramName}>
           <TracePlot
             key={paramName}
