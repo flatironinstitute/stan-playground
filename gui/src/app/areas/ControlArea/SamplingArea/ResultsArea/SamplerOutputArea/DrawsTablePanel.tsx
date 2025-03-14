@@ -73,7 +73,7 @@ const DrawsTablePanel: FunctionComponent<DrawsTableProps> = ({
 
   return (
     <Box display="flex" height="100%" width="100%" flexDirection="column">
-      <Box flex="1" marginBottom="0.75rem">
+      <Box flex="0" marginBottom="0.75rem">
         <IconButton size="small" title="Download" onClick={handleExportToCsv}>
           <Download fontSize="inherit" />
           &nbsp;Export to single .csv

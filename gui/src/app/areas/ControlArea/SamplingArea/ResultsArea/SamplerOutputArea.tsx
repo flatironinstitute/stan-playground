@@ -8,6 +8,7 @@ import DrawsTablePanel from "./SamplerOutputArea/DrawsTablePanel";
 import HistogramsPanel from "./SamplerOutputArea/HistogramsPanel";
 import TracePlotsPanel from "./SamplerOutputArea/TracePlotsPanel";
 import ConsolePanel from "./SamplerOutputArea/ConsolePanel";
+import ScatterPlotsPanel from "./SamplerOutputArea/ScatterPlotsPanel";
 
 const SamplerOutputArea: FunctionComponent<NeedsLatestRun> = ({
   latestRun,
@@ -41,7 +42,14 @@ const SamplerOutputArea: FunctionComponent<NeedsLatestRun> = ({
 
   return (
     <TabWidget
-      labels={["Summary", "Draws", "Histograms", "Trace plots", "Console"]}
+      labels={[
+        "Summary",
+        "Draws",
+        "Histograms",
+        "Scatter plots",
+        "Trace plots",
+        "Console",
+      ]}
     >
       <SummaryPanel
         draws={draws}
@@ -57,6 +65,11 @@ const SamplerOutputArea: FunctionComponent<NeedsLatestRun> = ({
         samplingOpts={samplingOpts}
       />
       <HistogramsPanel
+        draws={draws}
+        paramNames={paramNames}
+        drawChainIds={drawChainIds}
+      />
+      <ScatterPlotsPanel
         draws={draws}
         paramNames={paramNames}
         drawChainIds={drawChainIds}
