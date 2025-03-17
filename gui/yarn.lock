@@ -3412,10 +3412,8 @@ picomatch@^2.3.1:
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.3.1.tgz#3ba3833733646d9d3e4995946c1365a67fb07a42"
   integrity sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==
 
-plotly.js-strict-dist@^3.0.1:
+"plotly-stan-playground-dist@file:./vendor/plotly-stan-playground-dist":
   version "3.0.1"
-  resolved "https://registry.yarnpkg.com/plotly.js-strict-dist/-/plotly.js-strict-dist-3.0.1.tgz#e611c7ac3e8d652cecc874d752d02666c7cfd002"
-  integrity sha512-E9cJRTTdaohzeZoEF6YANCBLZOOU6IK0Bnntktok5LGa/tXrED5wL3e8l8bMQUBU8zZYfL9s8uC+WQKAwxwGuw==
 
 possible-typed-array-names@^1.0.0:
   version "1.0.0"
