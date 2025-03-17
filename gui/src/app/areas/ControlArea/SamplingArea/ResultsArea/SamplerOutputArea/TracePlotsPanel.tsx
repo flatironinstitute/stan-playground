@@ -1,7 +1,7 @@
 import type { FunctionComponent } from "react";
 
 import Collapsable from "@SpComponents/Collapsable";
-import TracePlot from "./TracePlot";
+import TracePlot from "./Plots/TracePlot";
 import prettifyStanParamName from "@SpUtil/prettifyStanParamName";
 
 type TracePlotsProps = {

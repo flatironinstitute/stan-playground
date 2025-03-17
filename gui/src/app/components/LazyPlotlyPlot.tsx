@@ -12,14 +12,29 @@ const Plot = React.lazy(async () => {
 
 const LazyPlotlyPlot: FunctionComponent<PlotParams> = ({ data, layout }) => {
   // plotly has a reactive setting, but it is buggy
-  const [ref, { width }] = useMeasure({ debounce: 100 });
+  const [ref, { width }] = useMeasure({ debounce: 10 });
+
+  // allow it to be overridden
+  const widthToUse = useMemo(
+    () => layout.width ?? width,
+    [layout.width, width],
+  );
 
   const layoutWithWidth = useMemo(
-    () => ({
-      ...layout,
-      width: width,
-    }),
-    [layout, width],
+    () =>
+      ({
+        width: widthToUse,
+        autosize: true,
+        plot_bgcolor: "rgba(240,240,240, 0.95)",
+        paper_bgcolor: "rgba(255,255,255, .5)",
+        legend: {
+          x: 1,
+          xanchor: "right",
+          y: 1,
+        },
+        ...layout,
+      }) as const,
+    [layout, widthToUse],
   );
 
   return (

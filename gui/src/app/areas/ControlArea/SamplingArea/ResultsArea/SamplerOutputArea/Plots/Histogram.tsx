@@ -3,13 +3,11 @@ import { FunctionComponent, useMemo } from "react";
 
 type HistogramProps = {
   histData: number[];
-  title: string;
   variableName: string;
 };
 
 const Histogram: FunctionComponent<HistogramProps> = ({
   histData,
-  title,
   variableName,
 }) => {
   const data = useMemo(
@@ -27,12 +25,12 @@ const Histogram: FunctionComponent<HistogramProps> = ({
 
   const layout = useMemo(
     () => ({
-      title: { text: title, font: { size: 12 } },
       xaxis: { title: { text: variableName } },
       yaxis: { title: { text: "Count" } },
-      margin: { r: 0 },
+
+      margin: { r: 10, l: 55, t: 45, b: 45 },
     }),
-    [title, variableName],
+    [variableName],
   );
 
   return <LazyPlotlyPlot data={data} layout={layout} />;

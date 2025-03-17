@@ -1,6 +1,6 @@
 import Button from "@mui/material/Button";
 import ResponsiveGrid from "@SpComponents/ResponsiveGrid";
-import Histogram from "./Histogram";
+import Histogram from "./Plots/Histogram";
 import { FunctionComponent, useMemo, useState } from "react";
 import prettifyStanParamName from "@SpUtil/prettifyStanParamName";
 
@@ -42,7 +42,6 @@ const HistogramsPanel: FunctionComponent<HistogramsProps> = ({
             <Histogram
               key={paramName}
               histData={draws[index]}
-              title={paramName}
               variableName={paramName}
             />
           ))}
