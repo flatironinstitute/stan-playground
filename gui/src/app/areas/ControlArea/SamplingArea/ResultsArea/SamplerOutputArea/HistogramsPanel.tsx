@@ -2,6 +2,7 @@ import Button from "@mui/material/Button";
 import ResponsiveGrid from "@SpComponents/ResponsiveGrid";
 import Histogram from "./Histogram";
 import { FunctionComponent, useMemo, useState } from "react";
+import prettifyStanParamName from "@SpUtil/prettifyStanParamName";
 
 type HistogramsProps = {
   draws: number[][];
@@ -15,23 +16,36 @@ const HistogramsPanel: FunctionComponent<HistogramsProps> = ({
 }) => {
   const paramNamesResorted = useMemo(() => {
     // put the names that don't end with __ first
-    const names = paramNames.filter((name) => !name.endsWith("__"));
-    const namesWithSuffix = paramNames.filter((name) => name.endsWith("__"));
+    const names: [string, number][] = [];
+    const namesWithSuffix: [string, number][] = [];
+
+    for (const [index, name] of paramNames
+      .map(prettifyStanParamName)
+      .entries()) {
+      if (name.endsWith("__")) {
+        namesWithSuffix.push([name, index]);
+      } else {
+        names.push([name, index]);
+      }
+    }
     return [...names, ...namesWithSuffix];
   }, [paramNames]);
+
   const [abbreviatedToNumPlots, setAbbreviatedToNumPlots] =
     useState<number>(30);
   return (
     <>
       <ResponsiveGrid>
-        {paramNamesResorted.slice(0, abbreviatedToNumPlots).map((paramName) => (
-          <Histogram
-            key={paramName}
-            histData={draws[paramNames.indexOf(paramName)]}
-            title={paramName}
-            variableName={paramName}
-          />
-        ))}
+        {paramNamesResorted
+          .slice(0, abbreviatedToNumPlots)
+          .map(([paramName, index]) => (
+            <Histogram
+              key={paramName}
+              histData={draws[index]}
+              title={paramName}
+              variableName={paramName}
+            />
+          ))}
       </ResponsiveGrid>
       {abbreviatedToNumPlots < paramNamesResorted.length && (
         <div className="PlotAbbreviationToggle">
