@@ -1,50 +1,27 @@
 import { FunctionComponent, useMemo } from "react";
+import type { StanDraw } from "../../SamplerOutputArea";
 
 import LazyPlotlyPlot from "@SpComponents/LazyPlotlyPlot";
 import chainColorList from "./chainColorway";
 
 type TracePlotProps = {
-  variableName: string;
-  draws: number[][];
-  columnIndex: number;
-  drawChainIds: number[];
+  variable: StanDraw;
 };
 
-const TracePlot: FunctionComponent<TracePlotProps> = ({
-  variableName,
-  draws,
-  columnIndex,
-  drawChainIds,
-}) => {
-  const plotSequences = useMemo(() => {
-    const uniqueChainIds = Array.from(new Set(drawChainIds)).sort();
-    return uniqueChainIds.map(
-      (chainId) => {
-        return {
-          label: `Chain ${chainId}`,
-          data: draws[columnIndex].filter(
-            (_, i) => drawChainIds[i] === chainId,
-          ),
-        };
-      },
-      [draws, columnIndex],
-    );
-  }, [draws, columnIndex, drawChainIds]);
+const TracePlot: FunctionComponent<TracePlotProps> = ({ variable }) => {
+  const data = useMemo(() => {
+    const n_chains = variable.draws.length;
+    return [...new Array(n_chains)].map((_, i) => {
+      return {
+        name: `Chain ${i + 1}`,
+        x: [...new Array(variable.draws[i].length).keys()].map((i) => i + 1),
+        y: variable.draws[i],
+        type: "scatter",
+        mode: "lines+markers",
+      } as const;
+    });
+  }, [variable.draws]);
 
-  const data = useMemo(
-    () =>
-      plotSequences.map(
-        (ps) =>
-          ({
-            x: [...new Array(ps.data.length).keys()].map((i) => i + 1),
-            y: ps.data,
-            name: ps.label,
-            type: "scatter",
-            mode: "lines+markers",
-          }) as const,
-      ),
-    [plotSequences],
-  );
   const layout = useMemo(() => {
     const axis = {
       showline: false,
@@ -55,7 +32,7 @@ const TracePlot: FunctionComponent<TracePlotProps> = ({
 
     return {
       title: { text: "" },
-      yaxis: { ...axis, title: { text: variableName } },
+      yaxis: { ...axis, title: { text: variable.name } },
       xaxis: { ...axis, title: { text: "draw" } },
 
       margin: { r: 10, l: 55, t: 10, b: 45 },
@@ -63,7 +40,7 @@ const TracePlot: FunctionComponent<TracePlotProps> = ({
 
       colorway: chainColorList,
     } as const;
-  }, [variableName]);
+  }, [variable]);
 
   return <LazyPlotlyPlot data={data} layout={layout} />;
 };

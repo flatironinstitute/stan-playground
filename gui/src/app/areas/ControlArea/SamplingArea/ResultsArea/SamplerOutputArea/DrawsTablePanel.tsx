@@ -19,49 +19,36 @@ import { FunctionComponent, useCallback, useMemo, useState } from "react";
 type DrawsTableProps = {
   draws: number[][];
   paramNames: string[];
-  drawChainIds: number[];
-  drawNumbers: number[];
   samplingOpts: SamplingOpts; // for including in exported zip
 };
 
 const DrawsTablePanel: FunctionComponent<DrawsTableProps> = ({
   draws,
   paramNames,
-  drawChainIds,
-  drawNumbers,
   samplingOpts,
 }) => {
+  const numChains = samplingOpts.num_chains;
+  const totalDraws = draws[0].length;
+
   const [abbreviatedToNumRows, setAbbreviatedToNumRows] = useState<
     number | undefined
   >(300);
+
   const formattedDraws = useMemo(() => {
     if (abbreviatedToNumRows === undefined) return draws;
     return draws.map((draw) =>
       formatDraws(draw.slice(0, abbreviatedToNumRows)),
     );
   }, [draws, abbreviatedToNumRows]);
+
   const handleExportToCsv = useCallback(() => {
-    const csvText = prepareCsvText(
-      draws,
-      paramNames,
-      drawChainIds,
-      drawNumbers,
-    );
+    const csvText = prepareCsvText(draws, paramNames, numChains);
     downloadTextFile(csvText, "draws.csv");
-  }, [draws, paramNames, drawChainIds, drawNumbers]);
+  }, [draws, paramNames, numChains]);
+
   const handleExportToMultipleCsvs = useCallback(async () => {
-    const uniqueChainIds = Array.from(new Set(drawChainIds));
-    const csvTexts = prepareMultipleCsvsText(
-      draws,
-      paramNames,
-      drawChainIds,
-      uniqueChainIds,
-    );
-    const blob = await createZipBlobForMultipleCsvs(
-      csvTexts,
-      uniqueChainIds,
-      samplingOpts,
-    );
+    const csvTexts = prepareMultipleCsvsText(draws, paramNames, numChains);
+    const blob = await createZipBlobForMultipleCsvs(csvTexts, samplingOpts);
     const fileName = "SP-draws.zip";
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -69,7 +56,7 @@ const DrawsTablePanel: FunctionComponent<DrawsTableProps> = ({
     a.download = fileName;
     a.click();
     URL.revokeObjectURL(url);
-  }, [draws, paramNames, drawChainIds, samplingOpts]);
+  }, [draws, paramNames, numChains, samplingOpts]);
 
   return (
     <Box display="flex" height="100%" width="100%" flexDirection="column">
@@ -104,8 +91,12 @@ const DrawsTablePanel: FunctionComponent<DrawsTableProps> = ({
           <TableBody>
             {formattedDraws[0].map((_, i) => (
               <SuccessBorderedTableRow key={i} hover>
-                <TableCell>{drawChainIds[i]}</TableCell>
-                <TableCell>{drawNumbers[i]}</TableCell>
+                <TableCell>
+                  {computeChainId(i, numChains, totalDraws)}
+                </TableCell>
+                <TableCell>
+                  {computeDrawNumber(i, numChains, totalDraws)}
+                </TableCell>
                 {formattedDraws.map((draw, j) => (
                   <TableCell padding="checkbox" key={j}>
                     {draw[i]}
@@ -140,17 +131,13 @@ const formatDraws = (draws: number[]) => {
 const prepareCsvText = (
   draws: number[][],
   paramNames: string[],
-  drawChainIds: number[],
-  drawNumbers: number[],
+  numChains: number,
 ) => {
-  // draws: Each element of draws is a column corresponding to a parameter, across all chains
-  // paramNames: The paramNames array contains the names of the parameters in the same order that they appear in the draws array
-  // drawChainIds: The drawChainIds array contains the chain id for each row in the draws array
-  // uniqueChainIds: The uniqueChainIds array contains the unique chain ids
+  const totalDraws = draws[0].length;
   const lines = draws[0].map((_, i) => {
     return [
-      `${drawChainIds[i]}`,
-      `${drawNumbers[i]}`,
+      `${computeChainId(i, numChains, totalDraws)}`,
+      `${computeDrawNumber(i, numChains, totalDraws)}`,
       ...paramNames.map((_, j) => draws[j][i]),
     ].join(",");
   });
@@ -160,27 +147,22 @@ const prepareCsvText = (
 const prepareMultipleCsvsText = (
   draws: number[][],
   paramNames: string[],
-  drawChainIds: number[],
-  uniqueChainIds: number[],
+  numChains: number,
 ) => {
-  // See the comments in prepareCsvText for the meaning of the arguments.
   // Whereas prepareCsvText returns a CSV that represents a long-form table,
   // this function returns multiple CSVs, one for each chain.
-  return uniqueChainIds.map((chainId) => {
-    const drawIndicesForChain = drawChainIds
-      .map((id, i) => (id === chainId ? i : -1))
-      .filter((i) => i >= 0);
-    const lines = drawIndicesForChain.map((i) => {
-      return paramNames.map((_, j) => draws[j][i]).join(",");
-    });
-
-    return [paramNames.join(","), ...lines].join("\n");
-  });
+  const totalDraws = draws[0].length;
+  const csvs = [...new Array(numChains)].map(() => [paramNames.join(",")]);
+  for (let i = 0; i < totalDraws; i++) {
+    const chainId = computeChainId(i, numChains, totalDraws);
+    console.log("chainId", chainId);
+    csvs[chainId - 1].push(paramNames.map((_, j) => draws[j][i]).join(","));
+  }
+  return csvs.map((csv) => csv.join("\n"));
 };
 
 const createZipBlobForMultipleCsvs = async (
   csvTexts: string[],
-  uniqueChainIds: number[],
   samplingOpts: SamplingOpts,
 ) => {
   const zip = new JSZip();
@@ -188,7 +170,7 @@ const createZipBlobForMultipleCsvs = async (
   const folder = zip.folder("draws");
   if (!folder) throw new Error("Failed to create folder");
   csvTexts.forEach((text, i) => {
-    folder.file(`chain_${uniqueChainIds[i]}.csv`, text);
+    folder.file(`chain_${i + 1}.csv`, text);
   });
   const samplingOptsText = JSON.stringify(samplingOpts, null, 2);
   folder.file("sampling_opts.json", samplingOptsText);
@@ -199,6 +181,18 @@ const createZipBlobForMultipleCsvs = async (
 const downloadTextFile = (text: string, filename: string) => {
   const blob = new Blob([text], { type: "text/plain" });
   triggerDownload(blob, filename, () => {});
+};
+
+const computeChainId = (i: number, numChains: number, totalDraws: number) =>
+  1 + Math.floor((i / totalDraws) * numChains);
+
+const computeDrawNumber = (
+  i: number,
+  numChains: number,
+  totalDraws: number,
+) => {
+  const numDrawsPerChain = Math.floor(totalDraws / numChains);
+  return 1 + (i % numDrawsPerChain);
 };
 
 export default DrawsTablePanel;

@@ -1,23 +1,20 @@
 import { FunctionComponent, useMemo } from "react";
+import type { StanDraw } from "../../SamplerOutputArea";
 
 import LazyPlotlyPlot from "@SpComponents/LazyPlotlyPlot";
 import chainColorList from "./chainColorway";
 
 type Scatter2DProps = {
-  x: { name: string; draws: number[][] };
-  y: { name: string; draws: number[][] };
-  chainIds: number[];
+  x: StanDraw;
+  y: StanDraw;
 };
 
-const ScatterPlot2D: FunctionComponent<Scatter2DProps> = ({
-  x,
-  y,
-  chainIds,
-}) => {
+const ScatterPlot2D: FunctionComponent<Scatter2DProps> = ({ x, y }) => {
   const data = useMemo(() => {
-    return chainIds.map((chainId, i) => {
+    const n_chains = x.draws.length;
+    return [...new Array(n_chains)].map((_, i) => {
       return {
-        name: `Chain ${chainId}`,
+        name: `Chain ${i + 1}`,
         x: x.draws[i],
         y: y.draws[i],
 
@@ -25,7 +22,7 @@ const ScatterPlot2D: FunctionComponent<Scatter2DProps> = ({
         mode: "markers",
       } as const;
     });
-  }, [chainIds, x.draws, y.draws]);
+  }, [x.draws, y.draws]);
 
   const layout = useMemo(() => {
     const axis = {

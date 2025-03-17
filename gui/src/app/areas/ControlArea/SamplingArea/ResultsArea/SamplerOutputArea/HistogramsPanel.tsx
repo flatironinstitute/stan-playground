@@ -2,12 +2,10 @@ import Button from "@mui/material/Button";
 import ResponsiveGrid from "@SpComponents/ResponsiveGrid";
 import Histogram from "./Plots/Histogram";
 import { FunctionComponent, useMemo, useState } from "react";
-import prettifyStanParamName from "@SpUtil/prettifyStanParamName";
 
 type HistogramsProps = {
   draws: number[][];
   paramNames: string[];
-  drawChainIds: number[];
 };
 
 const HistogramsPanel: FunctionComponent<HistogramsProps> = ({
@@ -19,9 +17,7 @@ const HistogramsPanel: FunctionComponent<HistogramsProps> = ({
     const names: [string, number][] = [];
     const namesWithSuffix: [string, number][] = [];
 
-    for (const [index, name] of paramNames
-      .map(prettifyStanParamName)
-      .entries()) {
+    for (const [index, name] of paramNames.entries()) {
       if (name.endsWith("__")) {
         namesWithSuffix.push([name, index]);
       } else {

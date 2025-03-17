@@ -1,25 +1,21 @@
 import { FunctionComponent, useMemo } from "react";
+import type { StanDraw } from "../../SamplerOutputArea";
 
 import LazyPlotlyPlot from "@SpComponents/LazyPlotlyPlot";
 import chainColorList from "./chainColorway";
 
 type Scatter3DProps = {
-  x: { name: string; draws: number[][] };
-  y: { name: string; draws: number[][] };
-  z: { name: string; draws: number[][] };
-  chainIds: number[];
+  x: StanDraw;
+  y: StanDraw;
+  z: StanDraw;
 };
 
-const ScatterPlot3D: FunctionComponent<Scatter3DProps> = ({
-  x,
-  y,
-  z,
-  chainIds,
-}) => {
+const ScatterPlot3D: FunctionComponent<Scatter3DProps> = ({ x, y, z }) => {
   const data = useMemo(() => {
-    return chainIds.map((chainId, i) => {
+    const n_chains = x.draws.length;
+    return [...new Array(n_chains)].map((_, i) => {
       return {
-        name: `Chain ${chainId}`,
+        name: `Chain ${i + 1}`,
         x: x.draws[i],
         y: y.draws[i],
         z: z.draws[i],
@@ -29,7 +25,7 @@ const ScatterPlot3D: FunctionComponent<Scatter3DProps> = ({
         marker: { size: 2 },
       } as const;
     });
-  }, [chainIds, x.draws, y.draws, z.draws]);
+  }, [x.draws, y.draws, z.draws]);
 
   const layout = useMemo(
     () =>
@@ -56,7 +52,7 @@ const ScatterPlot3D: FunctionComponent<Scatter3DProps> = ({
           },
         },
 
-        margin: { r: 0, l: 0, t: 0, b: 0 },
+        margin: { r: 10, l: 10, t: 0, b: 0 },
 
         colorway: chainColorList,
       }) as const,

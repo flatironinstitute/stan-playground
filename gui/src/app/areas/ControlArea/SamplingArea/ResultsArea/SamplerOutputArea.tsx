@@ -9,36 +9,52 @@ import HistogramsPanel from "./SamplerOutputArea/HistogramsPanel";
 import TracePlotsPanel from "./SamplerOutputArea/TracePlotsPanel";
 import ConsolePanel from "./SamplerOutputArea/ConsolePanel";
 import ScatterPlotsPanel from "./SamplerOutputArea/ScatterPlotsPanel";
+import prettifyStanParamName from "@SpUtil/prettifyStanParamName";
+
+export type StanDraw = {
+  name: string;
+  // draws is [draw][chain]
+  draws: number[][];
+};
 
 const SamplerOutputArea: FunctionComponent<NeedsLatestRun> = ({
   latestRun,
 }) => {
-  const drawChainIds = useMemo(() => {
-    if (!latestRun.runResult || !latestRun.samplingOpts) return [];
-    const numChains = latestRun.samplingOpts.num_chains;
-    const draws = latestRun.runResult.draws;
-    return [...new Array(draws[0].length).keys()].map(
-      (i) => 1 + Math.floor((i / draws[0].length) * numChains),
-    );
-  }, [latestRun.runResult, latestRun.samplingOpts]);
-
-  const drawNumbers: number[] = useMemo(() => {
-    if (!latestRun.runResult || !latestRun.samplingOpts) return [];
-    const numChains = latestRun.samplingOpts.num_chains;
-    const draws = latestRun.runResult.draws;
-    const numDrawsPerChain = Math.floor(draws[0].length / numChains);
-    return [...new Array(draws[0].length).keys()].map(
-      (i) => 1 + (i % numDrawsPerChain),
-    );
-  }, [latestRun.runResult, latestRun.samplingOpts]);
-
-  // handle case where there is no latest run yet
   if (!latestRun.runResult || !latestRun.samplingOpts) return <span />;
+  // this is only written this way due to the prohibition on conditional hooks
+  return <SamplerOutputExistsArea latestRun={latestRun} />;
+};
 
-  const {
-    samplingOpts,
-    runResult: { draws, paramNames, computeTimeSec, consoleText },
-  } = latestRun;
+const SamplerOutputExistsArea: FunctionComponent<NeedsLatestRun> = ({
+  latestRun,
+}) => {
+  // note, these are guaranteed to exist by the above check
+  const samplingOpts = latestRun.samplingOpts!;
+  const { draws, paramNames, computeTimeSec, consoleText } =
+    latestRun.runResult!;
+
+  const prettyParamNames = useMemo(
+    () => paramNames.map(prettifyStanParamName),
+    [paramNames],
+  );
+
+  // compute a useful re-shaping of the draws which is more convenient for
+  // most of the downstream components
+  const variables = useMemo(
+    () =>
+      prettyParamNames.map((name, index) => ({
+        name,
+        // split the draws into separate chains
+        draws: [...new Array(samplingOpts.num_chains)].map((_, chain) =>
+          draws[index].filter(
+            (_, i) =>
+              Math.floor((i / draws[0].length) * samplingOpts.num_chains) ===
+              chain,
+          ),
+        ),
+      })),
+    [draws, prettyParamNames, samplingOpts.num_chains],
+  );
 
   return (
     <TabWidget
@@ -51,34 +67,15 @@ const SamplerOutputArea: FunctionComponent<NeedsLatestRun> = ({
         "Console",
       ]}
     >
-      <SummaryPanel
-        draws={draws}
-        paramNames={paramNames}
-        drawChainIds={drawChainIds}
-        computeTimeSec={computeTimeSec}
-      />
+      <SummaryPanel variables={variables} computeTimeSec={computeTimeSec} />
       <DrawsTablePanel
         draws={draws}
         paramNames={paramNames}
-        drawChainIds={drawChainIds}
-        drawNumbers={drawNumbers}
         samplingOpts={samplingOpts}
       />
-      <HistogramsPanel
-        draws={draws}
-        paramNames={paramNames}
-        drawChainIds={drawChainIds}
-      />
-      <ScatterPlotsPanel
-        draws={draws}
-        paramNames={paramNames}
-        drawChainIds={drawChainIds}
-      />
-      <TracePlotsPanel
-        draws={draws}
-        paramNames={paramNames}
-        drawChainIds={drawChainIds}
-      />
+      <HistogramsPanel draws={draws} paramNames={prettyParamNames} />
+      <ScatterPlotsPanel variables={variables} />
+      <TracePlotsPanel variables={variables} />
       <ConsolePanel text={consoleText} />
     </TabWidget>
   );

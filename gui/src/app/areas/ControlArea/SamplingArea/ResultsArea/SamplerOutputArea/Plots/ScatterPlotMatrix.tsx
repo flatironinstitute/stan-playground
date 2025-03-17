@@ -1,21 +1,21 @@
 import { FunctionComponent, useMemo } from "react";
+import type { StanDraw } from "../../SamplerOutputArea";
 
 import LazyPlotlyPlot from "@SpComponents/LazyPlotlyPlot";
 import chainColorList from "./chainColorway";
 
 type ScatterMatrixProps = {
-  variables: { name: string; draws: number[][] }[];
-  chainIds: number[];
+  variables: StanDraw[];
 };
 
 const ScatterPlotMatrix: FunctionComponent<ScatterMatrixProps> = ({
   variables,
-  chainIds,
 }) => {
   const data = useMemo(() => {
-    return chainIds.map((chainId, i) => {
+    const n_chains = variables[0].draws.length;
+    return [...new Array(n_chains)].map((_, i) => {
       return {
-        name: `Chain ${chainId}`,
+        name: `Chain ${i + 1}`,
         dimensions: variables.map((variable) => ({
           label: variable.name,
           values: variable.draws[i],
@@ -27,7 +27,7 @@ const ScatterPlotMatrix: FunctionComponent<ScatterMatrixProps> = ({
         marker: { size: 2 },
       } as const;
     });
-  }, [chainIds, variables]);
+  }, [variables]);
 
   const layout = useMemo(() => {
     const axis = {
@@ -43,10 +43,12 @@ const ScatterPlotMatrix: FunctionComponent<ScatterMatrixProps> = ({
 
       colorway: chainColorList,
 
+      height: Math.max(400, 115 * (variables.length - 1)),
+
       xaxis: axis,
       yaxis: axis,
-      // this is a bit annoying, but each needs to be set separately
-      // we know there are < 6, though
+      // this is a bit annoying, but each needs to be set separately it seems...
+      // we know there are < 8, though
       xaxis2: axis,
       yaxis2: axis,
       xaxis3: axis,
@@ -57,8 +59,12 @@ const ScatterPlotMatrix: FunctionComponent<ScatterMatrixProps> = ({
       yaxis5: axis,
       xaxis6: axis,
       yaxis6: axis,
+      xaxis7: axis,
+      yaxis7: axis,
+      xaxis8: axis,
+      yaxis8: axis,
     } as const;
-  }, []);
+  }, [variables.length]);
 
   return <LazyPlotlyPlot data={data} layout={layout} />;
 };

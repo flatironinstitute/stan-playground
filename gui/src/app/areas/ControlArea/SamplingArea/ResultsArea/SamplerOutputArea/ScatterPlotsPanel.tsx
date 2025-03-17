@@ -6,6 +6,8 @@ import {
   type FunctionComponent,
 } from "react";
 
+import type { StanDraw } from "../SamplerOutputArea";
+
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
@@ -14,58 +16,31 @@ import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 
-import prettifyStanParamName from "@SpUtil/prettifyStanParamName";
 import ScatterPlot2D from "./Plots/ScatterPlot2D";
 import ScatterPlot3D from "./Plots/ScatterPlot3D";
 import ScatterPlotMatrix from "./Plots/ScatterPlotMatrix";
 
 type ScatterPlotsPanel = {
-  draws: number[][];
-  paramNames: string[];
-  drawChainIds: number[];
+  variables: StanDraw[];
 };
 
 const ScatterPlotsPanel: FunctionComponent<ScatterPlotsPanel> = ({
-  draws,
-  paramNames,
-  drawChainIds,
+  variables,
 }) => {
+  const paramNames = useMemo(() => variables.map((v) => v.name), [variables]);
   const [selected, setSelected] = useState<string[]>([]);
   const [prefers3D, setPrefers3D] = useState(true);
 
-  const prettyParamNames = useMemo(
-    () => paramNames.map(prettifyStanParamName),
-    [paramNames],
+  const selectedVariables = useMemo(
+    () => variables.filter((v) => selected.includes(v.name)),
+    [selected, variables],
   );
-
-  const chainIds = useMemo(
-    () => Array.from(new Set(drawChainIds)).sort(),
-    [drawChainIds],
-  );
-
-  const [variables, setVariables] = useState<
-    { name: string; draws: number[][] }[]
-  >([]);
-
-  useEffect(() => {
-    setVariables(
-      selected.map((name) => {
-        const index = prettyParamNames.indexOf(name);
-        return {
-          name,
-          draws: chainIds.map((chainId) =>
-            draws[index].filter((_, i) => drawChainIds[i] === chainId),
-          ),
-        };
-      }),
-    );
-  }, [selected, draws, prettyParamNames, chainIds, drawChainIds]);
 
   return (
     <Box display="flex" height="100%" width="100%" flexDirection="column">
       <Box flex="0" marginTop="0.75rem" marginBottom="0.75rem">
         <VariableSelection
-          options={prettyParamNames}
+          options={paramNames}
           value={selected}
           setValue={setSelected}
           prefers3D={prefers3D}
@@ -73,11 +48,7 @@ const ScatterPlotsPanel: FunctionComponent<ScatterPlotsPanel> = ({
         />
       </Box>
       <Box flex="0 1 auto" overflow="auto">
-        <PlotArea
-          variables={variables}
-          chainIds={chainIds}
-          prefers3D={prefers3D}
-        />
+        <PlotArea variables={selectedVariables} prefers3D={prefers3D} />
       </Box>
     </Box>
   );
@@ -145,7 +116,6 @@ const VariableSelection: FunctionComponent<SelectionProps> = ({
           <FormControlLabel
             control={
               <Checkbox
-                defaultChecked
                 checked={prefers3D}
                 onChange={() => setPrefers3D((prev) => !prev)}
               />
@@ -160,15 +130,12 @@ const VariableSelection: FunctionComponent<SelectionProps> = ({
 };
 
 type PlotAreaProps = {
-  // draws is an n_samples x n_chains array
   variables: { name: string; draws: number[][] }[];
-  chainIds: number[];
   prefers3D: boolean;
 };
 
 const PlotArea: FunctionComponent<PlotAreaProps> = ({
   variables,
-  chainIds,
   prefers3D,
 }) => {
   if (variables.length < 2) {
@@ -176,13 +143,13 @@ const PlotArea: FunctionComponent<PlotAreaProps> = ({
   }
   if (variables.length === 2) {
     const [x, y] = variables;
-    return <ScatterPlot2D x={x} y={y} chainIds={chainIds} />;
+    return <ScatterPlot2D x={x} y={y} />;
   }
   if (prefers3D && variables.length === 3) {
     const [x, y, z] = variables;
-    return <ScatterPlot3D x={x} y={y} z={z} chainIds={chainIds} />;
+    return <ScatterPlot3D x={x} y={y} z={z} />;
   }
-  return <ScatterPlotMatrix variables={variables} chainIds={chainIds} />;
+  return <ScatterPlotMatrix variables={variables} />;
 };
 
 export default ScatterPlotsPanel;
