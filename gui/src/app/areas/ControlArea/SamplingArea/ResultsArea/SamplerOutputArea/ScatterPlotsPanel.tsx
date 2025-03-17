@@ -139,7 +139,11 @@ const PlotArea: FunctionComponent<PlotAreaProps> = ({
   prefers3D,
 }) => {
   if (variables.length < 2) {
-    return <span>Select between two and eight variables.</span>;
+    return (
+      <div className="ScatterHelpText">
+        Select between two and eight variables.
+      </div>
+    );
   }
   if (variables.length === 2) {
     const [x, y] = variables;
