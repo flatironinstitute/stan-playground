@@ -14,6 +14,8 @@ def patch_matplotlib(post_image: Callable[[str], None]) -> None:
 
     import matplotlib.pyplot
 
+    matplotlib.pyplot.clf()
+
     _old_show = matplotlib.pyplot.show
 
     def show() -> None:
