@@ -20,6 +20,7 @@ const ScatterPlot2D: FunctionComponent<Scatter2DProps> = ({ x, y }) => {
 
         type: "scatter",
         mode: "markers",
+        marker: { opacity: 0.7 },
       } as const;
     });
   }, [x.draws, y.draws]);

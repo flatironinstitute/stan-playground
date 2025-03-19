@@ -24,7 +24,7 @@ const ScatterPlotMatrix: FunctionComponent<ScatterMatrixProps> = ({
         showupperhalf: false,
         type: "splom",
         mode: "markers",
-        marker: { size: 2 },
+        marker: { size: 2, opacity: 0.7 },
       } as const;
     });
   }, [variables]);

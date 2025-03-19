@@ -22,7 +22,7 @@ const ScatterPlot3D: FunctionComponent<Scatter3DProps> = ({ x, y, z }) => {
 
         type: "scatter3d",
         mode: "markers",
-        marker: { size: 2 },
+        marker: { size: 2, opacity: 0.7 },
       } as const;
     });
   }, [x.draws, y.draws, z.draws]);
