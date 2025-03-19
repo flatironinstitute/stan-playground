@@ -2,7 +2,6 @@ import { FunctionComponent, useMemo } from "react";
 import type { StanDraw } from "../../SamplerOutputArea";
 
 import LazyPlotlyPlot from "@SpComponents/LazyPlotlyPlot";
-import chainColorList from "./chainColorway";
 
 type Scatter3DProps = {
   x: StanDraw;
@@ -53,8 +52,6 @@ const ScatterPlot3D: FunctionComponent<Scatter3DProps> = ({ x, y, z }) => {
         },
 
         margin: { r: 10, l: 10, t: 0, b: 0 },
-
-        colorway: chainColorList,
       }) as const,
     [x.name, y.name, z.name],
   );

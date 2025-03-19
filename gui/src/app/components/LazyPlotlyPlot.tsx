@@ -11,20 +11,16 @@ const Plot = React.lazy(async () => {
 });
 
 const LazyPlotlyPlot: FunctionComponent<PlotParams> = ({ data, layout }) => {
-  // plotly has a reactive setting, but it is buggy
+  // Plotly's reactive setting only fires on Window resize
+  // We want it to work with our splitters, so we work around it
   const [ref, { width }] = useMeasure({ debounce: 10 });
-
-  // allow it to be overridden
-  const widthToUse = useMemo(
-    () => layout.width ?? width,
-    [layout.width, width],
-  );
 
   const layoutWithWidth = useMemo(
     () =>
       ({
-        width: widthToUse,
+        width,
         autosize: true,
+        colorway: chainColorway,
         plot_bgcolor: "rgba(240,240,240, 0.95)",
         paper_bgcolor: "rgba(255,255,255, .5)",
         legend: {
@@ -34,16 +30,43 @@ const LazyPlotlyPlot: FunctionComponent<PlotParams> = ({ data, layout }) => {
         },
         ...layout,
       }) as const,
-    [layout, widthToUse],
+    [layout, width],
   );
+
+  // react-use-measure gives this warning:
+  // > consider that knowing bounds is only possible *after* the view renders
+  // > so you'll get zero values on the first run and be informed later
+  // to avoid 'snapping' from that initial zero, we hide the plot
+  const hideWhenWidthIsZero = useMemo(() => {
+    return { visibility: width === 0 ? "hidden" : "visible" } as const;
+  }, [width]);
 
   return (
     <div ref={ref}>
       <Suspense fallback={<Loading name="Plotly.js" />}>
-        <Plot data={data} layout={layoutWithWidth} />
+        <Plot
+          data={data}
+          layout={layoutWithWidth}
+          style={hideWhenWidthIsZero}
+        />
       </Suspense>
     </div>
   );
 };
+
+const chainColorway: string[] = [
+  "#00ff00",
+  "#ff00ff",
+  "#0080ff",
+  "#ff8000",
+  "#80bf80",
+  "#470ba7",
+  "#c80b32",
+  "#fd7ee5",
+  "#027d30",
+  "#00ffff",
+  "#00ff80",
+  "#9c5a86",
+];
 
 export default LazyPlotlyPlot;

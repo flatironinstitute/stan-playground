@@ -2,7 +2,6 @@ import { FunctionComponent, useMemo } from "react";
 import type { StanDraw } from "../../SamplerOutputArea";
 
 import LazyPlotlyPlot from "@SpComponents/LazyPlotlyPlot";
-import chainColorList from "./chainColorway";
 
 type ScatterMatrixProps = {
   variables: StanDraw[];
@@ -40,8 +39,6 @@ const ScatterPlotMatrix: FunctionComponent<ScatterMatrixProps> = ({
       title: { text: "" },
 
       margin: { r: 10, l: 55, t: 0, b: 55, autoexpand: true },
-
-      colorway: chainColorList,
 
       height: Math.max(400, 115 * (variables.length - 1)),
 

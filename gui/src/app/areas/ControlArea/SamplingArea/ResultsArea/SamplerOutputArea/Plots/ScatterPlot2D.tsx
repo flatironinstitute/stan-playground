@@ -2,7 +2,6 @@ import { FunctionComponent, useMemo } from "react";
 import type { StanDraw } from "../../SamplerOutputArea";
 
 import LazyPlotlyPlot from "@SpComponents/LazyPlotlyPlot";
-import chainColorList from "./chainColorway";
 
 type Scatter2DProps = {
   x: StanDraw;
@@ -38,8 +37,6 @@ const ScatterPlot2D: FunctionComponent<Scatter2DProps> = ({ x, y }) => {
       yaxis: { ...axis, title: { text: y.name } },
 
       margin: { r: 10, l: 55, t: 0, b: 55, autoexpand: true },
-
-      colorway: chainColorList,
     } as const;
   }, [x.name, y.name]);
 
