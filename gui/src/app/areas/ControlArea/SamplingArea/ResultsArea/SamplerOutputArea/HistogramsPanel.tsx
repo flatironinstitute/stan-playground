@@ -1,48 +1,42 @@
-import Button from "@mui/material/Button";
-import ResponsiveGrid from "@SpComponents/ResponsiveGrid";
-import Histogram from "./Plots/Histogram";
 import { FunctionComponent, useMemo, useState } from "react";
 
+import Button from "@mui/material/Button";
+
+import ResponsiveGrid from "@SpComponents/ResponsiveGrid";
+
+import Histogram from "./Plots/Histogram";
+import type { StanDraw } from "../SamplerOutputArea";
+
 type HistogramsProps = {
-  draws: number[][];
-  paramNames: string[];
+  variables: StanDraw[];
 };
 
-const HistogramsPanel: FunctionComponent<HistogramsProps> = ({
-  draws,
-  paramNames,
-}) => {
-  const paramNamesResorted = useMemo(() => {
+const HistogramsPanel: FunctionComponent<HistogramsProps> = ({ variables }) => {
+  const variablesResorted = useMemo(() => {
     // put the names that don't end with __ first
-    const names: [string, number][] = [];
-    const namesWithSuffix: [string, number][] = [];
+    const vars: StanDraw[] = [];
+    const varsWithSuffix: StanDraw[] = [];
 
-    for (const [index, name] of paramNames.entries()) {
-      if (name.endsWith("__")) {
-        namesWithSuffix.push([name, index]);
+    for (const v of variables) {
+      if (v.name.endsWith("__")) {
+        varsWithSuffix.push(v);
       } else {
-        names.push([name, index]);
+        vars.push(v);
       }
     }
-    return [...names, ...namesWithSuffix];
-  }, [paramNames]);
+    return [...vars, ...varsWithSuffix];
+  }, [variables]);
 
   const [abbreviatedToNumPlots, setAbbreviatedToNumPlots] =
     useState<number>(30);
   return (
     <>
       <ResponsiveGrid>
-        {paramNamesResorted
-          .slice(0, abbreviatedToNumPlots)
-          .map(([paramName, index]) => (
-            <Histogram
-              key={paramName}
-              histData={draws[index]}
-              variableName={paramName}
-            />
-          ))}
+        {variablesResorted.slice(0, abbreviatedToNumPlots).map((v) => (
+          <Histogram key={v.name} variable={v} />
+        ))}
       </ResponsiveGrid>
-      {abbreviatedToNumPlots < paramNamesResorted.length && (
+      {abbreviatedToNumPlots < variablesResorted.length && (
         <div className="PlotAbbreviationToggle">
           <Button
             onClick={() => {

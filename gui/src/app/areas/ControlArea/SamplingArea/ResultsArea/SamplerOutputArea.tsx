@@ -20,41 +20,31 @@ export type StanDraw = {
 const SamplerOutputArea: FunctionComponent<NeedsLatestRun> = ({
   latestRun,
 }) => {
-  if (!latestRun.runResult || !latestRun.samplingOpts) return <span />;
-  // this is only written this way due to the prohibition on conditional hooks
-  return <SamplerOutputExistsArea latestRun={latestRun} />;
-};
-
-const SamplerOutputExistsArea: FunctionComponent<NeedsLatestRun> = ({
-  latestRun,
-}) => {
-  // note, these are guaranteed to exist by the above check
-  const samplingOpts = latestRun.samplingOpts!;
-  const { draws, paramNames, computeTimeSec, consoleText } =
-    latestRun.runResult!;
-
-  const prettyParamNames = useMemo(
-    () => paramNames.map(prettifyStanParamName),
-    [paramNames],
-  );
-
   // compute a useful re-shaping of the draws which is more convenient for
   // most of the downstream components
-  const variables = useMemo(
-    () =>
-      prettyParamNames.map((name, index) => ({
-        name,
-        // split the draws into separate chains
-        draws: [...new Array(samplingOpts.num_chains)].map((_, chain) =>
-          draws[index].filter(
-            (_, i) =>
-              Math.floor((i / draws[0].length) * samplingOpts.num_chains) ===
-              chain,
-          ),
-        ),
-      })),
-    [draws, prettyParamNames, samplingOpts.num_chains],
-  );
+  const variables = useMemo(() => {
+    if (!latestRun.runResult || !latestRun.samplingOpts) return [];
+
+    const numChains = latestRun.samplingOpts.num_chains;
+    const draws = latestRun.runResult.draws;
+
+    return latestRun.runResult.paramNames.map((name, index) => ({
+      name: prettifyStanParamName(name),
+      // split the draws into separate chains
+      draws: [...new Array(numChains)].map((_, chain) => {
+        return draws[index].filter(
+          (_, i) => Math.floor((i / draws[0].length) * numChains) === chain,
+        );
+      }),
+    }));
+  }, [latestRun.runResult, latestRun.samplingOpts]);
+
+  // don't render anything if we don't have a result yet
+  if (!latestRun.runResult || !latestRun.samplingOpts) return <span />;
+
+  const samplingOpts = latestRun.samplingOpts;
+  const { draws, paramNames, computeTimeSec, consoleText } =
+    latestRun.runResult;
 
   return (
     <TabWidget
@@ -73,7 +63,7 @@ const SamplerOutputExistsArea: FunctionComponent<NeedsLatestRun> = ({
         paramNames={paramNames}
         samplingOpts={samplingOpts}
       />
-      <HistogramsPanel draws={draws} paramNames={prettyParamNames} />
+      <HistogramsPanel variables={variables} />
       <ScatterPlotsPanel variables={variables} />
       <TracePlotsPanel variables={variables} />
       <ConsolePanel text={consoleText} />
