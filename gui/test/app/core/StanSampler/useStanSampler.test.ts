@@ -69,7 +69,7 @@ describe("useStanSampler", () => {
 
     act(() => {
       expect(() => {
-        result.current.sampler?.sample({}, defaultSamplingOpts);
+        result.current.sampler?.sample("", defaultSamplingOpts);
       }).toThrowError("model worker is undefined");
     });
 
@@ -111,7 +111,7 @@ describe("useStanSampler", () => {
       });
 
       act(() => {
-        result.current.sampler?.sample({}, defaultSamplingOpts);
+        result.current.sampler?.sample("", defaultSamplingOpts);
       });
 
       await waitFor(() => {
@@ -126,7 +126,7 @@ describe("useStanSampler", () => {
       const { result } = await loadedSampler();
 
       act(() => {
-        result.current.sampler?.sample({}, defaultSamplingOpts);
+        result.current.sampler?.sample("", defaultSamplingOpts);
       });
 
       await waitFor(() => {
@@ -142,7 +142,7 @@ describe("useStanSampler", () => {
       const { result } = await loadedSampler();
 
       act(() => {
-        result.current.sampler?.sample({}, erroringSamplingOpts);
+        result.current.sampler?.sample("", erroringSamplingOpts);
       });
 
       await waitFor(() => {
@@ -157,7 +157,7 @@ describe("useStanSampler", () => {
     test("cancelling reloads", async () => {
       const { result } = await loadedSampler();
       act(() => {
-        result.current.sampler?.sample({}, defaultSamplingOpts);
+        result.current.sampler?.sample("", defaultSamplingOpts);
       });
       // NOTE: Because vitest-web-worker does not actually run anything concurrently,
       // we cannot include this assertion.
@@ -175,7 +175,7 @@ describe("useStanSampler", () => {
 
       // can still sample afterwards
       act(() => {
-        result.current.sampler?.sample({}, defaultSamplingOpts);
+        result.current.sampler?.sample("", defaultSamplingOpts);
       });
 
       await waitFor(() => {
@@ -196,7 +196,7 @@ describe("useStanSampler", () => {
       expect(result.current.latestRun.progress).toBeUndefined();
 
       act(() => {
-        result.current.sampler?.sample({}, defaultSamplingOpts);
+        result.current.sampler?.sample("", defaultSamplingOpts);
       });
 
       await waitFor(() => {
@@ -225,7 +225,7 @@ describe("useStanSampler", () => {
       expect(
         result.current.latestRun.runResult?.computeTimeSec,
       ).toBeUndefined();
-      expect(result.current.latestRun.samplingOpts).toBeUndefined();
+      expect(result.current.latestRun.runResult?.samplingOpts).toBeUndefined();
 
       const testingSamplingOpts = {
         ...defaultSamplingOpts,
@@ -233,12 +233,14 @@ describe("useStanSampler", () => {
         seed: 12345,
       };
       act(() => {
-        result.current.sampler?.sample({}, testingSamplingOpts);
+        result.current.sampler?.sample("", testingSamplingOpts);
       });
 
       await waitFor(() => {
-        expect(result.current.latestRun.samplingOpts).toBe(testingSamplingOpts);
         expect(result.current.latestRun.runResult).toBeDefined();
+        expect(result.current.latestRun.runResult?.samplingOpts).toBe(
+          testingSamplingOpts,
+        );
         expect(result.current.latestRun.runResult?.draws).toEqual(mockedDraws);
         expect(result.current.latestRun.runResult?.paramNames).toEqual(
           mockedParamNames,

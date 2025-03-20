@@ -10,13 +10,12 @@ export type StanRun = {
   status: StanSamplerStatus;
   errorMessage: string;
   progress?: Progress;
-  samplingOpts?: SamplingOpts;
-  data?: string;
   runResult?: {
     consoleText: string;
     draws: number[][];
     paramNames: string[];
     computeTimeSec: number;
+    samplingOpts: SamplingOpts & { data: string };
   };
 };
 
@@ -42,8 +41,6 @@ export type StanRunAction =
     }
   | {
       type: "startSampling";
-      samplingOpts: SamplingOpts;
-      data: string;
     }
   | {
       type: "samplerReturn";
@@ -51,6 +48,7 @@ export type StanRunAction =
       paramNames: string[];
       computeTimeSec: number;
       consoleText: string;
+      samplingOpts: SamplingOpts & { data: string };
     };
 
 export const StanRunReducer = (
@@ -74,8 +72,6 @@ export const StanRunReducer = (
         runResult: state.runResult,
         status: "sampling",
         errorMessage: "",
-        samplingOpts: action.samplingOpts,
-        data: action.data,
       };
     case "samplerReturn":
       return {
@@ -85,6 +81,7 @@ export const StanRunReducer = (
           draws: action.draws,
           paramNames: action.paramNames,
           computeTimeSec: action.computeTimeSec,
+          samplingOpts: action.samplingOpts,
           consoleText: action.consoleText,
         },
       };

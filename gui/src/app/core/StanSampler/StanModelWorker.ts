@@ -42,6 +42,7 @@ export type StanModelReplyMessage =
       paramNames: string[];
       error: null;
       consoleText: string;
+      samplingOpts: Partial<SamplerParams>;
     }
   | {
       purpose: Replies.Progress;
@@ -134,6 +135,7 @@ self.onmessage = (e: MessageEvent<StanModelRequestMessage>) => {
           paramNames,
           error: null,
           consoleText,
+          samplingOpts: e.data.sampleConfig,
         });
       } catch (e: any) {
         postReply({ purpose: Replies.StanReturn, error: e.toString() });
@@ -158,6 +160,7 @@ self.onmessage = (e: MessageEvent<StanModelRequestMessage>) => {
           paramNames,
           error: null,
           consoleText,
+          samplingOpts: {},
         });
       } catch (e: any) {
         postReply({ purpose: Replies.StanReturn, error: e.toString() });

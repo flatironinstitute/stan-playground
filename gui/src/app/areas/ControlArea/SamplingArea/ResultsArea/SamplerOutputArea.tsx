@@ -23,9 +23,9 @@ const SamplerOutputArea: FunctionComponent<NeedsLatestRun> = ({
   // compute a useful re-shaping of the draws which is more convenient for
   // most of the downstream components
   const variables = useMemo(() => {
-    if (!latestRun.runResult || !latestRun.samplingOpts) return [];
+    if (!latestRun.runResult) return [];
 
-    const numChains = latestRun.samplingOpts.num_chains;
+    const numChains = latestRun.runResult.samplingOpts.num_chains;
     const draws = latestRun.runResult.draws;
 
     return latestRun.runResult.paramNames.map((name, index) => ({
@@ -37,13 +37,12 @@ const SamplerOutputArea: FunctionComponent<NeedsLatestRun> = ({
         );
       }),
     }));
-  }, [latestRun.runResult, latestRun.samplingOpts]);
+  }, [latestRun.runResult]);
 
   // don't render anything if we don't have a result yet
-  if (!latestRun.runResult || !latestRun.samplingOpts) return <span />;
+  if (!latestRun.runResult) return <span />;
 
-  const samplingOpts = latestRun.samplingOpts;
-  const { draws, paramNames, computeTimeSec, consoleText } =
+  const { draws, paramNames, computeTimeSec, consoleText, samplingOpts } =
     latestRun.runResult;
 
   return (

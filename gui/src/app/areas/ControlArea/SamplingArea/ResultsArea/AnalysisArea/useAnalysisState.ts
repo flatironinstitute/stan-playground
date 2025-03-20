@@ -24,8 +24,8 @@ const useAnalysisState = (latestRun: StanRun) => {
     clearOutputDivs(consoleRef, imagesRef);
   }, [latestRun.runResult?.draws]);
 
-  const { runResult, samplingOpts, status: samplerStatus } = latestRun;
-  const { draws, paramNames } = runResult || {};
+  const { runResult, status: samplerStatus } = latestRun;
+  const { draws, paramNames, samplingOpts } = runResult || {};
   const numChains = samplingOpts?.num_chains;
   const spData = useMemo(() => {
     if (samplerStatus === "completed" && draws && numChains && paramNames) {
@@ -47,14 +47,14 @@ const useAnalysisState = (latestRun: StanRun) => {
   const isDataDefined = useMemo(() => spData !== undefined, [spData]);
 
   const files = useMemo(() => {
-    if (latestRun.data === undefined) {
+    if (samplingOpts?.data === undefined) {
       return undefined;
     } else {
       return {
-        [FileNames.DATAFILE]: latestRun.data,
+        [FileNames.DATAFILE]: samplingOpts.data,
       };
     }
-  }, [latestRun.data]);
+  }, [samplingOpts?.data]);
 
   useEffect(() => {
     if (!isDataDefined) {

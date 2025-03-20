@@ -81,6 +81,9 @@ class StanSampler {
               paramNames: e.data.paramNames,
               computeTimeSec: Date.now() / 1000 - this.#samplingStartTimeSec,
               consoleText: e.data.consoleText,
+              samplingOpts: e.data.samplingOpts as SamplingOpts & {
+                data: string;
+              },
             });
           }
           break;
@@ -93,7 +96,7 @@ class StanSampler {
     this.postMessage({ purpose: Requests.Load, url: this.compiledUrl });
   }
 
-  sample(data: any, samplingOpts: SamplingOpts) {
+  sample(data: string, samplingOpts: SamplingOpts) {
     const refresh = calculateReasonableRefreshRate(samplingOpts);
     const sampleConfig: Partial<SamplerParams> = {
       ...samplingOpts,
@@ -103,7 +106,7 @@ class StanSampler {
     };
     if (!this.#stanWorker) throw new Error("model worker is undefined");
 
-    this.update({ type: "startSampling", samplingOpts, data });
+    this.update({ type: "startSampling" });
 
     this.#samplingStartTimeSec = Date.now() / 1000;
     this.postMessage({ purpose: Requests.Sample, sampleConfig });
