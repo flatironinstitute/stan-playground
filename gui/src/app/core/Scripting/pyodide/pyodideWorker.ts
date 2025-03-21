@@ -114,7 +114,7 @@ const run = async (
           packageFutures.push(micropip.install("arviz"));
         }
       }
-      if (script.includes("requests")) {
+      if (script.includes("requests") || script.includes("https://")) {
         patch_http = true;
         packageFutures.push(
           micropip.install(["requests", "lzma", "pyodide-http"]),
