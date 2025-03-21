@@ -26,7 +26,9 @@ const LazyPlotlyPlot: FunctionComponent<PlotParams> = ({ data, layout }) => {
         legend: {
           x: 1,
           xanchor: "right",
-          y: 1,
+          y: 0.95,
+          itemsizing: "constant",
+          bgcolor: "rgba(255,255,255, .8)",
         },
         ...layout,
       }) as const,
