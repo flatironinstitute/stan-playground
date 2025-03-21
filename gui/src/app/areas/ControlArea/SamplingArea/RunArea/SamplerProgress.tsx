@@ -1,7 +1,7 @@
 import type { FunctionComponent } from "react";
 
-import { Progress } from "@SpCore/StanSampler/StanModelWorker";
 import LinearProgressWithLabel from "@SpComponents/LinearProgressWithLabel";
+import { Progress } from "@SpCore/StanSampler/SamplerTypes";
 
 type SamplingProgressComponentProps = {
   report: Progress | undefined;
@@ -18,6 +18,7 @@ const SamplingProgressComponent: FunctionComponent<
     100;
   return (
     <>
+      Sampling
       <div className="SamplingProgress">
         <LinearProgressWithLabel value={progress} />
       </div>

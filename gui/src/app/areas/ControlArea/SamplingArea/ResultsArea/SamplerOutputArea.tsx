@@ -1,7 +1,7 @@
 import { FunctionComponent, useMemo } from "react";
 
 import TabWidget from "@SpComponents/TabWidget";
-import { NeedsLatestRun } from "@SpCore/StanSampler/useStanSampler";
+import { StanRun } from "@SpCore/StanSampler/SamplerTypes";
 
 import SummaryPanel from "./SamplerOutputArea/SummaryPanel";
 import DrawsTablePanel from "./SamplerOutputArea/DrawsTablePanel";
@@ -17,18 +17,18 @@ export type StanDraw = {
   draws: number[][];
 };
 
-const SamplerOutputArea: FunctionComponent<NeedsLatestRun> = ({
+const SamplerOutputArea: FunctionComponent<{ latestRun: StanRun }> = ({
   latestRun,
 }) => {
+  const { draws, paramNames, computeTimeSec, consoleText, sampleConfig } =
+    latestRun;
+
   // compute a useful re-shaping of the draws which is more convenient for
   // most of the downstream components
   const variables = useMemo(() => {
-    if (!latestRun.runResult) return [];
+    const numChains = sampleConfig.num_chains;
 
-    const numChains = latestRun.runResult.samplingOpts.num_chains;
-    const draws = latestRun.runResult.draws;
-
-    return latestRun.runResult.paramNames.map((name, index) => ({
+    return paramNames.map((name, index) => ({
       name: prettifyStanParamName(name),
       // split the draws into separate chains
       draws: [...new Array(numChains)].map((_, chain) => {
@@ -37,13 +37,7 @@ const SamplerOutputArea: FunctionComponent<NeedsLatestRun> = ({
         );
       }),
     }));
-  }, [latestRun.runResult]);
-
-  // don't render anything if we don't have a result yet
-  if (!latestRun.runResult) return <span />;
-
-  const { draws, paramNames, computeTimeSec, consoleText, samplingOpts } =
-    latestRun.runResult;
+  }, [draws, paramNames, sampleConfig.num_chains]);
 
   return (
     <TabWidget
@@ -60,7 +54,7 @@ const SamplerOutputArea: FunctionComponent<NeedsLatestRun> = ({
       <DrawsTablePanel
         draws={draws}
         paramNames={paramNames}
-        samplingOpts={samplingOpts}
+        sampleConfig={sampleConfig}
       />
       <HistogramsPanel variables={variables} />
       <ScatterPlotsPanel variables={variables} />

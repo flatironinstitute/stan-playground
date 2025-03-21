@@ -1,5 +1,5 @@
 import { FunctionComponent, RefObject, useCallback, useMemo } from "react";
-import { NeedsLatestRun } from "@SpCore/StanSampler/useStanSampler";
+import { NeedsSamplerState } from "@SpCore/StanSampler/SamplerTypes";
 import { FileNames } from "@SpCore/Project/FileMapping";
 import { ProjectKnownFiles } from "@SpCore/Project/ProjectDataModel";
 import useTemplatedFillerText from "@SpComponents/FileEditor/useTemplatedFillerText";
@@ -14,7 +14,9 @@ import usePyodideWorker from "@SpCore/Scripting/pyodide/usePyodideWorker";
 import useAnalysisState from "./useAnalysisState";
 import analysisPyTemplate from "./code_templates/analysis.py?raw";
 
-const AnalysisPyPanel: FunctionComponent<NeedsLatestRun> = ({ latestRun }) => {
+const AnalysisPyPanel: FunctionComponent<NeedsSamplerState> = ({
+  samplerState,
+}) => {
   const {
     consoleRef,
     imagesRef,
@@ -24,7 +26,7 @@ const AnalysisPyPanel: FunctionComponent<NeedsLatestRun> = ({ latestRun }) => {
     runnable,
     notRunnableReason,
     files,
-  } = useAnalysisState(latestRun);
+  } = useAnalysisState(samplerState);
 
   const callbacks = useMemo(
     () => ({

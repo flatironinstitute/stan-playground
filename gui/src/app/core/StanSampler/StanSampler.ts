@@ -1,24 +1,15 @@
 import { SamplingOpts } from "@SpCore/Project/ProjectDataModel";
 import { unreachable } from "@SpUtil/unreachable";
 
-import type { SamplerParams } from "tinystan";
-
 import {
   Replies,
   Requests,
+  SampleConfig,
   StanModelReplyMessage,
   StanModelRequestMessage,
-} from "./StanModelWorker";
-import { type StanRunAction } from "./useStanSampler";
+} from "./SamplerTypes";
+import { type SamplerStateAction } from "./useStanSampler";
 import StanWorkerUrl from "./StanModelWorker?worker&url";
-
-export type StanSamplerStatus =
-  | ""
-  | "loading"
-  | "loaded"
-  | "sampling"
-  | "completed"
-  | "failed";
 
 type StanSamplerAndCleanup = {
   sampler: StanSampler;
@@ -31,14 +22,14 @@ class StanSampler {
 
   private constructor(
     private compiledUrl: string,
-    private update: (action: StanRunAction) => void,
+    private update: (action: SamplerStateAction) => void,
   ) {
     this._initialize();
   }
 
   static __unsafe_create(
     compiledUrl: string,
-    update: (action: StanRunAction) => void,
+    update: (action: SamplerStateAction) => void,
   ): StanSamplerAndCleanup {
     const sampler = new StanSampler(compiledUrl, update);
     const cleanup = () => {
@@ -54,8 +45,6 @@ class StanSampler {
       name: "tinystan worker",
       type: "module",
     });
-
-    this.update({ type: "clear" });
 
     this.#stanWorker.onmessage = (e: MessageEvent<StanModelReplyMessage>) => {
       switch (e.data.purpose) {
@@ -79,11 +68,10 @@ class StanSampler {
               type: "samplerReturn",
               draws: e.data.draws,
               paramNames: e.data.paramNames,
-              computeTimeSec: Date.now() / 1000 - this.#samplingStartTimeSec,
+              computeTimeSec:
+                performance.now() / 1000 - this.#samplingStartTimeSec,
               consoleText: e.data.consoleText,
-              samplingOpts: e.data.samplingOpts as SamplingOpts & {
-                data: string;
-              },
+              sampleConfig: e.data.sampleConfig,
             });
           }
           break;
@@ -98,7 +86,7 @@ class StanSampler {
 
   sample(data: string, samplingOpts: SamplingOpts) {
     const refresh = calculateReasonableRefreshRate(samplingOpts);
-    const sampleConfig: Partial<SamplerParams> = {
+    const sampleConfig: SampleConfig = {
       ...samplingOpts,
       data,
       seed: samplingOpts.seed !== undefined ? samplingOpts.seed : null,
@@ -108,7 +96,7 @@ class StanSampler {
 
     this.update({ type: "startSampling" });
 
-    this.#samplingStartTimeSec = Date.now() / 1000;
+    this.#samplingStartTimeSec = performance.now() / 1000;
     this.postMessage({ purpose: Requests.Sample, sampleConfig });
   }
 
@@ -128,11 +116,11 @@ const calculateReasonableRefreshRate = (samplingOpts: SamplingOpts) => {
     (samplingOpts.num_samples + samplingOpts.num_warmup) *
     samplingOpts.num_chains;
 
-  const onePercent = Math.floor(totalSamples / 100);
+  const twoHalfPercent = Math.floor(totalSamples / 40);
 
-  const nearestMultipleOfTen = Math.round(onePercent / 10) * 10;
+  const nearestMultipleOfTen = Math.round(twoHalfPercent / 10) * 10;
 
-  return Math.max(10, nearestMultipleOfTen);
+  return Math.max(15, nearestMultipleOfTen);
 };
 
 export default StanSampler;

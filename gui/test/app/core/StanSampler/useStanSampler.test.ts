@@ -35,7 +35,7 @@ afterEach(() => {
 const loadedSampler = async () => {
   const sampler = renderHook(() => useStanSampler(mockCompiledMainJsUrl));
   await waitFor(() => {
-    expect(sampler.result.current.latestRun.status).toBe("loaded");
+    expect(sampler.result.current.samplerState.status).toBe("loaded");
   });
   return sampler;
 };
@@ -55,7 +55,7 @@ describe("useStanSampler", () => {
   });
 
   test("other URLs are nonempty", async () => {
-    const { result } = renderHook(() => useStanSampler(mockCompiledMainJsUrl));
+    const { result } = await loadedSampler();
 
     expect(result.current.sampler).toBeDefined();
   });
@@ -75,7 +75,7 @@ describe("useStanSampler", () => {
 
     await waitFor(() => {
       // e.g. not "sampling"
-      expect(result.current.latestRun.status).toBe("loaded");
+      expect(result.current.samplerState.status).toBe("loaded");
     });
   });
 
@@ -83,14 +83,14 @@ describe("useStanSampler", () => {
     test("loading changes status", async () => {
       const { result, rerender } = await rerenderableSampler();
 
-      expect(result.current.latestRun.status).toBe("");
+      expect(result.current.samplerState.status).toBe("");
 
       rerender(mockCompiledMainJsUrl);
 
-      expect(result.current.latestRun.status).toBe("loading");
+      expect(result.current.samplerState.status).toBe("loading");
 
       await waitFor(() => {
-        expect(result.current.latestRun.status).toBe("loaded");
+        expect(result.current.samplerState.status).toBe("loaded");
       });
       expect(mockedStderr).not.toHaveBeenCalled();
     });
@@ -98,12 +98,12 @@ describe("useStanSampler", () => {
     test("failing to load changes status", async () => {
       const { result, rerender } = await rerenderableSampler();
 
-      expect(result.current.latestRun.status).toBe("");
+      expect(result.current.samplerState.status).toBe("");
 
       rerender(erroringCompiledMainJsUrl);
 
       await waitFor(() => {
-        expect(result.current.latestRun.status).toBe("loading");
+        expect(result.current.samplerState.status).toBe("loading");
       });
 
       await waitFor(() => {
@@ -115,8 +115,8 @@ describe("useStanSampler", () => {
       });
 
       await waitFor(() => {
-        expect(result.current.latestRun.status).toBe("failed");
-        expect(result.current.latestRun.errorMessage).toBe(
+        expect(result.current.samplerState.status).toBe("failed");
+        expect(result.current.samplerState.errorMessage).toBe(
           "Model not loaded yet!",
         );
       });
@@ -130,8 +130,8 @@ describe("useStanSampler", () => {
       });
 
       await waitFor(() => {
-        expect(result.current.latestRun.status).toBe("completed");
-        expect(result.current.latestRun.runResult?.paramNames).toEqual(
+        expect(result.current.samplerState.status).toBe("completed");
+        expect(result.current.samplerState.latestRun?.paramNames).toEqual(
           mockedParamNames,
         );
       });
@@ -146,8 +146,8 @@ describe("useStanSampler", () => {
       });
 
       await waitFor(() => {
-        expect(result.current.latestRun.status).toBe("failed");
-        expect(result.current.latestRun.errorMessage).toBe(
+        expect(result.current.samplerState.status).toBe("failed");
+        expect(result.current.samplerState.errorMessage).toBe(
           "Error: error for testing in sample!",
         );
       });
@@ -162,7 +162,7 @@ describe("useStanSampler", () => {
       // NOTE: Because vitest-web-worker does not actually run anything concurrently,
       // we cannot include this assertion.
       // await waitFor(() => {
-      //   expect(result.current.latestRun.status).toBe("sampling");
+      //   expect(result.current.samplerState.status).toBe("sampling");
       // });
 
       // cancelling resets to "loaded"
@@ -170,7 +170,7 @@ describe("useStanSampler", () => {
         result.current.sampler?.cancel();
       });
       await waitFor(() => {
-        expect(result.current.latestRun.status).toBe("loaded");
+        expect(result.current.samplerState.status).toBe("loaded");
       });
 
       // can still sample afterwards
@@ -179,8 +179,8 @@ describe("useStanSampler", () => {
       });
 
       await waitFor(() => {
-        expect(result.current.latestRun.status).toBe("completed");
-        expect(result.current.latestRun.runResult?.paramNames).toEqual(
+        expect(result.current.samplerState.status).toBe("completed");
+        expect(result.current.samplerState.latestRun?.paramNames).toEqual(
           mockedParamNames,
         );
       });
@@ -193,14 +193,14 @@ describe("useStanSampler", () => {
     test("sampling changes status", async () => {
       const { result } = await loadedSampler();
 
-      expect(result.current.latestRun.progress).toBeUndefined();
+      expect(result.current.samplerState.progress).toBeUndefined();
 
       act(() => {
         result.current.sampler?.sample("", defaultSamplingOpts);
       });
 
       await waitFor(() => {
-        expect(result.current.latestRun.progress).toEqual(mockedProgress);
+        expect(result.current.samplerState.progress).toEqual(mockedProgress);
       });
 
       expect(mockedStderr).not.toHaveBeenCalled();
@@ -210,22 +210,24 @@ describe("useStanSampler", () => {
   describe("outputs", () => {
     test("undefined sampler returns undefined", () => {
       const { result } = renderHook(() => useStanSampler(undefined));
-      expect(result.current.latestRun.runResult?.draws).toBeUndefined();
-      expect(result.current.latestRun.runResult?.paramNames).toBeUndefined();
+      expect(result.current.samplerState.latestRun?.draws).toBeUndefined();
+      expect(result.current.samplerState.latestRun?.paramNames).toBeUndefined();
       expect(
-        result.current.latestRun.runResult?.computeTimeSec,
+        result.current.samplerState.latestRun?.computeTimeSec,
       ).toBeUndefined();
     });
 
     test("sampling changes output", async () => {
       const { result } = await loadedSampler();
 
-      expect(result.current.latestRun.runResult?.draws).toBeUndefined();
-      expect(result.current.latestRun.runResult?.paramNames).toBeUndefined();
+      expect(result.current.samplerState.latestRun?.draws).toBeUndefined();
+      expect(result.current.samplerState.latestRun?.paramNames).toBeUndefined();
       expect(
-        result.current.latestRun.runResult?.computeTimeSec,
+        result.current.samplerState.latestRun?.computeTimeSec,
       ).toBeUndefined();
-      expect(result.current.latestRun.runResult?.samplingOpts).toBeUndefined();
+      expect(
+        result.current.samplerState.latestRun?.sampleConfig,
+      ).toBeUndefined();
 
       const testingSamplingOpts = {
         ...defaultSamplingOpts,
@@ -237,20 +239,24 @@ describe("useStanSampler", () => {
       });
 
       await waitFor(() => {
-        expect(result.current.latestRun.runResult).toBeDefined();
-        expect(result.current.latestRun.runResult?.samplingOpts).toBe(
-          testingSamplingOpts,
+        expect(result.current.samplerState.latestRun).toBeDefined();
+        expect(result.current.samplerState.latestRun?.sampleConfig).toEqual({
+          ...testingSamplingOpts,
+          data: "",
+          refresh: 150,
+        });
+        expect(result.current.samplerState.latestRun?.draws).toEqual(
+          mockedDraws,
         );
-        expect(result.current.latestRun.runResult?.draws).toEqual(mockedDraws);
-        expect(result.current.latestRun.runResult?.paramNames).toEqual(
+        expect(result.current.samplerState.latestRun?.paramNames).toEqual(
           mockedParamNames,
         );
         expect(
-          result.current.latestRun.runResult?.computeTimeSec,
+          result.current.samplerState.latestRun?.computeTimeSec,
         ).toBeDefined();
       });
 
-      expect(result.current.latestRun.status).toBe("completed");
+      expect(result.current.samplerState.status).toBe("completed");
     });
   });
 });

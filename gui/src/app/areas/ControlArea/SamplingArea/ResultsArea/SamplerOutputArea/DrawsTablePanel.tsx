@@ -12,6 +12,7 @@ import {
   SuccessColoredTableHead,
 } from "@SpComponents/StyledTables";
 import { SamplingOpts } from "@SpCore/Project/ProjectDataModel";
+import { SampleConfig } from "@SpCore/StanSampler/SamplerTypes";
 import { triggerDownload } from "@SpUtil/triggerDownload";
 import JSZip from "jszip";
 import { FunctionComponent, useCallback, useMemo, useState } from "react";
@@ -19,15 +20,15 @@ import { FunctionComponent, useCallback, useMemo, useState } from "react";
 type DrawsTableProps = {
   draws: number[][];
   paramNames: string[];
-  samplingOpts: SamplingOpts; // for including in exported zip
+  sampleConfig: SampleConfig; // for including in exported zip
 };
 
 const DrawsTablePanel: FunctionComponent<DrawsTableProps> = ({
   draws,
   paramNames,
-  samplingOpts,
+  sampleConfig,
 }) => {
-  const numChains = samplingOpts.num_chains;
+  const numChains = sampleConfig.num_chains;
   const totalDraws = draws[0].length;
 
   const [abbreviatedToNumRows, setAbbreviatedToNumRows] = useState<
@@ -48,7 +49,7 @@ const DrawsTablePanel: FunctionComponent<DrawsTableProps> = ({
 
   const handleExportToMultipleCsvs = useCallback(async () => {
     const csvTexts = prepareMultipleCsvsText(draws, paramNames, numChains);
-    const blob = await createZipBlobForMultipleCsvs(csvTexts, samplingOpts);
+    const blob = await createZipBlobForMultipleCsvs(csvTexts, sampleConfig);
     const fileName = "SP-draws.zip";
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -56,7 +57,7 @@ const DrawsTablePanel: FunctionComponent<DrawsTableProps> = ({
     a.download = fileName;
     a.click();
     URL.revokeObjectURL(url);
-  }, [draws, paramNames, numChains, samplingOpts]);
+  }, [draws, paramNames, numChains, sampleConfig]);
 
   return (
     <Box display="flex" height="100%" width="100%" flexDirection="column">
@@ -163,8 +164,15 @@ const prepareMultipleCsvsText = (
 
 const createZipBlobForMultipleCsvs = async (
   csvTexts: string[],
-  samplingOpts: SamplingOpts,
+  sampleConfig: SampleConfig,
 ) => {
+  const samplingOpts: SamplingOpts = {
+    num_chains: sampleConfig.num_chains,
+    num_samples: sampleConfig.num_samples,
+    num_warmup: sampleConfig.num_warmup,
+    seed: sampleConfig.seed ?? undefined,
+    init_radius: sampleConfig.init_radius,
+  };
   const zip = new JSZip();
   // put them all in a folder called 'draws'
   const folder = zip.folder("draws");
