@@ -10,14 +10,14 @@ import RunArea from "./SamplingArea/RunArea";
 const SamplingArea: FunctionComponent = () => {
   const { compiledMainJsUrl } = use(CompileContext);
 
-  const { sampler, latestRun } = useStanSampler(compiledMainJsUrl);
+  const { sampler, samplerState } = useStanSampler(compiledMainJsUrl);
 
   return (
     <Split horizontal initialPrimarySize="30%" minSecondarySize="10%">
-      <RunArea sampler={sampler} latestRun={latestRun} />
+      <RunArea sampler={sampler} samplerState={samplerState} />
       <Box height="100%" display="flex" flexDirection="column">
         <Box flex="1" overflow="hidden">
-          <ResultsArea latestRun={latestRun} />
+          <ResultsArea samplerState={samplerState} />
         </Box>
       </Box>
     </Split>

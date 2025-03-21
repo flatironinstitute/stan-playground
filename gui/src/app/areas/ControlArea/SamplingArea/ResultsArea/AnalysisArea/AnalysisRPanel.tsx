@@ -1,5 +1,5 @@
 import { FunctionComponent, useCallback } from "react";
-import { NeedsLatestRun } from "@SpCore/StanSampler/useStanSampler";
+import { NeedsSamplerState } from "@SpCore/StanSampler/SamplerTypes";
 import { FileNames } from "@SpCore/Project/FileMapping";
 import { ProjectKnownFiles } from "@SpCore/Project/ProjectDataModel";
 import PlottingScriptEditor from "@SpComponents/FileEditor/PlottingScriptEditor";
@@ -12,7 +12,9 @@ import useWebR from "@SpCore/Scripting/webR/useWebR";
 import useAnalysisState from "./useAnalysisState";
 import analysisRTemplate from "./code_templates/analysis.R?raw";
 
-const AnalysisRPanel: FunctionComponent<NeedsLatestRun> = ({ latestRun }) => {
+const AnalysisRPanel: FunctionComponent<NeedsSamplerState> = ({
+  samplerState,
+}) => {
   const {
     consoleRef,
     imagesRef,
@@ -22,7 +24,7 @@ const AnalysisRPanel: FunctionComponent<NeedsLatestRun> = ({ latestRun }) => {
     runnable,
     notRunnableReason,
     files,
-  } = useAnalysisState(latestRun);
+  } = useAnalysisState(samplerState);
 
   const { run, cancel } = useWebR({ consoleRef, imagesRef, onStatus });
 

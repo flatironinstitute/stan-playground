@@ -1,60 +1,13 @@
 import { isMonacoWorkerNoise } from "@SpUtil/isMonacoWorkerNoise";
 import { unreachable } from "@SpUtil/unreachable";
-import StanModel, { PathfinderParams, SamplerParams } from "tinystan";
-
-export enum Requests {
-  Load = "load",
-  Sample = "sample",
-  Pathfinder = "pathfinder",
-}
-
-export type StanModelRequestMessage =
-  | {
-      purpose: Requests.Load;
-      url: string;
-    }
-  | {
-      purpose: Requests.Sample;
-      sampleConfig: Partial<SamplerParams>;
-    }
-  | {
-      purpose: Requests.Pathfinder;
-      pathfinderConfig: Partial<PathfinderParams>;
-    };
-
-export enum Replies {
-  ModelLoaded = "modelLoaded",
-  StanReturn = "stanReturn",
-  Progress = "progress",
-}
-
-export type StanModelReplyMessage =
-  | {
-      purpose: Replies.ModelLoaded;
-    }
-  | {
-      purpose: Replies.StanReturn;
-      error: string;
-    }
-  | {
-      purpose: Replies.StanReturn;
-      draws: number[][];
-      paramNames: string[];
-      error: null;
-      consoleText: string;
-    }
-  | {
-      purpose: Replies.Progress;
-      report: Progress;
-    };
-
-export type Progress = {
-  chain: number;
-  iteration: number;
-  totalIterations: number;
-  percent: number;
-  warmup: boolean;
-};
+import StanModel from "tinystan";
+import {
+  Progress,
+  Replies,
+  Requests,
+  StanModelReplyMessage,
+  StanModelRequestMessage,
+} from "./SamplerTypes";
 
 const postReply = (message: StanModelReplyMessage) => self.postMessage(message);
 
@@ -134,36 +87,14 @@ self.onmessage = (e: MessageEvent<StanModelRequestMessage>) => {
           paramNames,
           error: null,
           consoleText,
+          sampleConfig: e.data.sampleConfig,
         });
       } catch (e: any) {
         postReply({ purpose: Replies.StanReturn, error: e.toString() });
       }
       break;
     }
-    case Requests.Pathfinder: {
-      if (!model) {
-        postReply({
-          purpose: Replies.StanReturn,
-          error: "Model not loaded yet!",
-        });
-        return;
-      }
-      try {
-        consoleText = "";
-        const { draws, paramNames } = model.pathfinder(e.data.pathfinderConfig);
-        // TODO? use an ArrayBuffer so we can transfer without serialization cost
-        postReply({
-          purpose: Replies.StanReturn,
-          draws,
-          paramNames,
-          error: null,
-          consoleText,
-        });
-      } catch (e: any) {
-        postReply({ purpose: Replies.StanReturn, error: e.toString() });
-      }
-      break;
-    }
+
     default: {
       unreachable(e.data);
     }

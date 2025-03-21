@@ -1,35 +1,20 @@
 import { useEffect, useReducer, useState } from "react";
 
-import { type SamplingOpts } from "@SpCore/Project/ProjectDataModel";
 import { unreachable } from "@SpUtil/unreachable";
+import {
+  Progress,
+  SampleConfig,
+  SamplerState,
+  StanSamplerStatus,
+} from "./SamplerTypes";
+import StanSampler from "./StanSampler";
 
-import { type Progress } from "./StanModelWorker";
-import StanSampler, { type StanSamplerStatus } from "./StanSampler";
-
-export type StanRun = {
-  status: StanSamplerStatus;
-  errorMessage: string;
-  progress?: Progress;
-  samplingOpts?: SamplingOpts;
-  data?: string;
-  runResult?: {
-    consoleText: string;
-    draws: number[][];
-    paramNames: string[];
-    computeTimeSec: number;
-  };
-};
-
-export type NeedsLatestRun = {
-  latestRun: StanRun;
-};
-
-const initialStanRun: StanRun = {
+const initialState: SamplerState = {
   status: "",
   errorMessage: "",
 };
 
-export type StanRunAction =
+export type SamplerStateAction =
   | { type: "clear" }
   | {
       type: "statusUpdate";
@@ -42,8 +27,6 @@ export type StanRunAction =
     }
   | {
       type: "startSampling";
-      samplingOpts: SamplingOpts;
-      data: string;
     }
   | {
       type: "samplerReturn";
@@ -51,15 +34,16 @@ export type StanRunAction =
       paramNames: string[];
       computeTimeSec: number;
       consoleText: string;
+      sampleConfig: SampleConfig;
     };
 
-export const StanRunReducer = (
-  state: StanRun,
-  action: StanRunAction,
-): StanRun => {
+const SamplerStateReducer = (
+  state: SamplerState,
+  action: SamplerStateAction,
+): SamplerState => {
   switch (action.type) {
     case "clear":
-      return initialStanRun;
+      return initialState;
     case "progressUpdate":
       return { ...state, progress: action.progress };
     case "statusUpdate":
@@ -71,20 +55,19 @@ export const StanRunReducer = (
     case "startSampling":
       return {
         // preserve previous draws, paramNames, etc in case they are still being rendered while sampling progresses
-        runResult: state.runResult,
+        latestRun: state.latestRun,
         status: "sampling",
         errorMessage: "",
-        samplingOpts: action.samplingOpts,
-        data: action.data,
       };
     case "samplerReturn":
       return {
         ...state,
         status: "completed",
-        runResult: {
+        latestRun: {
           draws: action.draws,
           paramNames: action.paramNames,
           computeTimeSec: action.computeTimeSec,
+          sampleConfig: action.sampleConfig,
           consoleText: action.consoleText,
         },
       };
@@ -94,7 +77,7 @@ export const StanRunReducer = (
 };
 
 const useStanSampler = (compiledMainJsUrl: string | undefined) => {
-  const [latestRun, update] = useReducer(StanRunReducer, initialStanRun);
+  const [samplerState, update] = useReducer(SamplerStateReducer, initialState);
 
   const [sampler, setSampler] = useState<StanSampler | undefined>(undefined);
 
@@ -112,7 +95,7 @@ const useStanSampler = (compiledMainJsUrl: string | undefined) => {
     return destructor;
   }, [compiledMainJsUrl]);
 
-  return { sampler, latestRun };
+  return { sampler, samplerState };
 };
 
 export default useStanSampler;

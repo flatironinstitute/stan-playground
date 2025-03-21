@@ -2,13 +2,15 @@ import TabWidget from "@SpComponents/TabWidget";
 import { FunctionComponent } from "react";
 import AnalysisPyPanel from "./AnalysisArea/AnalysisPyPanel";
 import AnalysisRPanel from "./AnalysisArea/AnalysisRPanel";
-import { NeedsLatestRun } from "@SpCore/StanSampler/useStanSampler";
+import { NeedsSamplerState } from "@SpCore/StanSampler/SamplerTypes";
 
-const AnalysisArea: FunctionComponent<NeedsLatestRun> = ({ latestRun }) => {
+const AnalysisArea: FunctionComponent<NeedsSamplerState> = ({
+  samplerState,
+}) => {
   return (
     <TabWidget labels={["Python", "R"]}>
-      <AnalysisPyPanel latestRun={latestRun} />
-      <AnalysisRPanel latestRun={latestRun} />
+      <AnalysisPyPanel samplerState={samplerState} />
+      <AnalysisRPanel samplerState={samplerState} />
     </TabWidget>
   );
 };

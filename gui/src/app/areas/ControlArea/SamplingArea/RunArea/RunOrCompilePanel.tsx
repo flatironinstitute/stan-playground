@@ -1,24 +1,25 @@
 import { FunctionComponent, useCallback, use, useMemo } from "react";
 
 import Button from "@mui/material/Button";
-import { CompileContext } from "@SpCore/Compilation/CompileContextProvider";
-import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
-import StanSampler from "@SpCore/StanSampler/StanSampler";
-import { StanRun } from "@SpCore/StanSampler/useStanSampler";
-import RunWithProgressPanel from "./RunWithProgressPanel";
 import CircularProgress from "@mui/material/CircularProgress";
 import Tooltip from "@mui/material/Tooltip";
 
+import { CompileContext } from "@SpCore/Compilation/CompileContextProvider";
+import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
+import StanSampler from "@SpCore/StanSampler/StanSampler";
+import type { SamplerState } from "@SpCore/StanSampler/SamplerTypes";
+import RunPanel from "./RunPanel";
+import SamplerStatusPanel from "./SamplerStatusPanel";
+
 type RunOrCompileProps = {
   sampler?: StanSampler;
-  latestRun: StanRun;
+  samplerState: SamplerState;
 };
 
 const RunOrCompilePanel: FunctionComponent<RunOrCompileProps> = ({
   sampler,
-  latestRun,
+  samplerState,
 }) => {
-  const { status: runStatus, errorMessage, progress } = latestRun;
   const { data: projectData } = use(ProjectContext);
 
   const handleRun = useCallback(async () => {
@@ -84,14 +85,18 @@ const RunOrCompilePanel: FunctionComponent<RunOrCompileProps> = ({
     <div className="RunPanel">
       <div className="RunPanelPadded">
         {compileStatus === "compiled" ? (
-          <RunWithProgressPanel
-            handleRun={handleRun}
-            cancelRun={cancelRun}
-            runStatus={runStatus}
-            progress={progress}
-            numChains={projectData.samplingOpts.num_chains}
-            errorMessage={errorMessage}
-          />
+          <>
+            <RunPanel
+              handleRun={handleRun}
+              cancelRun={cancelRun}
+              runStatus={samplerState.status}
+            />
+            <hr />
+            <SamplerStatusPanel
+              samplerState={samplerState}
+              numChains={projectData.samplingOpts.num_chains}
+            />
+          </>
         ) : ["preparing", "compiling"].includes(compileStatus) ? (
           compilingDiv
         ) : (

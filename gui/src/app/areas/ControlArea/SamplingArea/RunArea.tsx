@@ -1,5 +1,5 @@
 import { FunctionComponent, use, useCallback } from "react";
-import type { StanRun } from "@SpCore/StanSampler/useStanSampler";
+import type { SamplerState } from "@SpCore/StanSampler/SamplerTypes";
 
 import Grid from "@mui/material/Grid2";
 import { SamplingOpts } from "@SpCore/Project/ProjectDataModel";
@@ -11,9 +11,12 @@ import RunOrCompilePanel from "./RunArea/RunOrCompilePanel";
 
 type RunAreaProps = {
   sampler: StanSampler | undefined;
-  latestRun: StanRun;
+  samplerState: SamplerState;
 };
-const RunArea: FunctionComponent<RunAreaProps> = ({ sampler, latestRun }) => {
+const RunArea: FunctionComponent<RunAreaProps> = ({
+  sampler,
+  samplerState,
+}) => {
   const { data, update } = use(ProjectContext);
 
   const setSamplingOpts = useCallback(
@@ -23,7 +26,7 @@ const RunArea: FunctionComponent<RunAreaProps> = ({ sampler, latestRun }) => {
     [update],
   );
 
-  const isSampling = latestRun.status === "sampling";
+  const isSampling = samplerState.status === "sampling";
 
   return (
     <Grid container>
@@ -34,7 +37,7 @@ const RunArea: FunctionComponent<RunAreaProps> = ({ sampler, latestRun }) => {
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
-        <RunOrCompilePanel sampler={sampler} latestRun={latestRun} />
+        <RunOrCompilePanel sampler={sampler} samplerState={samplerState} />
       </Grid>
     </Grid>
   );
