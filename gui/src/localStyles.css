@@ -179,6 +179,10 @@ span.EditorTitle {
   place-items: center;
 }
 
+.ScatterHelpText {
+  text-align: center;
+}
+
 /* Sampling Opts ------ */
 .SamplingOptsWrapper {
   padding: 10px;

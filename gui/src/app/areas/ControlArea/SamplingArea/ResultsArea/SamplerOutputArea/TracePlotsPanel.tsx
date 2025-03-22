@@ -1,31 +1,20 @@
 import type { FunctionComponent } from "react";
 
+import type { StanDraw } from "../SamplerOutputArea";
+
 import Collapsable from "@SpComponents/Collapsable";
-import TracePlot from "./TracePlot";
-import prettifyStanParamName from "@SpUtil/prettifyStanParamName";
+import TracePlot from "./Plots/TracePlot";
 
 type TracePlotsProps = {
-  draws: number[][];
-  paramNames: string[];
-  drawChainIds: number[];
+  variables: StanDraw[];
 };
 
-const TracePlotsPanel: FunctionComponent<TracePlotsProps> = ({
-  draws,
-  paramNames,
-  drawChainIds,
-}) => {
+const TracePlotsPanel: FunctionComponent<TracePlotsProps> = ({ variables }) => {
   return (
     <>
-      {paramNames.map(prettifyStanParamName).map((paramName, i) => (
-        <Collapsable name={paramName} key={paramName}>
-          <TracePlot
-            key={paramName}
-            variableName={paramName}
-            columnIndex={i}
-            draws={draws}
-            drawChainIds={drawChainIds}
-          />
+      {variables.map((variable) => (
+        <Collapsable name={variable.name} key={variable.name}>
+          <TracePlot key={variable.name} variable={variable} />
         </Collapsable>
       ))}
     </>

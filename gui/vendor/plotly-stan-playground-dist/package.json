@@ -1,0 +1,27 @@
+{
+  "name": "plotly-stan-playground-dist",
+  "version": "3.0.1",
+  "license": "MIT",
+  "main": "plotly-stan-playground.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/plotly/plotly.js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/plotly/plotly.js/issues"
+  },
+  "author": "Plotly, Inc.",
+  "keywords": [
+    "graphing",
+    "plotting",
+    "data",
+    "visualization",
+    "plotly"
+  ],
+  "files": [
+    "LICENSE",
+    "README.md",
+    "plotly-stan-playground.js",
+    "plotly-stan-playground.d.ts"
+  ]
+}

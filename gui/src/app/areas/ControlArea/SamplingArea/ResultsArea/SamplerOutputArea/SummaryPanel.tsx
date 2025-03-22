@@ -1,13 +1,11 @@
+import { FunctionComponent, useMemo } from "react";
+
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableRow from "@mui/material/TableRow";
-import {
-  AlternatingTableRow,
-  SecondaryColoredTableHead,
-} from "@SpComponents/StyledTables";
-import prettifyStanParamName from "@SpUtil/prettifyStanParamName";
+
 import {
   effective_sample_size,
   split_potential_scale_reduction,
@@ -16,7 +14,12 @@ import {
   std_deviation,
 } from "mcmc-stats";
 
-import { FunctionComponent, useMemo } from "react";
+import type { StanDraw } from "../SamplerOutputArea";
+
+import {
+  AlternatingTableRow,
+  SecondaryColoredTableHead,
+} from "@SpComponents/StyledTables";
 
 const columns = [
   {
@@ -75,39 +78,36 @@ type TableRow = {
 };
 
 type SummaryProps = {
-  draws: number[][];
-  paramNames: string[];
-  drawChainIds: number[];
+  variables: StanDraw[];
   computeTimeSec: number | undefined;
 };
 
 const SummaryPanel: FunctionComponent<SummaryProps> = ({
-  draws,
-  paramNames,
-  drawChainIds,
+  variables,
   computeTimeSec,
 }) => {
   const rows = useMemo(() => {
     const rows: TableRow[] = [];
-    for (const [index, pname] of paramNames.entries()) {
-      const pDraws = draws[index];
-      const pDrawsSorted = [...pDraws].sort((a, b) => a - b);
-      const ess = computeEss(pDraws, drawChainIds);
-      const rhat = computeRhat(pDraws, drawChainIds);
-      const stdDev = std_deviation(pDraws);
+    for (const { name, draws } of variables) {
+      const drawsFlatSorted = [...draws.flat()].sort((a, b) => a - b);
+
+      const ess = effective_sample_size(draws);
+      const rhat = split_potential_scale_reduction(draws);
+
+      const stdDev = std_deviation(drawsFlatSorted);
       const values = columns.map((column) => {
         if (column.key === "mean") {
-          return mean(pDraws);
+          return mean(drawsFlatSorted);
         } else if (column.key === "mcse") {
           return stdDev / Math.sqrt(ess);
         } else if (column.key === "stdDev") {
           return stdDev;
         } else if (column.key === "5%") {
-          return percentile(pDrawsSorted, 0.05);
+          return percentile(drawsFlatSorted, 0.05);
         } else if (column.key === "50%") {
-          return percentile(pDrawsSorted, 0.5);
+          return percentile(drawsFlatSorted, 0.5);
         } else if (column.key === "95%") {
-          return percentile(pDrawsSorted, 0.95);
+          return percentile(drawsFlatSorted, 0.95);
         } else if (column.key === "nEff") {
           return ess;
         } else if (column.key === "nEff/s") {
@@ -119,12 +119,12 @@ const SummaryPanel: FunctionComponent<SummaryProps> = ({
         }
       });
       rows.push({
-        key: prettifyStanParamName(pname),
+        key: name,
         values,
       });
     }
     return rows;
-  }, [draws, paramNames, drawChainIds, computeTimeSec]);
+  }, [variables, computeTimeSec]);
 
   return (
     <TableContainer sx={{ maxHeight: "100%", overflow: "auto" }}>
@@ -159,32 +159,6 @@ const SummaryPanel: FunctionComponent<SummaryProps> = ({
       </ul>
     </TableContainer>
   );
-};
-
-const drawsByChain = (draws: number[], chainIds: number[]): number[][] => {
-  // Group draws by chain for use in computing ESS and Rhat
-  const uniqueChainIds = Array.from(new Set(chainIds)).sort();
-  const drawsByChain: number[][] = new Array(uniqueChainIds.length)
-    .fill(0)
-    .map(() => []);
-  for (let i = 0; i < draws.length; i++) {
-    const chainId = chainIds[i];
-    const chainIndex = uniqueChainIds.indexOf(chainId);
-    drawsByChain[chainIndex].push(draws[i]);
-  }
-  return drawsByChain;
-};
-
-const computeEss = (x: number[], chainIds: number[]) => {
-  const draws = drawsByChain(x, chainIds);
-  const ess = effective_sample_size(draws);
-  return ess;
-};
-
-const computeRhat = (x: number[], chainIds: number[]) => {
-  const draws = drawsByChain(x, chainIds);
-  const rhat = split_potential_scale_reduction(draws);
-  return rhat;
 };
 
 export default SummaryPanel;
