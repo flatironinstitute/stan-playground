@@ -7,8 +7,8 @@ const ExportProjectWindow: FunctionComponent<
 > = ({ open, handleClose }) => {
   return (
     <CloseableDialog
-      title="Load Project"
-      id="loadProjectDialogue"
+      title="Export Project"
+      id="exportProjectDialogue"
       open={open}
       handleClose={handleClose}
     >
