@@ -8,7 +8,7 @@ export enum Requests {
 export type SampleConfig = Omit<SamplingOpts, "seed"> & {
   data: string;
   refresh: number;
-  seed: number | null;
+  seed: number;
 };
 
 export type StanModelRequestMessage =

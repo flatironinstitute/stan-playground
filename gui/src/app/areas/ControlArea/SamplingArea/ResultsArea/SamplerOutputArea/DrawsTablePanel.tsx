@@ -11,7 +11,6 @@ import {
   SuccessBorderedTableRow,
   SuccessColoredTableHead,
 } from "@SpComponents/StyledTables";
-import { SamplingOpts } from "@SpCore/Project/ProjectDataModel";
 import { SampleConfig } from "@SpCore/StanSampler/SamplerTypes";
 import { triggerDownload } from "@SpUtil/triggerDownload";
 import JSZip from "jszip";
@@ -166,13 +165,6 @@ const createZipBlobForMultipleCsvs = async (
   csvTexts: string[],
   sampleConfig: SampleConfig,
 ) => {
-  const samplingOpts: SamplingOpts = {
-    num_chains: sampleConfig.num_chains,
-    num_samples: sampleConfig.num_samples,
-    num_warmup: sampleConfig.num_warmup,
-    seed: sampleConfig.seed ?? undefined,
-    init_radius: sampleConfig.init_radius,
-  };
   const zip = new JSZip();
   // put them all in a folder called 'draws'
   const folder = zip.folder("draws");
@@ -180,8 +172,8 @@ const createZipBlobForMultipleCsvs = async (
   csvTexts.forEach((text, i) => {
     folder.file(`chain_${i + 1}.csv`, text);
   });
-  const samplingOptsText = JSON.stringify(samplingOpts, null, 2);
-  folder.file("sampling_opts.json", samplingOptsText);
+  const sampleConfigText = JSON.stringify(sampleConfig, null, 2);
+  folder.file("sampling_opts.json", sampleConfigText);
   const blob = await zip.generateAsync({ type: "blob" });
   return blob;
 };

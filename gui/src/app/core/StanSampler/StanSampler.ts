@@ -4,7 +4,6 @@ import { unreachable } from "@SpUtil/unreachable";
 import {
   Replies,
   Requests,
-  SampleConfig,
   StanModelReplyMessage,
   StanModelRequestMessage,
 } from "./SamplerTypes";
@@ -85,13 +84,8 @@ class StanSampler {
   }
 
   sample(data: string, samplingOpts: SamplingOpts) {
-    const refresh = calculateReasonableRefreshRate(samplingOpts);
-    const sampleConfig: SampleConfig = {
-      ...samplingOpts,
-      data,
-      seed: samplingOpts.seed !== undefined ? samplingOpts.seed : null,
-      refresh,
-    };
+    const sampleConfig = makeSamplerConfig(samplingOpts, data);
+
     if (!this.#stanWorker) throw new Error("model worker is undefined");
 
     this.update({ type: "startSampling" });
@@ -110,6 +104,18 @@ class StanSampler {
     this._initialize();
   }
 }
+
+const makeSamplerConfig = (samplingOpts: SamplingOpts, data: string) => {
+  const refresh = calculateReasonableRefreshRate(samplingOpts);
+  return {
+    ...samplingOpts,
+    data,
+    // this line is equivalent to what TinyStan itself does,
+    // but by doing it ourselves we can e.g. store it in the csv file zip
+    seed: samplingOpts.seed ?? Math.floor(Math.random() * Math.pow(2, 32)),
+    refresh,
+  };
+};
 
 const calculateReasonableRefreshRate = (samplingOpts: SamplingOpts) => {
   const totalSamples =
