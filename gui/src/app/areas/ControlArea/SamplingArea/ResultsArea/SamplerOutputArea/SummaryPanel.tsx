@@ -66,7 +66,7 @@ const columns = [
   },
   {
     key: "rHat",
-    label: <>R&#770;</>,
+    label: "Rhat",
     title:
       "Potential scale reduction factor on split chains (at convergence, Rhat=1)",
   },
