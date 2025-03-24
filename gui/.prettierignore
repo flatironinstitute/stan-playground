@@ -2,6 +2,7 @@ backend/
 node_modules/
 dist/
 coverage/
+vendor/
 
 stanc.js
 fft.ts

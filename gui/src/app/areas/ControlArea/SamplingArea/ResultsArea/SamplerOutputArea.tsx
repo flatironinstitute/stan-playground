@@ -8,64 +8,64 @@ import DrawsTablePanel from "./SamplerOutputArea/DrawsTablePanel";
 import HistogramsPanel from "./SamplerOutputArea/HistogramsPanel";
 import TracePlotsPanel from "./SamplerOutputArea/TracePlotsPanel";
 import ConsolePanel from "./SamplerOutputArea/ConsolePanel";
+import ScatterPlotsPanel from "./SamplerOutputArea/ScatterPlotsPanel";
+import prettifyStanParamName from "@SpUtil/prettifyStanParamName";
+
+export type StanDraw = {
+  name: string;
+  // draws is [draw][chain]
+  draws: number[][];
+};
 
 const SamplerOutputArea: FunctionComponent<NeedsLatestRun> = ({
   latestRun,
 }) => {
-  const drawChainIds = useMemo(() => {
+  // compute a useful re-shaping of the draws which is more convenient for
+  // most of the downstream components
+  const variables = useMemo(() => {
     if (!latestRun.runResult || !latestRun.samplingOpts) return [];
+
     const numChains = latestRun.samplingOpts.num_chains;
     const draws = latestRun.runResult.draws;
-    return [...new Array(draws[0].length).keys()].map(
-      (i) => 1 + Math.floor((i / draws[0].length) * numChains),
-    );
+
+    return latestRun.runResult.paramNames.map((name, index) => ({
+      name: prettifyStanParamName(name),
+      // split the draws into separate chains
+      draws: [...new Array(numChains)].map((_, chain) => {
+        return draws[index].filter(
+          (_, i) => Math.floor((i / draws[0].length) * numChains) === chain,
+        );
+      }),
+    }));
   }, [latestRun.runResult, latestRun.samplingOpts]);
 
-  const drawNumbers: number[] = useMemo(() => {
-    if (!latestRun.runResult || !latestRun.samplingOpts) return [];
-    const numChains = latestRun.samplingOpts.num_chains;
-    const draws = latestRun.runResult.draws;
-    const numDrawsPerChain = Math.floor(draws[0].length / numChains);
-    return [...new Array(draws[0].length).keys()].map(
-      (i) => 1 + (i % numDrawsPerChain),
-    );
-  }, [latestRun.runResult, latestRun.samplingOpts]);
-
-  // handle case where there is no latest run yet
+  // don't render anything if we don't have a result yet
   if (!latestRun.runResult || !latestRun.samplingOpts) return <span />;
 
-  const {
-    samplingOpts,
-    runResult: { draws, paramNames, computeTimeSec, consoleText },
-  } = latestRun;
+  const samplingOpts = latestRun.samplingOpts;
+  const { draws, paramNames, computeTimeSec, consoleText } =
+    latestRun.runResult;
 
   return (
     <TabWidget
-      labels={["Summary", "Draws", "Histograms", "Trace plots", "Console"]}
+      labels={[
+        "Summary",
+        "Draws",
+        "Histograms",
+        "Scatter plots",
+        "Trace plots",
+        "Console",
+      ]}
     >
-      <SummaryPanel
-        draws={draws}
-        paramNames={paramNames}
-        drawChainIds={drawChainIds}
-        computeTimeSec={computeTimeSec}
-      />
+      <SummaryPanel variables={variables} computeTimeSec={computeTimeSec} />
       <DrawsTablePanel
         draws={draws}
         paramNames={paramNames}
-        drawChainIds={drawChainIds}
-        drawNumbers={drawNumbers}
         samplingOpts={samplingOpts}
       />
-      <HistogramsPanel
-        draws={draws}
-        paramNames={paramNames}
-        drawChainIds={drawChainIds}
-      />
-      <TracePlotsPanel
-        draws={draws}
-        paramNames={paramNames}
-        drawChainIds={drawChainIds}
-      />
+      <HistogramsPanel variables={variables} />
+      <ScatterPlotsPanel variables={variables} />
+      <TracePlotsPanel variables={variables} />
       <ConsolePanel text={consoleText} />
     </TabWidget>
   );
