@@ -34,32 +34,25 @@ const ScatterPlotMatrix: FunctionComponent<ScatterMatrixProps> = ({
       zeroline: false,
       gridcolor: "#ffff",
       ticklen: 4,
-    };
+    } as const;
+
+    // layout needs 'xaxis', 'yaxis', 'xaxis2', 'yaxis2', etc.
+    // rather than copy-paste the same code for each axis, we generate it
+    const i_to_str = (i: number) => (i === 0 ? "axis" : `axis${i + 1}`);
+    const mapbase = [...new Array(variables.length)].map(
+      (_, i) => `${i_to_str(i)}`,
+    );
+    const axismap = Object.assign(
+      {},
+      ...mapbase.map((s) => ({ [`x${s}`]: axis })),
+      ...mapbase.map((s) => ({ [`y${s}`]: axis })),
+    );
+
     return {
       title: { text: "" },
-
       margin: { r: 10, l: 55, t: 0, b: 55, autoexpand: true },
-
       height: Math.max(400, 115 * (variables.length - 1)),
-
-      xaxis: axis,
-      yaxis: axis,
-      // this is a bit annoying, but each needs to be set separately it seems...
-      // we know there are < 8, though
-      xaxis2: axis,
-      yaxis2: axis,
-      xaxis3: axis,
-      yaxis3: axis,
-      xaxis4: axis,
-      yaxis4: axis,
-      xaxis5: axis,
-      yaxis5: axis,
-      xaxis6: axis,
-      yaxis6: axis,
-      xaxis7: axis,
-      yaxis7: axis,
-      xaxis8: axis,
-      yaxis8: axis,
+      ...axismap,
     } as const;
   }, [variables.length]);
 
