@@ -39,38 +39,38 @@ const columns = [
     title: "Standard deviation of the parameter",
   },
   {
-    key: "5%",
+    key: "fifthPercentile",
     label: "5%",
     title: "5th percentile of the parameter",
   },
   {
-    key: "50%",
+    key: "median",
     label: "50%",
     title: "50th percentile of the parameter",
   },
   {
-    key: "95%",
+    key: "ninetyFifthPercentile",
     label: "95%",
     title: "95th percentile of the parameter",
   },
   {
-    key: "nEff",
-    label: "N_Eff",
+    key: "ess",
+    label: "ESS",
     title:
-      "Effective sample size: A crude measure of the effective sample size",
+      "Effective sample size: An estimate of the number of independent draws this sample is equivalent to",
   },
   {
-    key: "nEff/s",
-    label: "N_Eff/s",
+    key: "essPerSecond",
+    label: "ESS/s",
     title: "Effective sample size per second of compute time",
   },
   {
     key: "rHat",
-    label: "R_hat",
+    label: <>R&#770;</>,
     title:
-      "Potential scale reduction factor on split chains (at convergence, R_hat=1)",
+      "Potential scale reduction factor on split chains (at convergence, Rhat=1)",
   },
-];
+] as const;
 
 type TableRow = {
   key: string;
@@ -79,7 +79,7 @@ type TableRow = {
 
 type SummaryProps = {
   variables: StanDraw[];
-  computeTimeSec: number | undefined;
+  computeTimeSec: number;
 };
 
 const SummaryPanel: FunctionComponent<SummaryProps> = ({
@@ -92,35 +92,23 @@ const SummaryPanel: FunctionComponent<SummaryProps> = ({
       const drawsFlatSorted = [...draws.flat()].sort((a, b) => a - b);
 
       const ess = effective_sample_size(draws);
-      const rhat = split_potential_scale_reduction(draws);
-
       const stdDev = std_deviation(drawsFlatSorted);
-      const values = columns.map((column) => {
-        if (column.key === "mean") {
-          return mean(drawsFlatSorted);
-        } else if (column.key === "mcse") {
-          return stdDev / Math.sqrt(ess);
-        } else if (column.key === "stdDev") {
-          return stdDev;
-        } else if (column.key === "5%") {
-          return percentile(drawsFlatSorted, 0.05);
-        } else if (column.key === "50%") {
-          return percentile(drawsFlatSorted, 0.5);
-        } else if (column.key === "95%") {
-          return percentile(drawsFlatSorted, 0.95);
-        } else if (column.key === "nEff") {
-          return ess;
-        } else if (column.key === "nEff/s") {
-          return computeTimeSec ? ess / computeTimeSec : NaN;
-        } else if (column.key === "rHat") {
-          return rhat;
-        } else {
-          return NaN;
-        }
-      });
+
+      const row = {
+        mean: mean(drawsFlatSorted),
+        mcse: stdDev / Math.sqrt(ess),
+        stdDev,
+        fifthPercentile: percentile(drawsFlatSorted, 0.05),
+        median: percentile(drawsFlatSorted, 0.5),
+        ninetyFifthPercentile: percentile(drawsFlatSorted, 0.95),
+        ess,
+        essPerSecond: ess / computeTimeSec,
+        rHat: split_potential_scale_reduction(draws),
+      } as const;
+
       rows.push({
         key: name,
-        values,
+        values: columns.map((column) => row[column.key]),
       });
     }
     return rows;
