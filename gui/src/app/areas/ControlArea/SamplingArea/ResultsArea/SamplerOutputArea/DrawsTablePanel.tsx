@@ -11,7 +11,7 @@ import {
   SuccessBorderedTableRow,
   SuccessColoredTableHead,
 } from "@SpComponents/StyledTables";
-import { SamplingOpts } from "@SpCore/Project/ProjectDataModel";
+import { SampleConfig } from "@SpCore/StanSampler/SamplerTypes";
 import { triggerDownload } from "@SpUtil/triggerDownload";
 import JSZip from "jszip";
 import { FunctionComponent, useCallback, useMemo, useState } from "react";
@@ -19,15 +19,15 @@ import { FunctionComponent, useCallback, useMemo, useState } from "react";
 type DrawsTableProps = {
   draws: number[][];
   paramNames: string[];
-  samplingOpts: SamplingOpts; // for including in exported zip
+  sampleConfig: SampleConfig; // for including in exported zip
 };
 
 const DrawsTablePanel: FunctionComponent<DrawsTableProps> = ({
   draws,
   paramNames,
-  samplingOpts,
+  sampleConfig,
 }) => {
-  const numChains = samplingOpts.num_chains;
+  const numChains = sampleConfig.num_chains;
   const totalDraws = draws[0].length;
 
   const [abbreviatedToNumRows, setAbbreviatedToNumRows] = useState<
@@ -48,7 +48,7 @@ const DrawsTablePanel: FunctionComponent<DrawsTableProps> = ({
 
   const handleExportToMultipleCsvs = useCallback(async () => {
     const csvTexts = prepareMultipleCsvsText(draws, paramNames, numChains);
-    const blob = await createZipBlobForMultipleCsvs(csvTexts, samplingOpts);
+    const blob = await createZipBlobForMultipleCsvs(csvTexts, sampleConfig);
     const fileName = "SP-draws.zip";
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -56,7 +56,7 @@ const DrawsTablePanel: FunctionComponent<DrawsTableProps> = ({
     a.download = fileName;
     a.click();
     URL.revokeObjectURL(url);
-  }, [draws, paramNames, numChains, samplingOpts]);
+  }, [draws, paramNames, numChains, sampleConfig]);
 
   return (
     <Box display="flex" height="100%" width="100%" flexDirection="column">
@@ -163,7 +163,7 @@ const prepareMultipleCsvsText = (
 
 const createZipBlobForMultipleCsvs = async (
   csvTexts: string[],
-  samplingOpts: SamplingOpts,
+  sampleConfig: SampleConfig,
 ) => {
   const zip = new JSZip();
   // put them all in a folder called 'draws'
@@ -172,8 +172,8 @@ const createZipBlobForMultipleCsvs = async (
   csvTexts.forEach((text, i) => {
     folder.file(`chain_${i + 1}.csv`, text);
   });
-  const samplingOptsText = JSON.stringify(samplingOpts, null, 2);
-  folder.file("sampling_opts.json", samplingOptsText);
+  const sampleConfigText = JSON.stringify(sampleConfig, null, 2);
+  folder.file("sampling_opts.json", sampleConfigText);
   const blob = await zip.generateAsync({ type: "blob" });
   return blob;
 };
