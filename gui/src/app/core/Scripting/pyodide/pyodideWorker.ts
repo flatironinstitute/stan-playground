@@ -186,6 +186,8 @@ patch_matplotlib(_SP_ADD_IMAGE)
 import matplotlib.pyplot as plt
 if len(plt.gcf().get_children()) > 1:
     plt.show()
+
+plt.close('all')
 `;
   }
 
