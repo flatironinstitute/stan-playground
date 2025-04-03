@@ -18,7 +18,7 @@ export default defineConfig({
             "pyodide",
             "webr",
           ],
-          mui: ["@mui/material", "@mui/icons-material"],
+          // mui: ["@mui/material", "@mui/icons-material"],
         },
       },
     },
