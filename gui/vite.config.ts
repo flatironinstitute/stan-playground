@@ -2,6 +2,7 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { configDefaults, coverageConfigDefaults } from "vitest/config";
+import { codecovVitePlugin } from "@codecov/vite-plugin";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -42,7 +43,16 @@ export default defineConfig({
     },
     exclude: [...configDefaults.exclude],
   },
-  plugins: [react(), tsconfigPaths()],
+  plugins: [
+    react(),
+    tsconfigPaths(),
+    codecovVitePlugin({
+      enableBundleAnalysis: process.env.CODECOV_TOKEN !== undefined,
+      bundleName: "stan-playground",
+      uploadToken: process.env.CODECOV_TOKEN,
+      telemetry: false,
+    }),
+  ],
   server: {
     host: "127.0.0.1",
     port: 3000,

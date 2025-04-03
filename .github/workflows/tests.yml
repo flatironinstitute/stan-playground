@@ -2,9 +2,9 @@ name: test stan-playground
 
 on:
   push:
-    branches: ['main']
+    branches: ["main"]
   pull_request:
-    branches: ['main']
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
@@ -25,12 +25,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'yarn'
+          cache: "yarn"
           cache-dependency-path: gui/yarn.lock
       - name: Install dependencies
         run: cd gui; yarn
       - name: Test
         run: cd gui; yarn test
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   frontend-build:
     name: yarn build
@@ -42,9 +46,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'yarn'
+          cache: "yarn"
           cache-dependency-path: gui/yarn.lock
       - name: Install dependencies
         run: cd gui; yarn
       - name: Build
         run: cd gui; yarn build
+        with:
+          env:
+            CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
