@@ -1,20 +1,17 @@
 codecov:
-  require_ci_to_pass: false
+  require_ci_to_pass: true
 
 coverage:
   status:
-    project:
-      default:
-        informational: true
-        threshold: 100%
-        target: 0%
-    patch:
-      default:
-        informational: true
-        threshold: 100%
-        target: 0%
+    project: false
+    patch: false
+
+bundle_analysis:
+  warning_threshold: "5%"
+  status: "informational"
 
 comment:
   layout: "diff, files"
-  behavior: once
+  behavior: default
   require_changes: true
+  require_bundle_changes: true
