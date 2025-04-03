@@ -52,6 +52,5 @@ jobs:
         run: cd gui; yarn
       - name: Build
         run: cd gui; yarn build
-        with:
-          env:
-            CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
