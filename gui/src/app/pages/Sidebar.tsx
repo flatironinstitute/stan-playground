@@ -27,6 +27,10 @@ const exampleLinks = [
     name: "Disease transmission",
     link: "https://gist.github.com/WardBrian/e47253bf29282d0eabf13616265d393e",
   },
+  {
+    name: "Lotka-Volterra",
+    link: "https://gist.github.com/WardBrian/d8ab811b137085f154b6145d3c36cbc4",
+  },
 ];
 
 export const drawerWidth = 180;
