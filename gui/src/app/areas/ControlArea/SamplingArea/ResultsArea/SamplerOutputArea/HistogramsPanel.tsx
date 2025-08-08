@@ -1,4 +1,4 @@
-import { FunctionComponent, useMemo, useState } from "react";
+import { FunctionComponent, useState } from "react";
 
 import Button from "@mui/material/Button";
 
@@ -12,31 +12,16 @@ type HistogramsProps = {
 };
 
 const HistogramsPanel: FunctionComponent<HistogramsProps> = ({ variables }) => {
-  const variablesResorted = useMemo(() => {
-    // put the names that don't end with __ first
-    const vars: StanDraw[] = [];
-    const varsWithSuffix: StanDraw[] = [];
-
-    for (const v of variables) {
-      if (v.name.endsWith("__")) {
-        varsWithSuffix.push(v);
-      } else {
-        vars.push(v);
-      }
-    }
-    return [...vars, ...varsWithSuffix];
-  }, [variables]);
-
   const [abbreviatedToNumPlots, setAbbreviatedToNumPlots] =
     useState<number>(30);
   return (
     <>
       <ResponsiveGrid>
-        {variablesResorted.slice(0, abbreviatedToNumPlots).map((v) => (
+        {variables.slice(0, abbreviatedToNumPlots).map((v) => (
           <Histogram key={v.name} variable={v} />
         ))}
       </ResponsiveGrid>
-      {abbreviatedToNumPlots < variablesResorted.length && (
+      {abbreviatedToNumPlots < variables.length && (
         <div className="PlotAbbreviationToggle">
           <Button
             onClick={() => {

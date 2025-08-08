@@ -28,15 +28,29 @@ const SamplerOutputArea: FunctionComponent<{ latestRun: StanRun }> = ({
   const variables = useMemo(() => {
     const numChains = sampleConfig.num_chains;
 
-    return paramNames.map((name, index) => ({
-      name: prettifyStanParamName(name),
-      // split the draws into separate chains
-      draws: [...new Array(numChains)].map((_, chain) => {
-        return draws[index].filter(
-          (_, i) => Math.floor((i / draws[0].length) * numChains) === chain,
-        );
-      }),
-    }));
+    const vars: StanDraw[] = [];
+    const varsWithSuffix: StanDraw[] = [];
+
+    for (const [index, name] of paramNames.entries()) {
+      const v = {
+        name: prettifyStanParamName(name),
+        // split the draws into separate chains
+        draws: [...new Array(numChains)].map((_, chain) => {
+          return draws[index].filter(
+            (_, i) => Math.floor((i / draws[0].length) * numChains) === chain,
+          );
+        }),
+      };
+
+      if (v.name.endsWith("__")) {
+        varsWithSuffix.push(v);
+      } else {
+        vars.push(v);
+      }
+    }
+
+    // put the names that don't end with __ first
+    return [...vars, ...varsWithSuffix];
   }, [draws, paramNames, sampleConfig.num_chains]);
 
   return (
