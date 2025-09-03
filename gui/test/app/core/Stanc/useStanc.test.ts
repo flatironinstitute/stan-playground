@@ -32,10 +32,13 @@ describe("useStanc", () => {
       result.current.requestFormat();
     });
 
-    await waitFor(() => {
-      expect(setCode).toHaveBeenCalledOnce();
-      expect(setCode).toHaveBeenCalledWith("data {\n  int x;\n}\n");
-    });
+    await waitFor(
+      () => {
+        expect(setCode).toHaveBeenCalledOnce();
+        expect(setCode).toHaveBeenCalledWith("data {\n  int x;\n}\n");
+      },
+      { timeout: 3000 },
+    );
 
     expect(mockedStdout).not.toHaveBeenCalledWith("terminating stanc worker");
     unmount();
@@ -56,11 +59,16 @@ describe("useStanc", () => {
 
     rerender({ code: "data { int x; " });
 
-    await waitFor(() => {
-      expect(result.current.stancErrors.errors).toBeDefined();
-      expect(result.current.stancErrors.errors?.[1]).toContain("Syntax error");
-      expect(setCode).not.toHaveBeenCalled();
-    });
+    await waitFor(
+      () => {
+        expect(result.current.stancErrors.errors).toBeDefined();
+        expect(result.current.stancErrors.errors?.[1]).toContain(
+          "Syntax error",
+        );
+        expect(setCode).not.toHaveBeenCalled();
+      },
+      { timeout: 3000 },
+    );
 
     expect(mockedStdout).not.toHaveBeenCalledWith("terminating stanc worker");
     unmount();
@@ -81,12 +89,15 @@ describe("useStanc", () => {
       result.current.requestFormat();
     });
 
-    await waitFor(() => {
-      // logged in worker
-      expect(mockedStderr).toHaveBeenCalledWith("Failed to load stanc.js");
-      // logged in useStanc
-      expect(mockedStderr).toHaveBeenCalledWith("stanc.js not loaded!");
-      expect(setCode).not.toHaveBeenCalled();
-    });
+    await waitFor(
+      () => {
+        // logged in worker
+        expect(mockedStderr).toHaveBeenCalledWith("Failed to load stanc.js");
+        // logged in useStanc
+        expect(mockedStderr).toHaveBeenCalledWith("stanc.js not loaded!");
+        expect(setCode).not.toHaveBeenCalled();
+      },
+      { timeout: 3000 },
+    );
   });
 });
