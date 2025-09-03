@@ -9,7 +9,7 @@ At the moment, those traces are `scatter`, `splom` (Scatter PLOt Matrix), `scatt
 The file `plotly-stan-playground.js` was generated from the Plotly 3.0.1 source with the following commands:
 
 ```sh
-git clone --branch v3.0.1 --depth 1 https://github.com/plotly/plotly.js.git
+git clone --branch v3.1.0 --depth 1 https://github.com/plotly/plotly.js.git
 cd plotly.js
 npm i
 npm run custom-bundle -- --traces scatter,splom,scatter3d,histogram --unminified --out stan-playground
