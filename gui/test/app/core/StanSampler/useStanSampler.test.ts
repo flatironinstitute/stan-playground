@@ -34,9 +34,12 @@ afterEach(() => {
 
 const loadedSampler = async () => {
   const sampler = renderHook(() => useStanSampler(mockCompiledMainJsUrl));
-  await waitFor(() => {
-    expect(sampler.result.current.samplerState.status).toBe("loaded");
-  });
+  await waitFor(
+    () => {
+      expect(sampler.result.current.samplerState.status).toBe("loaded");
+    },
+    { timeout: 2000 },
+  );
   return sampler;
 };
 

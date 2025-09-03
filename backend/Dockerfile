@@ -1,5 +1,5 @@
 # Dockerfile
-FROM emscripten/emsdk:4.0.0 AS builder
+FROM emscripten/emsdk:4.0.9 AS builder
 
 # Set the working directory
 WORKDIR /app
@@ -41,7 +41,7 @@ RUN pip install uvicorn
 # Clone the TinyStan repository and checkout a specific commit
 RUN git clone https://github.com/WardBrian/tinystan.git && \
     cd tinystan && \
-    git checkout "17f6cf732a0d9adfc5211fef4474905c92e219a9" && \
+    git checkout "48214842ea2a8d7ce0a722684ee91e8fe98b3ed2" && \
     git submodule update --init --recursive
 
 # Copy the local configuration file for TinyStan
