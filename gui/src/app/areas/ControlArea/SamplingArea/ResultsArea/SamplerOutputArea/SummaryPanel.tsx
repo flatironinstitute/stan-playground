@@ -94,13 +94,26 @@ const SummaryPanel: FunctionComponent<SummaryProps> = ({
       const ess = effective_sample_size(draws);
       const stdDev = std_deviation(drawsFlatSorted);
 
+      let fifthPercentile = NaN;
+      let median = NaN;
+      let ninetyFifthPercentile = NaN;
+      try {
+        // percentile functions can throw if NaN or infinite values are present,
+        // due to an isSorted check
+        fifthPercentile = percentile(drawsFlatSorted, 0.05);
+        median = percentile(drawsFlatSorted, 0.5);
+        ninetyFifthPercentile = percentile(drawsFlatSorted, 0.95);
+      } catch {
+        // ignore
+      }
+
       const row = {
         mean: mean(drawsFlatSorted),
         mcse: stdDev / Math.sqrt(ess),
         stdDev,
-        fifthPercentile: percentile(drawsFlatSorted, 0.05),
-        median: percentile(drawsFlatSorted, 0.5),
-        ninetyFifthPercentile: percentile(drawsFlatSorted, 0.95),
+        fifthPercentile,
+        median,
+        ninetyFifthPercentile,
         ess,
         essPerSecond: ess / computeTimeSec,
         rHat: split_potential_scale_reduction(draws),
