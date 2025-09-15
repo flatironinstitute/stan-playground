@@ -79,7 +79,7 @@ self.onmessage = (e: MessageEvent<StanModelRequestMessage>) => {
       }
       try {
         consoleText = "";
-        const { paramNames, draws } = model.sample(e.data.sampleConfig);
+        const { paramNames, draws } = model.walnuts(e.data.sampleConfig);
         // TODO? use an ArrayBuffer so we can transfer without serialization cost
         postReply({
           purpose: Replies.StanReturn,

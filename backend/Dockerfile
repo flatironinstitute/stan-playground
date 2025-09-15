@@ -41,7 +41,7 @@ RUN pip install uvicorn
 # Clone the TinyStan repository and checkout a specific commit
 RUN git clone https://github.com/WardBrian/tinystan.git && \
     cd tinystan && \
-    git checkout "48214842ea2a8d7ce0a722684ee91e8fe98b3ed2" && \
+    git checkout "27dd09076d96405c10bf9990797578c8e4ab5e01" && \
     git submodule update --init --recursive
 
 # Copy the local configuration file for TinyStan
