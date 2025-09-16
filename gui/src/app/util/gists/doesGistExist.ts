@@ -1,20 +1,20 @@
-import { Octokit } from "@octokit/rest";
-
 const doesGistExist = async (gistUri: string): Promise<boolean> => {
-  const parts = gistUri.split("/");
-  const gistId = parts[parts.length - 1];
-  if (!gistId) {
-    return false;
-  }
-  const octokit = new Octokit();
   try {
-    const r = await octokit.request("HEAD /gists/{gist_id}", {
-      gist_id: gistId,
-      headers: {
-        "X-GitHub-Api-Version": "2022-11-28",
+    const r = await fetch(
+      "https://stan-playground-gist-access.vercel.app/api/gist/exists",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ gistUri }),
       },
-    });
-    return r.status === 200;
+    );
+    if (!r.ok) {
+      return false;
+    }
+    const result = await r.json();
+    return result.exists === true;
   } catch (e) {
     return false;
   }
