@@ -4,8 +4,9 @@ import ProjectContextProvider from "@SpCore/Project/ProjectContextProvider";
 import CompileContextProvider from "@SpCore/Compilation/CompileContextProvider";
 
 import HomePage from "@SpPages/HomePage";
+import HomeEmbedded from "@SpPages/HomeEmbedded";
 import { Analytics } from "@vercel/analytics/react";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 const App = () => {
   return (
@@ -15,7 +16,10 @@ const App = () => {
           <div className="MainWindow">
             <ProjectContextProvider>
               <CompileContextProvider>
-                <HomePage />
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/embedded" element={<HomeEmbedded />} />
+                </Routes>
               </CompileContextProvider>
             </ProjectContextProvider>
             <Analytics />
