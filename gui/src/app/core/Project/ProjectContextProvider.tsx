@@ -30,7 +30,7 @@ type ProjectContextType = {
 };
 
 type ProjectContextProviderProps = {
-  //
+  disableLocalStorageForProjectState?: boolean;
 };
 
 export const ProjectContext = createContext<ProjectContextType>({
@@ -40,7 +40,7 @@ export const ProjectContext = createContext<ProjectContextType>({
 
 const ProjectContextProvider: FunctionComponent<
   PropsWithChildren<ProjectContextProviderProps>
-> = ({ children }) => {
+> = ({ children, disableLocalStorageForProjectState = false }) => {
   const [data, update] = useReducer(ProjectReducer, initialDataModel);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -48,11 +48,13 @@ const ProjectContextProvider: FunctionComponent<
   useEffect(() => {
     // as user reloads the page or closes the tab, save state to local storage
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      const state = serializeProjectToLocalStorage(data);
-      localStorage.setItem("stan-playground-saved-state", state);
-      if (modelHasUnsavedChanges(data)) {
-        e.preventDefault();
-        e.returnValue = true; // legacy
+      if (!disableLocalStorageForProjectState) {
+        const state = serializeProjectToLocalStorage(data);
+        localStorage.setItem("stan-playground-saved-state", state);
+        if (modelHasUnsavedChanges(data)) {
+          e.preventDefault();
+          e.returnValue = true; // legacy
+        }
       }
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -60,7 +62,7 @@ const ProjectContextProvider: FunctionComponent<
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [data]);
+  }, [data, disableLocalStorageForProjectState]);
 
   useEffect(() => {
     const queries = fromQueryParams(searchParams);
@@ -79,16 +81,18 @@ const ProjectContextProvider: FunctionComponent<
       });
     } else {
       // load the saved state on first load
-      const savedState = localStorage.getItem("stan-playground-saved-state");
-      if (!savedState) return;
-      const parsedData = deserializeProjectFromLocalStorage(savedState);
-      if (!parsedData) return; // unsuccessful parse or type cast
-      update({ type: "loadInitialData", state: parsedData });
+      if (!disableLocalStorageForProjectState) {
+        const savedState = localStorage.getItem("stan-playground-saved-state");
+        if (!savedState) return;
+        const parsedData = deserializeProjectFromLocalStorage(savedState);
+        if (!parsedData) return; // unsuccessful parse or type cast
+        update({ type: "loadInitialData", state: parsedData });
+      }
     }
     // once we have loaded some data, we don't need the localStorage again
     // and it will be overwritten by the above event listener on close
     localStorage.removeItem("stan-playground-saved-state");
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, setSearchParams, disableLocalStorageForProjectState]);
 
   return <ProjectContext value={{ data, update }}>{children}</ProjectContext>;
 };
