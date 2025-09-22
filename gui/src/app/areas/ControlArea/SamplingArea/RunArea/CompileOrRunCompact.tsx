@@ -12,7 +12,6 @@ import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
-import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Box from "@mui/material/Box";
 import { CompileContext } from "@SpCore/Compilation/CompileContextProvider";
@@ -23,6 +22,7 @@ const CHAIN_OPTIONS = [1, 2, 4, 8];
 const WARMUP_OPTIONS = [0, 500, 1000, 2000];
 const SAMPLE_OPTIONS = [100, 500, 1000, 2000];
 const RADIUS_OPTIONS = [0.1, 1.0, 2.0, 5.0];
+const SEED_OPTIONS = ["undef", 0, 1, 2, 3, 4, 5];
 
 type CompileOrRunCompactProps = {
   sampler: StanSampler | undefined;
@@ -35,6 +35,9 @@ const CompileOrRunCompact: FunctionComponent<CompileOrRunCompactProps> = ({
 }) => {
   const { compile, compileStatus, validSyntax, isConnected } =
     use(CompileContext);
+  console.log("--- validSyntax", validSyntax);
+  console.log("--- isConnected", isConnected);
+  console.log("--- compileStatus", compileStatus);
   if (compileStatus === "compiled") {
     return <RunCompact sampler={sampler} samplerState={samplerState} />;
   } else if (compileStatus === "compiling") {
@@ -110,13 +113,39 @@ const RunCompact: FunctionComponent<CompileOrRunCompactProps> = ({
   const isDisabled = isSampling || isLoading;
 
   return (
-    <Box sx={{ p: 1, height: "150px" }}>
+    <Box sx={{ height: "150px" }}>
       <Stack
         direction="row"
         spacing={1}
         alignItems="center"
-        sx={{ height: "100%" }}
+        sx={{ height: "100%", overflowX: "auto", px: 1 }}
       >
+        <Box>
+          <Stack direction="row" spacing={1}>
+            {!isSampling && (
+              <Button
+                variant="contained"
+                color="success"
+                onClick={handleRun}
+                disabled={isDisabled || !sampler}
+                size="small"
+              >
+                Run
+              </Button>
+            )}
+            {isSampling && (
+              <Button
+                color="error"
+                variant="outlined"
+                onClick={handleCancel}
+                size="small"
+              >
+                Cancel
+              </Button>
+            )}
+          </Stack>
+        </Box>
+
         <Tooltip title="Number of sampling chains">
           <FormControl size="small" sx={{ minWidth: 80 }}>
             <InputLabel>Chains</InputLabel>
@@ -209,62 +238,42 @@ const RunCompact: FunctionComponent<CompileOrRunCompactProps> = ({
           </FormControl>
         </Tooltip>
 
-        <Tooltip title="Random seed (optional)">
-          <TextField
-            size="small"
-            label="Seed"
-            type="number"
-            value={opts.seed === undefined ? "" : opts.seed}
-            onChange={(e) => {
-              const val =
-                e.target.value === "" ? undefined : parseInt(e.target.value);
-              setSamplingOpts({ ...opts, seed: val });
-            }}
-            disabled={isDisabled}
-            sx={{ width: 80 }}
-          />
+        <Tooltip title="Random seed">
+          <FormControl size="small" sx={{ minWidth: 90 }}>
+            <InputLabel>Seed</InputLabel>
+            <Select
+              value={opts.seed === undefined ? "undef" : opts.seed}
+              label="Seed"
+              disabled={isDisabled}
+              onChange={(e) =>
+                setSamplingOpts({
+                  ...opts,
+                  seed:
+                    e.target.value === "undef"
+                      ? undefined
+                      : (e.target.value as number),
+                })
+              }
+            >
+              {SEED_OPTIONS.map((n) => (
+                <MenuItem key={n === "undef" ? "undef" : n} value={n}>
+                  {n === "undef" ? "undef" : n}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Tooltip>
 
-        <Tooltip title="Reset sampling options to defaults">
+        <Tooltip title="Reset to default values">
           <Button
-            size="small"
-            variant="text"
-            color="inherit"
+            variant="outlined"
             onClick={handleReset}
             disabled={isDisabled}
-            sx={{
-              minWidth: "auto",
-              p: 0.5,
-              opacity: 0.6,
-              "&:hover": { opacity: 1 },
-            }}
+            size="small"
           >
-            ↺
+            Reset
           </Button>
         </Tooltip>
-        <Box sx={{ ml: "auto" }}>
-          <Stack direction="row" spacing={1}>
-            <Button
-              variant="contained"
-              color="success"
-              onClick={handleRun}
-              disabled={isDisabled || !sampler}
-              size="small"
-            >
-              Run
-            </Button>
-            {isSampling && (
-              <Button
-                color="error"
-                variant="outlined"
-                onClick={handleCancel}
-                size="small"
-              >
-                Cancel
-              </Button>
-            )}
-          </Stack>
-        </Box>
       </Stack>
     </Box>
   );
