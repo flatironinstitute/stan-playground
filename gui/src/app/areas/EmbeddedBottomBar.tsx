@@ -1,21 +1,24 @@
-import { FunctionComponent, use, useCallback, useMemo } from "react";
-import type { SamplerState } from "@SpCore/StanSampler/SamplerTypes";
+import { CompileContext } from "@SpCore/Compilation/CompileContextProvider";
+import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
 import {
   defaultSamplingOpts,
   SamplingOpts,
 } from "@SpCore/Project/ProjectDataModel";
+import type { SamplerState } from "@SpCore/StanSampler/SamplerTypes";
 import StanSampler from "@SpCore/StanSampler/StanSampler";
-import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
-import Stack from "@mui/material/Stack";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import Button from "@mui/material/Button";
-import InputLabel from "@mui/material/InputLabel";
-import FormControl from "@mui/material/FormControl";
-import Tooltip from "@mui/material/Tooltip";
 import Box from "@mui/material/Box";
-import { CompileContext } from "@SpCore/Compilation/CompileContextProvider";
-import { CircularProgress } from "@mui/material";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import LaunchIcon from "@mui/icons-material/Launch";
+import HelpIcon from "@mui/icons-material/Help";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import Stack from "@mui/material/Stack";
+import Tooltip from "@mui/material/Tooltip";
+import { FunctionComponent, use, useCallback, useMemo } from "react";
 
 // Preset options for dropdowns
 const CHAIN_OPTIONS = [1, 2, 4, 8];
@@ -24,12 +27,12 @@ const SAMPLE_OPTIONS = [100, 500, 1000, 2000];
 const RADIUS_OPTIONS = [0, 0.1, 1.0, 2.0, 5.0];
 const SEED_OPTIONS = ["undef", 0, 1, 2, 3, 4, 5];
 
-type CompileOrRunCompactProps = {
+type EmbeddedBottomBarProps = {
   sampler: StanSampler | undefined;
   samplerState: SamplerState;
 };
 
-const CompileOrRunCompact: FunctionComponent<CompileOrRunCompactProps> = ({
+const EmbeddedBottomBar: FunctionComponent<EmbeddedBottomBarProps> = ({
   sampler,
   samplerState,
 }) => {
@@ -46,50 +49,81 @@ const CompileOrRunCompact: FunctionComponent<CompileOrRunCompactProps> = ({
     return projectData.stanFileContent === projectData.ephemera.stanFileContent;
   }, [projectData.ephemera.stanFileContent, projectData.stanFileContent]);
 
-  if (compileStatus === "compiled") {
-    return <RunCompact sampler={sampler} samplerState={samplerState} />;
-  } else if (compileStatus === "compiling") {
-    return (
-      <Box
-        sx={{ p: 1, height: "150px", display: "flex", alignItems: "center" }}
-      >
-        <CircularProgress size={24} />
-        <Box sx={{ ml: 2 }}>Compiling...</Box>
-      </Box>
-    );
-  } else {
-    return (
-      <Box
-        sx={{ p: 1, height: "150px", display: "flex", alignItems: "center" }}
-      >
-        <Tooltip
-          title={
-            !validSyntax
-              ? "Syntax error"
-              : !isConnected
-                ? "Not connected to compilation server"
-                : ""
-          }
-        >
-          <span>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => compile()}
-              disabled={
-                !validSyntax || !isConnected || !modelIsPresent || !modelIsSaved
+  const openInStanPlayground = useCallback(() => {
+    const baseUrl = window.location.origin;
+    const url = new URL(baseUrl);
+    url.searchParams.set("stan", createDataUrl(projectData.stanFileContent));
+    url.searchParams.set("data", createDataUrl(projectData.dataFileContent));
+    window.open(url.toString(), "_blank");
+  }, [projectData]);
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        height: 52,
+      }}
+    >
+      {compileStatus === "compiled" ? (
+        <RunCompact sampler={sampler} samplerState={samplerState} />
+      ) : (
+        <>
+          <Tooltip
+            title={
+              !validSyntax
+                ? "Syntax error"
+                : !isConnected
+                  ? "Not connected to compilation server"
+                  : ""
+            }
+          >
+            <span>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => compile()}
+                disabled={
+                  !validSyntax ||
+                  !isConnected ||
+                  !modelIsPresent ||
+                  !modelIsSaved
+                }
+              >
+                Compile
+              </Button>
+            </span>
+          </Tooltip>
+          <Box sx={{ flex: 1 }} />
+        </>
+      )}
+      {modelIsSaved && (
+        <>
+          <Tooltip title="Open in full Stan Playground (new tab)">
+            <IconButton onClick={openInStanPlayground} size="small">
+              <LaunchIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="View source code on GitHub">
+            <IconButton
+              onClick={() =>
+                window.open(
+                  "https://github.com/flatironinstitute/stan-playground",
+                  "_blank",
+                )
               }
+              size="small"
             >
-              Compile
-            </Button>
-          </span>
-        </Tooltip>
-      </Box>
-    );
-  }
+              <HelpIcon />
+            </IconButton>
+          </Tooltip>
+        </>
+      )}
+    </Box>
+  );
 };
 
-const RunCompact: FunctionComponent<CompileOrRunCompactProps> = ({
+const RunCompact: FunctionComponent<EmbeddedBottomBarProps> = ({
   sampler,
   samplerState,
 }) => {
@@ -123,7 +157,7 @@ const RunCompact: FunctionComponent<CompileOrRunCompactProps> = ({
   const isDisabled = isSampling || isLoading;
 
   return (
-    <Box sx={{ height: "150px" }}>
+    <>
       <Stack
         direction="row"
         spacing={1}
@@ -275,18 +309,17 @@ const RunCompact: FunctionComponent<CompileOrRunCompactProps> = ({
         </Tooltip>
 
         <Tooltip title="Reset to default values">
-          <Button
-            variant="outlined"
-            onClick={handleReset}
-            disabled={isDisabled}
-            size="small"
-          >
-            Reset
-          </Button>
+          <IconButton onClick={handleReset} disabled={isDisabled} size="small">
+            <RestartAltIcon />
+          </IconButton>
         </Tooltip>
       </Stack>
-    </Box>
+    </>
   );
 };
 
-export default CompileOrRunCompact;
+const createDataUrl = (content: string) => {
+  return "data:text/plain;charset=utf-8," + encodeURIComponent(content);
+};
+
+export default EmbeddedBottomBar;

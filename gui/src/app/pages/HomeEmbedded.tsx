@@ -1,5 +1,5 @@
 import SamplerOutputArea from "@SpAreas/ControlArea/SamplingArea/ResultsArea/SamplerOutputArea";
-import CompileOrRunCompact from "@SpAreas/ControlArea/SamplingArea/RunArea/CompileOrRunCompact";
+import EmbeddedBottomBar from "@SpAreas/EmbeddedBottomBar";
 import DataEditorPanel from "@SpAreas/ModelDataArea/DataEditorPanel";
 import ModelEditorPanel from "@SpAreas/ModelDataArea/ModelEditorPanel";
 import TabWidget from "@SpComponents/TabWidget";
@@ -40,8 +40,8 @@ const HomeEmbedded: FunctionComponent = () => {
           )}
         </TabWidget>
       </div>
-      <div className="CompileOrRunCompactContainer">
-        <CompileOrRunCompact sampler={sampler} samplerState={samplerState} />
+      <div className="EmbeddedBottomBarContainer">
+        <EmbeddedBottomBar sampler={sampler} samplerState={samplerState} />
       </div>
     </div>
   );

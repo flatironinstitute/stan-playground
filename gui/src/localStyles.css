@@ -240,7 +240,7 @@ span.EditorTitle {
   flex-direction: column;
 }
 
-.CompileOrRunCompactContainer {
-  height: 110px;
+.EmbeddedBottomBarContainer {
+  height: 50px;
   width: 100%;
 }
