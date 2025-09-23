@@ -4,5 +4,4 @@ dist/
 coverage/
 vendor/
 
-stanc.js
 fft.ts

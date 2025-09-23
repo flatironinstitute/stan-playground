@@ -4108,6 +4108,11 @@ stackback@0.0.2:
   resolved "https://registry.yarnpkg.com/stackback/-/stackback-0.0.2.tgz#1ac8a0d9483848d1695e418b6d031a3c3ce68e3b"
   integrity sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==
 
+stanc3@^2.37.0:
+  version "2.37.0"
+  resolved "https://registry.yarnpkg.com/stanc3/-/stanc3-2.37.0.tgz#c40a3dc0d932d757abe9cb6745e2f375e430ec7e"
+  integrity sha512-FMk314ioOvLk9NqVmrJMMHWvSJ+NL/qdnG1tm1GTHbElu/6BxnefWl/vDeMqTE8e45YnAo6KHNnudueWvmPsyg==
+
 state-local@^1.0.6:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/state-local/-/state-local-1.0.7.tgz#da50211d07f05748d53009bee46307a37db386d5"

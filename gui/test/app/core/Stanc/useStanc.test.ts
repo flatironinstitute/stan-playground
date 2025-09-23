@@ -74,30 +74,4 @@ describe("useStanc", () => {
     unmount();
     expect(mockedStdout).toHaveBeenCalledWith("terminating stanc worker");
   });
-
-  test("gracefully refuses requests if stanc.js failed to load", async () => {
-    vi.stubGlobal("eval", () => {
-      throw new Error("test error");
-    });
-
-    const code = "data { int x; }";
-    const setCode = vi.fn();
-
-    const { result } = renderHook(() => useStanc("main.stan", code, setCode));
-
-    act(() => {
-      result.current.requestFormat();
-    });
-
-    await waitFor(
-      () => {
-        // logged in worker
-        expect(mockedStderr).toHaveBeenCalledWith("Failed to load stanc.js");
-        // logged in useStanc
-        expect(mockedStderr).toHaveBeenCalledWith("stanc.js not loaded!");
-        expect(setCode).not.toHaveBeenCalled();
-      },
-      { timeout: 3000 },
-    );
-  });
 });
