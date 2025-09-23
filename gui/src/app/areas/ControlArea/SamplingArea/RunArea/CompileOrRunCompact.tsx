@@ -35,9 +35,6 @@ const CompileOrRunCompact: FunctionComponent<CompileOrRunCompactProps> = ({
 }) => {
   const { compile, compileStatus, validSyntax, isConnected } =
     use(CompileContext);
-  console.log("--- validSyntax", validSyntax);
-  console.log("--- isConnected", isConnected);
-  console.log("--- compileStatus", compileStatus);
   if (compileStatus === "compiled") {
     return <RunCompact sampler={sampler} samplerState={samplerState} />;
   } else if (compileStatus === "compiling") {
