@@ -1,5 +1,4 @@
 import SamplerOutputArea from "@SpAreas/ControlArea/SamplingArea/ResultsArea/SamplerOutputArea";
-import SamplingProgressComponent from "@SpAreas/ControlArea/SamplingArea/RunArea/SamplerProgress";
 import SamplerStatusPanel from "@SpAreas/ControlArea/SamplingArea/RunArea/SamplerStatusPanel";
 import EmbeddedBottomBar from "@SpAreas/EmbeddedBottomBar";
 import DataEditorPanel from "@SpAreas/ModelDataArea/DataEditorPanel";
