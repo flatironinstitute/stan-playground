@@ -30,7 +30,7 @@ type ProjectContextType = {
 };
 
 type ProjectContextProviderProps = {
-  disableLocalStorageForProjectState?: boolean;
+  persist?: boolean;
 };
 
 export const ProjectContext = createContext<ProjectContextType>({
@@ -40,7 +40,7 @@ export const ProjectContext = createContext<ProjectContextType>({
 
 const ProjectContextProvider: FunctionComponent<
   PropsWithChildren<ProjectContextProviderProps>
-> = ({ children, disableLocalStorageForProjectState = false }) => {
+> = ({ children, persist = true }) => {
   const [data, update] = useReducer(ProjectReducer, initialDataModel);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -48,7 +48,7 @@ const ProjectContextProvider: FunctionComponent<
   useEffect(() => {
     // as user reloads the page or closes the tab, save state to local storage
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (!disableLocalStorageForProjectState) {
+      if (persist) {
         const state = serializeProjectToLocalStorage(data);
         localStorage.setItem("stan-playground-saved-state", state);
         if (modelHasUnsavedChanges(data)) {
@@ -62,7 +62,7 @@ const ProjectContextProvider: FunctionComponent<
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [data, disableLocalStorageForProjectState]);
+  }, [data, persist]);
 
   useEffect(() => {
     const queries = fromQueryParams(searchParams);
@@ -81,7 +81,7 @@ const ProjectContextProvider: FunctionComponent<
       });
     } else {
       // load the saved state on first load
-      if (!disableLocalStorageForProjectState) {
+      if (persist) {
         const savedState = localStorage.getItem("stan-playground-saved-state");
         if (!savedState) return;
         const parsedData = deserializeProjectFromLocalStorage(savedState);
@@ -92,7 +92,7 @@ const ProjectContextProvider: FunctionComponent<
     // once we have loaded some data, we don't need the localStorage again
     // and it will be overwritten by the above event listener on close
     localStorage.removeItem("stan-playground-saved-state");
-  }, [searchParams, setSearchParams, disableLocalStorageForProjectState]);
+  }, [searchParams, setSearchParams, persist]);
 
   return <ProjectContext value={{ data, update }}>{children}</ProjectContext>;
 };

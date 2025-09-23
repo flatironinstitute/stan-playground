@@ -16,9 +16,7 @@ const AppContent = () => {
     <CustomTheming>
       <UserSettingsProvider>
         <div className="MainWindow">
-          <ProjectContextProvider
-            disableLocalStorageForProjectState={isEmbedded}
-          >
+          <ProjectContextProvider persist={!isEmbedded}>
             <CompileContextProvider>
               <Routes>
                 <Route path="/" element={<HomePage />} />

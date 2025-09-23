@@ -1,4 +1,4 @@
-import { FunctionComponent, use, useCallback } from "react";
+import { FunctionComponent, use, useCallback, useMemo } from "react";
 import type { SamplerState } from "@SpCore/StanSampler/SamplerTypes";
 import {
   defaultSamplingOpts,
@@ -21,7 +21,7 @@ import { CircularProgress } from "@mui/material";
 const CHAIN_OPTIONS = [1, 2, 4, 8];
 const WARMUP_OPTIONS = [0, 500, 1000, 2000];
 const SAMPLE_OPTIONS = [100, 500, 1000, 2000];
-const RADIUS_OPTIONS = [0.1, 1.0, 2.0, 5.0];
+const RADIUS_OPTIONS = [0, 0.1, 1.0, 2.0, 5.0];
 const SEED_OPTIONS = ["undef", 0, 1, 2, 3, 4, 5];
 
 type CompileOrRunCompactProps = {
@@ -35,6 +35,17 @@ const CompileOrRunCompact: FunctionComponent<CompileOrRunCompactProps> = ({
 }) => {
   const { compile, compileStatus, validSyntax, isConnected } =
     use(CompileContext);
+
+  const { data: projectData } = use(ProjectContext);
+
+  const modelIsPresent = useMemo(() => {
+    return projectData.stanFileContent.trim();
+  }, [projectData.stanFileContent]);
+
+  const modelIsSaved = useMemo(() => {
+    return projectData.stanFileContent === projectData.ephemera.stanFileContent;
+  }, [projectData.ephemera.stanFileContent, projectData.stanFileContent]);
+
   if (compileStatus === "compiled") {
     return <RunCompact sampler={sampler} samplerState={samplerState} />;
   } else if (compileStatus === "compiling") {
@@ -65,7 +76,9 @@ const CompileOrRunCompact: FunctionComponent<CompileOrRunCompactProps> = ({
               variant="contained"
               color="primary"
               onClick={() => compile()}
-              disabled={!validSyntax || !isConnected}
+              disabled={
+                !validSyntax || !isConnected || !modelIsPresent || !modelIsSaved
+              }
             >
               Compile
             </Button>

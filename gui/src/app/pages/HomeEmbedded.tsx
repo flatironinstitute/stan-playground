@@ -8,7 +8,6 @@ import useStanSampler from "@SpCore/StanSampler/useStanSampler";
 import { FunctionComponent, use, useEffect, useState } from "react";
 
 const HomeEmbedded: FunctionComponent = () => {
-  // const { data } = use(ProjectContext);
   const { compiledMainJsUrl } = use(CompileContext);
   const { sampler, samplerState } = useStanSampler(compiledMainJsUrl);
   const [currentTab, setCurrentTab] = useState<number | undefined>(undefined);
@@ -26,16 +25,7 @@ const HomeEmbedded: FunctionComponent = () => {
   }, []);
 
   return (
-    <div
-      style={{
-        margin: "0 auto",
-        maxWidth: "1000px",
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <div className="HomeEmbedded">
       <div style={{ flex: 1, minHeight: 0 }}>
         <TabWidget
           labels={["Stan", "Data", "Output"]}
@@ -50,7 +40,7 @@ const HomeEmbedded: FunctionComponent = () => {
           )}
         </TabWidget>
       </div>
-      <div style={{ height: "110px", width: "100%", maxWidth: "1000px" }}>
+      <div className="CompileOrRunCompactContainer">
         <CompileOrRunCompact sampler={sampler} samplerState={samplerState} />
       </div>
     </div>
