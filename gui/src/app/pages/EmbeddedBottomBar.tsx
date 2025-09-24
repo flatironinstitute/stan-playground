@@ -324,11 +324,11 @@ type SiteButtonsProps = {
 };
 
 const SiteButtons: FunctionComponent<SiteButtonsProps> = () => {
-  const { data: projectData } = use(ProjectContext);
+  const { data } = use(ProjectContext);
 
   const modelIsSaved = useMemo(() => {
-    return projectData.stanFileContent === projectData.ephemera.stanFileContent;
-  }, [projectData.ephemera.stanFileContent, projectData.stanFileContent]);
+    return data.stanFileContent === data.ephemera.stanFileContent;
+  }, [data.ephemera.stanFileContent, data.stanFileContent]);
 
   const {
     settingsWindow: { openSettings },
@@ -337,10 +337,10 @@ const SiteButtons: FunctionComponent<SiteButtonsProps> = () => {
   const openInStanPlayground = useCallback(() => {
     const baseUrl = window.location.origin;
     const url = new URL(baseUrl);
-    url.searchParams.set("stan", createDataUrl(projectData.stanFileContent));
-    url.searchParams.set("data", createDataUrl(projectData.dataFileContent));
+    url.searchParams.set("stan", createDataUrl(data.stanFileContent));
+    url.searchParams.set("data", createDataUrl(data.dataFileContent));
     window.open(url.toString(), "_blank");
-  }, [projectData]);
+  }, [data.dataFileContent, data.stanFileContent]);
 
   return (
     <>
