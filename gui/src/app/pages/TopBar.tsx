@@ -57,7 +57,7 @@ const TopBar: FunctionComponent<TopBarProps> = ({ title, onSetCollapsed }) => {
             <Menu />
           </IconButton>
           Stan Playground - {title}
-          <span className="TopBarSpacer" />
+          <span className="MenuBarSpacer" />
           <IconButton
             title="Toggle light/dark"
             size="small"
