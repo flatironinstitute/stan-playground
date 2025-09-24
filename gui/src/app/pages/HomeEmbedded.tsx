@@ -1,6 +1,6 @@
 import SamplerOutputArea from "@SpAreas/ControlArea/SamplingArea/ResultsArea/SamplerOutputArea";
 import SamplerStatusPanel from "@SpAreas/ControlArea/SamplingArea/RunArea/SamplerStatusPanel";
-import EmbeddedBottomBar from "@SpAreas/EmbeddedBottomBar";
+import EmbeddedBottomBar from "@SpPages/EmbeddedBottomBar";
 import DataEditorPanel from "@SpAreas/ModelDataArea/DataEditorPanel";
 import ModelEditorPanel from "@SpAreas/ModelDataArea/ModelEditorPanel";
 import TabWidget from "@SpComponents/TabWidget";
