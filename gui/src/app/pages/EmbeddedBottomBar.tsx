@@ -6,12 +6,14 @@ import {
 } from "@SpCore/Project/ProjectDataModel";
 import type { SamplerState } from "@SpCore/StanSampler/SamplerTypes";
 import StanSampler from "@SpCore/StanSampler/StanSampler";
+import SamplingProgressCircular from "../areas/ControlArea/SamplingArea/RunArea/SamplerProgressCircular";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import LaunchIcon from "@mui/icons-material/Launch";
 import HelpIcon from "@mui/icons-material/Help";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import CancelIcon from "@mui/icons-material/Cancel";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
@@ -178,14 +180,18 @@ const RunCompact: FunctionComponent<EmbeddedBottomBarProps> = ({
               </Button>
             )}
             {isSampling && (
-              <Button
-                color="error"
-                variant="outlined"
-                onClick={handleCancel}
-                size="small"
-              >
-                Cancel
-              </Button>
+              <>
+                <SamplingProgressCircular
+                  report={samplerState.progress}
+                  numChains={opts.num_chains}
+                  size={24}
+                />
+                <Tooltip title="Cancel sampling">
+                  <IconButton color="error" onClick={handleCancel} size="small">
+                    <CancelIcon />
+                  </IconButton>
+                </Tooltip>
+              </>
             )}
           </Stack>
         </Box>
