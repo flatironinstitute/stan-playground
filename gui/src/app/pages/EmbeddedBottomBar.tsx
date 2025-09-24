@@ -7,11 +7,13 @@ import {
 import type { SamplerState } from "@SpCore/StanSampler/SamplerTypes";
 import StanSampler from "@SpCore/StanSampler/StanSampler";
 import SamplingProgressCircular from "../areas/ControlArea/SamplingArea/RunArea/SamplerProgressCircular";
+import { UserSettingsContext } from "@SpCore/Settings/UserSettings";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import LaunchIcon from "@mui/icons-material/Launch";
 import HelpIcon from "@mui/icons-material/Help";
+import Settings from "@mui/icons-material/Settings";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import CancelIcon from "@mui/icons-material/Cancel";
 import FormControl from "@mui/material/FormControl";
@@ -42,6 +44,9 @@ const EmbeddedBottomBar: FunctionComponent<EmbeddedBottomBarProps> = ({
     use(CompileContext);
 
   const { data: projectData } = use(ProjectContext);
+  const {
+    settingsWindow: { openSettings },
+  } = use(UserSettingsContext);
 
   const modelIsPresent = useMemo(() => {
     return projectData.stanFileContent.trim();
@@ -104,6 +109,14 @@ const EmbeddedBottomBar: FunctionComponent<EmbeddedBottomBarProps> = ({
           <Tooltip title="Open in full Stan Playground (new tab)">
             <IconButton onClick={openInStanPlayground} size="small">
               <LaunchIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Settings">
+            <IconButton
+              onClick={() => openSettings("personalization")}
+              size="small"
+            >
+              <Settings />
             </IconButton>
           </Tooltip>
           <Tooltip title="View source code on GitHub">

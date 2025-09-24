@@ -5,6 +5,7 @@ import TabWidget from "@SpComponents/TabWidget";
 import { CompileContext } from "@SpCore/Compilation/CompileContextProvider";
 import useStanSampler from "@SpCore/StanSampler/useStanSampler";
 import EmbeddedBottomBar from "@SpPages/EmbeddedBottomBar";
+import SettingsWindow from "@SpWindows/SettingsWindow";
 import { FunctionComponent, use, useEffect, useState } from "react";
 
 const HomeEmbedded: FunctionComponent = () => {
@@ -43,6 +44,7 @@ const HomeEmbedded: FunctionComponent = () => {
       <div className="EmbeddedBottomBarContainer">
         <EmbeddedBottomBar sampler={sampler} samplerState={samplerState} />
       </div>
+      <SettingsWindow />
     </div>
   );
 };
