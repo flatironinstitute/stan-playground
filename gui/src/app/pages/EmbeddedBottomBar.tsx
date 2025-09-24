@@ -22,6 +22,9 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
+import Checkbox from "@mui/material/Checkbox";
+import TextField from "@mui/material/TextField";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import { FunctionComponent, use, useCallback, useMemo } from "react";
 
 // Preset options for dropdowns
@@ -29,7 +32,6 @@ const CHAIN_OPTIONS = [1, 2, 4, 8];
 const WARMUP_OPTIONS = [0, 500, 1000, 2000];
 const SAMPLE_OPTIONS = [100, 500, 1000, 2000];
 const RADIUS_OPTIONS = [0, 0.1, 1.0, 2.0, 5.0];
-const SEED_OPTIONS = ["undef", 0, 1, 2, 3, 4, 5];
 
 type EmbeddedBottomBarProps = {
   sampler: StanSampler | undefined;
@@ -302,29 +304,51 @@ const RunCompact: FunctionComponent<EmbeddedBottomBarProps> = ({
         </Tooltip>
 
         <Tooltip title="Random seed">
-          <FormControl size="small" sx={{ minWidth: 90 }}>
-            <InputLabel>Seed</InputLabel>
-            <Select
-              value={opts.seed === undefined ? "undef" : opts.seed}
-              label="Seed"
-              disabled={isDisabled}
-              onChange={(e) =>
-                setSamplingOpts({
-                  ...opts,
-                  seed:
-                    e.target.value === "undef"
-                      ? undefined
-                      : (e.target.value as number),
-                })
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={opts.seed !== undefined}
+                  disabled={isDisabled}
+                  size="small"
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSamplingOpts({
+                        ...opts,
+                        seed: 0,
+                      });
+                    } else {
+                      setSamplingOpts({
+                        ...opts,
+                        seed: undefined,
+                      });
+                    }
+                  }}
+                />
               }
-            >
-              {SEED_OPTIONS.map((n) => (
-                <MenuItem key={n === "undef" ? "undef" : n} value={n}>
-                  {n === "undef" ? "undef" : n}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              label="Seed"
+              sx={{ margin: 0 }}
+            />
+            {opts.seed !== undefined && (
+              <TextField
+                size="small"
+                type="number"
+                value={opts.seed}
+                disabled={isDisabled}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value);
+                  if (!isNaN(value)) {
+                    setSamplingOpts({
+                      ...opts,
+                      seed: value,
+                    });
+                  }
+                }}
+                sx={{ width: 60 }}
+                inputProps={{ min: 0 }}
+              />
+            )}
+          </Box>
         </Tooltip>
 
         <Tooltip title="Reset to default values">
