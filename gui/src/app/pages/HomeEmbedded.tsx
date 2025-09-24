@@ -14,7 +14,10 @@ const HomeEmbedded: FunctionComponent = () => {
   const [currentTab, setCurrentTab] = useState<number | undefined>(undefined);
 
   useEffect(() => {
-    if (samplerState.status === "completed") {
+    if (
+      samplerState.status === "completed" ||
+      samplerState.status === "failed"
+    ) {
       setCurrentTab(2); // Switch to output tab (third tab)
     } else {
       setCurrentTab(undefined);
@@ -34,7 +37,15 @@ const HomeEmbedded: FunctionComponent = () => {
         >
           <ModelEditorPanel />
           <DataEditorPanel />
-          {samplerState.latestRun ? (
+          {samplerState.status === "failed" ? (
+            <div>
+              Sampling failed!
+              <pre className="SamplerError">{samplerState.errorMessage}</pre>
+              <span className="details">
+                (see browser console for more details)
+              </span>
+            </div>
+          ) : samplerState.latestRun ? (
             <SamplerOutputArea latestRun={samplerState.latestRun} />
           ) : (
             <div>No output available. Run sampling first.</div>
