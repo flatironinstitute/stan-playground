@@ -2,8 +2,6 @@
 Define a custom HTML element <stan-playground-embed> that embeds a Stan Playground iframe.
 
 Usage:
-Load this script in your page, then use the following structure:
-
 <stan-playground-embed>
 <iframe width="100%" height="500" frameborder="0"></iframe>
 
@@ -15,6 +13,11 @@ Load this script in your page, then use the following structure:
 ... JSON data ...
 </script>
 
+</stan-playground-embed>
+
+You can also specify the Stan program URL and data URL via attributes:
+<stan-playground-embed stan="relative-or-absolute-url-to-stan-program" data="relative-or-absolute-url-to-data">
+<iframe width="100%" height="500" frameborder="0"></iframe>
 </stan-playground-embed>
 */
 class StanPlaygroundEmbed extends HTMLElement {
@@ -41,29 +44,56 @@ class StanPlaygroundEmbed extends HTMLElement {
       return;
     }
 
-    // Extract and hide program and data elements
-    const programElement = this.querySelector("script.stan-program");
-    const dataElement = this.querySelector("script.stan-data");
-
-    if (!programElement || !dataElement) {
-      console.error("Missing stan-program or stan-data script elements");
-      return;
-    }
-
-    const stanProgram = programElement.textContent.trim();
-    const stanData = dataElement.textContent.trim();
-
     const encodePlain = (text) => {
       // replace &lt; and &gt; with < and >
       const text2 = text.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
       return "data:text/plain;charset=utf-8," + encodeURIComponent(text2);
+    };
+
+    // Extract and hide program and data elements
+    const programElement = this.querySelector("script.stan-program");
+    const dataElement = this.querySelector("script.stan-data");
+
+    let stanUrl;
+    if (programElement) {
+      const stanProgram = programElement.textContent.trim();
+      stanUrl = encodePlain(stanProgram);
+    }
+    else if (this.attributes.stan) {
+      stanUrl = this.attributes.stan.value;
+      if (stanUrl.startsWith("./")) {
+        const baseUrl = window.location.href;
+        stanUrl = new URL(stanUrl, baseUrl).href;
+      }
+    }
+    else {
+      console.error("Missing stan-program script element or stan attribute");
+      return;
     }
 
-    const stanUrl = encodePlain(stanProgram);
-    const dataUrl = encodePlain(stanData);
+    let dataUrl;
+    if (dataElement) {
+      const stanData = dataElement.textContent.trim();
+      dataUrl = encodePlain(stanData);
+    }
+    else if (this.attributes.data) {
+      dataUrl = this.attributes.data.value;
+      if (dataUrl.startsWith("./")) {
+        const baseUrl = window.location.href;
+        dataUrl = new URL(dataUrl, baseUrl).href;
+      }
+    }
+    else {
+      console.error("Missing stan-data script element or data attribute");
+      return;
+    }
+
+    // Get Stan Playground URL from attribute or use default
+    const defaultStanPlaygroundUrl = "https://stan-playground.flatironinstitute.org";
+    const stanPlaygroundUrl = this.attributes["stan-playground-url"]?.value || defaultStanPlaygroundUrl;
 
     // Set iframe src
-    this.iframe.src = `https://stan-playground.flatironinstitute.org/embedded?stan=${stanUrl}&data=${dataUrl}`;
+    this.iframe.src = `${stanPlaygroundUrl}/embedded?stan=${encodeURIComponent(stanUrl)}&data=${encodeURIComponent(dataUrl)}`;
   }
 }
 
