@@ -78,8 +78,8 @@ class StanPlaygroundEmbed extends HTMLElement {
         dataUrl = new URL(dataUrl, baseUrl).href;
       }
     } else {
-      console.error("Missing stan-data script element or data attribute");
-      return;
+      // Empty data is allowed
+      dataUrl = encodePlain("");
     }
 
     // Get Stan Playground URL from attribute or use default
