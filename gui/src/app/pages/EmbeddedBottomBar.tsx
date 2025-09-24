@@ -343,7 +343,7 @@ const SiteButtons: FunctionComponent<SiteButtonsProps> = () => {
   }, [data.dataFileContent, data.stanFileContent]);
 
   return (
-    <>
+    <Stack direction="row" alignItems="center" sx={{ height: "100%" }}>
       {modelIsSaved && (
         <Tooltip title="Open in full Stan Playground (new tab)">
           <IconButton onClick={openInStanPlayground} size="small">
@@ -372,7 +372,7 @@ const SiteButtons: FunctionComponent<SiteButtonsProps> = () => {
           <HelpIcon />
         </IconButton>
       </Tooltip>
-    </>
+    </Stack>
   );
 };
 

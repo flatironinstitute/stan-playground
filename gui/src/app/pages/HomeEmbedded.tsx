@@ -52,9 +52,7 @@ const HomeEmbedded: FunctionComponent = () => {
           )}
         </TabWidget>
       </div>
-      <div className="EmbeddedBottomBarContainer">
-        <EmbeddedBottomBar sampler={sampler} samplerState={samplerState} />
-      </div>
+      <EmbeddedBottomBar sampler={sampler} samplerState={samplerState} />
       <SettingsWindow />
     </div>
   );

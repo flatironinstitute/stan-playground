@@ -239,8 +239,3 @@ span.EditorTitle {
   display: flex;
   flex-direction: column;
 }
-
-.EmbeddedBottomBarContainer {
-  height: 50px;
-  width: 100%;
-}
