@@ -28,9 +28,7 @@ class StanPlaygroundEmbed extends HTMLElement {
   connectedCallback() {
     // Initialize immediately if document is ready
     if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", () =>
-        this.initialize()
-      );
+      document.addEventListener("DOMContentLoaded", () => this.initialize());
     } else {
       this.initialize();
     }
@@ -58,15 +56,13 @@ class StanPlaygroundEmbed extends HTMLElement {
     if (programElement) {
       const stanProgram = programElement.textContent.trim();
       stanUrl = encodePlain(stanProgram);
-    }
-    else if (this.attributes.stan) {
+    } else if (this.attributes.stan) {
       stanUrl = this.attributes.stan.value;
       if (stanUrl.startsWith("./")) {
         const baseUrl = window.location.href;
         stanUrl = new URL(stanUrl, baseUrl).href;
       }
-    }
-    else {
+    } else {
       console.error("Missing stan-program script element or stan attribute");
       return;
     }
@@ -75,22 +71,22 @@ class StanPlaygroundEmbed extends HTMLElement {
     if (dataElement) {
       const stanData = dataElement.textContent.trim();
       dataUrl = encodePlain(stanData);
-    }
-    else if (this.attributes.data) {
+    } else if (this.attributes.data) {
       dataUrl = this.attributes.data.value;
       if (dataUrl.startsWith("./")) {
         const baseUrl = window.location.href;
         dataUrl = new URL(dataUrl, baseUrl).href;
       }
-    }
-    else {
+    } else {
       console.error("Missing stan-data script element or data attribute");
       return;
     }
 
     // Get Stan Playground URL from attribute or use default
-    const defaultStanPlaygroundUrl = "https://stan-playground.flatironinstitute.org";
-    const stanPlaygroundUrl = this.attributes["stan-playground-url"]?.value || defaultStanPlaygroundUrl;
+    const defaultStanPlaygroundUrl =
+      "https://stan-playground.flatironinstitute.org";
+    const stanPlaygroundUrl =
+      this.attributes["stan-playground-url"]?.value || defaultStanPlaygroundUrl;
 
     // Set iframe src
     this.iframe.src = `${stanPlaygroundUrl}/embedded?stan=${encodeURIComponent(stanUrl)}&data=${encodeURIComponent(dataUrl)}`;
