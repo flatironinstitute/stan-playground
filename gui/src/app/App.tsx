@@ -4,24 +4,37 @@ import ProjectContextProvider from "@SpCore/Project/ProjectContextProvider";
 import CompileContextProvider from "@SpCore/Compilation/CompileContextProvider";
 
 import HomePage from "@SpPages/HomePage";
+import HomeEmbedded from "@SpPages/HomeEmbedded";
 import { Analytics } from "@vercel/analytics/react";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+
+const AppContent = () => {
+  const location = useLocation();
+  const isEmbedded = location.pathname === "/embedded";
+
+  return (
+    <CustomTheming>
+      <UserSettingsProvider>
+        <div className="MainWindow">
+          <ProjectContextProvider persist={!isEmbedded}>
+            <CompileContextProvider>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/embedded" element={<HomeEmbedded />} />
+              </Routes>
+            </CompileContextProvider>
+          </ProjectContextProvider>
+          <Analytics />
+        </div>
+      </UserSettingsProvider>
+    </CustomTheming>
+  );
+};
 
 const App = () => {
   return (
     <BrowserRouter>
-      <CustomTheming>
-        <UserSettingsProvider>
-          <div className="MainWindow">
-            <ProjectContextProvider>
-              <CompileContextProvider>
-                <HomePage />
-              </CompileContextProvider>
-            </ProjectContextProvider>
-            <Analytics />
-          </div>
-        </UserSettingsProvider>
-      </CustomTheming>
+      <AppContent />
     </BrowserRouter>
   );
 };

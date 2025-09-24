@@ -23,6 +23,12 @@ const TabWidget: FunctionComponent<TabWidgetProps> = ({
   useEffect(() => {
     if (forcedSelection !== undefined) {
       setIndex(forcedSelection);
+      setTabsThatHaveBeenViewed((prev) => {
+        if (!prev.includes(forcedSelection)) {
+          return [...prev, forcedSelection];
+        }
+        return prev;
+      });
     }
   }, [forcedSelection]);
 
