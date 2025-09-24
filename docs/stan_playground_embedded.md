@@ -46,3 +46,11 @@ If you are deploying markdown documents to GitHub Pages, you can include the scr
 ```
 
 Then use the HTML embedding code in your markdown file as shown above.
+
+## Examples
+
+[HTML Example](https://flatironinstitute.github.io/stan-playground/embed_examples/embed_example_1) ([source](https://github.com/flatironinstitute/stan-playground/blob/main/docs/embed_examples/embed_example_1.html))
+
+[Markdown Example](https://flatironinstitute.github.io/stan-playground/embed_examples/embed_example_2) ([source](https://github.com/flatironinstitute/stan-playground/blob/main/docs/embed_examples/embed_example_2.md))
+
+[Markdown Example with External Files](https://flatironinstitute.github.io/stan-playground/embed_examples/embed_example_3) ([source](https://github.com/flatironinstitute/stan-playground/blob/main/docs/embed_examples/embed_example_3.md))
