@@ -2,8 +2,6 @@
 
 Welcome to the documentation for [Stan Playground](https://stan-playground.flatironinstitute.org/)
 
-The following pages are available:
-
 ## Feature overview
 
 To get familiar with the layout of the Stan Playground interface and
@@ -18,9 +16,7 @@ This feature provides an easy way to share your work with collaborators, student
 forum users, and many other audiences.
 
 Additionally, you can also prepare links which will pre-populate each portion of
-Stan Playground when clicked by using
-[URL Parameters](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/Web_mechanics/What_is_a_URL#parameters).
-
+Stan Playground when clicked.
 For more information, see [SP: URL Parameters](./url_parameters.md).
 
 ## Embedding Stan Playground in your own site
