@@ -1,13 +1,5 @@
-import { CompileContext } from "@SpCore/Compilation/CompileContextProvider";
-import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
-import {
-  defaultSamplingOpts,
-  SamplingOpts,
-} from "@SpCore/Project/ProjectDataModel";
-import type { SamplerState } from "@SpCore/StanSampler/SamplerTypes";
-import StanSampler from "@SpCore/StanSampler/StanSampler";
-import SamplingProgressCircular from "../areas/ControlArea/SamplingArea/RunArea/SamplerProgressCircular";
-import { UserSettingsContext } from "@SpCore/Settings/UserSettings";
+import { FunctionComponent, use, useCallback, useMemo } from "react";
+
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -25,7 +17,18 @@ import Tooltip from "@mui/material/Tooltip";
 import Checkbox from "@mui/material/Checkbox";
 import TextField from "@mui/material/TextField";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import { FunctionComponent, use, useCallback, useMemo } from "react";
+
+import { CompileContext } from "@SpCore/Compilation/CompileContextProvider";
+import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
+import {
+  defaultSamplingOpts,
+  SamplingOpts,
+} from "@SpCore/Project/ProjectDataModel";
+import type { SamplerState } from "@SpCore/StanSampler/SamplerTypes";
+import StanSampler from "@SpCore/StanSampler/StanSampler";
+import SamplingProgressCircular from "@SpAreas/ControlArea/SamplingArea/RunArea/SamplerProgressCircular";
+import { UserSettingsContext } from "@SpCore/Settings/UserSettings";
+import CompileButton from "@SpAreas/ControlArea/SamplingArea/RunArea/CompileButton";
 
 type EmbeddedBottomBarProps = {
   sampler: StanSampler | undefined;
@@ -49,50 +52,15 @@ const CompileOrRunControls: FunctionComponent<EmbeddedBottomBarProps> = ({
   sampler,
   samplerState,
 }) => {
-  const { compile, validSyntax, compileStatus, isConnected } =
-    use(CompileContext);
+  const { compileStatus } = use(CompileContext);
 
-  const { data: projectData } = use(ProjectContext);
-
-  const canCompile = useMemo(() => {
-    return (
-      validSyntax &&
-      isConnected &&
-      projectData.stanFileContent.trim() &&
-      projectData.stanFileContent === projectData.ephemera.stanFileContent
-    );
-  }, [
-    isConnected,
-    projectData.ephemera.stanFileContent,
-    projectData.stanFileContent,
-    validSyntax,
-  ]);
   return (
     <>
       {compileStatus === "compiled" ? (
         <RunCompact sampler={sampler} samplerState={samplerState} />
       ) : (
         <Stack direction="row" spacing={1} alignItems="center" sx={{ px: 1 }}>
-          <Tooltip
-            title={
-              !validSyntax
-                ? "Syntax error"
-                : !isConnected
-                  ? "Not connected to compilation server"
-                  : ""
-            }
-          >
-            <span>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={compile}
-                disabled={!canCompile}
-              >
-                Compile
-              </Button>
-            </span>
-          </Tooltip>
+          <CompileButton />
         </Stack>
       )}
     </>
