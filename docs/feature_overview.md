@@ -15,8 +15,8 @@ compiler for instant feedback.
 
 ## 2: Preparing Data
 
-Data can be provided in JSON format in its own editor, or can be generated from code written in R 
-(using [webR](https://docs.r-wasm.org/webr/latest/)) or Python (using [pyodide](https://pyodide.org/en/stable/)), 
+Data can be provided in JSON format in its own editor, or can be generated from code written in R
+(using [webR](https://docs.r-wasm.org/webr/latest/)) or Python (using [pyodide](https://pyodide.org/en/stable/)),
 including code that imports published datasets.
 
 <img width="1538" height="662" alt="2a: Data Editor" src="https://github.com/user-attachments/assets/6330e876-1764-4860-8fe7-b6568e7f2d8f" />
@@ -26,8 +26,8 @@ including code that imports published datasets.
 
 <img width="1270" height="534" alt="image" src="https://github.com/user-attachments/assets/17763bee-b26c-4ddf-91f4-deb3d691b21e" />
 
-Compilation of the models is the only part of Stan Playground which is not run locally. 
-We provide a public server for convenience, but you can also [host your own](./compilation_server_setup).
+Compilation of the models is the only part of Stan Playground which is not run locally.
+We provide a public server for convenience, but you can also [host your own](./compilation_server_setup.md).
 This is controlled in settings (see section 6 below).
 
 After a model has been compiled, sampling can be run entirely in your local browser.
@@ -50,7 +50,7 @@ Stan Playground has built-in sharing features to allow you to download a copy of
 <img height="782" alt="image" src="https://github.com/user-attachments/assets/4d2f78f6-e726-403b-ba54-d40c67eb2f88" />
 
 
-You can also [prepare custom links](./url_parameters) if you have files already living at some URL (e.g., they are already in a github repository).
+You can also [prepare custom links](./url_parameters.md) if you have files already living at some URL (e.g., they are already in a github repository).
 For example, this link will load the "golf" case study from the Stan example models repository:
 
 [https://stan-playground.flatironinstitute.org/?title=Knitr%20-%20Golf%20-%20Golf%20Angle&stan=https://raw.githubusercontent.com/stan-dev/example-models/master/knitr/golf/golf_angle.stan&data=https://raw.githubusercontent.com/stan-dev/example-models/master/knitr/golf/golf1.data.json](https://stan-playground.flatironinstitute.org/?title=Knitr%20-%20Golf%20-%20Golf%20Angle&stan=https://raw.githubusercontent.com/stan-dev/example-models/master/knitr/golf/golf_angle.stan&data=https://raw.githubusercontent.com/stan-dev/example-models/master/knitr/golf/golf1.data.json)
@@ -61,4 +61,3 @@ For example, this link will load the "golf" case study from the Stan example mod
 The settings window allows you to control the compilation server used and some other user-settings, including a dark mode.
 <img width="1583" height="1175" alt="image" src="https://github.com/user-attachments/assets/ae975153-dbf5-4134-a48b-a19148b004fd" />
 <img width="3838" height="1733" alt="image" src="https://github.com/user-attachments/assets/061db102-95b4-4520-8796-ce0a52012d27" />
-
