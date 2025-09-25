@@ -187,6 +187,9 @@ const TextEditor: FunctionComponent<Props> = ({
           wordWrap: "on",
           minimap: { enabled: false },
           tabSize: 2,
+          scrollbar: {
+            alwaysConsumeMouseWheel: false,
+          },
         }}
         theme={theme}
       />
