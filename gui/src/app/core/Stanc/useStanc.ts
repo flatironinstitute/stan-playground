@@ -18,7 +18,10 @@ const useStanc = (
   code: string,
   onFormat: (s: string) => void,
 ) => {
-  const [stancErrors, setStancErrors] = useState<StancErrors>({});
+  const [stancErrors, setStancErrors] = useState<StancErrors>({
+    errors: undefined,
+    warnings: undefined,
+  });
   const [stancWorker, setStancWorker] = useState<Worker | undefined>(undefined);
   const { pedantic } = use(UserSettingsContext);
 
@@ -84,7 +87,7 @@ const useStanc = (
 
   const { setValidSyntax } = use(CompileContext);
   const validSyntax = useMemo(() => {
-    return stancErrors.errors === undefined;
+    return stancErrors.errors === undefined || stancErrors.errors.length === 0;
   }, [stancErrors]);
   useEffect(() => {
     setValidSyntax(validSyntax);

@@ -125,7 +125,7 @@ and the right hand side has type
 
   describe("from Stanc Errors", () => {
     test("empty errors returns empty list", () => {
-      const stancErrors = {};
+      const stancErrors = { errors: undefined };
       const codeMarkers = stancErrorsToCodeMarkers(stancErrors);
       expect(codeMarkers).toEqual([]);
     });
@@ -141,6 +141,7 @@ and the right hand side has type
 
     test("single warning returns single warning marker", () => {
       const stancErrors = {
+        errors: undefined,
         warnings: [jacobianWarning],
       };
       const codeMarkers = stancErrorsToCodeMarkers(stancErrors);
