@@ -190,10 +190,6 @@ span.EditorTitle {
   min-width: 8em;
 }
 
-.SamplingOptsSpacer {
-  position: relative;
-  height: 5px;
-}
 
 /* Save/Load Project ------ */
 .GistExplainer {
