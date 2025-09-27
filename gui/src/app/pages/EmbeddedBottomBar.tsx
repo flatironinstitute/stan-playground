@@ -59,17 +59,12 @@ const CompileOrRunControls: FunctionComponent<EmbeddedBottomBarProps> = ({
 };
 
 // Preset options for dropdowns
-const CHAIN_OPTIONS = [1, 2, 4, 8];
-const WARMUP_OPTIONS = [0, 500, 1000, 2000];
-const SAMPLE_OPTIONS = [100, 500, 1000, 2000];
-const RADIUS_OPTIONS = [0, 0.1, 1.0, 2.0, 5.0];
-const SEED_OPTIONS = ["random", 1, 2, 3, 4, 5] satisfies (number | "random")[];
-const OPTIONS = {
-  num_chains: CHAIN_OPTIONS,
-  num_warmup: WARMUP_OPTIONS,
-  num_samples: SAMPLE_OPTIONS,
-  init_radius: RADIUS_OPTIONS,
-  seed: SEED_OPTIONS,
+const SAMPLING_CONFIG = {
+  num_chains: [1, 2, 3, 4],
+  num_warmup: [0, 100, 500, 1000, 2000],
+  num_samples: [100, 500, 1000, 2000],
+  init_radius: [0, 0.1, 1.0, 2.0, 5.0],
+  seed: ["random" as const, 1, 2, 3, 4, 5],
 };
 
 const RunCompact: FunctionComponent<EmbeddedBottomBarProps> = ({
@@ -136,7 +131,7 @@ const RunCompact: FunctionComponent<EmbeddedBottomBarProps> = ({
         samplingOpts={data.samplingOpts}
         setSamplingOpts={!isSampling ? setSamplingOpts : undefined}
         direction="row"
-        options={OPTIONS}
+        config={SAMPLING_CONFIG}
       />
     </Stack>
   );

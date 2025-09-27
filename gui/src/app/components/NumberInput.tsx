@@ -7,26 +7,30 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 
 export type Selections = (number | "random")[];
-export type NumRange = { min: number; max?: number };
-export type Option = Selections | NumRange;
+export type NumRange = {
+  min: number;
+  max?: number;
+  type: "int" | "float" | "intOrUndefined";
+};
+export type InputConfig = Selections | NumRange;
 
 type NumberProps = {
   value: number | undefined;
-  label?: string;
-  onChange: (value: number | undefined) => void;
+  label: string;
   readOnly: boolean;
-  type: "int" | "float" | "intOrUndefined";
+  onChange: (value: number | undefined) => void;
 };
 
-const NumberInput: FunctionComponent<
-  NumberProps & {
-    options: Option;
+// Based on the type of input, either create a dropdown or a custom text input
+const NumberInput: FunctionComponent<NumberProps & { options: InputConfig }> = (
+  props,
+) => {
+  const { options } = props;
+  if (Array.isArray(options)) {
+    return <NumberSelect {...props} options={options} />;
+  } else {
+    return <NumberEdit {...props} options={options} />;
   }
-> = (props) => {
-  if (Array.isArray(props.options)) {
-    return <NumberSelect {...props} options={props.options} />;
-  }
-  return <NumberEdit {...props} options={props.options} />;
 };
 
 const NumberSelect: FunctionComponent<
@@ -57,11 +61,14 @@ const NumberSelect: FunctionComponent<
   );
 };
 
-const NumberEdit: FunctionComponent<
-  NumberProps & {
-    options: NumRange;
-  }
-> = ({ value, onChange, options: { min, max }, readOnly, type, label }) => {
+const NumberEdit: FunctionComponent<NumberProps & { options: NumRange }> = ({
+  value,
+  onChange,
+  options: { min, max, type },
+  readOnly,
+  label,
+}) => {
+  // "local" copy to allow invalid text without polluting the outside state
   const [localValue, setLocalValue] = useState<number | undefined>(value);
   useEffect(() => {
     setLocalValue(value);
@@ -69,62 +76,64 @@ const NumberEdit: FunctionComponent<
 
   const [error, setError] = useState<string>("");
 
-  const parse = useCallback(
-    (s: string): { value: number | undefined; error?: string } => {
-      let value: number | undefined;
+  const parseValue = useCallback(
+    (s: string): { value?: number; error?: string } => {
+      let value: number;
       switch (type) {
         case "int":
           value = parseInt(s);
           if (isNaN(value)) {
-            return { value: undefined, error: "Enter an integer" };
+            return { error: "Enter an integer" };
           }
           break;
         case "float":
           value = parseFloat(s);
           if (isNaN(value)) {
-            return { value: undefined, error: "Enter a number" };
+            return { error: "Enter a number" };
           }
           break;
         case "intOrUndefined":
+          if (s.trim() === "") {
+            return { value: undefined };
+          }
           value = parseInt(s);
           if (isNaN(value)) {
-            value = undefined;
+            return { error: "Enter an integer or leave blank" };
           }
           break;
         default:
           unreachable(type);
+          value = NaN; // to satisfy TS
       }
-      if (value === undefined) {
-        return { value: undefined };
-      }
+
       if (value < min) {
-        return { value: value, error: `Must be >= ${min}` };
+        return { value, error: `Must be >= ${min}` };
       }
       if (max !== undefined && value > max) {
-        return { value: value, error: `Must be <= ${max}` };
+        return { value, error: `Must be <= ${max}` };
       }
-      return { value: value };
+      return { value };
     },
     [max, min, type],
   );
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { value: newValue, error } = parse(e.target.value);
-      setLocalValue(newValue);
+      const { value, error } = parseValue(e.target.value);
+      setLocalValue(value);
       setError(error || "");
       if (!error) {
-        onChange(newValue);
+        onChange(value);
       }
     },
-    [onChange, parse],
+    [onChange, parseValue],
   );
 
   return (
     <TextField
       label={label}
       size="small"
-      value={localValue === undefined ? "" : localValue}
+      value={localValue ?? ""}
       type="number"
       onChange={handleChange}
       disabled={readOnly}
@@ -134,7 +143,6 @@ const NumberEdit: FunctionComponent<
       }}
       error={error !== ""}
       helperText={error}
-      className="SamplingOptsNumberEditBox"
     />
   );
 };

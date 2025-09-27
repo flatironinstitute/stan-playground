@@ -9,13 +9,13 @@ import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
 import SamplingOptsPanel from "./RunArea/SamplingOptsPanel";
 import RunOrCompilePanel from "./RunArea/RunOrCompilePanel";
 
-const OPTIONS = {
-  num_chains: { min: 1, max: 8 },
-  num_warmup: { min: 0 },
-  num_samples: { min: 1 },
-  init_radius: { min: 0 },
-  seed: { min: 0 },
-};
+const SAMPLING_CONFIG = {
+  num_chains: { min: 1, max: 8, type: "int" },
+  num_warmup: { min: 0, type: "int" },
+  num_samples: { min: 1, type: "int" },
+  init_radius: { min: 0, type: "float" },
+  seed: { min: 0, type: "intOrUndefined" },
+} as const;
 
 type RunAreaProps = {
   sampler: StanSampler | undefined;
@@ -37,18 +37,19 @@ const RunArea: FunctionComponent<RunAreaProps> = ({
   const isSampling = samplerState.status === "sampling";
 
   return (
-    <Grid container>
-      <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+    // reverse and flex-end mean that the buttons are on the top when stacked
+    <Grid container direction="row-reverse" justifyContent="flex-end">
+      <Grid size={{ xs: 12, md: 9 }}>
+        <RunOrCompilePanel sampler={sampler} samplerState={samplerState} />
+      </Grid>
+      <Grid size={{ xs: 12, md: 3 }}>
         <div className="SamplingOptsWrapper">
           <SamplingOptsPanel
             samplingOpts={data.samplingOpts}
             setSamplingOpts={!isSampling ? setSamplingOpts : undefined}
-            options={OPTIONS}
+            config={SAMPLING_CONFIG}
           />
         </div>
-      </Grid>
-      <Grid size={{ xs: 8, md: 4 }}>
-        <RunOrCompilePanel sampler={sampler} samplerState={samplerState} />
       </Grid>
     </Grid>
   );

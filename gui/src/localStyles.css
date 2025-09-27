@@ -186,15 +186,13 @@ span.EditorTitle {
 /* Sampling Opts ------ */
 .SamplingOptsWrapper {
   padding: 10px;
+  width: 80%;
+  min-width: 8em;
 }
 
 .SamplingOptsSpacer {
   position: relative;
   height: 5px;
-}
-
-.SamplingOptsNumberEditBox {
-  width: 6em;
 }
 
 /* Save/Load Project ------ */
