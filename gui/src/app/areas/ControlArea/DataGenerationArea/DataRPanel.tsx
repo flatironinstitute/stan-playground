@@ -13,7 +13,7 @@ import dataRTemplate from "./code_templates/data.R?raw";
 const handleHelp = () =>
   alert(
     'Write a R script to assign data to the "data" variable and then click "Run" to generate data. \
-You can also use the "sp_brm" function to generate the Stan code and data from a brms formula.',
+You can also use the "brm" function to generate the Stan code and data from a brms formula.',
   );
 
 const DataRPanel: FunctionComponent = () => {
@@ -31,7 +31,7 @@ const DataRPanel: FunctionComponent = () => {
   );
 
   const contentOnEmpty = useTemplatedFillerText(
-    'Define a list called "data" or call sp_brm with a brms formula to update the data.json. ',
+    'Define a list called "data" or call brm() to update the data.json. ',
     dataRTemplate,
     ProjectKnownFiles.DATARFILE,
   );
