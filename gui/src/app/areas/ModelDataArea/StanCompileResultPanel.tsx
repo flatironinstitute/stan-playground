@@ -1,5 +1,5 @@
 import { UserSettingsContext } from "@SpCore/Settings/UserSettings";
-import { StancErrors } from "@SpCore/Stanc/Types";
+import type { StancErrors } from "@SpCore/Stanc/Types";
 import { Close, Done } from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";

@@ -1,34 +1,17 @@
 import {
-  StancFunction,
   StancReplyMessage,
   StancRequestMessage,
   StancWorkerRequests,
 } from "@SpCore/Stanc/Types";
-import rawStancJS from "@SpCore/Stanc/stanc.js?raw"; // https://vitejs.dev/guide/assets#importing-asset-as-string
 import { isMonacoWorkerNoise } from "@SpUtil/isMonacoWorkerNoise";
 import { unreachable } from "@SpUtil/unreachable";
 
-let stanc: undefined | StancFunction;
-try {
-  // stanc.js code is not a module, so most nice options for loading are unavailable
-  eval(rawStancJS);
-  // stanc.js also detects if it is running under node, which makes testing annoying
-  if (typeof module !== "undefined") {
-    // node (default vitest setup)
-    stanc = module.exports.stanc;
-  } else {
-    // browser
-    stanc = (globalThis as any).stanc;
-  }
-  if (stanc) {
-    const stanc_version = stanc("", "", ["version"]).result;
-    console.log(`loaded stanc.js, version '${stanc_version}'`);
-  } else {
-    console.error("Failed to load stanc.js");
-  }
-} catch (e) {
+import { stanc, stanc_version } from "stanc3";
+
+if (stanc_version) {
+  console.log(`loaded stanc.js, version '${stanc_version}'`);
+} else {
   console.error("Failed to load stanc.js");
-  console.error(e);
 }
 
 // helper alias for type safety
@@ -72,7 +55,7 @@ self.onmessage = (e: MessageEvent<StancRequestMessage>) => {
     case StancWorkerRequests.CheckSyntax: {
       // if we just syntax checked, don't send back formatted code
       const { errors, warnings } = output;
-      postReply({ errors, warnings });
+      postReply({ result: undefined, errors: errors ?? [], warnings });
       break;
     }
     default:

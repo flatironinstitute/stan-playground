@@ -1,15 +1,6 @@
-export type StancErrors = {
-  errors?: string[];
-  warnings?: string[];
-};
+import { StancReturn } from "stanc3";
 
-type StancReturn = { result?: string } & StancErrors;
-
-export type StancFunction = (
-  name: string,
-  code: string,
-  args: string[],
-) => StancReturn;
+export type StancErrors = Omit<StancReturn, "result">;
 
 export type StancReplyMessage = { fatal: string } | StancReturn;
 
