@@ -31,7 +31,7 @@ const DataRPanel: FunctionComponent = () => {
   );
 
   const contentOnEmpty = useTemplatedFillerText(
-    'Define a list called "data" or call brm() to update the data.json. ',
+    'Define a list called "data" or call brm() to update the data.json.',
     dataRTemplate,
     ProjectKnownFiles.DATARFILE,
   );
