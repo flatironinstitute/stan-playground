@@ -30,6 +30,8 @@ webr::canvas()
 .shim_brm <- function(){
   if (requireNamespace("brms", quietly = TRUE)) {
     .overwrite_packageVersion()
+
+    options(brms.parse_stancode = FALSE, brms.backend = "mock")
     orig_brm <- brms::brm
 
     .overwrite_function("brms", "brm", function(..., empty=TRUE){
