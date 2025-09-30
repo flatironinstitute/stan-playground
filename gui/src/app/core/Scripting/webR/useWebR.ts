@@ -108,18 +108,17 @@ const useWebR = ({
           // setup
           await webR.evalRVoid(webRPreamble, options);
           await webR.evalRVoid(code, options);
-
-          if (onData) {
-            const result = JSON.parse(
-              await webR.evalRString(dataPostamble, options),
-            );
-            onData(result);
-          }
           if (onStanCode) {
             const result = await webR.evalRString(stanCodePostamble, options);
             if (result && result !== "") {
               onStanCode(result);
             }
+          }
+          if (onData) {
+            const result = JSON.parse(
+              await webR.evalRString(dataPostamble, options),
+            );
+            onData(result);
           }
         } finally {
           shelter.purge();
