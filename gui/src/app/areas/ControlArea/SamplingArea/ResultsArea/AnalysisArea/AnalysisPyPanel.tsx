@@ -59,7 +59,7 @@ const AnalysisPyPanel: FunctionComponent<NeedsSamplerState> = ({
   );
 
   const contentOnEmpty = useTemplatedFillerText(
-    "Use the draws object to access the samples. ",
+    "Use the draws object to access the samples.",
     analysisPyTemplate,
     ProjectKnownFiles.ANALYSISPYFILE,
   );

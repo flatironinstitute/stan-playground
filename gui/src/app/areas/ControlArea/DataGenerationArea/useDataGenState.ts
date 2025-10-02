@@ -1,5 +1,8 @@
 import { useCallback, use, useRef, useState } from "react";
-import { DataSource } from "@SpCore/Project/ProjectDataModel";
+import {
+  DataSource,
+  ProjectKnownFiles,
+} from "@SpCore/Project/ProjectDataModel";
 import { writeConsoleOutToDiv } from "@SpCore/Scripting/OutputDivUtils";
 import { InterpreterStatus } from "@SpCore/Scripting/InterpreterTypes";
 import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
@@ -32,7 +35,24 @@ const useDataGenState = (source: "python" | "r") => {
     [update, consoleRef],
   );
 
-  return { consoleRef, status, onStatus: setStatus, onData };
+  const onStanCode = useCallback(
+    (newCode: string) => {
+      update({
+        type: "editFile",
+        filename: ProjectKnownFiles.STANFILE,
+        content: newCode,
+      });
+      update({ type: "commitFile", filename: ProjectKnownFiles.STANFILE });
+      writeConsoleOutToDiv(
+        consoleRef,
+        "[stan-playground] Stan code updated",
+        "stdout",
+      );
+    },
+    [update, consoleRef],
+  );
+
+  return { consoleRef, status, onStatus: setStatus, onData, onStanCode };
 };
 
 export default useDataGenState;

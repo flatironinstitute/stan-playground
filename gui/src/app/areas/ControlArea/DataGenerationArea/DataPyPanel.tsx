@@ -50,7 +50,7 @@ const DataPyPanel: FunctionComponent = () => {
   );
 
   const contentOnEmpty = useTemplatedFillerText(
-    "Define a dictionary called data to update the data.json. ",
+    "Define a dictionary called data to update the data.json.",
     dataPyTemplate,
     ProjectKnownFiles.DATAPYFILE,
   );

@@ -5,6 +5,7 @@ import { writeConsoleOutToDiv } from "@SpCore/Scripting/OutputDivUtils";
 
 import webRPreamble from "./webR_preamble.R?raw";
 import dataPostamble from "./data_postamble.R?raw";
+import stanCodePostamble from "./stan_code_postamble.R?raw";
 
 const captureOutputOptions = {
   withAutoprint: true,
@@ -18,6 +19,7 @@ type useWebRProps = {
   imagesRef?: RefObject<HTMLDivElement | null>;
   onStatus: (status: InterpreterStatus) => void;
   onData?: (data: any) => void;
+  onStanCode?: (code: string) => void;
 };
 
 type RunRProps = {
@@ -26,7 +28,13 @@ type RunRProps = {
   files?: Record<string, string>;
 };
 
-const useWebR = ({ imagesRef, consoleRef, onStatus, onData }: useWebRProps) => {
+const useWebR = ({
+  imagesRef,
+  consoleRef,
+  onStatus,
+  onData,
+  onStanCode,
+}: useWebRProps) => {
   const [webR, setWebR] = useState<WebR | null>(null);
 
   const loadWebRInstance = useCallback(async () => {
@@ -68,6 +76,10 @@ const useWebR = ({ imagesRef, consoleRef, onStatus, onData }: useWebRProps) => {
       try {
         const webR = await loadWebRInstance();
         const shelter = await new webR.Shelter();
+        if (code.indexOf("brms") >= 0) {
+          onStatus("installing");
+          await webR.installPackages(["brms"]);
+        }
         onStatus("running");
         await sleep(100); // let the UI update
 
@@ -96,7 +108,12 @@ const useWebR = ({ imagesRef, consoleRef, onStatus, onData }: useWebRProps) => {
           // setup
           await webR.evalRVoid(webRPreamble, options);
           await webR.evalRVoid(code, options);
-
+          if (onStanCode) {
+            const result = await webR.evalRString(stanCodePostamble, options);
+            if (result && result !== "") {
+              onStanCode(result);
+            }
+          }
           if (onData) {
             const result = JSON.parse(
               await webR.evalRString(dataPostamble, options),
@@ -118,7 +135,7 @@ const useWebR = ({ imagesRef, consoleRef, onStatus, onData }: useWebRProps) => {
         onStatus("failed");
       }
     },
-    [consoleRef, loadWebRInstance, onData, onStatus],
+    [consoleRef, loadWebRInstance, onData, onStanCode, onStatus],
   );
 
   const cancel = useMemo(() => {

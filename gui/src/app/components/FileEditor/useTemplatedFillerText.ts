@@ -14,6 +14,7 @@ const useTemplatedFillerText = (
   const contentOnEmpty = useMemo(() => {
     const spanElement = document.createElement("span");
     const t1 = document.createTextNode(text);
+    const space = document.createTextNode(" ");
     const a1 = document.createElement("a");
     a1.onclick = () => {
       update({
@@ -24,6 +25,7 @@ const useTemplatedFillerText = (
     };
     a1.textContent = "Click here to generate an example";
     spanElement.appendChild(t1);
+    spanElement.appendChild(space);
     spanElement.appendChild(a1);
     return spanElement;
   }, [file, template, text, update]);
