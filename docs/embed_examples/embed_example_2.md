@@ -1,6 +1,8 @@
+# Embed Example: Inline Code
+
 <script src="https://stan-playground.flatironinstitute.org/stan-playground-embed.js"></script>
 
-This is to demonstrate how to embed stan-playground in a markdown file that can be rendered on GitHub pages.
+This example demonstrates how to embed Stan Playground in a markdown file with inline Stan code and data. This can be rendered on GitHub pages.
 
 <stan-playground-embed>
 <iframe width="100%" height="700" frameborder="0"></iframe>

@@ -1,6 +1,8 @@
+# Embed Example: External Files
+
 <script src="https://stan-playground.flatironinstitute.org/stan-playground-embed.js"></script>
 
-Here is an example of embedding Stan Playground in a markdown document using external files for the Stan program and data.
+This example demonstrates how to embed Stan Playground in a markdown document using external files for the Stan program and data.
 
 <stan-playground-embed
     stan="./linear_regression_multiple_predictors.stan"

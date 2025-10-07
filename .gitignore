@@ -29,3 +29,6 @@ coverage
 
 # python
 *.pyc
+
+# Sphinx documentation
+docs/_build/
