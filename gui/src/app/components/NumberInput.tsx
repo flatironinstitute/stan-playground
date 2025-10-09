@@ -41,7 +41,7 @@ const NumberSelect: FunctionComponent<
       <InputLabel>{label}</InputLabel>
       <Select
         value={value === undefined ? "random" : value}
-        label="Warmup"
+        label={label}
         disabled={readOnly}
         onChange={(e) =>
           onChange(
@@ -74,7 +74,7 @@ const NumberEdit: FunctionComponent<NumberProps & { options: NumRange }> = ({
     setLocalValue(value);
   }, [value]);
 
-  const [error, setError] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const parseValue = useCallback(
     (s: string): { value?: number; error?: string } => {
@@ -121,7 +121,7 @@ const NumberEdit: FunctionComponent<NumberProps & { options: NumRange }> = ({
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const { value, error } = parseValue(e.target.value);
       setLocalValue(value);
-      setError(error || "");
+      setErrorMessage(error || "");
       if (!error) {
         onChange(value);
       }
@@ -141,8 +141,8 @@ const NumberEdit: FunctionComponent<NumberProps & { options: NumRange }> = ({
         min,
         max,
       }}
-      error={error !== ""}
-      helperText={error}
+      error={errorMessage !== ""}
+      helperText={errorMessage}
     />
   );
 };

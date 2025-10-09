@@ -50,7 +50,7 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({
             key={k}
             value={samplingOpts[k]}
             onChange={(value) =>
-              setSamplingOpts &&
+              !readOnly &&
               setSamplingOpts({
                 ...samplingOpts,
                 [k]: value,
