@@ -6,29 +6,20 @@ import IconButton from "@mui/material/IconButton";
 import LaunchIcon from "@mui/icons-material/Launch";
 import HelpIcon from "@mui/icons-material/Help";
 import Settings from "@mui/icons-material/Settings";
-import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import CancelIcon from "@mui/icons-material/Cancel";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
+
 import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
-import Checkbox from "@mui/material/Checkbox";
-import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
 
 import { CompileContext } from "@SpCore/Compilation/CompileContextProvider";
 import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
-import {
-  defaultSamplingOpts,
-  SamplingOpts,
-} from "@SpCore/Project/ProjectDataModel";
+import { SamplingOpts } from "@SpCore/Project/ProjectDataModel";
 import type { SamplerState } from "@SpCore/StanSampler/SamplerTypes";
 import StanSampler from "@SpCore/StanSampler/StanSampler";
 import SamplingProgressCircular from "@SpAreas/ControlArea/SamplingArea/RunArea/SamplerProgressCircular";
 import { UserSettingsContext } from "@SpCore/Settings/UserSettings";
 import CompileButton from "@SpAreas/ControlArea/SamplingArea/RunArea/CompileButton";
+import SamplingOptsPanel from "@SpAreas/ControlArea/SamplingArea/RunArea/SamplingOptsPanel";
 
 type EmbeddedBottomBarProps = {
   sampler: StanSampler | undefined;
@@ -68,10 +59,13 @@ const CompileOrRunControls: FunctionComponent<EmbeddedBottomBarProps> = ({
 };
 
 // Preset options for dropdowns
-const CHAIN_OPTIONS = [1, 2, 4, 8];
-const WARMUP_OPTIONS = [0, 500, 1000, 2000];
-const SAMPLE_OPTIONS = [100, 500, 1000, 2000];
-const RADIUS_OPTIONS = [0, 0.1, 1.0, 2.0, 5.0];
+const SAMPLING_CONFIG = {
+  num_chains: [1, 2, 3, 4],
+  num_warmup: [0, 100, 500, 1000, 2000],
+  num_samples: [100, 500, 1000, 2000],
+  init_radius: [0, 0.1, 1.0, 2.0, 5.0],
+  seed: ["random" as const, 1, 2, 3, 4, 5],
+};
 
 const RunCompact: FunctionComponent<EmbeddedBottomBarProps> = ({
   sampler,
@@ -86,10 +80,6 @@ const RunCompact: FunctionComponent<EmbeddedBottomBarProps> = ({
     },
     [update],
   );
-
-  const handleReset = useCallback(() => {
-    setSamplingOpts(defaultSamplingOpts);
-  }, [setSamplingOpts]);
 
   const handleRun = useCallback(async () => {
     if (!sampler) return;
@@ -137,152 +127,12 @@ const RunCompact: FunctionComponent<EmbeddedBottomBarProps> = ({
           </Tooltip>
         </Stack>
       )}
-
-      <Tooltip title="Number of sampling chains">
-        <FormControl size="small" sx={{ minWidth: 80 }}>
-          <InputLabel>Chains</InputLabel>
-          <Select
-            value={opts.num_chains}
-            label="Chains"
-            disabled={isDisabled}
-            onChange={(e) =>
-              setSamplingOpts({
-                ...opts,
-                num_chains: e.target.value as number,
-              })
-            }
-          >
-            {CHAIN_OPTIONS.map((n) => (
-              <MenuItem key={n} value={n}>
-                {n}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Tooltip>
-
-      <Tooltip title="Number of warmup draws per chain">
-        <FormControl size="small" sx={{ minWidth: 90 }}>
-          <InputLabel>Warmup</InputLabel>
-          <Select
-            value={opts.num_warmup}
-            label="Warmup"
-            disabled={isDisabled}
-            onChange={(e) =>
-              setSamplingOpts({
-                ...opts,
-                num_warmup: e.target.value as number,
-              })
-            }
-          >
-            {WARMUP_OPTIONS.map((n) => (
-              <MenuItem key={n} value={n}>
-                {n}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Tooltip>
-
-      <Tooltip title="Number of regular draws per chain">
-        <FormControl size="small" sx={{ minWidth: 90 }}>
-          <InputLabel>Samples</InputLabel>
-          <Select
-            value={opts.num_samples}
-            label="Samples"
-            disabled={isDisabled}
-            onChange={(e) =>
-              setSamplingOpts({
-                ...opts,
-                num_samples: e.target.value as number,
-              })
-            }
-          >
-            {SAMPLE_OPTIONS.map((n) => (
-              <MenuItem key={n} value={n}>
-                {n}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Tooltip>
-
-      <Tooltip title="Radius for initial parameter values">
-        <FormControl size="small" sx={{ minWidth: 90 }}>
-          <InputLabel>Radius</InputLabel>
-          <Select
-            value={opts.init_radius}
-            label="Radius"
-            disabled={isDisabled}
-            onChange={(e) =>
-              setSamplingOpts({
-                ...opts,
-                init_radius: e.target.value as number,
-              })
-            }
-          >
-            {RADIUS_OPTIONS.map((n) => (
-              <MenuItem key={n} value={n}>
-                {n}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Tooltip>
-
-      <Tooltip title="Random seed">
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={opts.seed !== undefined}
-                disabled={isDisabled}
-                size="small"
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setSamplingOpts({
-                      ...opts,
-                      seed: 0,
-                    });
-                  } else {
-                    setSamplingOpts({
-                      ...opts,
-                      seed: undefined,
-                    });
-                  }
-                }}
-              />
-            }
-            label="Seed"
-            sx={{ margin: 0 }}
-          />
-          {opts.seed !== undefined && (
-            <TextField
-              size="small"
-              type="number"
-              value={opts.seed}
-              disabled={isDisabled}
-              onChange={(e) => {
-                const value = parseInt(e.target.value);
-                if (!isNaN(value)) {
-                  setSamplingOpts({
-                    ...opts,
-                    seed: value,
-                  });
-                }
-              }}
-              sx={{ width: 60 }}
-              inputProps={{ min: 0 }}
-            />
-          )}
-        </Box>
-      </Tooltip>
-
-      <Tooltip title="Reset to default values">
-        <IconButton onClick={handleReset} disabled={isDisabled} size="small">
-          <RestartAltIcon />
-        </IconButton>
-      </Tooltip>
+      <SamplingOptsPanel
+        samplingOpts={data.samplingOpts}
+        setSamplingOpts={!isSampling ? setSamplingOpts : undefined}
+        direction="row"
+        config={SAMPLING_CONFIG}
+      />
     </Stack>
   );
 };
