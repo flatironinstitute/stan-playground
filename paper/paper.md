@@ -29,7 +29,8 @@ bibliography: paper.bib
 
 # Summary
 
-Web interface for Stan [@Carpenter2017; @Stan2025]
+Web interface for Stan [@Carpenter2017; @Stan2025]. Provides pre- and post-processing using Python
+through Pyodide [@pyodide2021] and R through webR [@Stagg2023]).
 
 # Statement of need
 
