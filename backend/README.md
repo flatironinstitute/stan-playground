@@ -21,10 +21,11 @@ It provides the following endpoints:
 
 The server listens to the following environment variables for configuration:
 
-- `SWS_PASSCODE` - a simple `Authorization: Bearer` token for the `/compile` endpoint. Required.
 - `TINYSTAN` or `TINYSTAN_DIR` - the location to look for a [tinystan](github.com/WardBrian/tinystan) installation. Required.
+
   **Note**: This tinystan folder is expected to be configured to build WebAssembly. Consult the Dockerfile and `local.mk` files for
   reference.
+- `SWS_PASSCODE` - a simple `Authorization: Bearer` token for the `/compile` endpoint. Required.
 - `SWS_RESTART_TOKEN` - a simple `Authorization: Bearer` token for the `/restart` endpoint. Optional, defaults to disabling the `/restart` endpoint.
 - `SWS_JOB_DIR` - the path used for compilation and scratch work. Optional, defaults to `/jobs`.
 - `SWS_JOB_DIR` - the path used to store (and cache) the results of compilation. Optional, defaults to `/compiled_models`.
