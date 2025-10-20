@@ -27,11 +27,11 @@ more.
 
 The compilation server is a FastAPI project with a dockerized environment
 located in the `backend/` folder.
+The [README](./backend/README.md) there describes the server architecture and
+how one can build the docker image from scratch.
 
 The website frontend is a Vitejs/React project located in the `gui/` folder.
 The [README](./gui/README.md) there gives information on how to get started running a local development server.
-
-This project is based on [stan-web-demo](https://github.com/WardBrian/stan-web-demo) which shows how to use [TinyStan](https://github.com/WardBrian/tinystan) to build a WebAssembly version of a Stan model that can be executed in the browser. While stan-web-demo focuses on integrating a specific Stan model into a website—essentially "baking" the model into the web environment—stan-playground is designed for a broader purpose. It offers a flexible platform for experimenting with and exploring various Stan models. This makes it ideal for users looking to test different statistical models and hypotheses directly in their browser, without the commitment to a single model implementation.
 
 ## License
 

@@ -3,9 +3,12 @@
 # Architecture
 
 Stan Playground is a single page application (SPA), which pushed us
-to invent some of our own nomeclature to describe the sub-units of UI:
+to invent some of our own nomenclature to describe the sub-units of UI:
 
-- **Pages** (`gui/src/app/pages`) are web pages. We only have one, `HomePage`.
+- **Pages** (`gui/src/app/pages`) are web pages. We currently have two,
+  `HomePage`, which is the main site, and `HomeEmbedded`, which provides
+  a stripped-down layout more amenable to being embedded in other pages.
+
   A page is made up of Areas, and may be covered by Windows.
 
 - **Areas** (`gui/src/app/areas`) are subdivisions of a page with a _unique
