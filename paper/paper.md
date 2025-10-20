@@ -1,5 +1,5 @@
 ---
-title: 'stan-playground: Run Stan models directly in your browser.'
+title: "stan-playground: Run Stan models directly in your browser."
 tags:
   - WebAssembly
   - Stan
@@ -20,9 +20,9 @@ authors:
     equal-contrib: true
     affiliation: 1
 affiliations:
- - name: Center for Computational Mathematics, Flatiron Institute
-   index: 1
-   ror: 00sekdz59
+  - name: Center for Computational Mathematics, Flatiron Institute
+    index: 1
+    ror: 00sekdz59
 date: 10 October 2025
 bibliography: paper.bib
 ---
@@ -34,6 +34,14 @@ Web interface for Stan [@Carpenter2017; @Stan2025]
 # Statement of need
 
 Stan is difficult to install.
+
+# Examples
+
+Stan-Playground provides several example programs on the left
+sidebar of the home page at various levels of complexity, spanning from a basic
+linear regression on fake data to
+[a reimplementation of the model and analysis](https://stan-playground.flatironinstitute.org/?project=https://gist.github.com/WardBrian/d8ab811b137085f154b6145d3c36cbc4)
+from @Carpenter2018.
 
 <!-- # Mathematics
 
