@@ -129,10 +129,10 @@ and without freezing the user interface.
 
 # Acknowledgements
 
-Andrew Gelman and Jonah Gabry (both: Columbia University)
+Andrew Gelman and Jonah Gabry from Columbia University
 offered valuable early feedback on this project.
 
 This project relies on `tinystan` [@tinystan2025], which was itself
-inspired by Edward Roauldes' `BridgeStan` project [@Roualdes2023].
+inspired by Edward Roualdes' `BridgeStan` project [@Roualdes2023].
 
 # References
