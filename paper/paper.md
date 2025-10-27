@@ -31,11 +31,12 @@ bibliography: paper.bib
 
 [Stan Playground](https://stan-playground.flatironinstitute.org/) is an in-browser editor
 and execution environment for Stan [@Carpenter2017; @Stan2025] statistical models.
-Models and analyses run entirely locally with no installation required, utilizing a bespoke
-compilation server which translates users' models into WebAssembly modules built with the
-Emscripten [@emscripten2011] toolchain. Built-in sharing features and integration with
-Pyodide [@pyodide2021] and webR [@Stagg2023] make Stan Playground a complete environment
-for instruction, prototyping, and analysis.
+Models and analyses run entirely locally with no installation required. The only non-local computation
+required is on-demand compilation, which is performed by a bespoke server that translates users' models
+into WebAssembly modules built with the Emscripten [@emscripten2011] toolchain. A free, public server
+is provided, making this process transparent to the end user while still allowing for customization.
+Built-in sharing features and integration with Pyodide [@pyodide2021] and webR [@Stagg2023] make
+Stan Playground a complete environment for instruction, prototyping, and analysis.
 
 # Statement of need
 
@@ -59,7 +60,7 @@ to get a blank project, or a student clicks on a link provided by their instruct
 code and data already populated. They can then begin editing, compiling, and running Stan models
 immediately, regardless of their local system configuration.
 
-A similar level of convenience could be achieved by performing both compilation and sampling on
+A similar level of convenience could be achieved by performing both compilation and sampling on a
 centrally provided server, but there are several issues with this approach.
 Sampling involves executing user-written code that could perform potentially-unbounded amounts of
 compute. Offering this as a public service would require authentication or rate-limiting.
@@ -92,7 +93,7 @@ the browser.
    and provides WebAssembly modules back to the client. While a public server is hosted by the Flatiron Institute,
    users can also run their own and connect to that instead in the settings UI.
 
-4. **Sampling**. User can control the key parameters for the sampling algorithm (number of iterations, etc) and
+4. **Sampling**. Users can control the key parameters for the sampling algorithm (number of iterations, etc) and
    monitor progress in real time.
 
 5. **Posterior Analysis**. Stan Playground provides many built-in diagnostics and visualizations for the
@@ -101,17 +102,22 @@ the browser.
 
 6. **Sharing and Export**. Stan Playground by default saves your analysis in browser local storage.
    For longer-term storage, users can export their projects to zip files for local use, or upload
-   to a Github Gist. Github Gist links facilitate easy sharing, as they can be used in URL parameters
+   to a Github Gist. GitHub Gist links facilitate easy sharing, as they can be used in URL parameters
    to load a specific project when a link is clicked. More customizable sharing options are also available
    through URL parameters.
 
-# Examples
+![Stan Playground's embedded layout inside a mock document. Model from @Grinsztajn2020. \label{fig:embedded}](embedded.png)
 
-Stan Playground provides several example programs on the left
-sidebar of the home page at various levels of complexity, spanning from a basic
-linear regression on fake data to
-[a reimplementation of the model and analysis](https://stan-playground.flatironinstitute.org/?project=https://gist.github.com/WardBrian/d8ab811b137085f154b6145d3c36cbc4)
-from @Carpenter2018. The above link uses Stan Playground's sharing features to pre-populate the project on page load.
+7. **Embedding**. Stan Playground is able to be fully embedded using the `<iframe>` tag. A second UI layout
+   which is more amenable to embedding is provided, and a custom element to make this easier is available
+   in a small, no-dependency script. Blogs or documentation sites can use these to gain interactivity with minimal effort.
+
+8. **Examples**. Stan Playground provides several example programs on the left
+   sidebar of the home page at various levels of complexity, spanning from a basic
+   linear regression on fake data to
+   [a reimplementation of the model and analysis](https://stan-playground.flatironinstitute.org/?project=https://gist.github.com/WardBrian/d8ab811b137085f154b6145d3c36cbc4)
+   from @Carpenter2018.
+   The linked example uses Stan Playground's sharing features to pre-populate the project on page load.
 
 # Implementation details
 
@@ -124,8 +130,9 @@ The remainder of the project is the user-facing web application, which can be fo
 
 This web application is built on the [React](https://react.dev/) framework and features various
 panels to allow editing of Stan models, compilation, sampling, and downstream analysis of the
-results. The use of WebAssembly and web workers allows these computations to complete quickly
-and without freezing the user interface.
+results. The use of WebAssembly and browser Web Workers to move computations off
+the main thread allows these computations to complete quickly and without freezing
+the user interface.
 
 # Acknowledgements
 
