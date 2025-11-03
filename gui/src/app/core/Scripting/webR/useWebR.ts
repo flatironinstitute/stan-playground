@@ -4,6 +4,7 @@ import { InterpreterStatus } from "@SpCore/Scripting/InterpreterTypes";
 import { writeConsoleOutToDiv } from "@SpCore/Scripting/OutputDivUtils";
 
 import webRPreamble from "./webR_preamble.R?raw";
+import webRBRMS from "./webR_brms.R?raw";
 import dataPostamble from "./data_postamble.R?raw";
 import stanCodePostamble from "./stan_code_postamble.R?raw";
 
@@ -79,6 +80,7 @@ const useWebR = ({
         if (code.indexOf("brms") >= 0) {
           onStatus("installing");
           await webR.installPackages(["brms"]);
+          await webR.evalRVoid(webRBRMS);
         }
         onStatus("running");
         await sleep(100); // let the UI update
