@@ -44,13 +44,11 @@ const useWebR = ({
     }
 
     onStatus("loading");
-    await sleep(100); // let the UI update
 
     const w = new WebR();
     await w.init();
 
     onStatus("installing");
-    await sleep(100); // let the UI update
     await w.installPackages(["jsonlite", "posterior"]);
 
     setWebR(w);
@@ -83,7 +81,6 @@ const useWebR = ({
           await webR.evalRVoid(webRBRMS);
         }
         onStatus("running");
-        await sleep(100); // let the UI update
 
         try {
           const globals: { [key: string]: any } = {
@@ -123,12 +120,13 @@ const useWebR = ({
             onData(result);
           }
         } finally {
-          shelter.purge();
+          const promises = [shelter.purge()];
           if (files) {
             for (const [name] of Object.entries(files)) {
-              await webR.FS.unlink(name);
+              promises.push(webR.FS.unlink(name));
             }
           }
+          await Promise.all(promises);
         }
         onStatus("completed");
       } catch (e: any) {
@@ -154,8 +152,6 @@ const useWebR = ({
 
   return { run, cancel };
 };
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Similar to examples at
 // https://docs.r-wasm.org/webr/latest/communication.html#handling-messages
