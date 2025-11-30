@@ -1,5 +1,5 @@
 ---
-title: "stan-playground: Run Stan models directly in your browser."
+title: "stan-playground: Run Stan models directly in your browser"
 tags:
   - WebAssembly
   - Stan
