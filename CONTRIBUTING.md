@@ -27,7 +27,7 @@ covering the suggestion, please
 [open a new one](https://github.com/flatironinstitute/stan-playground/issues/new).
 Providing as much detail as you can about what you're suggesting and how/where
 it fits into the existing functionality of Stan Playground will help us
-understand and increase the chances of your idea becoming a reality!
+understand your idea and increase the chances of it becoming a reality!
 
 ## Contributing code
 
@@ -59,5 +59,5 @@ Documentation changes can be submitted via PR, in the same way as code changes.
 
 If you would like to suggest a new example, we ask that you suggest it in an
 issue rather than a PR, for logistical reasons. Include contents of each file
-for the example in the issue, as well as why you think it demonstrates something
-valuable over/above the existing examples.
+for the example in the issue, as well as what you think it demonstrates
+that is missing in the existing examples.
