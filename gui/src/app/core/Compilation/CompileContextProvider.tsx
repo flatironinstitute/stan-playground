@@ -104,8 +104,8 @@ const CompileContextProvider: FunctionComponent<
   const { data } = use(ProjectContext);
   const [compileStatus, setCompileStatus] = useState<CompileStatus>("");
   const [
-    theStanFileContentThasHasBeenCompiled,
-    setTheStanFileContentThasHasBeenCompiled,
+    theStanFileContentThatHasBeenCompiled,
+    setTheStanFileContentThatHasBeenCompiled,
   ] = useState<string>("");
   const [compileMessage, setCompileMessage] = useState<string>("");
   const [compiledMainJsUrl, setCompiledMainJsUrl] = useState<
@@ -116,7 +116,7 @@ const CompileContextProvider: FunctionComponent<
   useEffect(() => {
     // if the compiled content is not the same as the current content,
     // then the state should not be compiled or failed
-    if (data.stanFileContent !== theStanFileContentThasHasBeenCompiled) {
+    if (data.stanFileContent !== theStanFileContentThatHasBeenCompiled) {
       if (compileStatus === "compiled" || compileStatus === "failed") {
         setCompileStatus("");
         setCompiledMainJsUrl("");
@@ -124,7 +124,7 @@ const CompileContextProvider: FunctionComponent<
     }
   }, [
     data.stanFileContent,
-    theStanFileContentThasHasBeenCompiled,
+    theStanFileContentThatHasBeenCompiled,
     compileStatus,
     setCompiledMainJsUrl,
   ]);
@@ -137,7 +137,6 @@ const CompileContextProvider: FunctionComponent<
     }
 
     setCompileStatus("compiling");
-    await new Promise((resolve) => setTimeout(resolve, 500)); // for effect
     const onStatus = (msg: string) => {
       setCompileMessage(msg);
     };
@@ -147,7 +146,7 @@ const CompileContextProvider: FunctionComponent<
       onStatus,
     );
 
-    setTheStanFileContentThasHasBeenCompiled(data.stanFileContent);
+    setTheStanFileContentThatHasBeenCompiled(data.stanFileContent);
     if (!mainJsUrl) {
       setCompileStatus("failed");
       return;
