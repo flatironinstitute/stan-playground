@@ -118,7 +118,7 @@ be completed in the browser.
 
 6. **Sharing and Export**. Stan Playground by default saves the project in
    browser local storage. For longer-term storage, users can export their projects
-   to zip files for local use, or upload to a Github Gist. GitHub Gist links
+   to zip files for local use, or upload to a GitHub Gist. GitHub Gist links
    facilitate easy sharing, as they can be used in URL parameters to load a
    specific project when a link is clicked. More customizable sharing options are
    also available through URL parameters.
