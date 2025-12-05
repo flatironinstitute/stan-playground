@@ -69,7 +69,7 @@ class StanSampler {
               paramNames: e.data.paramNames,
               computeTimeSec:
                 performance.now() / 1000 - this.#samplingStartTimeSec,
-              consoleText: e.data.consoleText,
+              consoleMessages: e.data.consoleMessages,
               sampleConfig: e.data.sampleConfig,
             });
           }

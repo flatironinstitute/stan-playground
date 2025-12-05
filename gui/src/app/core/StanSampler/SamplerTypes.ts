@@ -27,6 +27,11 @@ export enum Replies {
   Progress = "progress",
 }
 
+export type ConsoleMessage = {
+  text: string;
+  type: "error" | "log";
+};
+
 export type StanModelReplyMessage =
   | {
       purpose: Replies.ModelLoaded;
@@ -40,7 +45,7 @@ export type StanModelReplyMessage =
       draws: number[][];
       paramNames: string[];
       error: null;
-      consoleText: string;
+      consoleMessages: ConsoleMessage[];
       sampleConfig: SampleConfig;
     }
   | {
@@ -65,7 +70,7 @@ export type StanSamplerStatus =
   | "failed";
 
 export type StanRun = {
-  consoleText: string;
+  consoleMessages: ConsoleMessage[];
   draws: number[][];
   paramNames: string[];
   computeTimeSec: number;

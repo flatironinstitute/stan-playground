@@ -2,6 +2,7 @@ import { useEffect, useReducer, useState } from "react";
 
 import { unreachable } from "@SpUtil/unreachable";
 import {
+  ConsoleMessage,
   Progress,
   SampleConfig,
   SamplerState,
@@ -33,7 +34,7 @@ export type SamplerStateAction =
       draws: number[][];
       paramNames: string[];
       computeTimeSec: number;
-      consoleText: string;
+      consoleMessages: ConsoleMessage[];
       sampleConfig: SampleConfig;
     };
 
@@ -68,7 +69,7 @@ const SamplerStateReducer = (
           paramNames: action.paramNames,
           computeTimeSec: action.computeTimeSec,
           sampleConfig: action.sampleConfig,
-          consoleText: action.consoleText,
+          consoleMessages: action.consoleMessages,
         },
       };
     default:

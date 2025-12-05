@@ -2,6 +2,7 @@ import { isMonacoWorkerNoise } from "@SpUtil/isMonacoWorkerNoise";
 import { unreachable } from "@SpUtil/unreachable";
 import StanModel from "tinystan";
 import {
+  ConsoleMessage,
   Progress,
   Replies,
   Requests,
@@ -31,7 +32,8 @@ const parseProgress = (msg: string): Progress => {
   return { chain, iteration, totalIterations, percent, warmup };
 };
 
-let consoleText = "";
+let consoleMessages: ConsoleMessage[] = [];
+
 const progressPrintCallback = (msg: string) => {
   if (!msg) {
     return;
@@ -40,12 +42,17 @@ const progressPrintCallback = (msg: string) => {
     // storing this has a not-insignificant overhead when a model
     // has print statements, but is much faster than posting
     // every single line to the main thread
-    consoleText += msg + "\n";
+    consoleMessages.push({ text: msg, type: "log" });
     console.log(msg);
     return;
   }
   const report = parseProgress(msg);
   postReply({ purpose: Replies.Progress, report });
+};
+
+const errorPrintCallback = (msg: string) => {
+  consoleMessages.push({ text: msg, type: "error" });
+  console.warn(msg);
 };
 
 let model: StanModel;
@@ -58,7 +65,9 @@ self.onmessage = (e: MessageEvent<StanModelRequestMessage>) => {
   switch (e.data.purpose) {
     case Requests.Load: {
       import(/* @vite-ignore */ e.data.url)
-        .then((js) => StanModel.load(js.default, progressPrintCallback))
+        .then((js) =>
+          StanModel.load(js.default, progressPrintCallback, errorPrintCallback),
+        )
         .then((m) => {
           model = m;
           console.log(
@@ -78,7 +87,7 @@ self.onmessage = (e: MessageEvent<StanModelRequestMessage>) => {
         return;
       }
       try {
-        consoleText = "";
+        consoleMessages = [];
         const { paramNames, draws } = model.sample(e.data.sampleConfig);
         // TODO? use an ArrayBuffer so we can transfer without serialization cost
         postReply({
@@ -86,7 +95,7 @@ self.onmessage = (e: MessageEvent<StanModelRequestMessage>) => {
           draws,
           paramNames,
           error: null,
-          consoleText,
+          consoleMessages,
           sampleConfig: e.data.sampleConfig,
         });
       } catch (e: any) {
