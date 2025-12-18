@@ -4322,10 +4322,10 @@ tinyspy@^3.0.2:
   resolved "https://registry.yarnpkg.com/tinyspy/-/tinyspy-3.0.2.tgz#86dd3cf3d737b15adcf17d7887c84a75201df20a"
   integrity sha512-n1cw8k1k0x4pgA2+9XrOkFydTerNcJ1zWCO5Nn9scWHTD+5tp8dghT2x1uduQePZTZgd3Tupf+x9BxJjeJi77Q==
 
-tinystan@^0.3.1:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/tinystan/-/tinystan-0.3.1.tgz#9fb36b4ff998925791aafe419a84d94971208200"
-  integrity sha512-AU95Ub8IQt4C90uwnVWAyEBfjyl35bF6rdfeep2xSuadbY/ap1v+sU3YglcTV24f/XDm3mOkm24g3kRcZs8H0Q==
+tinystan@^0.3.2:
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/tinystan/-/tinystan-0.3.2.tgz#6b823dae25dcea6359e3aed64f2f0afc69dea721"
+  integrity sha512-PSqQJ0+wztxGJGEkHYx5jJGZZGWEZpOAZvCxuu3srmO26lM1CEn8uY4aQQzOPX0htmyxstrBFqEW6ZjF3eM5/Q==
 
 tldts-core@^6.1.86:
   version "6.1.86"
