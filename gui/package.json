@@ -31,7 +31,7 @@
     "jszip": "^3.10.1",
     "mcmc-stats": "^0.0.1",
     "plotly-stan-playground-dist": "file:./vendor/plotly-stan-playground-dist",
-    "pyodide": "^0.28.3",
+    "pyodide": "^0.29.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.5",
@@ -40,7 +40,7 @@
     "react-use-measure": "^2.1.1",
     "stanc3": "^2.37.0",
     "tinystan": "^0.3.2",
-    "webr": "^0.5.6"
+    "webr": "^0.5.8"
   },
   "devDependencies": {
     "@codecov/vite-plugin": "^1.9.0",
