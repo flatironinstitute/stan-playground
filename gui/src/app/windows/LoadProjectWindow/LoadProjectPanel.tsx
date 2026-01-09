@@ -1,5 +1,5 @@
 import { FunctionComponent, useCallback, use, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 import { Delete } from "@mui/icons-material";
 import Button from "@mui/material/Button";
