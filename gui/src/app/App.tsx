@@ -6,7 +6,7 @@ import CompileContextProvider from "@SpCore/Compilation/CompileContextProvider";
 import HomePage from "@SpPages/HomePage";
 import HomeEmbedded from "@SpPages/HomeEmbedded";
 import { Analytics } from "@vercel/analytics/react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router";
 
 const AppContent = () => {
   const location = useLocation();
