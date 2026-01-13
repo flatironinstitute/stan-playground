@@ -8,6 +8,9 @@ To run your own server locally using [Docker](https://www.docker.com/), execute 
 docker run -p 8083:8080 -it ghcr.io/flatironinstitute/stan-wasm-server:latest
 ```
 
+This will download the latest version of the compilation server, with all the necessary dependencies, and
+start it running on the required port (port 8083).
+
 After setting up the server, navigate to https://stan-playground.flatironinstitute.org.
 
 In the menu bar, you can choose to use either the public server or your local server. If you opt for the local server, the default port is 8083. If you change this port or use a different host, update your settings in the "Custom server" option.
@@ -19,3 +22,8 @@ To compile a Stan model, click the "compile" button at the top of the Stan file 
 ```
 curl http://localhost:8083/probe
 ```
+
+## More information
+
+Curious about editing the server, building the image from scratch, or what
+endpoints are provided? Consult the [backend README file](https://github.com/flatironinstitute/stan-playground/blob/main/backend/README.md)
