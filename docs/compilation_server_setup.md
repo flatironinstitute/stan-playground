@@ -9,7 +9,7 @@ docker run -p 8083:8080 -it ghcr.io/flatironinstitute/stan-wasm-server:latest
 ```
 
 This will download the latest version of the compilation server, with all the necessary dependencies, and
-start it running on the required port.
+start it running on the required port (port 8083).
 
 After setting up the server, navigate to https://stan-playground.flatironinstitute.org.
 

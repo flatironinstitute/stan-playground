@@ -42,7 +42,7 @@ find a browser that does not work!).
 That being said, it is of course possible to run both the backend and website locally
 and get the same set of features.
 
-If you'd like to run a local compilation server, consult [the documentation](https://flatironinstitute.github.io/stan-playground/compilation_server_setup.html).
+If you'd like to run a local compilation server, consult [the local compilation server documentation](https://flatironinstitute.github.io/stan-playground/compilation_server_setup.html).
 The only dependency needed is [Docker](https://www.docker.com/).
 
 If you'd like to run a local copy of the website, consult the
