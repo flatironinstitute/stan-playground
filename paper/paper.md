@@ -155,6 +155,31 @@ and downstream analysis of the results. The use of WebAssembly and browser Web
 Workers to move computations off the main thread allows these computations to
 complete quickly and without freezing the user interface.
 
+# Similar projects
+
+Several projects have previously employed the Web platform for assisting
+Stan users, including ShinyStan [@Gabry2025] and
+[MCMC Monitor](https://github.com/flatironinstitute/mcmc-monitor).
+However, both of these tools relied on an existing, local installation of Stan to
+perform sampling, inheriting the usual installation difficulties as a result.
+
+The idea of a web-based "playground" for a programming language is also
+well-explored territory. Some examples that inspired the authors in various
+ways include:
+
+- The Rust Playground ([play.rust-lang.org](https://play.rust-lang.org)).
+- The Compiler Explorer ([godbolt.org](https://godbolt.org/)).
+- JSFiddle ([jsfiddle.net](https://jsfiddle.net/)).
+
+Note that while Stan Playground shares many conceptual ideas with
+these previous tools, the technical details differ greatly; for instance, both
+Compiler Explorer and Rust Playground provide code execution via hosted
+server environments rather than the use of WebAssembly.
+
+Furthermore, the integration of a full probabalistic programming environment,
+with data preparation, plotting, and more on top of sampling the model,
+remains a unique contribution by this project.
+
 # Acknowledgements
 
 Andrew Gelman and Jonah Gabry from Columbia University offered valuable early
