@@ -28,7 +28,6 @@ Check out the how-to and examples at [SP: Embedded](./stan_playground_embedded.m
 
 ## Custom compilation server setup
 
-
 While the Stan models execute in the browser (on your local machine), the compilation process requires a dedicated server.
 Most users will prefer to use the public server for compilation.
 However, if you want to set up your own compilation server, use the following instructions:

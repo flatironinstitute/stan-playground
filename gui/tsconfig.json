@@ -19,14 +19,13 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     /* Imports */
-    "baseUrl": "./src",
     "paths": {
-      "@SpComponents/*": ["app/components/*"],
-      "@SpAreas/*": ["app/areas/*"],
-      "@SpWindows/*": ["app/windows/*"],
-      "@SpCore/*": ["app/core/*"],
-      "@SpUtil/*": ["app/util/*"],
-      "@SpPages/*": ["app/pages/*"]
+      "@SpComponents/*": ["./src/app/components/*"],
+      "@SpAreas/*": ["./src/app/areas/*"],
+      "@SpWindows/*": ["./src/app/windows/*"],
+      "@SpCore/*": ["./src/app/core/*"],
+      "@SpUtil/*": ["./src/app/util/*"],
+      "@SpPages/*": ["./src/app/pages/*"]
     }
   },
   "include": ["src", "test"],

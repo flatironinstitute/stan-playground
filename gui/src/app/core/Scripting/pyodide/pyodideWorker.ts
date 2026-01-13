@@ -11,7 +11,7 @@ import spMPLScript from "./sp_patch_matplotlib.py?raw";
 
 const loadPyodideInstance = async () => {
   const pyodide = await loadPyodide({
-    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.28.3/full",
+    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.0/full",
     stdout: (x: string) => {
       sendStdout(x);
     },

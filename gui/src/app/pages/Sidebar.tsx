@@ -11,7 +11,7 @@ import ListItem from "@mui/material/ListItem";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
 import { FunctionComponent, use, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import ExportProjectWindow from "@SpWindows/ExportProjectWindow";
 
 type SidebarProps = {

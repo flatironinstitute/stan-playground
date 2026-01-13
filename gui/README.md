@@ -6,25 +6,45 @@ This project is based on [`stan-web-demo`](https://github.com/WardBrian/stan-web
 
 The code organization is documented in [ARCHITECTURE.md](./ARCHITECTURE.md)
 
-## Local development
+## Running a local copy of the frontend
 
-To run a local development version of the page, first
-install the required dependencies using `yarn`:
+To run a local version of the frontend (for development, etc),
+you will need a copy of the [Yarn package manager](https://yarnpkg.com/) installed.
+
+Once set up, you can use yarn to install the other dependencies by running
 
 ```bash
 yarn install
 ```
 
-Then, start a development server:
+in this `gui/` folder.
+
+Once installed, you can build the frontend and start a local webserver by running
+
+```bash
+yarn build && yarn preview
+```
+
+OR, start a development server (which will automatically reload when changes are made) by running
 
 ```bash
 yarn dev
 ```
 
-This will give you a local URL to navigate to, and provide
-features like reload-on-change.
+Both of these commands will provide a link to a local URL you can open in your browser.
 
-Other useful commands:
+## Testing
 
-- `yarn test` - run our automated tests with `vitest`
+We test the frontend using [`vitest`](https://vitest.dev/). The
+tests live in the `test/` folder in a hierarchy mirroring the code
+modules they are testing.
+
+To run the automated tests, use the command
+
+```bash
+yarn test
+```
+
+## Other commands
+
 - `yarn format` - format the code with `prettier`

@@ -22,7 +22,7 @@ import {
   useEffect,
   useReducer,
 } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 
 type ProjectContextType = {
   data: ProjectDataModel;

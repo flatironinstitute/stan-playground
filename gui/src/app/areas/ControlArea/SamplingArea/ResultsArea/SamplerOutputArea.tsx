@@ -20,7 +20,7 @@ export type StanDraw = {
 const SamplerOutputArea: FunctionComponent<{ latestRun: StanRun }> = ({
   latestRun,
 }) => {
-  const { draws, paramNames, computeTimeSec, consoleText, sampleConfig } =
+  const { draws, paramNames, computeTimeSec, consoleMessages, sampleConfig } =
     latestRun;
 
   // compute a useful re-shaping of the draws which is more convenient for
@@ -73,7 +73,7 @@ const SamplerOutputArea: FunctionComponent<{ latestRun: StanRun }> = ({
       <HistogramsPanel variables={variables} />
       <ScatterPlotsPanel variables={variables} />
       <TracePlotsPanel variables={variables} />
-      <ConsolePanel text={consoleText} />
+      <ConsolePanel messages={consoleMessages} />
     </TabWidget>
   );
 };
