@@ -153,7 +153,9 @@ This web application is built on the [React](https://react.dev/) framework and
 features various panels to allow editing of Stan models, compilation, sampling,
 and downstream analysis of the results. The use of WebAssembly and browser Web
 Workers to move computations off the main thread allows these computations to
-complete quickly and without freezing the user interface.
+complete quickly and without freezing the user interface. Users or developers
+can run the web frontend locally by installing [Yarn](https://yarnpkg.com/) and
+following the instructions provided in the repository. 
 
 # Similar projects
 
