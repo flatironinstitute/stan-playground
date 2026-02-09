@@ -145,8 +145,8 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
                 fileManifest[name] = content;
               }
 
-              serializeAsZip(folderName, fileManifest).then(([zipBlob, name]) =>
-                triggerDownload(zipBlob, `SP-${name}.zip`, onClose),
+              serializeAsZip(folderName, fileManifest).then((zipBlob) =>
+                triggerDownload(zipBlob, `SP-${folderName}.zip`, onClose),
               );
             }}
           >
