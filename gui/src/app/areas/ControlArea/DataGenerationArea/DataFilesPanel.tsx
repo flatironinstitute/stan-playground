@@ -30,7 +30,7 @@ const DataFilesPanel: FunctionComponent = () => {
         <UploadArea height={100} onUpload={setFiles} />
         {files.length > 0 && (
           <>
-            <h3>Uploaded files</h3>
+            <h3>Available files</h3>
             <FileListing files={files} setFiles={setFiles} />
           </>
         )}
