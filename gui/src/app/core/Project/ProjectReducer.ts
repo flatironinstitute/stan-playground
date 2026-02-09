@@ -7,6 +7,7 @@ import {
   SamplingOpts,
 } from "@SpCore/Project/ProjectDataModel";
 import { loadFromProjectFiles } from "@SpCore/Project/ProjectSerialization";
+import { File } from "@SpUtil/files";
 import { unreachable } from "@SpUtil/unreachable";
 
 export type ProjectReducerAction =
@@ -33,6 +34,7 @@ export type ProjectReducerAction =
       type: "setSamplingOpts";
       opts: Partial<SamplingOpts>;
     }
+  | { type: "setExtraDataFiles"; files: File[] }
   | {
       type: "loadInitialData";
       state: ProjectDataModel;
@@ -77,6 +79,9 @@ const ProjectReducer = (s: ProjectDataModel, a: ProjectReducerAction) => {
       }
       newState[a.filename] = s.ephemera[a.filename];
       return newState;
+    }
+    case "setExtraDataFiles": {
+      return { ...s, extraDataFiles: a.files };
     }
     case "generateData": {
       return {

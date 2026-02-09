@@ -1,16 +1,25 @@
-import { FunctionComponent } from "react";
+import { FunctionComponent, use, useCallback } from "react";
 
-import { File } from "@SpUtil/files";
 import FileListing from "@SpComponents/FileListing";
 import UploadArea from "@SpComponents/UploadArea";
 import Stack from "@mui/material/Stack";
+import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
+import { File } from "@SpUtil/files";
 
-type Props = {
-  files: File[];
-  setFiles: (f: File[] | ((prev: File[]) => File[])) => void;
-};
+const DataFilesPanel: FunctionComponent = () => {
+  const {
+    update,
+    data: { extraDataFiles: files },
+  } = use(ProjectContext);
 
-const DataFilesPanel: FunctionComponent<Props> = ({ files, setFiles }) => {
+  const setFiles = useCallback(
+    (updater: (prev: File[]) => File[]) => {
+      const newFiles = updater(files);
+      update({ type: "setExtraDataFiles", files: newFiles });
+    },
+    [update, files],
+  );
+
   return (
     <div className="dialogWrapper">
       <Stack spacing={2}>

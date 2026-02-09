@@ -15,14 +15,17 @@ import {
   parseSamplingOpts,
   persistStateToEphemera,
 } from "@SpCore/Project/ProjectDataModel";
+import { base64decode, base64encode } from "@SpUtil/files";
 import JSZip from "jszip";
 
 export const serializeProjectToLocalStorage = (
   data: ProjectDataModel,
 ): string => {
+  const b64files = (data.extraDataFiles ?? []).map(base64encode);
   const intermediary = {
     ...data,
     ephemera: undefined,
+    extraDataFiles: b64files,
   };
   return JSON.stringify(intermediary);
 };
@@ -36,6 +39,12 @@ export const deserializeProjectFromLocalStorage = (
     intermediary.ephemera = {};
     const stringFileKeys = getStringKnownFileKeys();
     stringFileKeys.forEach((k) => (intermediary.ephemera[k] = intermediary[k]));
+
+    const extraDataFiles = (intermediary.extraDataFiles ?? []).map(
+      base64decode,
+    );
+    intermediary.extraDataFiles = extraDataFiles;
+
     if (!isProjectDataModel(intermediary)) {
       console.warn(intermediary);
       throw new Error("Deserialized data is not a valid ProjectDataModel");
@@ -122,6 +131,27 @@ const loadFileFromString = (
   return newData;
 };
 
+const loadExtraDataFilesFromString = (
+  data: ProjectDataModel,
+  json: string,
+): ProjectDataModel => {
+  const newData = { ...data };
+  const parsed = JSON.parse(json);
+  if (!Array.isArray(parsed)) {
+    throw new Error("Extra data files manifest is not an array");
+  }
+  for (const item of parsed) {
+    if (typeof item.name !== "string" || typeof item.content !== "string") {
+      throw new Error(
+        "Extra data files manifest items must have name and content string properties",
+      );
+    }
+  }
+  const decodedFiles = parsed.map(base64decode);
+  newData.extraDataFiles = decodedFiles;
+  return newData;
+};
+
 export const loadFromProjectFiles = (
   data: ProjectDataModel,
   files: Partial<FieldsContentsMap>,
@@ -135,6 +165,10 @@ export const loadFromProjectFiles = (
   if (Object.keys(files).includes("samplingOpts")) {
     newData = loadSamplingOptsFromString(newData, files.samplingOpts ?? "");
     delete files["samplingOpts"];
+  }
+  if (Object.keys(files).includes("extraDataFiles")) {
+    newData = loadExtraDataFilesFromString(newData, files.extraDataFiles ?? "");
+    delete files["extraDataFiles"];
   }
   const fileKeys = Object.keys(files) as ProjectKnownFiles[];
   newData = fileKeys.reduce(

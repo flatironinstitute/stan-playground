@@ -7,7 +7,7 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 
 import { AlternatingTableRow } from "@SpComponents/StyledTables";
-import { mapModelToFileManifest } from "@SpCore/Project/FileMapping";
+import { FileNames, mapModelToFileManifest } from "@SpCore/Project/FileMapping";
 import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
 import makeRuntimeScript from "@SpCore/Scripting/Takeout/makeRuntime";
 import { triggerDownload } from "@SpUtil/triggerDownload";
@@ -129,7 +129,7 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
         <div>
           <Button
             onClick={async () => {
-              const fileManifest: { [key: string]: string } =
+              const fileManifest: { [key: string]: string | Uint8Array } =
                 mapModelToFileManifest(data);
               const folderName = replaceSpacesWithUnderscores(data.meta.title);
               if (includeRunPy) {
@@ -138,6 +138,13 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
               if (includeRunR) {
                 fileManifest["run.R"] = runR;
               }
+
+              // hack(?): actually include files in zip, when they're normally serialized for gists etc
+              delete fileManifest[FileNames.EXTRA_DATA_MANIFEST];
+              for (const { name, content } of data.extraDataFiles) {
+                fileManifest[name] = content;
+              }
+
               serializeAsZip(folderName, fileManifest).then(([zipBlob, name]) =>
                 triggerDownload(zipBlob, `SP-${name}.zip`, onClose),
               );

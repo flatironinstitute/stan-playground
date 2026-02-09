@@ -12,19 +12,15 @@ import usePyodideWorker from "@SpCore/Scripting/pyodide/usePyodideWorker";
 
 import useDataGenState from "./useDataGenState";
 import dataPyTemplate from "./code_templates/data.py?raw";
-import { File } from "@SpUtil/files";
 
 const handleHelp = () =>
   alert(
     'Write a Python script to assign data to the "data" variable and then click "Run" to generate data.',
   );
 
-type Props = {
-  files: File[];
-};
-
-const DataPyPanel: FunctionComponent<Props> = ({ files }) => {
-  const { consoleRef, status, onStatus, onData } = useDataGenState("python");
+const DataPyPanel: FunctionComponent = () => {
+  const { consoleRef, status, onStatus, onData, files } =
+    useDataGenState("python");
 
   const callbacks = useMemo(
     () => ({

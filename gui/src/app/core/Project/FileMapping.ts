@@ -29,6 +29,7 @@ export enum FileNames {
   ANALYSISRFILE = "analysis.R",
   DATAPYFILE = "data.py",
   DATARFILE = "data.R",
+  EXTRA_DATA_MANIFEST = "extra_data_files.json",
 }
 
 const isFileName = (x: any): x is FileNames => {
@@ -55,6 +56,7 @@ export const ProjectFileMap: FileMapType = {
   analysisRFileContent: FileNames.ANALYSISRFILE,
   dataPyFileContent: FileNames.DATAPYFILE,
   dataRFileContent: FileNames.DATARFILE,
+  extraDataFiles: FileNames.EXTRA_DATA_MANIFEST,
 };
 
 // The FileRegistry is the 2-3 leg of the triangle: it maps the known file names
@@ -138,6 +140,10 @@ export const mapFileContentsToModel = (
       }
       case FileNames.SAMPLING: {
         theMap.samplingOpts = files[f];
+        break;
+      }
+      case FileNames.EXTRA_DATA_MANIFEST: {
+        theMap.extraDataFiles = files[f];
         break;
       }
       default:

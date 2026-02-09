@@ -13,7 +13,10 @@ const useDataGenState = (source: "python" | "r") => {
   const [status, setStatus] = useState<InterpreterStatus>("idle");
   const consoleRef = useRef<HTMLDivElement | null>(null);
 
-  const { update } = use(ProjectContext);
+  const {
+    update,
+    data: { extraDataFiles: files },
+  } = use(ProjectContext);
 
   const onData = useCallback(
     (newData: unknown) => {
@@ -52,7 +55,7 @@ const useDataGenState = (source: "python" | "r") => {
     [update, consoleRef],
   );
 
-  return { consoleRef, status, onStatus: setStatus, onData, onStanCode };
+  return { consoleRef, status, onStatus: setStatus, onData, onStanCode, files };
 };
 
 export default useDataGenState;
