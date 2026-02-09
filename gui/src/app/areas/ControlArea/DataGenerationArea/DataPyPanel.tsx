@@ -12,13 +12,18 @@ import usePyodideWorker from "@SpCore/Scripting/pyodide/usePyodideWorker";
 
 import useDataGenState from "./useDataGenState";
 import dataPyTemplate from "./code_templates/data.py?raw";
+import { File } from "@SpUtil/files";
 
 const handleHelp = () =>
   alert(
     'Write a Python script to assign data to the "data" variable and then click "Run" to generate data.',
   );
 
-const DataPyPanel: FunctionComponent = () => {
+type Props = {
+  files: File[];
+};
+
+const DataPyPanel: FunctionComponent<Props> = ({ files }) => {
   const { consoleRef, status, onStatus, onData } = useDataGenState("python");
 
   const callbacks = useMemo(
@@ -44,9 +49,10 @@ const DataPyPanel: FunctionComponent = () => {
           producesData: true,
           filenameForErrors: FileNames.DATAPYFILE,
         },
+        files,
       });
     },
-    [consoleRef, run],
+    [consoleRef, files, run],
   );
 
   const contentOnEmpty = useTemplatedFillerText(

@@ -1,31 +1,29 @@
+import { File as SPFile } from "@SpUtil/files";
 import { FunctionComponent, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 
-type UploadFilesProps = {
+type UploadArea = {
   height: number;
-  onUpload: (
-    files: {
-      name: string;
-      content: ArrayBuffer;
-    }[],
-  ) => void;
+  onUpload: (updater: (prev: SPFile[]) => SPFile[]) => void;
 };
 
-const UploadFiles: FunctionComponent<UploadFilesProps> = ({
-  height,
-  onUpload,
-}) => {
+const UploadArea: FunctionComponent<UploadArea> = ({ height, onUpload }) => {
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
       const fileNames = acceptedFiles.map((file) => file.name);
       const fileContents = await Promise.all(
-        acceptedFiles.map((file) => file.arrayBuffer()),
+        acceptedFiles.map((file) => file.bytes()),
       );
       const files = fileNames.map((name, i) => ({
         name,
         content: fileContents[i],
       }));
-      onUpload(files);
+
+      onUpload((prev) => {
+        const newNames = files.map((f) => f.name);
+        const oldToKeep = prev.filter((f) => !newNames.includes(f.name));
+        return [...oldToKeep, ...files];
+      });
     },
     [onUpload],
   );
@@ -44,4 +42,4 @@ const UploadFiles: FunctionComponent<UploadFilesProps> = ({
   );
 };
 
-export default UploadFiles;
+export default UploadArea;

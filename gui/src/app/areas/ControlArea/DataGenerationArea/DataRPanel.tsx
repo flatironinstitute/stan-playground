@@ -4,6 +4,7 @@ import { clearOutputDivs } from "@SpCore/Scripting/OutputDivUtils";
 import { FileNames } from "@SpCore/Project/FileMapping";
 import { ProjectKnownFiles } from "@SpCore/Project/ProjectDataModel";
 import useTemplatedFillerText from "@SpComponents/FileEditor/useTemplatedFillerText";
+import { File } from "@SpUtil/files";
 
 import useWebR from "@SpCore/Scripting/webR/useWebR";
 
@@ -16,7 +17,11 @@ const handleHelp = () =>
 You can also use the "brm" function to generate the Stan code and data from a brms formula.',
   );
 
-const DataRPanel: FunctionComponent = () => {
+type Props = {
+  files: File[];
+};
+
+const DataRPanel: FunctionComponent<Props> = ({ files }) => {
   const { consoleRef, status, onStatus, onData, onStanCode } =
     useDataGenState("r");
 
@@ -25,9 +30,9 @@ const DataRPanel: FunctionComponent = () => {
   const handleRun = useCallback(
     async (code: string) => {
       clearOutputDivs(consoleRef);
-      await run({ code });
+      await run({ code, files });
     },
-    [consoleRef, run],
+    [consoleRef, files, run],
   );
 
   const contentOnEmpty = useTemplatedFillerText(

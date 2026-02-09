@@ -8,6 +8,7 @@ import {
 } from "./pyodideWorkerTypes";
 import spDrawsScript from "./sp_load_draws.py?raw";
 import spMPLScript from "./sp_patch_matplotlib.py?raw";
+import { File } from "@SpUtil/files";
 
 const loadPyodideInstance = async () => {
   const pyodide = await loadPyodide({
@@ -74,7 +75,7 @@ const run = async (
   code: string,
   spData: Record<string, any> | undefined,
   spPySettings: PyodideRunSettings,
-  files: Record<string, string> | undefined,
+  files: File[] | undefined,
   interruptBuffer: Uint8Array | undefined,
 ) => {
   setStatus("loading");
@@ -131,9 +132,8 @@ const run = async (
       }
 
       if (files) {
-        const encoder = new TextEncoder();
-        for (const [filename, content] of Object.entries(files)) {
-          await pyodide.FS.writeFile(filename, encoder.encode(content + "\n"));
+        for (const { name, content } of files) {
+          await pyodide.FS.writeFile(name, new Uint8Array(content));
         }
       }
 
@@ -148,9 +148,11 @@ const run = async (
       sendStderr(e.toString());
     } finally {
       if (files) {
-        for (const filename of Object.keys(files)) {
-          await pyodide.FS.unlink(filename);
+        const promises = [];
+        for (const { name } of files) {
+          promises.push(pyodide.FS.unlink(name));
         }
+        await Promise.all(promises);
       }
     }
 

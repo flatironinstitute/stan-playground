@@ -1,21 +1,14 @@
 import { FunctionComponent, useCallback, use, useState } from "react";
 import { useNavigate } from "react-router";
 
-import { Delete } from "@mui/icons-material";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid2";
-import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
 import FormControl from "@mui/material/FormControl";
 import TextField from "@mui/material/TextField";
 import FormHelperText from "@mui/material/FormHelperText";
 
-import { AlternatingTableRow } from "@SpComponents/StyledTables";
 import {
   FileNames,
   FileRegistry,
@@ -28,14 +21,14 @@ import {
 } from "@SpCore/Project/ProjectSerialization";
 import doesGistExist from "@SpUtil/gists/doesGistExist";
 
-import UploadFiles from "./UploadFiles";
+import UploadArea from "../../components/UploadArea";
 import {
   fromQueryParams,
   QueryParamKeys,
   queryStringHasParameters,
 } from "@SpCore/Project/ProjectQueryLoading";
-
-type File = { name: string; content: ArrayBuffer };
+import { File } from "@SpUtil/files";
+import FileListing from "@SpComponents/FileListing";
 
 type LoadProjectProps = {
   onClose: () => void;
@@ -47,7 +40,7 @@ const LoadProjectPanel: FunctionComponent<LoadProjectProps> = ({ onClose }) => {
   const [filesUploaded, setFilesUploaded] = useState<File[]>([]);
 
   const importUploadedZip = useCallback(
-    async (zipFile: ArrayBuffer) => {
+    async (zipFile: Uint8Array) => {
       try {
         const fileManifest = await deserializeZipToFiles(zipFile);
         update({
@@ -116,18 +109,18 @@ const LoadProjectPanel: FunctionComponent<LoadProjectProps> = ({ onClose }) => {
   );
 
   const onUpload = useCallback(
-    (fs: File[]) => {
-      if (fs.length === 1 && fs[0].name.endsWith(".zip")) {
-        importUploadedZip(fs[0].content);
+    (callback: (prev: File[]) => File[]) => {
+      const fs = callback(filesUploaded);
+      if (
+        fs.length === filesUploaded.length + 1 &&
+        fs[filesUploaded.length].name.endsWith(".zip")
+      ) {
+        importUploadedZip(fs[filesUploaded.length].content);
       } else {
-        setFilesUploaded((prev) => {
-          const newNames = fs.map((f) => f.name);
-          const oldToKeep = prev.filter((f) => !newNames.includes(f.name));
-          return [...oldToKeep, ...fs];
-        });
+        setFilesUploaded(fs);
       }
     },
-    [importUploadedZip],
+    [filesUploaded, importUploadedZip],
   );
 
   const { urlToLoad, setUrlToLoad, tryLoad } = useUrlLoader(setErrorText);
@@ -159,7 +152,7 @@ const LoadProjectPanel: FunctionComponent<LoadProjectProps> = ({ onClose }) => {
               <li>A GitHub Gist URL</li>
             </ul>
           </FormHelperText>
-          <UploadFiles height={300} onUpload={onUpload} />
+          <UploadArea height={300} onUpload={onUpload} />
           <FormHelperText component="div">
             You can upload:
             <ul style={{ margin: 0 }}>
@@ -183,32 +176,7 @@ const LoadProjectPanel: FunctionComponent<LoadProjectProps> = ({ onClose }) => {
 
         {filesUploaded.length > 0 && (
           <>
-            <TableContainer>
-              <Table padding="none">
-                <TableBody>
-                  {filesUploaded.map(({ name, content }) => (
-                    <AlternatingTableRow hover key={name}>
-                      <TableCell>
-                        <strong>{name}</strong>
-                      </TableCell>
-                      <TableCell>{content.byteLength} bytes</TableCell>
-                      <TableCell>
-                        <IconButton
-                          onClick={() => {
-                            setFilesUploaded((prev) =>
-                              prev.filter((f) => f.name !== name),
-                            );
-                          }}
-                          size="small"
-                        >
-                          <Delete fontSize="inherit" />
-                        </IconButton>
-                      </TableCell>
-                    </AlternatingTableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+            <FileListing files={filesUploaded} setFiles={setFilesUploaded} />
             <Grid container justifyContent="center" spacing={1}>
               <Grid>
                 <Button

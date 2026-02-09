@@ -9,6 +9,7 @@ import {
   isMessageFromPyodideWorker,
   PyodideRunSettings,
 } from "./pyodideWorkerTypes";
+import { File } from "@SpUtil/files";
 
 type PyodideWorkerCallbacks = {
   onStdout: (data: string) => void;
@@ -22,7 +23,7 @@ type RunPyProps = {
   code: string;
   spData?: Record<string, any>;
   spRunSettings: PyodideRunSettings;
-  files?: Record<string, string>;
+  files?: File[];
 };
 
 class PyodideWorkerInterface {

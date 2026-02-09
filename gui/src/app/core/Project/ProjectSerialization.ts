@@ -47,12 +47,12 @@ export const deserializeProjectFromLocalStorage = (
   }
 };
 
-export const parseFile = (fileBuffer: ArrayBuffer) => {
+export const parseFile = (fileBuffer: Uint8Array) => {
   const content = new TextDecoder().decode(fileBuffer);
   return content;
 };
 
-export const deserializeZipToFiles = async (zipBuffer: ArrayBuffer) => {
+export const deserializeZipToFiles = async (zipBuffer: Uint8Array) => {
   const zip = await JSZip.loadAsync(zipBuffer);
   const dirNames: string[] = [];
   zip.forEach((relpath, file) => file.dir && dirNames.push(relpath));
