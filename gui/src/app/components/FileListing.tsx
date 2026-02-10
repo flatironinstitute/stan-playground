@@ -29,7 +29,7 @@ const FileListing: FunctionComponent<Props> = ({ files, setFiles }) => {
       <Table padding="none">
         <TableBody>
           {files.map(({ name, content }) => {
-            let text = "Binary file";
+            let text;
             try {
               text = decoder.decode(content);
               text =
@@ -37,18 +37,19 @@ const FileListing: FunctionComponent<Props> = ({ files, setFiles }) => {
                   ? text.substring(0, 100) + " ...\n(preview truncated)"
                   : text;
             } catch {
-              // ignore
+              text = "Binary file (preview not available)";
             }
+
             return (
               <Tooltip
-                title={<div style={{ whiteSpace: "pre-line" }}>{text}</div>}
+                title={<pre className="WrappedToolTip">{text}</pre>}
                 key={name}
                 arrow
                 disableInteractive
               >
                 <AlternatingTableRow hover>
                   <TableCell>
-                    <strong> {name}</strong>
+                    <strong className="FileListingTitle"> {name}</strong>
                   </TableCell>
                   <TableCell>{content.byteLength} bytes</TableCell>
                   <TableCell>
