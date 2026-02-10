@@ -15,10 +15,7 @@ import {
   mapFileContentsToModel,
 } from "@SpCore/Project/FileMapping";
 import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
-import {
-  deserializeZipToFiles,
-  parseFile,
-} from "@SpCore/Project/ProjectSerialization";
+import { deserializeZipToFiles } from "@SpCore/Project/ProjectSerialization";
 import doesGistExist from "@SpUtil/gists/doesGistExist";
 
 import UploadArea from "../../components/UploadArea";
@@ -27,7 +24,7 @@ import {
   QueryParamKeys,
   queryStringHasParameters,
 } from "@SpCore/Project/ProjectQueryLoading";
-import { File } from "@SpUtil/files";
+import { File, tryDecodeText } from "@SpUtil/files";
 import FileListing from "@SpComponents/FileListing";
 
 type LoadProjectProps = {
@@ -69,7 +66,13 @@ const LoadProjectPanel: FunctionComponent<LoadProjectProps> = ({ onClose }) => {
             if (stanFileName !== "") {
               throw new Error("Only one .stan file can be uploaded at a time");
             }
-            files["main.stan"] = parseFile(file.content);
+            const stanContent = tryDecodeText(file.content);
+            if (stanContent === undefined) {
+              throw new Error(
+                `Stan file ${file.name} is not a valid text file`,
+              );
+            }
+            files["main.stan"] = stanContent;
             stanFileName = file.name;
             continue;
           }
@@ -82,7 +85,11 @@ const LoadProjectPanel: FunctionComponent<LoadProjectProps> = ({ onClose }) => {
           if (!Object.values(FileNames).includes(file.name as any)) {
             throw new Error(`Unsupported file name: ${file.name}`);
           }
-          files[file.name as FileNames] = parseFile(file.content);
+          const content = tryDecodeText(file.content);
+          if (content === undefined) {
+            throw new Error(`File ${file.name} is not a valid text file`);
+          }
+          files[file.name as FileNames] = content;
         }
 
         const fileManifest = mapFileContentsToModel(files);

@@ -4,6 +4,7 @@ import {
   FileRegistry,
   ProjectFileMap,
   mapFileContentsToModel,
+  mapModelToFileManifest,
 } from "@SpCore/Project/FileMapping";
 import {
   ProjectDataModel,
@@ -15,7 +16,9 @@ import {
   parseSamplingOpts,
   persistStateToEphemera,
 } from "@SpCore/Project/ProjectDataModel";
-import { base64decode, base64encode } from "@SpUtil/files";
+import { base64decode, base64encode, tryDecodeText } from "@SpUtil/files";
+import { replaceSpacesWithUnderscores } from "@SpUtil/replaceSpaces";
+import { serializeAsZip } from "@SpUtil/serializeAsZip";
 import JSZip from "jszip";
 
 export const serializeProjectToLocalStorage = (
@@ -56,9 +59,28 @@ export const deserializeProjectFromLocalStorage = (
   }
 };
 
-export const parseFile = (fileBuffer: Uint8Array) => {
-  const content = new TextDecoder().decode(fileBuffer);
-  return content;
+export const serializeProjectToZip = async (
+  data: ProjectDataModel,
+  runPy: string | null,
+  runR: string | null,
+): Promise<[Blob, string]> => {
+  const fileManifest: { [key: string]: string | Uint8Array } =
+    mapModelToFileManifest(data);
+  const folderName = replaceSpacesWithUnderscores(data.meta.title);
+  if (runPy) {
+    fileManifest["run.py"] = runPy;
+  }
+  if (runR) {
+    fileManifest["run.R"] = runR;
+  }
+
+  // hack(?): actually include files in zip, when they're normally serialized for gists etc
+  delete fileManifest[FileNames.EXTRA_DATA_MANIFEST];
+  for (const { name, content } of data.extraDataFiles) {
+    fileManifest[name] = content;
+  }
+
+  return [await serializeAsZip(folderName, fileManifest), folderName];
 };
 
 export const deserializeZipToFiles = async (zipBuffer: Uint8Array) => {
@@ -76,6 +98,8 @@ export const deserializeZipToFiles = async (zipBuffer: Uint8Array) => {
   });
   const folderLength = folderName.length;
   const files: { [name: string]: string } = {};
+
+  const extraDataFiles: { name: string; b64contents: string }[] = [];
   // we want to use a traditional for loop here, since async doesn't do nicely with higher-order callbacks
   for (const name in zip.files) {
     const file = zip.files[name];
@@ -83,14 +107,24 @@ export const deserializeZipToFiles = async (zipBuffer: Uint8Array) => {
     const basename = name.substring(folderLength);
     if (Object.values(ProjectFileMap).includes(basename as FileNames)) {
       const content = await file.async("arraybuffer");
-      const decoded = new TextDecoder().decode(content);
+      const decoded = tryDecodeText(new Uint8Array(content));
+      if (decoded === undefined) {
+        throw new Error(`File ${basename} is not a valid text file`);
+      }
       files[basename] = decoded;
     } else if (!["run.R", "run.py"].includes(basename)) {
-      throw new Error(
-        `Unrecognized file in zip: ${file.name} (basename ${basename})`,
-      );
+      const content = await file.async("arraybuffer");
+      const f = base64encode({
+        name: basename,
+        content: new Uint8Array(content),
+      });
+      extraDataFiles.push(f);
     }
   }
+  if (extraDataFiles.length > 0) {
+    files[FileNames.EXTRA_DATA_MANIFEST] = JSON.stringify(extraDataFiles);
+  }
+
   return mapFileContentsToModel(files as Partial<FileRegistry>);
 };
 
@@ -141,9 +175,9 @@ const loadExtraDataFilesFromString = (
     throw new Error("Extra data files manifest is not an array");
   }
   for (const item of parsed) {
-    if (typeof item.name !== "string" || typeof item.content !== "string") {
+    if (typeof item.name !== "string" || typeof item.b64contents !== "string") {
       throw new Error(
-        "Extra data files manifest items must have name and content string properties",
+        "Extra data files manifest items must have name and b64contents string properties",
       );
     }
   }

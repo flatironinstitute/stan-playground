@@ -9,7 +9,7 @@ import TableContainer from "@mui/material/TableContainer";
 import Tooltip from "@mui/material/Tooltip";
 
 import { AlternatingTableRow } from "@SpComponents/StyledTables";
-import { File } from "@SpUtil/files";
+import { File, tryDecodeText } from "@SpUtil/files";
 
 type Props = {
   files: File[];
@@ -23,22 +23,17 @@ const FileListing: FunctionComponent<Props> = ({ files, setFiles }) => {
     },
     [setFiles],
   );
-  const decoder = new TextDecoder("utf-8", { fatal: true });
   return (
     <TableContainer>
       <Table padding="none">
         <TableBody>
           {files.map(({ name, content }) => {
-            let text;
-            try {
-              text = decoder.decode(content);
-              text =
-                text.length > 100
-                  ? text.substring(0, 100) + " ...\n(preview truncated)"
-                  : text;
-            } catch {
-              text = "Binary file (preview not available)";
-            }
+            let text =
+              tryDecodeText(content) ?? "Binary file (preview not available)";
+            text =
+              text.length > 100
+                ? text.substring(0, 100) + " ...\n(preview truncated)"
+                : text;
 
             return (
               <Tooltip

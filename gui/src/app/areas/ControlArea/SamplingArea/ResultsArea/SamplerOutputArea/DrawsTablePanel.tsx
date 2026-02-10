@@ -12,8 +12,8 @@ import {
   SuccessColoredTableHead,
 } from "@SpComponents/StyledTables";
 import { SampleConfig } from "@SpCore/StanSampler/SamplerTypes";
+import { serializeAsZip } from "@SpUtil/serializeAsZip";
 import { triggerDownload } from "@SpUtil/triggerDownload";
-import JSZip from "jszip";
 import { FunctionComponent, useCallback, useMemo, useState } from "react";
 
 type DrawsTableProps = {
@@ -49,13 +49,7 @@ const DrawsTablePanel: FunctionComponent<DrawsTableProps> = ({
   const handleExportToMultipleCsvs = useCallback(async () => {
     const csvTexts = prepareMultipleCsvsText(draws, paramNames, numChains);
     const blob = await createZipBlobForMultipleCsvs(csvTexts, sampleConfig);
-    const fileName = "SP-draws.zip";
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    a.click();
-    URL.revokeObjectURL(url);
+    triggerDownload(blob, "SP-draws.zip", () => {});
   }, [draws, paramNames, numChains, sampleConfig]);
 
   return (
@@ -165,17 +159,12 @@ const createZipBlobForMultipleCsvs = async (
   csvTexts: string[],
   sampleConfig: SampleConfig,
 ) => {
-  const zip = new JSZip();
-  // put them all in a folder called 'draws'
-  const folder = zip.folder("draws");
-  if (!folder) throw new Error("Failed to create folder");
-  csvTexts.forEach((text, i) => {
-    folder.file(`chain_${i + 1}.csv`, text);
+  return await serializeAsZip("draws", {
+    ...Object.fromEntries(
+      csvTexts.map((text, i) => [`chain_${i + 1}.csv`, text]),
+    ),
+    "sampling_opts.json": JSON.stringify(sampleConfig, null, 2),
   });
-  const sampleConfigText = JSON.stringify(sampleConfig, null, 2);
-  folder.file("sampling_opts.json", sampleConfigText);
-  const blob = await zip.generateAsync({ type: "blob" });
-  return blob;
 };
 
 const downloadTextFile = (text: string, filename: string) => {
