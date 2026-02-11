@@ -1,7 +1,6 @@
 export type File = { name: string; content: Uint8Array };
 
 const encoder = new TextEncoder();
-
 export const encodeTextFile = (name: string, content: string): File => {
   return {
     name,
@@ -10,8 +9,7 @@ export const encodeTextFile = (name: string, content: string): File => {
 };
 
 const decoder = new TextDecoder();
-
-export const tryDecodeText = (content: Uint8Array): string | undefined => {
+export const tryDecodeText = (content: ArrayBufferLike): string | undefined => {
   try {
     return decoder.decode(content);
   } catch {
@@ -19,23 +17,23 @@ export const tryDecodeText = (content: Uint8Array): string | undefined => {
   }
 };
 
-export const base64encode = (
-  f: File,
-): { name: string; b64contents: string } => {
+export type base64EncodedFile = { name: string; b64contents: string };
+
+export const base64encode = ({ name, content }: File): base64EncodedFile => {
   return {
-    name: f.name,
+    name,
     b64contents: btoa(
-      f.content.reduce((data, byte) => data + String.fromCharCode(byte), ""),
+      content.reduce((data, byte) => data + String.fromCharCode(byte), ""),
     ),
   };
 };
 
-export const base64decode = (d: {
-  name: string;
-  b64contents: string;
-}): File => {
+export const base64decode = ({
+  name,
+  b64contents,
+}: base64EncodedFile): File => {
   return {
-    name: d.name,
-    content: Uint8Array.from(atob(d.b64contents), (c) => c.charCodeAt(0)),
+    name,
+    content: Uint8Array.from(atob(b64contents), (c) => c.charCodeAt(0)),
   };
 };

@@ -107,7 +107,7 @@ export const deserializeZipToFiles = async (zipBuffer: Uint8Array) => {
     const basename = name.substring(folderLength);
     if (Object.values(ProjectFileMap).includes(basename as FileNames)) {
       const content = await file.async("arraybuffer");
-      const decoded = tryDecodeText(new Uint8Array(content));
+      const decoded = tryDecodeText(content);
       if (decoded === undefined) {
         throw new Error(`File ${basename} is not a valid text file`);
       }

@@ -133,7 +133,7 @@ const run = async (
 
       if (files) {
         for (const { name, content } of files) {
-          await pyodide.FS.writeFile(name, new Uint8Array(content));
+          await pyodide.FS.writeFile(name, content);
         }
       }
 
