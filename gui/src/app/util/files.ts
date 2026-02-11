@@ -9,7 +9,9 @@ export const encodeTextFile = (name: string, content: string): File => {
 };
 
 const decoder = new TextDecoder();
-export const tryDecodeText = (content: ArrayBufferLike): string | undefined => {
+export const tryDecodeText = (
+  content: AllowSharedBufferSource,
+): string | undefined => {
   try {
     return decoder.decode(content);
   } catch {
@@ -18,6 +20,8 @@ export const tryDecodeText = (content: ArrayBufferLike): string | undefined => {
 };
 
 export type base64EncodedFile = { name: string; b64contents: string };
+
+// TODO: use Uint8Array.toBase64 and Uint8Array.fromBase64 when it has been available for longer
 
 export const base64encode = ({ name, content }: File): base64EncodedFile => {
   return {

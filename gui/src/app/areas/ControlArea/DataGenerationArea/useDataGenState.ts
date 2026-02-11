@@ -35,6 +35,7 @@ const useDataGenState = (source: "python" | "r") => {
         "stdout",
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- source intentionally excluded
     [update, consoleRef],
   );
 

@@ -336,8 +336,12 @@ describe("Project reducer", () => {
   });
 
   describe("Setting extra files", () => {
-    test("Updates data file and ephemera with new data", () => {
-      const initialState = {} as any as ProjectDataModel;
+    test("Extra data files are set to expected value", () => {
+      const initialState = {
+        extraDataFiles: [
+          encodeTextFile("extra_before.txt", "old extra file content"),
+        ],
+      } as any as ProjectDataModel;
 
       const extraFiles = [encodeTextFile("extra1.txt", "extra file content")];
       const extraAction: ProjectReducerAction = {

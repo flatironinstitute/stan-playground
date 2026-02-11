@@ -24,7 +24,7 @@ import JSZip from "jszip";
 export const serializeProjectToLocalStorage = (
   data: ProjectDataModel,
 ): string => {
-  const b64files = (data.extraDataFiles ?? []).map(base64encode);
+  const b64files = data.extraDataFiles.map(base64encode);
   const intermediary = {
     ...data,
     ephemera: undefined,
