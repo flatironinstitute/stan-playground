@@ -7,11 +7,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { CompileContext } from "@SpCore/Compilation/CompileContextProvider";
 import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
 
-type CompileButtonProps = {
-  // No props
-};
-
-const CompileButton: FunctionComponent<CompileButtonProps> = () => {
+const CompileButton: FunctionComponent = () => {
   const { data: projectData } = use(ProjectContext);
 
   const { compile, compileStatus, validSyntax, isConnected } =

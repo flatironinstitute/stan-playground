@@ -36,9 +36,10 @@ const SamplingOptsPanel: FunctionComponent<SamplingOptsPanelProps> = ({
 }) => {
   const readOnly = !setSamplingOpts;
 
-  const handleReset = useCallback(() => {
-    setSamplingOpts && setSamplingOpts(defaultSamplingOpts);
-  }, [setSamplingOpts]);
+  const handleReset = useCallback(
+    () => setSamplingOpts && setSamplingOpts(defaultSamplingOpts),
+    [setSamplingOpts],
+  );
 
   return (
     <Stack direction={direction} spacing={1}>

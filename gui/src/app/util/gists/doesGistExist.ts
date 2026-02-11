@@ -15,7 +15,7 @@ const doesGistExist = async (gistUri: string): Promise<boolean> => {
     }
     const result = await r.json();
     return result.exists === true;
-  } catch (e) {
+  } catch {
     return false;
   }
 };

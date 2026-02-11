@@ -137,11 +137,7 @@ const RunCompact: FunctionComponent<EmbeddedBottomBarProps> = ({
   );
 };
 
-type SiteButtonsProps = {
-  // empty
-};
-
-const SiteButtons: FunctionComponent<SiteButtonsProps> = () => {
+const SiteButtons: FunctionComponent = () => {
   const { data } = use(ProjectContext);
 
   const modelIsSaved = useMemo(() => {

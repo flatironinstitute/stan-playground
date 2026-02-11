@@ -29,6 +29,8 @@ jobs:
           cache-dependency-path: gui/yarn.lock
       - name: Install dependencies
         run: cd gui; yarn
+      - name: Lint
+        run: cd gui; yarn format --check && yarn lint
       - name: Test
         run: cd gui; yarn test
       - name: Upload coverage reports to Codecov
