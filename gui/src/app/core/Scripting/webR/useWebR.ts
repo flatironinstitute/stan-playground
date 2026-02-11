@@ -100,9 +100,11 @@ const useWebR = ({
           const options = { ...captureOutputOptions, env };
 
           if (files) {
+            const promises = [];
             for (const { name, content } of files) {
-              await webR.FS.writeFile(name, content);
+              promises.push(webR.FS.writeFile(name, content));
             }
+            await Promise.all(promises);
           }
           // setup
           await webR.evalRVoid(webRPreamble, options);

@@ -104,37 +104,38 @@ const run = async (
 
     let succeeded = false;
     try {
-      const packageFutures = [];
+      const setUpPromises = [];
       let patch_http = false;
       const micropip = pyodide.pyimport("micropip");
 
       if (spPySettings.showsPlots) {
-        packageFutures.push(pyodide.loadPackage("matplotlib"));
+        setUpPromises.push(pyodide.loadPackage("matplotlib"));
 
         if (script.includes("arviz")) {
-          packageFutures.push(micropip.install("arviz"));
+          setUpPromises.push(micropip.install("arviz"));
         }
       }
       if (script.includes("requests") || script.includes("https://")) {
         patch_http = true;
-        packageFutures.push(
+        setUpPromises.push(
           micropip.install(["requests", "lzma", "pyodide-http"]),
         );
       }
-      packageFutures.push(micropip.install("stanio"));
-      packageFutures.push(pyodide.loadPackagesFromImports(script));
-      await Promise.all(packageFutures);
+      setUpPromises.push(micropip.install("stanio"));
+      setUpPromises.push(pyodide.loadPackagesFromImports(script));
+
+      if (files) {
+        for (const { name, content } of files) {
+          setUpPromises.push(pyodide.FS.writeFile(name, content));
+        }
+      }
+      await Promise.all(setUpPromises);
+
       if (patch_http) {
         await pyodide.runPythonAsync(`
         from pyodide_http import patch_all
         patch_all()
         `);
-      }
-
-      if (files) {
-        for (const { name, content } of files) {
-          await pyodide.FS.writeFile(name, content);
-        }
       }
 
       setStatus("running");
