@@ -118,11 +118,8 @@ const LoadProjectPanel: FunctionComponent<LoadProjectProps> = ({ onClose }) => {
   const onUpload = useCallback(
     (callback: (prev: File[]) => File[]) => {
       const fs = callback(filesUploaded);
-      if (
-        fs.length === filesUploaded.length + 1 &&
-        fs[filesUploaded.length].name.endsWith(".zip")
-      ) {
-        importUploadedZip(fs[filesUploaded.length].content);
+      if (fs.length === 1 && fs[filesUploaded.length].name.endsWith(".zip")) {
+        importUploadedZip(fs[0].content);
       } else {
         setFilesUploaded(fs);
       }

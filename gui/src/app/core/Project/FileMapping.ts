@@ -32,7 +32,7 @@ export enum FileNames {
   EXTRA_DATA_MANIFEST = "extra_data_files.json",
 }
 
-const isFileName = (x: any): x is FileNames => {
+export const isFileName = (x: any): x is FileNames => {
   return Object.values(FileNames).includes(x);
 };
 

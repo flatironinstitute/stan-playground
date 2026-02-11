@@ -1,10 +1,13 @@
-import { FunctionComponent, use, useCallback } from "react";
+import { FunctionComponent, use, useCallback, useState } from "react";
+
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 import FileListing from "@SpComponents/FileListing";
 import UploadArea from "@SpComponents/UploadArea";
-import Stack from "@mui/material/Stack";
 import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
 import { File } from "@SpUtil/files";
+import { isFileName as isProjectFile } from "@SpCore/Project/FileMapping";
 
 const DataFilesPanel: FunctionComponent = () => {
   const {
@@ -12,12 +15,36 @@ const DataFilesPanel: FunctionComponent = () => {
     data: { extraDataFiles: files },
   } = use(ProjectContext);
 
+  const [errorText, setErrorText] = useState<string>("");
+
   const setFiles = useCallback(
     (updater: (prev: File[]) => File[]) => {
+      setErrorText("");
       const newFiles = updater(files);
-      update({ type: "setExtraDataFiles", files: newFiles });
+
+      const validFiles = [];
+      const invalidFiles = [];
+      for (const file of newFiles) {
+        if (
+          isProjectFile(file.name) ||
+          file.name == "run.py" ||
+          file.name == "run.R"
+        ) {
+          invalidFiles.push(file.name);
+          continue;
+        }
+        validFiles.push(file);
+      }
+      if (invalidFiles.length > 0) {
+        setErrorText(
+          "Error: The following files have names that are already in use by Stan Playground and were not added: " +
+            invalidFiles.join(", "),
+        );
+      }
+
+      update({ type: "setExtraDataFiles", files: validFiles });
     },
-    [update, files],
+    [update, files, setErrorText],
   );
 
   return (
@@ -28,6 +55,9 @@ const DataFilesPanel: FunctionComponent = () => {
           them from the data scripts.
         </div>
         <UploadArea height={100} onUpload={setFiles} />
+        {errorText !== "" && (
+          <Typography color="error.main">{errorText}</Typography>
+        )}
         {files.length > 0 && (
           <>
             <h3>Available files</h3>
