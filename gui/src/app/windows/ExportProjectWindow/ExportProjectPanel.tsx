@@ -40,20 +40,12 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
   const [runR, setRunR] = useState("");
 
   useEffect(() => {
-    if (includeRunPy) {
-      makeRuntimeScript(data, "py").then(setRunPy);
-    } else {
-      setRunPy("");
-    }
-  }, [includeRunPy, data]);
+    makeRuntimeScript(data, "py").then(setRunPy);
+  }, [data]);
 
   useEffect(() => {
-    if (includeRunR) {
-      makeRuntimeScript(data, "R").then(setRunR);
-    } else {
-      setRunR("");
-    }
-  }, [includeRunR, data]);
+    makeRuntimeScript(data, "R").then(setRunR);
+  }, [data]);
 
   return (
     <div className="dialogWrapper">
@@ -101,7 +93,7 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
                   checked={includeRunPy}
                   onChange={(e) => setIncludeRunPy(e.target.checked)}
                 />
-                &nbsp; {runPy.length} bytes
+                &nbsp; {includeRunPy ? runPy.length : 0} bytes
               </TableCell>
             </AlternatingTableRow>
             <AlternatingTableRow
@@ -117,7 +109,7 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
                   checked={includeRunR}
                   onChange={(e) => setIncludeRunR(e.target.checked)}
                 />
-                &nbsp; {runR.length} bytes
+                &nbsp; {includeRunR ? runR.length : 0} bytes
               </TableCell>
             </AlternatingTableRow>
           </TableBody>

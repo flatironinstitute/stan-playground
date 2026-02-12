@@ -6,23 +6,16 @@ import { CompileContext } from "@SpCore/Compilation/CompileContextProvider";
 import useStanSampler from "@SpCore/StanSampler/useStanSampler";
 import EmbeddedBottomBar from "@SpPages/EmbeddedBottomBar";
 import SettingsWindow from "@SpWindows/SettingsWindow";
-import { FunctionComponent, use, useEffect, useState } from "react";
+import { FunctionComponent, use, useEffect } from "react";
 
 const HomeEmbedded: FunctionComponent = () => {
   const { compiledMainJsUrl } = use(CompileContext);
   const { sampler, samplerState } = useStanSampler(compiledMainJsUrl);
-  const [currentTab, setCurrentTab] = useState<number | undefined>(undefined);
 
-  useEffect(() => {
-    if (
-      samplerState.status === "completed" ||
-      samplerState.status === "failed"
-    ) {
-      setCurrentTab(2); // Switch to output tab (third tab)
-    } else {
-      setCurrentTab(undefined);
-    }
-  }, [samplerState.status]);
+  let forcedTab: number | undefined = undefined;
+  if (samplerState.status === "completed" || samplerState.status === "failed") {
+    forcedTab = 2; // Switch to output tab (third tab)
+  }
 
   useEffect(() => {
     document.title = "Stan Playground Embedded";
@@ -33,7 +26,7 @@ const HomeEmbedded: FunctionComponent = () => {
       <div style={{ flex: 1, minHeight: 0 }}>
         <TabWidget
           labels={["Stan", "Data", "Output"]}
-          forcedSelection={currentTab}
+          forcedSelection={forcedTab}
         >
           <ModelEditorPanel />
           <DataEditorPanel />

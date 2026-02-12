@@ -41,11 +41,9 @@ const useAnalysisState = (samplerState: SamplerState) => {
   }, [samplerStatus, draws, numChains, paramNames]);
 
   const [status, setStatus] = useState<InterpreterStatus>("idle");
-
-  const [runnable, setRunnable] = useState<boolean>(true);
-  const [notRunnableReason, setNotRunnableReason] = useState<string>("");
-
   const isDataDefined = useMemo(() => spData !== undefined, [spData]);
+  const runnable = isDataDefined && !isInterpreterBusy(status);
+  const notRunnableReason = !isDataDefined ? "Run sampler first." : "";
 
   const files = useMemo(() => {
     if (samplingOpts?.data === undefined) {
@@ -53,20 +51,7 @@ const useAnalysisState = (samplerState: SamplerState) => {
     } else {
       return [encodeTextFile(FileNames.DATAFILE, samplingOpts.data)];
     }
-  }, [samplingOpts?.data]);
-
-  useEffect(() => {
-    if (!isDataDefined) {
-      setRunnable(false);
-      setNotRunnableReason("Run sampler first.");
-    } else if (isInterpreterBusy(status)) {
-      setRunnable(false);
-      setNotRunnableReason("");
-    } else {
-      setRunnable(true);
-      setNotRunnableReason("");
-    }
-  }, [isDataDefined, status]);
+  }, [samplingOpts]);
 
   return {
     consoleRef,

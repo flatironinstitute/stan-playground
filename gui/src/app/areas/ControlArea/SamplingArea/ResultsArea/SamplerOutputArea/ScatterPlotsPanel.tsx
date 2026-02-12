@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type FunctionComponent,
-} from "react";
+import { useCallback, useMemo, useState, type FunctionComponent } from "react";
 
 import type { StanDraw } from "../SamplerOutputArea";
 
@@ -83,10 +77,7 @@ const VariableSelection: FunctionComponent<SelectionProps> = ({
     [hitLimit, value],
   );
 
-  const [showCheckbox, setShowCheckbox] = useState(false);
-  useEffect(() => {
-    setShowCheckbox(value.length === 3);
-  }, [value.length]);
+  const showCheckbox = value.length === 3;
 
   return (
     <Stack
