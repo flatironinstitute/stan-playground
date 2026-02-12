@@ -17,10 +17,12 @@ compiler for instant feedback.
 
 Data can be provided in JSON format in its own editor, or can be generated from code written in R
 (using [webR](https://docs.r-wasm.org/webr/latest/)) or Python (using [pyodide](https://pyodide.org/en/stable/)),
-including code that imports published datasets.
+including code that imports published datasets from the web or from files added in the "additional files" tab.
 
 ![2a: Data Editor](https://github.com/user-attachments/assets/6330e876-1764-4860-8fe7-b6568e7f2d8f)
-![2b: Data Generation](https://github.com/user-attachments/assets/a4234c85-468a-48f7-a395-d1bc9f2c4fdc)
+![2b: Data Generation](https://github.com/user-attachments/assets/efe80c59-80d8-47b5-8f92-31f9afe56729)
+![2b: Additional Files for Data Generation](https://github.com/user-attachments/assets/965107b3-008a-4177-b36b-97d937a90404)
+(with this the scripts can access `park.csv`. E.g., data.R could call `read.csv("park.csv")` and use that to produce data.json)
 
 ## 3: Compiling and Running
 
