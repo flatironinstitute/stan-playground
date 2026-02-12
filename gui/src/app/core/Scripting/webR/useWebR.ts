@@ -7,6 +7,7 @@ import webRPreamble from "./webR_preamble.R?raw";
 import webRBRMS from "./webR_brms.R?raw";
 import dataPostamble from "./data_postamble.R?raw";
 import stanCodePostamble from "./stan_code_postamble.R?raw";
+import { File } from "@SpUtil/files";
 
 const captureOutputOptions = {
   withAutoprint: true,
@@ -26,7 +27,7 @@ type useWebRProps = {
 type RunRProps = {
   code: string;
   spData?: Record<string, any>;
-  files?: Record<string, string>;
+  files?: File[];
 };
 
 const useWebR = ({
@@ -99,10 +100,11 @@ const useWebR = ({
           const options = { ...captureOutputOptions, env };
 
           if (files) {
-            const encoder = new TextEncoder();
-            for (const [name, content] of Object.entries(files)) {
-              await webR.FS.writeFile(name, encoder.encode(content + "\n"));
+            const promises = [];
+            for (const { name, content } of files) {
+              promises.push(webR.FS.writeFile(name, content));
             }
+            await Promise.all(promises);
           }
           // setup
           await webR.evalRVoid(webRPreamble, options);
@@ -122,7 +124,7 @@ const useWebR = ({
         } finally {
           const promises = [shelter.purge()];
           if (files) {
-            for (const [name] of Object.entries(files)) {
+            for (const { name } of files) {
               promises.push(webR.FS.unlink(name));
             }
           }

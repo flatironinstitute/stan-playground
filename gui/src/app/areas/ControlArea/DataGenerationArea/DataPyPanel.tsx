@@ -19,7 +19,8 @@ const handleHelp = () =>
   );
 
 const DataPyPanel: FunctionComponent = () => {
-  const { consoleRef, status, onStatus, onData } = useDataGenState("python");
+  const { consoleRef, status, onStatus, onData, files } =
+    useDataGenState("python");
 
   const callbacks = useMemo(
     () => ({
@@ -44,9 +45,10 @@ const DataPyPanel: FunctionComponent = () => {
           producesData: true,
           filenameForErrors: FileNames.DATAPYFILE,
         },
+        files,
       });
     },
-    [consoleRef, run],
+    [consoleRef, files, run],
   );
 
   const contentOnEmpty = useTemplatedFillerText(

@@ -3,6 +3,7 @@ import {
   InterpreterStatus,
   isInterpreterStatus,
 } from "@SpCore/Scripting/InterpreterTypes";
+import { File } from "@SpUtil/files";
 
 export type PyodideRunSettings = Partial<{
   loadsDraws: boolean;
@@ -16,7 +17,7 @@ export type MessageToPyodideWorker = {
   code: string;
   spData: Record<string, any> | undefined;
   spRunSettings: PyodideRunSettings;
-  files: Record<string, string> | undefined;
+  files: File[] | undefined;
   interruptBuffer: Uint8Array | undefined;
 };
 

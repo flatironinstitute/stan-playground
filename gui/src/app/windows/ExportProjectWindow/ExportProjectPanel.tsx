@@ -8,11 +8,10 @@ import TextField from "@mui/material/TextField";
 
 import { AlternatingTableRow } from "@SpComponents/StyledTables";
 import { mapModelToFileManifest } from "@SpCore/Project/FileMapping";
+import { serializeProjectToZip } from "@SpCore/Project/ProjectSerialization";
 import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
 import makeRuntimeScript from "@SpCore/Scripting/Takeout/makeRuntime";
 import { triggerDownload } from "@SpUtil/triggerDownload";
-import { replaceSpacesWithUnderscores } from "@SpUtil/replaceSpaces";
-import { serializeAsZip } from "@SpUtil/serializeAsZip";
 
 import GistExportPanel from "./GistExportPanel";
 import GistUpdatePanel from "./GistUpdatePanel";
@@ -129,17 +128,12 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
         <div>
           <Button
             onClick={async () => {
-              const fileManifest: { [key: string]: string } =
-                mapModelToFileManifest(data);
-              const folderName = replaceSpacesWithUnderscores(data.meta.title);
-              if (includeRunPy) {
-                fileManifest["run.py"] = runPy;
-              }
-              if (includeRunR) {
-                fileManifest["run.R"] = runR;
-              }
-              serializeAsZip(folderName, fileManifest).then(([zipBlob, name]) =>
-                triggerDownload(zipBlob, `SP-${name}.zip`, onClose),
+              serializeProjectToZip(
+                data,
+                includeRunPy ? runPy : null,
+                includeRunR ? runR : null,
+              ).then(([zipBlob, filename]) =>
+                triggerDownload(zipBlob, `SP-${filename}.zip`, onClose),
               );
             }}
           >

@@ -190,7 +190,6 @@ span.EditorTitle {
   min-width: 8em;
 }
 
-
 /* Save/Load Project ------ */
 .GistExplainer {
   max-width: 800px;
@@ -232,4 +231,13 @@ span.EditorTitle {
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+.WrappedToolTip {
+  white-space: pre-line;
+}
+
+.FileListingTitle {
+  font-size: 14px;
+  padding-left: 1em;
 }

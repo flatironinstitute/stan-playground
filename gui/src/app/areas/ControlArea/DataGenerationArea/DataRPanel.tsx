@@ -17,7 +17,7 @@ You can also use the "brm" function to generate the Stan code and data from a br
   );
 
 const DataRPanel: FunctionComponent = () => {
-  const { consoleRef, status, onStatus, onData, onStanCode } =
+  const { consoleRef, status, onStatus, onData, onStanCode, files } =
     useDataGenState("r");
 
   const { run, cancel } = useWebR({ consoleRef, onStatus, onData, onStanCode });
@@ -25,9 +25,9 @@ const DataRPanel: FunctionComponent = () => {
   const handleRun = useCallback(
     async (code: string) => {
       clearOutputDivs(consoleRef);
-      await run({ code });
+      await run({ code, files });
     },
-    [consoleRef, run],
+    [consoleRef, files, run],
   );
 
   const contentOnEmpty = useTemplatedFillerText(

@@ -5,6 +5,7 @@ import {
 } from "@SpCore/Scripting/InterpreterTypes";
 import { clearOutputDivs } from "@SpCore/Scripting/OutputDivUtils";
 import { SamplerState } from "@SpCore/StanSampler/SamplerTypes";
+import { encodeTextFile } from "@SpUtil/files";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 export type GlobalDataForAnalysis = {
@@ -50,9 +51,7 @@ const useAnalysisState = (samplerState: SamplerState) => {
     if (samplingOpts?.data === undefined) {
       return undefined;
     } else {
-      return {
-        [FileNames.DATAFILE]: samplingOpts.data,
-      };
+      return [encodeTextFile(FileNames.DATAFILE, samplingOpts.data)];
     }
   }, [samplingOpts?.data]);
 

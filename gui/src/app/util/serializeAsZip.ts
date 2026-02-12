@@ -2,8 +2,8 @@ import JSZip from "jszip";
 
 export const serializeAsZip = async (
   folderName: string,
-  files: { [key: string]: string } = {},
-): Promise<[Blob, string]> => {
+  files: { [key: string]: string | Uint8Array } = {},
+): Promise<Blob> => {
   const zip = new JSZip();
   const folder = zip.folder(folderName);
   if (!folder) {
@@ -11,11 +11,14 @@ export const serializeAsZip = async (
   }
 
   Object.entries(files).forEach(([name, content]) => {
-    if (content.trim() !== "") {
+    if (typeof content === "string") {
+      content = content.trim();
+    }
+    if (content.length > 0) {
       folder.file(name, content);
     }
   });
   const zipBlob = await zip.generateAsync({ type: "blob" });
 
-  return [zipBlob, folderName];
+  return zipBlob;
 };

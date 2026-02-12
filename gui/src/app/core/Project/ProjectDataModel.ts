@@ -1,5 +1,6 @@
 import baseObjectCheck from "@SpUtil/baseObjectCheck";
 import { ProjectFileMap } from "@SpCore/Project/FileMapping";
+import { base64encode, File } from "@SpUtil/files";
 
 export enum ProjectKnownFiles {
   STANFILE = "stanFileContent",
@@ -82,6 +83,7 @@ const isProjectFiles = (x: any): x is ProjectFiles => {
 
 type ProjectBase = ProjectFiles & {
   samplingOpts: SamplingOpts;
+  extraDataFiles: File[];
 };
 
 const isProjectBase = (x: any): x is ProjectBase => {
@@ -158,6 +160,7 @@ export const initialDataModel: ProjectDataModel = {
   dataPyFileContent: "",
   dataRFileContent: "",
   samplingOpts: defaultSamplingOpts,
+  extraDataFiles: [],
 };
 
 export const persistStateToEphemera = (
@@ -193,6 +196,11 @@ export const stringifyField = (
   if (field === "ephemera") return "";
   const value = data[field];
   if (typeof value === "string") return value;
+  if (field === "extraDataFiles") {
+    const files = value as File[];
+    if (!files || files.length == 0) return "";
+    return JSON.stringify(files.map(base64encode));
+  }
   return JSON.stringify(value);
 };
 

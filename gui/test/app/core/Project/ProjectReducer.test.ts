@@ -9,6 +9,7 @@ import {
 import ProjectReducer, {
   ProjectReducerAction,
 } from "@SpCore/Project/ProjectReducer";
+import { encodeTextFile } from "@SpUtil/files";
 import { afterEach, describe, expect, test, vi } from "vitest";
 
 const mockedConsoleError = vi
@@ -331,6 +332,24 @@ describe("Project reducer", () => {
       expect(result[ProjectKnownFiles.DATAFILE]).toEqual(newData);
       expect(result.ephemera[ProjectKnownFiles.DATAFILE]).toEqual(newData);
       expect(result.meta.dataSource).toEqual(DataSource.GENERATED_BY_PYTHON);
+    });
+  });
+
+  describe("Setting extra files", () => {
+    test("Extra data files are set to expected value", () => {
+      const initialState = {
+        extraDataFiles: [
+          encodeTextFile("extra_before.txt", "old extra file content"),
+        ],
+      } as any as ProjectDataModel;
+
+      const extraFiles = [encodeTextFile("extra1.txt", "extra file content")];
+      const extraAction: ProjectReducerAction = {
+        type: "setExtraDataFiles",
+        files: extraFiles,
+      };
+      const result = ProjectReducer(initialState, extraAction);
+      expect(result.extraDataFiles).toEqual(extraFiles);
     });
   });
 });

@@ -8,6 +8,7 @@ import {
 } from "./pyodideWorkerTypes";
 import spDrawsScript from "./sp_load_draws.py?raw";
 import spMPLScript from "./sp_patch_matplotlib.py?raw";
+import { File } from "@SpUtil/files";
 
 const loadPyodideInstance = async () => {
   const pyodide = await loadPyodide({
@@ -74,7 +75,7 @@ const run = async (
   code: string,
   spData: Record<string, any> | undefined,
   spPySettings: PyodideRunSettings,
-  files: Record<string, string> | undefined,
+  files: File[] | undefined,
   interruptBuffer: Uint8Array | undefined,
 ) => {
   setStatus("loading");
@@ -103,38 +104,38 @@ const run = async (
 
     let succeeded = false;
     try {
-      const packageFutures = [];
+      const setUpPromises = [];
       let patch_http = false;
       const micropip = pyodide.pyimport("micropip");
 
       if (spPySettings.showsPlots) {
-        packageFutures.push(pyodide.loadPackage("matplotlib"));
+        setUpPromises.push(pyodide.loadPackage("matplotlib"));
 
         if (script.includes("arviz")) {
-          packageFutures.push(micropip.install("arviz"));
+          setUpPromises.push(micropip.install("arviz"));
         }
       }
       if (script.includes("requests") || script.includes("https://")) {
         patch_http = true;
-        packageFutures.push(
+        setUpPromises.push(
           micropip.install(["requests", "lzma", "pyodide-http"]),
         );
       }
-      packageFutures.push(micropip.install("stanio"));
-      packageFutures.push(pyodide.loadPackagesFromImports(script));
-      await Promise.all(packageFutures);
+      setUpPromises.push(micropip.install("stanio"));
+      setUpPromises.push(pyodide.loadPackagesFromImports(script));
+
+      if (files) {
+        for (const { name, content } of files) {
+          setUpPromises.push(pyodide.FS.writeFile(name, content));
+        }
+      }
+      await Promise.all(setUpPromises);
+
       if (patch_http) {
         await pyodide.runPythonAsync(`
         from pyodide_http import patch_all
         patch_all()
         `);
-      }
-
-      if (files) {
-        const encoder = new TextEncoder();
-        for (const [filename, content] of Object.entries(files)) {
-          await pyodide.FS.writeFile(filename, encoder.encode(content + "\n"));
-        }
       }
 
       setStatus("running");
@@ -148,9 +149,11 @@ const run = async (
       sendStderr(e.toString());
     } finally {
       if (files) {
-        for (const filename of Object.keys(files)) {
-          await pyodide.FS.unlink(filename);
+        const promises = [];
+        for (const { name } of files) {
+          promises.push(pyodide.FS.unlink(name));
         }
+        await Promise.all(promises);
       }
     }
 
