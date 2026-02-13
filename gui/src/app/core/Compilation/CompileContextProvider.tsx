@@ -43,10 +43,6 @@ export const CompileContext = createContext<CompileContextType>({
   retryConnection: () => {},
 });
 
-type CompileContextProviderProps = {
-  // none
-};
-
 const useIsConnected = (stanWasmServerUrl: string) => {
   const probeUrl = `${stanWasmServerUrl}/probe`;
   const [isConnected, setIsConnected] = useState<boolean>(false);
@@ -67,7 +63,7 @@ const useIsConnected = (stanWasmServerUrl: string) => {
         if (response.status === 200) {
           setIsConnected(true);
         }
-      } catch (err) {
+      } catch {
         setIsConnected(false);
       }
     })();
@@ -98,9 +94,9 @@ const showOneTimeMessage = (url: string) => {
   return false;
 };
 
-const CompileContextProvider: FunctionComponent<
-  PropsWithChildren<CompileContextProviderProps>
-> = ({ children }) => {
+const CompileContextProvider: FunctionComponent<PropsWithChildren> = ({
+  children,
+}) => {
   const { data } = use(ProjectContext);
   const [compileStatus, setCompileStatus] = useState<CompileStatus>("");
   const [

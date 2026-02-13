@@ -19,6 +19,9 @@ const TabWidget: FunctionComponent<TabWidgetProps> = ({
   }
 
   const [index, setIndex] = useState(forcedSelection ?? 0);
+  const [tabsThatHaveBeenViewed, setTabsThatHaveBeenViewed] = useState<
+    number[]
+  >([index]);
 
   useEffect(() => {
     if (forcedSelection !== undefined) {
@@ -31,10 +34,6 @@ const TabWidget: FunctionComponent<TabWidgetProps> = ({
       });
     }
   }, [forcedSelection]);
-
-  const [tabsThatHaveBeenViewed, setTabsThatHaveBeenViewed] = useState<
-    number[]
-  >([index]);
 
   const handleChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabsThatHaveBeenViewed((prev) => {

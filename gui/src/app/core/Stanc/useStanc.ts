@@ -32,38 +32,36 @@ const useStanc = (
     [stancWorker],
   );
 
-  // worker creation
-  useEffect(() => {
-    const worker = new Worker(stancWorkerURL, {
-      name: "stancWorker",
-      type: "module",
-    });
-    setStancWorker(worker);
-    return () => {
-      console.log("terminating stanc worker");
-      worker.terminate();
-    };
-  }, []);
-
-  // message handling
-  useEffect(() => {
-    if (!stancWorker) return;
-
-    stancWorker.onmessage = (e: MessageEvent<StancReplyMessage>) => {
+  const onMessage = useCallback(
+    (e: MessageEvent<StancReplyMessage>) => {
       if ("fatal" in e.data) {
         // only returned if stanc.js failed to load
         console.error(e.data.fatal);
         return;
       }
-
       const { result, warnings, errors } = e.data;
       setStancErrors({ warnings, errors });
       if (result) {
         // only format requests return a result
         onFormat(result);
       }
+    },
+    [onFormat],
+  );
+
+  // worker creation
+  useEffect(() => {
+    const worker = new Worker(stancWorkerURL, {
+      name: "stancWorker",
+      type: "module",
+    });
+    worker.onmessage = onMessage;
+    setStancWorker(worker);
+    return () => {
+      console.log("terminating stanc worker");
+      worker.terminate();
     };
-  }, [stancWorker, onFormat]);
+  }, [onMessage]);
 
   // automatic syntax checking
   useEffect(() => {

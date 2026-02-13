@@ -33,7 +33,7 @@ class StanSampler {
     const sampler = new StanSampler(compiledUrl, update);
     const cleanup = () => {
       console.log("terminating model worker");
-      sampler.#stanWorker && sampler.#stanWorker.terminate();
+      if (sampler.#stanWorker) sampler.#stanWorker.terminate();
       sampler.#stanWorker = undefined;
     };
     return { sampler, cleanup };
