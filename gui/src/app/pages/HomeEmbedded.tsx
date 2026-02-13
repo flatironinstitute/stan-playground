@@ -12,10 +12,10 @@ const HomeEmbedded: FunctionComponent = () => {
   const { compiledMainJsUrl } = use(CompileContext);
   const { sampler, samplerState } = useStanSampler(compiledMainJsUrl);
 
-  let forcedTab: number | undefined = undefined;
-  if (samplerState.status === "completed" || samplerState.status === "failed") {
-    forcedTab = 2; // Switch to output tab (third tab)
-  }
+  const forcedTab =
+    samplerState.status === "completed" || samplerState.status === "failed"
+      ? 2 // Switch to output tab (third tab)
+      : undefined;
 
   useEffect(() => {
     document.title = "Stan Playground Embedded";

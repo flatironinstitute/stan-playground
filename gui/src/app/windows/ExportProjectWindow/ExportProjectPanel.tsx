@@ -41,9 +41,6 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
 
   useEffect(() => {
     makeRuntimeScript(data, "py").then(setRunPy);
-  }, [data]);
-
-  useEffect(() => {
     makeRuntimeScript(data, "R").then(setRunR);
   }, [data]);
 
