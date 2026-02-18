@@ -8,7 +8,10 @@ import {
   persistStateToEphemera,
   validateSamplingOpts,
 } from "@SpCore/Project/ProjectDataModel";
-import { loadFromProjectFiles } from "@SpCore/Project/ProjectSerialization";
+import {
+  deserializeProjectFromURLParameter,
+  loadFromProjectFiles,
+} from "@SpCore/Project/ProjectSerialization";
 import { tryFetch } from "@SpUtil/tryFetch";
 
 export enum QueryParamKeys {
@@ -70,27 +73,37 @@ export const fetchRemoteProject = async (query: QueryParams) => {
   let data: ProjectDataModel = structuredClone(initialDataModel);
   if (projectUri) {
     if (projectUri.startsWith("https://gist.github.com/")) {
-      let contentLoadedFromGist: {
-        files: { [key: string]: string };
-        description: string;
-      };
       try {
-        contentLoadedFromGist = await loadFilesFromGist(projectUri);
+        const contentLoadedFromGist = await loadFilesFromGist(projectUri);
+        data = loadFromProjectFiles(
+          data,
+          mapFileContentsToModel(contentLoadedFromGist.files),
+          false,
+        );
+        data.meta.title = contentLoadedFromGist.description;
       } catch (err) {
         console.error("Failed to load content from gist", err);
         alert(`Failed to load content from gist ${projectUri}`);
-        // do not continue with any other query parameters if we failed to load the gist
-        return persistStateToEphemera(data);
       }
-      data = loadFromProjectFiles(
-        data,
-        mapFileContentsToModel(contentLoadedFromGist.files),
-        false,
-      );
-      data.meta.title = contentLoadedFromGist.description;
+      return persistStateToEphemera(data);
+    } else if (projectUri.startsWith("lz-string:")) {
+      try {
+        const fromParam = deserializeProjectFromURLParameter(
+          projectUri.slice("lz-string:".length),
+        );
+        if (fromParam) {
+          data = fromParam;
+        } else {
+          throw new Error(
+            "Failed to deserialize project from URL parameter, got undefined",
+          );
+        }
+      } catch (err) {
+        console.error("Failed to load content from project string", err);
+        alert("Failed to load content from compressed project");
+      }
       return persistStateToEphemera(data);
     } else {
-      // right now we only support loading from a gist
       console.error("Unsupported project URI", projectUri);
     }
   }

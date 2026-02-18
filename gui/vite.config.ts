@@ -13,6 +13,7 @@ export default defineConfig({
         manualChunks: {
           utilities: [
             "jszip",
+            "lz-string",
             "@octokit/rest",
             "react-dropzone",
             "pyodide",

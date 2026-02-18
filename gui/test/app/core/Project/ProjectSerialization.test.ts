@@ -8,10 +8,12 @@ import {
   persistStateToEphemera,
 } from "@SpCore/Project/ProjectDataModel";
 import {
-  deserializeProjectFromLocalStorage,
+  deserializeProjectFromString,
+  deserializeProjectFromURLParameter,
   deserializeZipToFiles,
   loadFromProjectFiles,
-  serializeProjectToLocalStorage,
+  serializeProjectToString,
+  serializeProjectToURLParameter,
   serializeProjectToZip,
 } from "@SpCore/Project/ProjectSerialization";
 import { encodeTextFile } from "@SpUtil/files";
@@ -35,9 +37,16 @@ describe("Serialization of projects", () => {
     ],
   });
 
-  test("Round-trips project data through localStorage json", () => {
-    const storage = serializeProjectToLocalStorage(project);
-    const model = deserializeProjectFromLocalStorage(storage);
+  test("Round-trips project data through string", () => {
+    const storage = serializeProjectToString(project);
+    const model = deserializeProjectFromString(storage);
+
+    expect(model).toEqual(project);
+  });
+
+  test("Round-trips project data through URL parameter", () => {
+    const storage = serializeProjectToURLParameter(project);
+    const model = deserializeProjectFromURLParameter(storage);
 
     expect(model).toEqual(project);
   });

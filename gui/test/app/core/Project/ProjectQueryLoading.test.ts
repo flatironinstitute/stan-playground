@@ -11,6 +11,7 @@ import {
   ProjectKnownFiles,
   SamplingOpts,
 } from "@SpCore/Project/ProjectDataModel";
+import { serializeProjectToURLParameter } from "@SpCore/Project/ProjectSerialization";
 
 const mockedConsoleError = vi
   .spyOn(console, "error")
@@ -265,7 +266,7 @@ describe("Query fetching", () => {
     expect(mockedConsoleError).not.toHaveBeenCalled();
   });
 
-  describe("fetchRemoteProject project handling", () => {
+  describe("fetchRemoteProject gist handling", () => {
     test("fetchRemoteProject errors on non-gist project", async () => {
       const queryParam = new URLSearchParams("project=notgist");
       const queries = fromQueryParams(queryParam);
@@ -323,6 +324,38 @@ describe("Query fetching", () => {
       expect(project.ephemera.dataRFileContent).toEqual("gist data.R");
 
       expect(project.samplingOpts).toEqual(hoistedMocks.mockedSamplingOpts);
+    });
+  });
+
+  describe("fetchRemoteProject compressed project string handling", () => {
+    test("fetchRemoteProject errors when lz decompress", async () => {
+      const queryParam = new URLSearchParams(
+        "project=lz-string:==badlzstring==",
+      );
+      const queries = fromQueryParams(queryParam);
+
+      const project = await fetchRemoteProject(queries);
+      expect(project).toEqual(initialDataModel);
+
+      expect(mockedConsoleError).toHaveBeenCalledWith(
+        "Error deserializing data from string",
+        expect.anything() /* SyntaxError */,
+      );
+    });
+
+    test("fetchRemoteProject populates from good gist project", async () => {
+      const queryParam = new URLSearchParams(
+        "project=lz-string:" +
+          serializeProjectToURLParameter({
+            ...initialDataModel,
+            stanFileContent: "lz stan!",
+          }),
+      );
+      const queries = fromQueryParams(queryParam);
+
+      const project = await fetchRemoteProject(queries);
+      expect(project.stanFileContent).toEqual("lz stan!");
+      expect(project.ephemera.stanFileContent).toEqual("lz stan!");
     });
   });
 });

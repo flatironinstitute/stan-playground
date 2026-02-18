@@ -29,6 +29,7 @@
     "@octokit/rest": "^21.1.1",
     "@vercel/analytics": "^1.3.1",
     "jszip": "^3.10.1",
+    "lz-string": "^1.5.0",
     "mcmc-stats": "^0.0.1",
     "plotly-stan-playground-dist": "file:./vendor/plotly-stan-playground-dist",
     "pyodide": "^0.29.0",

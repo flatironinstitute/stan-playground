@@ -21,9 +21,12 @@ import { replaceSpacesWithUnderscores } from "@SpUtil/replaceSpaces";
 import { serializeAsZip } from "@SpUtil/serializeAsZip";
 import JSZip from "jszip";
 
-export const serializeProjectToLocalStorage = (
-  data: ProjectDataModel,
-): string => {
+import {
+  compressToEncodedURIComponent,
+  decompressFromEncodedURIComponent,
+} from "lz-string";
+
+export const serializeProjectToString = (data: ProjectDataModel): string => {
   const b64files = data.extraDataFiles.map(base64encode);
   const intermediary = {
     ...data,
@@ -33,7 +36,7 @@ export const serializeProjectToLocalStorage = (
   return JSON.stringify(intermediary);
 };
 
-export const deserializeProjectFromLocalStorage = (
+export const deserializeProjectFromString = (
   serialized: string,
 ): ProjectDataModel | undefined => {
   try {
@@ -54,9 +57,26 @@ export const deserializeProjectFromLocalStorage = (
     }
     return intermediary;
   } catch (e) {
-    console.error("Error deserializing data from local storage", e);
+    console.error("Error deserializing data from string", e);
     return undefined;
   }
+};
+
+export const serializeProjectToURLParameter = (
+  data: ProjectDataModel,
+): string => {
+  return compressToEncodedURIComponent(serializeProjectToString(data));
+};
+
+export const deserializeProjectFromURLParameter = (
+  param: string,
+): ProjectDataModel | undefined => {
+  const decompressed = decompressFromEncodedURIComponent(param);
+  if (!decompressed) {
+    console.error("Failed to decompress project data from URL parameter");
+    return undefined;
+  }
+  return deserializeProjectFromString(decompressed);
 };
 
 export const serializeProjectToZip = async (
