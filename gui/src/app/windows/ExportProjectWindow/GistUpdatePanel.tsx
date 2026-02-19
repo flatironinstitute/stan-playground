@@ -7,7 +7,6 @@ import TableContainer from "@mui/material/TableContainer";
 import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import Link from "@mui/material/Link";
 
 import { FileRegistry } from "@SpCore/Project/FileMapping";
 import loadFilesFromGist from "@SpUtil/gists/loadFilesFromGist";
@@ -15,6 +14,7 @@ import {
   createPatchForUpdatingGist,
   updateGitHubGist,
 } from "@SpUtil/gists/saveAsGitHubGist";
+import CopyableLink from "@SpComponents/CopyableLink";
 
 import InputPersonalAccessToken from "./InputPersonalAccessToken";
 import { InvitationToShareArea } from "./InvitationToShareArea";
@@ -84,12 +84,8 @@ const GistUpdatePanel: FunctionComponent<GistUpdateProps> = ({
       )}
       {updated && gistUrl && (
         <div>
-          <p>
-            Successfully updated Gist:{" "}
-            <Link href={gistUrl} target="_blank" rel="noreferrer">
-              {gistUrl}
-            </Link>
-          </p>
+          <p>Successfully updated Gist: </p>
+          <CopyableLink link={gistUrl} />
           <InvitationToShareArea project={gistUrl} />
           <Button onClick={onClose}>Close</Button>
         </div>

@@ -5,6 +5,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import Stack from "@mui/material/Stack";
 
 import { AlternatingTableRow } from "@SpComponents/StyledTables";
 import { mapModelToFileManifest } from "@SpCore/Project/FileMapping";
@@ -16,7 +17,6 @@ import { triggerDownload } from "@SpUtil/triggerDownload";
 import GistExportPanel from "./GistExportPanel";
 import GistUpdatePanel from "./GistUpdatePanel";
 import QuickSharePanel from "./QuickSharePanel";
-import Stack from "@mui/material/Stack";
 
 type ExportProjectProps = {
   onClose: () => void;

@@ -1,6 +1,7 @@
-import { serializeProjectToURLParameter } from "@SpCore/Project/ProjectSerialization";
-import Button from "@mui/material/Button";
 import { FunctionComponent } from "react";
+import Button from "@mui/material/Button";
+
+import { serializeProjectToURLParameter } from "@SpCore/Project/ProjectSerialization";
 import { ProjectDataModel } from "@SpCore/Project/ProjectDataModel";
 import { InvitationToShareArea } from "./InvitationToShareArea";
 

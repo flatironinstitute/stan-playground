@@ -5,8 +5,8 @@ import Link from "@mui/material/Link";
 
 import { FileRegistry } from "@SpCore/Project/FileMapping";
 import saveAsGitHubGist from "@SpUtil/gists/saveAsGitHubGist";
-import InputPersonalAccessToken from "./InputPersonalAccessToken";
 import CopyableLink from "@SpComponents/CopyableLink";
+import InputPersonalAccessToken from "./InputPersonalAccessToken";
 import { InvitationToShareArea } from "./InvitationToShareArea";
 
 type GistExportProps = {
@@ -88,7 +88,6 @@ const GistExportPanel: FunctionComponent<GistExportProps> = ({
         <div>
           <p>Successfully exported to GitHub Gist: </p>
           <CopyableLink link={gistUrl} />
-
           <InvitationToShareArea project={gistUrl} />
           <Button onClick={onClose}>Close</Button>
         </div>
