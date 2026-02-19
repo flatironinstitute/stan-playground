@@ -6,7 +6,8 @@ import Link from "@mui/material/Link";
 import { FileRegistry } from "@SpCore/Project/FileMapping";
 import saveAsGitHubGist from "@SpUtil/gists/saveAsGitHubGist";
 import InputPersonalAccessToken from "./InputPersonalAccessToken";
-import { makeSPShareableLinkFromGistUrl } from "./makeShareableLink";
+import CopyableLink from "@SpComponents/CopyableLink";
+import { InvitationToShareArea } from "./InvitationToShareArea";
 
 type GistExportProps = {
   fileManifest: Partial<FileRegistry>;
@@ -85,26 +86,10 @@ const GistExportPanel: FunctionComponent<GistExportProps> = ({
       )}
       {gistUrl && (
         <div>
-          <p>
-            Successfully exported to GitHub Gist:{" "}
-            <Link href={gistUrl} target="_blank" rel="noreferrer">
-              {gistUrl}
-            </Link>
-          </p>
-          <p>
-            You can now share the following link to this Stan Playground
-            project:&nbsp;
-            <br />
-            <br />
-            <Link
-              href={makeSPShareableLinkFromGistUrl(gistUrl)}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {makeSPShareableLinkFromGistUrl(gistUrl)}
-            </Link>
-            <br />
-          </p>
+          <p>Successfully exported to GitHub Gist: </p>
+          <CopyableLink link={gistUrl} />
+
+          <InvitationToShareArea project={gistUrl} />
           <Button onClick={onClose}>Close</Button>
         </div>
       )}

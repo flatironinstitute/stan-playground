@@ -17,7 +17,7 @@ import {
 } from "@SpUtil/gists/saveAsGitHubGist";
 
 import InputPersonalAccessToken from "./InputPersonalAccessToken";
-import { makeSPShareableLinkFromGistUrl } from "./makeShareableLink";
+import { InvitationToShareArea } from "./InvitationToShareArea";
 
 type GistUpdateProps = {
   fileManifest: Partial<FileRegistry>;
@@ -90,36 +90,11 @@ const GistUpdatePanel: FunctionComponent<GistUpdateProps> = ({
               {gistUrl}
             </Link>
           </p>
-          <InvitationToShareProjectParagraph gistUrl={gistUrl} />
+          <InvitationToShareArea project={gistUrl} />
           <Button onClick={onClose}>Close</Button>
         </div>
       )}
     </div>
-  );
-};
-
-type InvitationToShareProjectParagraphProps = {
-  gistUrl: string;
-};
-
-const InvitationToShareProjectParagraph: FunctionComponent<
-  InvitationToShareProjectParagraphProps
-> = ({ gistUrl }) => {
-  return (
-    <p>
-      You can now share the following link to this Stan Playground
-      project:&nbsp;
-      <br />
-      <br />
-      <Link
-        href={makeSPShareableLinkFromGistUrl(gistUrl)}
-        target="_blank"
-        rel="noreferrer"
-      >
-        {makeSPShareableLinkFromGistUrl(gistUrl)}
-      </Link>
-      <br />
-    </p>
   );
 };
 
