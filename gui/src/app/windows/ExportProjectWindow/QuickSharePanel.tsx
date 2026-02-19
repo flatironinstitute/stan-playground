@@ -10,7 +10,7 @@ type Props = {
 };
 
 const QuickSharePanel: FunctionComponent<Props> = ({ data, onClose }) => {
-  const project = "lz-string:" + serializeProjectToURLParameter(data);
+  const project = serializeProjectToURLParameter(data);
   return (
     <div className="GistExplainer">
       <p>

@@ -345,7 +345,7 @@ describe("Query fetching", () => {
 
     test("fetchRemoteProject populates from good gist project", async () => {
       const queryParam = new URLSearchParams(
-        "project=lz-string:" +
+        "project=" +
           serializeProjectToURLParameter({
             ...initialDataModel,
             stanFileContent: "lz stan!",

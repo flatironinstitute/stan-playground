@@ -62,16 +62,29 @@ export const deserializeProjectFromString = (
   }
 };
 
+const LZ_PARAMETER_PREFIX = "lz-string:";
+
+export const hasKnownProjectParameterPrefix = (param: string) =>
+  param.startsWith(LZ_PARAMETER_PREFIX);
+
 export const serializeProjectToURLParameter = (
   data: ProjectDataModel,
 ): string => {
-  return compressToEncodedURIComponent(serializeProjectToString(data));
+  return (
+    LZ_PARAMETER_PREFIX +
+    compressToEncodedURIComponent(serializeProjectToString(data))
+  );
 };
 
 export const deserializeProjectFromURLParameter = (
   param: string,
 ): ProjectDataModel | undefined => {
-  const decompressed = decompressFromEncodedURIComponent(param);
+  if (!param.startsWith(LZ_PARAMETER_PREFIX)) {
+    console.error("URL parameter does not have expected prefix");
+    return undefined;
+  }
+  const encoded = param.substring(LZ_PARAMETER_PREFIX.length);
+  const decompressed = decompressFromEncodedURIComponent(encoded);
   if (!decompressed) {
     console.error("Failed to decompress project data from URL parameter");
     return undefined;

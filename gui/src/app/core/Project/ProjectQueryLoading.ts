@@ -10,6 +10,7 @@ import {
 } from "@SpCore/Project/ProjectDataModel";
 import {
   deserializeProjectFromURLParameter,
+  hasKnownProjectParameterPrefix,
   loadFromProjectFiles,
 } from "@SpCore/Project/ProjectSerialization";
 import { tryFetch } from "@SpUtil/tryFetch";
@@ -86,11 +87,9 @@ export const fetchRemoteProject = async (query: QueryParams) => {
         alert(`Failed to load content from gist ${projectUri}`);
       }
       return persistStateToEphemera(data);
-    } else if (projectUri.startsWith("lz-string:")) {
+    } else if (hasKnownProjectParameterPrefix(projectUri)) {
       try {
-        const fromParam = deserializeProjectFromURLParameter(
-          projectUri.slice("lz-string:".length),
-        );
+        const fromParam = deserializeProjectFromURLParameter(projectUri);
         if (fromParam) {
           data = fromParam;
         } else {
