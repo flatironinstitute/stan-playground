@@ -70,14 +70,12 @@ export const queryStringHasParameters = (query: QueryParams) => {
 
 export const fetchRemoteProject = async (query: QueryParams) => {
   const projectParam = query.project;
-  const data: ProjectDataModel = structuredClone(initialDataModel);
 
   if (projectParam) {
     if (projectParam.startsWith("https://gist.github.com/")) {
       try {
         const contentLoadedFromGist = await loadFilesFromGist(projectParam);
         const dataFromGist = loadFromProjectFiles(
-          data,
           mapFileContentsToModel(contentLoadedFromGist.files),
         );
         dataFromGist.meta.title = contentLoadedFromGist.description;
@@ -102,9 +100,10 @@ export const fetchRemoteProject = async (query: QueryParams) => {
       console.error("Unsupported project parameter type", projectParam);
     }
     // other parameters are ignored whenever project= is set
-    return data;
+    return initialDataModel;
   }
 
+  const data: ProjectDataModel = structuredClone(initialDataModel);
   const stanFilePromise = query.stan
     ? tryFetch(query.stan)
     : Promise.resolve(data.stanFileContent);

@@ -54,7 +54,7 @@ describe("Serialization of projects", () => {
   test("Round-trips project data through file mapping", () => {
     const fileRegistry = mapModelToFileManifest(project);
     const fieldContents = mapFileContentsToModel(fileRegistry);
-    const model = loadFromProjectFiles({} as any, fieldContents, true);
+    const model = loadFromProjectFiles(fieldContents);
 
     expect(model).toEqual(project);
   });
@@ -77,7 +77,7 @@ describe("Serialization of projects", () => {
     );
 
     const fieldContents = await deserializeZipToFiles(zipBuffer);
-    const model = loadFromProjectFiles({} as any, fieldContents, true);
+    const model = loadFromProjectFiles(fieldContents);
 
     expect(model).toEqual(project);
   });
