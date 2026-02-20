@@ -275,7 +275,7 @@ describe("Query fetching", () => {
       expect(project).toEqual(initialDataModel);
 
       expect(mockedConsoleError).toHaveBeenCalledWith(
-        "Unsupported project URI",
+        "Unsupported project parameter type",
         "notgist",
       );
     });
