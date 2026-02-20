@@ -1,4 +1,10 @@
-import { FunctionComponent, use, useEffect, useState } from "react";
+import {
+  FunctionComponent,
+  use,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -46,6 +52,10 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
     makeRuntimeScript(data, "py").then(setRunPy);
     makeRuntimeScript(data, "R").then(setRunR);
   }, [data]);
+
+  const onBack = useCallback(() => {
+    setExportingType("none");
+  }, [setExportingType]);
 
   return (
     <div className="dialogWrapper">
@@ -161,6 +171,7 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
           fileManifest={fileManifest}
           title={data.meta.title}
           onClose={onClose}
+          onBack={onBack}
         />
       )}
       {exportingType === "update-gist" && (
@@ -168,6 +179,7 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
           fileManifest={fileManifest}
           title={data.meta.title}
           onClose={onClose}
+          onBack={onBack}
         />
       )}
     </div>

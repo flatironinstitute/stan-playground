@@ -2,6 +2,7 @@ import { FunctionComponent, useCallback, useState } from "react";
 
 import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
+import Stack from "@mui/material/Stack";
 
 import { FileRegistry } from "@SpCore/Project/FileMapping";
 import saveAsGitHubGist from "@SpUtil/gists/saveAsGitHubGist";
@@ -13,12 +14,14 @@ type GistExportProps = {
   fileManifest: Partial<FileRegistry>;
   title: string;
   onClose: () => void;
+  onBack: () => void;
 };
 
 const GistExportPanel: FunctionComponent<GistExportProps> = ({
   fileManifest,
   title,
   onClose,
+  onBack,
 }) => {
   const [gitHubPersonalAccessToken, setGitHubPersonalAccessToken] =
     useState("");
@@ -76,13 +79,15 @@ const GistExportPanel: FunctionComponent<GistExportProps> = ({
       />
       <div>&nbsp;</div>
       {!gistUrl && (
-        <div>
+        <Stack direction="row" spacing={2} alignItems="center">
           <Button onClick={handleExport} disabled={!gitHubPersonalAccessToken}>
             Export to GitHub Gist
           </Button>
-          &nbsp;
-          <Button onClick={onClose}>Cancel</Button>
-        </div>
+          <Button onClick={onBack}>Back</Button>
+          <Button color="error" onClick={onClose}>
+            Cancel
+          </Button>
+        </Stack>
       )}
       {gistUrl && (
         <div>
