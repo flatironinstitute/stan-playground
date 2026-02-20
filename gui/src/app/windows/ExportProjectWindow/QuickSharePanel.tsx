@@ -17,8 +17,9 @@ const QuickSharePanel: FunctionComponent<Props> = ({ data, onClose }) => {
       <p>
         Quick share creates a link that contains the entire contents of your
         projected encoded in the URL. This is convienent but makes it difficult
-        to view the contents elsewhere, and may not work for very large projects
-        due to browser-specific length limits on URLs.
+        to view the contents outside of Stan Playground, and browser-specific
+        length limits on URLs may lead to very large projects failing to load
+        when shared in this method.
         <br />
         For larger projects, we recommend exporting to a .zip file or GitHub
         Gist.

@@ -328,7 +328,7 @@ describe("Query fetching", () => {
   });
 
   describe("fetchRemoteProject compressed project string handling", () => {
-    test("fetchRemoteProject errors when lz decompress", async () => {
+    test("fetchRemoteProject errors when lz decompress fails", async () => {
       const queryParam = new URLSearchParams(
         "project=lz-string:==badlzstring==",
       );
