@@ -69,42 +69,40 @@ export const queryStringHasParameters = (query: QueryParams) => {
 };
 
 export const fetchRemoteProject = async (query: QueryParams) => {
-  const projectUri = query.project;
+  const projectParam = query.project;
+  const data: ProjectDataModel = structuredClone(initialDataModel);
 
-  let data: ProjectDataModel = structuredClone(initialDataModel);
-  if (projectUri) {
-    if (projectUri.startsWith("https://gist.github.com/")) {
+  if (projectParam) {
+    if (projectParam.startsWith("https://gist.github.com/")) {
       try {
-        const contentLoadedFromGist = await loadFilesFromGist(projectUri);
-        data = loadFromProjectFiles(
+        const contentLoadedFromGist = await loadFilesFromGist(projectParam);
+        const dataFromGist = loadFromProjectFiles(
           data,
           mapFileContentsToModel(contentLoadedFromGist.files),
-          false,
         );
-        data.meta.title = contentLoadedFromGist.description;
+        dataFromGist.meta.title = contentLoadedFromGist.description;
+        return persistStateToEphemera(dataFromGist);
       } catch (err) {
         console.error("Failed to load content from gist", err);
-        alert(`Failed to load content from gist ${projectUri}`);
+        alert(`Failed to load content from gist ${projectParam}`);
       }
-      return persistStateToEphemera(data);
-    } else if (hasKnownProjectParameterPrefix(projectUri)) {
+    } else if (hasKnownProjectParameterPrefix(projectParam)) {
       try {
-        const fromParam = deserializeProjectFromURLParameter(projectUri);
-        if (fromParam) {
-          data = fromParam;
+        const dataFromParam = deserializeProjectFromURLParameter(projectParam);
+        if (dataFromParam) {
+          return persistStateToEphemera(dataFromParam);
         } else {
-          throw new Error(
-            "Failed to deserialize project from URL parameter, got undefined",
-          );
+          throw new Error("Failed to deserialize project from URL parameter");
         }
       } catch (err) {
         console.error("Failed to load content from project string", err);
         alert("Failed to load content from compressed project");
       }
-      return persistStateToEphemera(data);
     } else {
-      console.error("Unsupported project URI", projectUri);
+      console.error("Unsupported project parameter type", projectParam);
     }
+    // other parameters are ignored whenever project= is set
+    return data;
   }
 
   const stanFilePromise = query.stan
