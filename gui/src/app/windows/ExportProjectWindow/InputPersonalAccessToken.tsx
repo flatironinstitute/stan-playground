@@ -15,6 +15,7 @@ type InputGitHubPersonalAccessTokenComponentProps = {
 const InputPersonalAccessToken: FunctionComponent<
   InputGitHubPersonalAccessTokenComponentProps
 > = ({ gitHubPersonalAccessToken, setGitHubPersonalAccessToken }) => {
+  // TODO: store in ephemera to at least allow re-shares before window is closed?
   return (
     <TableContainer>
       <Table padding="none">

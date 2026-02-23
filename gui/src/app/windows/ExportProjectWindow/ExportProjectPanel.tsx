@@ -1,10 +1,17 @@
-import { FunctionComponent, use, useEffect, useState } from "react";
+import {
+  FunctionComponent,
+  use,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import Stack from "@mui/material/Stack";
 
 import { AlternatingTableRow } from "@SpComponents/StyledTables";
 import { mapModelToFileManifest } from "@SpCore/Project/FileMapping";
@@ -15,10 +22,13 @@ import { triggerDownload } from "@SpUtil/triggerDownload";
 
 import GistExportPanel from "./GistExportPanel";
 import GistUpdatePanel from "./GistUpdatePanel";
+import QuickSharePanel from "./QuickSharePanel";
 
 type ExportProjectProps = {
   onClose: () => void;
 };
+
+type Exporting = "none" | "gist" | "update-gist" | "quick";
 
 const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
   onClose,
@@ -26,8 +36,7 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
   const { data, update } = use(ProjectContext);
   const fileManifest = mapModelToFileManifest(data);
 
-  const [exportingToGist, setExportingToGist] = useState(false);
-  const [updatingExistingGist, setUpdatingExistingGist] = useState(false);
+  const [exportingType, setExportingType] = useState<Exporting>("none");
 
   const [includeRunPy, setIncludeRunPy] = useState(
     data.analysisPyFileContent.length > 0 || data.dataPyFileContent.length > 0,
@@ -43,6 +52,10 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
     makeRuntimeScript(data, "py").then(setRunPy);
     makeRuntimeScript(data, "R").then(setRunR);
   }, [data]);
+
+  const onBack = useCallback(() => {
+    setExportingType("none");
+  }, [setExportingType]);
 
   return (
     <div className="dialogWrapper">
@@ -112,9 +125,8 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
           </TableBody>
         </Table>
       </TableContainer>
-      <div>&nbsp;</div>
-      {!exportingToGist && !updatingExistingGist && (
-        <div>
+      {exportingType === "none" && (
+        <Stack direction="row" spacing={2} alignItems="center">
           <Button
             onClick={async () => {
               serializeProjectToZip(
@@ -128,35 +140,46 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
           >
             Export to .zip file
           </Button>
-          &nbsp;
           <Button
             onClick={() => {
-              setExportingToGist(true);
+              setExportingType("quick");
             }}
           >
-            Export to GitHub Gist
+            Quick Share
           </Button>
           <Button
             onClick={() => {
-              setUpdatingExistingGist(true);
+              setExportingType("gist");
             }}
           >
-            Update a GitHub Gist
+            Save to Gist
           </Button>
-        </div>
+          <Button
+            onClick={() => {
+              setExportingType("update-gist");
+            }}
+          >
+            Update a Gist
+          </Button>
+        </Stack>
       )}
-      {exportingToGist && (
+      {exportingType === "quick" && (
+        <QuickSharePanel data={data} onClose={onClose} />
+      )}
+      {exportingType === "gist" && (
         <GistExportPanel
           fileManifest={fileManifest}
           title={data.meta.title}
           onClose={onClose}
+          onBack={onBack}
         />
       )}
-      {updatingExistingGist && (
+      {exportingType === "update-gist" && (
         <GistUpdatePanel
           fileManifest={fileManifest}
           title={data.meta.title}
           onClose={onClose}
+          onBack={onBack}
         />
       )}
     </div>

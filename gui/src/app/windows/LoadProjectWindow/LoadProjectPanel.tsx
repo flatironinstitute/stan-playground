@@ -214,7 +214,10 @@ const useUrlLoader = (setErrorText: (text: string) => void) => {
       setQuery("");
 
       if (url === "") return;
-      if (url.startsWith("https://stan-playground.flatironinstitute.org/")) {
+      if (
+        url.startsWith("https://stan-playground.flatironinstitute.org") ||
+        url.startsWith("http://127.0.0.1:3000")
+      ) {
         const queriesOnly = new URLSearchParams(url.split("?", 2)[1]);
         if (queryStringHasParameters(fromQueryParams(queriesOnly))) {
           setQuery(`?${queriesOnly.toString()}`);

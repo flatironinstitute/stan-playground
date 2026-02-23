@@ -2,22 +2,26 @@ import { FunctionComponent, useCallback, useState } from "react";
 
 import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
+import Stack from "@mui/material/Stack";
 
 import { FileRegistry } from "@SpCore/Project/FileMapping";
 import saveAsGitHubGist from "@SpUtil/gists/saveAsGitHubGist";
+import CopyableLink from "@SpComponents/CopyableLink";
 import InputPersonalAccessToken from "./InputPersonalAccessToken";
-import { makeSPShareableLinkFromGistUrl } from "./makeShareableLink";
+import { InvitationToShareArea } from "./InvitationToShareArea";
 
 type GistExportProps = {
   fileManifest: Partial<FileRegistry>;
   title: string;
   onClose: () => void;
+  onBack: () => void;
 };
 
 const GistExportPanel: FunctionComponent<GistExportProps> = ({
   fileManifest,
   title,
   onClose,
+  onBack,
 }) => {
   const [gitHubPersonalAccessToken, setGitHubPersonalAccessToken] =
     useState("");
@@ -75,36 +79,21 @@ const GistExportPanel: FunctionComponent<GistExportProps> = ({
       />
       <div>&nbsp;</div>
       {!gistUrl && (
-        <div>
+        <Stack direction="row" spacing={2} alignItems="center">
           <Button onClick={handleExport} disabled={!gitHubPersonalAccessToken}>
             Export to GitHub Gist
           </Button>
-          &nbsp;
-          <Button onClick={onClose}>Cancel</Button>
-        </div>
+          <Button onClick={onBack}>Back</Button>
+          <Button color="error" onClick={onClose}>
+            Cancel
+          </Button>
+        </Stack>
       )}
       {gistUrl && (
         <div>
-          <p>
-            Successfully exported to GitHub Gist:{" "}
-            <Link href={gistUrl} target="_blank" rel="noreferrer">
-              {gistUrl}
-            </Link>
-          </p>
-          <p>
-            You can now share the following link to this Stan Playground
-            project:&nbsp;
-            <br />
-            <br />
-            <Link
-              href={makeSPShareableLinkFromGistUrl(gistUrl)}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {makeSPShareableLinkFromGistUrl(gistUrl)}
-            </Link>
-            <br />
-          </p>
+          <p>Successfully exported to GitHub Gist: </p>
+          <CopyableLink link={gistUrl} />
+          <InvitationToShareArea project={gistUrl} />
           <Button onClick={onClose}>Close</Button>
         </div>
       )}

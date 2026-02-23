@@ -12,8 +12,8 @@ import ProjectReducer, {
   ProjectReducerAction,
 } from "@SpCore/Project/ProjectReducer";
 import {
-  deserializeProjectFromLocalStorage,
-  serializeProjectToLocalStorage,
+  deserializeProjectFromString,
+  serializeProjectToString,
 } from "@SpCore/Project/ProjectSerialization";
 import {
   createContext,
@@ -49,7 +49,7 @@ const ProjectContextProvider: FunctionComponent<
     // as user reloads the page or closes the tab, save state to local storage
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (persist) {
-        const state = serializeProjectToLocalStorage(data);
+        const state = serializeProjectToString(data);
         localStorage.setItem("stan-playground-saved-state", state);
         if (modelHasUnsavedChanges(data)) {
           e.preventDefault();
@@ -84,7 +84,7 @@ const ProjectContextProvider: FunctionComponent<
       if (persist) {
         const savedState = localStorage.getItem("stan-playground-saved-state");
         if (!savedState) return;
-        const parsedData = deserializeProjectFromLocalStorage(savedState);
+        const parsedData = deserializeProjectFromString(savedState);
         if (!parsedData) return; // unsuccessful parse or type cast
         update({ type: "loadInitialData", state: parsedData });
       }

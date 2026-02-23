@@ -64,9 +64,18 @@ describe("Project reducer", () => {
       expect(result).toBe(fakeLoadFileResponse);
       expect(hoistedMocks.mockedLoad).toHaveBeenCalledOnce();
       expect(hoistedMocks.mockedLoad).toHaveBeenCalledWith(
-        fakeEmptyProjectData,
         mockFiles,
-        false,
+        fakeEmptyProjectData,
+      );
+
+      const clearedResult = ProjectReducer(fakeEmptyProjectData, {
+        ...loadAction,
+        clearExisting: true,
+      });
+      expect(clearedResult).toBe(fakeLoadFileResponse);
+      expect(hoistedMocks.mockedLoad).toHaveBeenCalledWith(
+        mockFiles,
+        undefined,
       );
     });
     test("Logs error and returns initial state if load-files call fails", () => {

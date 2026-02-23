@@ -21,9 +21,12 @@ import { replaceSpacesWithUnderscores } from "@SpUtil/replaceSpaces";
 import { serializeAsZip } from "@SpUtil/serializeAsZip";
 import JSZip from "jszip";
 
-export const serializeProjectToLocalStorage = (
-  data: ProjectDataModel,
-): string => {
+import {
+  compressToEncodedURIComponent,
+  decompressFromEncodedURIComponent,
+} from "lz-string";
+
+export const serializeProjectToString = (data: ProjectDataModel): string => {
   const b64files = data.extraDataFiles.map(base64encode);
   const intermediary = {
     ...data,
@@ -33,7 +36,7 @@ export const serializeProjectToLocalStorage = (
   return JSON.stringify(intermediary);
 };
 
-export const deserializeProjectFromLocalStorage = (
+export const deserializeProjectFromString = (
   serialized: string,
 ): ProjectDataModel | undefined => {
   try {
@@ -54,9 +57,39 @@ export const deserializeProjectFromLocalStorage = (
     }
     return intermediary;
   } catch (e) {
-    console.error("Error deserializing data from local storage", e);
+    console.error("Error deserializing data from string", e);
     return undefined;
   }
+};
+
+const LZ_PARAMETER_PREFIX = "lz-string:";
+
+export const hasKnownProjectParameterPrefix = (param: string) =>
+  param.startsWith(LZ_PARAMETER_PREFIX);
+
+export const serializeProjectToURLParameter = (
+  data: ProjectDataModel,
+): string => {
+  return (
+    LZ_PARAMETER_PREFIX +
+    compressToEncodedURIComponent(serializeProjectToString(data))
+  );
+};
+
+export const deserializeProjectFromURLParameter = (
+  param: string,
+): ProjectDataModel | undefined => {
+  if (!param.startsWith(LZ_PARAMETER_PREFIX)) {
+    console.error("URL parameter does not have expected prefix");
+    return undefined;
+  }
+  const encoded = param.substring(LZ_PARAMETER_PREFIX.length);
+  const decompressed = decompressFromEncodedURIComponent(encoded);
+  if (!decompressed) {
+    console.error("Failed to decompress project data from URL parameter");
+    return undefined;
+  }
+  return deserializeProjectFromString(decompressed);
 };
 
 export const serializeProjectToZip = async (
@@ -131,27 +164,21 @@ export const deserializeZipToFiles = async (zipBuffer: Uint8Array) => {
 const loadMetaFromString = (
   data: ProjectDataModel,
   json: string,
-  clearExisting: boolean = false,
 ): ProjectDataModel => {
   const newMeta = JSON.parse(json);
   if (!isProjectMetaData(newMeta)) {
     throw new Error("Deserialized meta is not valid");
   }
-  const newMetaMember = clearExisting
-    ? { ...newMeta }
-    : { ...data.meta, ...newMeta };
+  const newMetaMember = { ...data.meta, ...newMeta };
   return { ...data, meta: newMetaMember };
 };
 
 const loadSamplingOptsFromString = (
   data: ProjectDataModel,
   json: string,
-  clearExisting: boolean = false,
 ): ProjectDataModel => {
   const newSampling = parseSamplingOpts(json);
-  const newSamplingOptsMember = clearExisting
-    ? { ...newSampling }
-    : { ...data.samplingOpts, ...newSampling };
+  const newSamplingOptsMember = { ...data.samplingOpts, ...newSampling };
   return { ...data, samplingOpts: newSamplingOptsMember };
 };
 
@@ -187,11 +214,11 @@ const loadExtraDataFilesFromString = (
 };
 
 export const loadFromProjectFiles = (
-  data: ProjectDataModel,
   files: Partial<FieldsContentsMap>,
-  clearExisting: boolean = false,
+  previous: ProjectDataModel | undefined = undefined,
 ): ProjectDataModel => {
-  let newData = clearExisting ? initialDataModel : data;
+  let newData = previous ? previous : structuredClone(initialDataModel);
+
   if (Object.keys(files).includes("meta")) {
     newData = loadMetaFromString(newData, files.meta ?? "");
     delete files["meta"];

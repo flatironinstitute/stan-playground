@@ -7,7 +7,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import Link from "@mui/material/Link";
+import Stack from "@mui/material/Stack";
 
 import { FileRegistry } from "@SpCore/Project/FileMapping";
 import loadFilesFromGist from "@SpUtil/gists/loadFilesFromGist";
@@ -15,20 +15,23 @@ import {
   createPatchForUpdatingGist,
   updateGitHubGist,
 } from "@SpUtil/gists/saveAsGitHubGist";
+import CopyableLink from "@SpComponents/CopyableLink";
 
 import InputPersonalAccessToken from "./InputPersonalAccessToken";
-import { makeSPShareableLinkFromGistUrl } from "./makeShareableLink";
+import { InvitationToShareArea } from "./InvitationToShareArea";
 
 type GistUpdateProps = {
   fileManifest: Partial<FileRegistry>;
   title: string;
   onClose: () => void;
+  onBack: () => void;
 };
 
 const GistUpdatePanel: FunctionComponent<GistUpdateProps> = ({
   fileManifest,
   title,
   onClose,
+  onBack,
 }) => {
   const [gitHubPersonalAccessToken, setGitHubPersonalAccessToken] =
     useState("");
@@ -70,56 +73,30 @@ const GistUpdatePanel: FunctionComponent<GistUpdateProps> = ({
         setGitHubPersonalAccessToken={setGitHubPersonalAccessToken}
       />
       <div>&nbsp;</div>
-      {!updated && gistUrl && (
-        <div>
+
+      {!updated && (
+        <Stack direction="row" spacing={2} alignItems="center">
           <Button
             onClick={handleUpdateGist}
             disabled={!gitHubPersonalAccessToken || !gistUrl}
           >
             Update GitHub Gist
           </Button>
-          &nbsp;
-          <Button onClick={onClose}>Cancel</Button>
-        </div>
+          <Button onClick={onBack}>Back</Button>
+          <Button color="error" onClick={onClose}>
+            Cancel
+          </Button>
+        </Stack>
       )}
       {updated && gistUrl && (
         <div>
-          <p>
-            Successfully updated Gist:{" "}
-            <Link href={gistUrl} target="_blank" rel="noreferrer">
-              {gistUrl}
-            </Link>
-          </p>
-          <InvitationToShareProjectParagraph gistUrl={gistUrl} />
+          <p>Successfully updated Gist: </p>
+          <CopyableLink link={gistUrl} />
+          <InvitationToShareArea project={gistUrl} />
           <Button onClick={onClose}>Close</Button>
         </div>
       )}
     </div>
-  );
-};
-
-type InvitationToShareProjectParagraphProps = {
-  gistUrl: string;
-};
-
-const InvitationToShareProjectParagraph: FunctionComponent<
-  InvitationToShareProjectParagraphProps
-> = ({ gistUrl }) => {
-  return (
-    <p>
-      You can now share the following link to this Stan Playground
-      project:&nbsp;
-      <br />
-      <br />
-      <Link
-        href={makeSPShareableLinkFromGistUrl(gistUrl)}
-        target="_blank"
-        rel="noreferrer"
-      >
-        {makeSPShareableLinkFromGistUrl(gistUrl)}
-      </Link>
-      <br />
-    </p>
   );
 };
 

@@ -47,7 +47,7 @@ const ProjectReducer = (s: ProjectDataModel, a: ProjectReducerAction) => {
   switch (a.type) {
     case "loadFiles": {
       try {
-        return loadFromProjectFiles(s, a.files, a.clearExisting);
+        return loadFromProjectFiles(a.files, a.clearExisting ? undefined : s);
       } catch (e) {
         // probably sampling opts or meta files were not valid
         console.error("Error loading files", e);

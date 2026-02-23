@@ -2,13 +2,19 @@ import { mapFileContentsToModel } from "@SpCore/Project/FileMapping";
 import loadFilesFromGist from "@SpUtil/gists/loadFilesFromGist";
 import {
   ProjectDataModel,
+  ProjectKnownFiles,
+  SamplingOpts,
   defaultSamplingOpts,
   initialDataModel,
   parseSamplingOpts,
   persistStateToEphemera,
   validateSamplingOpts,
 } from "@SpCore/Project/ProjectDataModel";
-import { loadFromProjectFiles } from "@SpCore/Project/ProjectSerialization";
+import {
+  deserializeProjectFromURLParameter,
+  hasKnownProjectParameterPrefix,
+  loadFromProjectFiles,
+} from "@SpCore/Project/ProjectSerialization";
 import { tryFetch } from "@SpUtil/tryFetch";
 
 export enum QueryParamKeys {
@@ -60,145 +66,135 @@ export const fromQueryParams = (searchParams: URLSearchParams) => {
   return queries;
 };
 
+const queryParamToDataModelFieldMap = {
+  [QueryParamKeys.StanFile]: ProjectKnownFiles.STANFILE,
+  [QueryParamKeys.DataFile]: ProjectKnownFiles.DATAFILE,
+  [QueryParamKeys.AnalysisPyFile]: ProjectKnownFiles.ANALYSISPYFILE,
+  [QueryParamKeys.AnalysisRFile]: ProjectKnownFiles.ANALYSISRFILE,
+  [QueryParamKeys.DataPyFile]: ProjectKnownFiles.DATAPYFILE,
+  [QueryParamKeys.DataRFile]: ProjectKnownFiles.DATARFILE,
+} as const;
+
 export const queryStringHasParameters = (query: QueryParams) => {
   return Object.values(query).some((v) => v !== null);
 };
 
 export const fetchRemoteProject = async (query: QueryParams) => {
-  const projectUri = query.project;
-
-  let data: ProjectDataModel = structuredClone(initialDataModel);
-  if (projectUri) {
-    if (projectUri.startsWith("https://gist.github.com/")) {
-      let contentLoadedFromGist: {
-        files: { [key: string]: string };
-        description: string;
-      };
-      try {
-        contentLoadedFromGist = await loadFilesFromGist(projectUri);
-      } catch (err) {
-        console.error("Failed to load content from gist", err);
-        alert(`Failed to load content from gist ${projectUri}`);
-        // do not continue with any other query parameters if we failed to load the gist
-        return persistStateToEphemera(data);
-      }
-      data = loadFromProjectFiles(
-        data,
-        mapFileContentsToModel(contentLoadedFromGist.files),
-        false,
-      );
-      data.meta.title = contentLoadedFromGist.description;
-      return persistStateToEphemera(data);
-    } else {
-      // right now we only support loading from a gist
-      console.error("Unsupported project URI", projectUri);
-    }
+  if (query.project) {
+    // other parameters are ignored whenever project= is set
+    return await loadFromProjectParameter(query.project);
   }
 
-  const stanFilePromise = query.stan
-    ? tryFetch(query.stan)
-    : Promise.resolve(data.stanFileContent);
-  const dataFilePromise = query.data
-    ? tryFetch(query.data)
-    : Promise.resolve(data.dataFileContent);
-  const analysisPyFilePromise = query["analysis_py"]
-    ? tryFetch(query["analysis_py"])
-    : Promise.resolve(data.analysisPyFileContent);
-  const analysisRFilePromise = query["analysis_r"]
-    ? tryFetch(query["analysis_r"])
-    : Promise.resolve(data.analysisRFileContent);
-  const dataPyFilePromise = query["data_py"]
-    ? tryFetch(query["data_py"])
-    : Promise.resolve(data.dataPyFileContent);
-  const dataRFilePromise = query["data_r"]
-    ? tryFetch(query["data_r"])
-    : Promise.resolve(data.dataRFileContent);
-  const sampling_optsPromise = query.sampling_opts
-    ? tryFetch(query.sampling_opts)
-    : Promise.resolve(null);
-
-  const stanFileContent = await stanFilePromise;
-  if (stanFileContent !== undefined) {
-    data.stanFileContent = stanFileContent;
-  } else {
-    data.stanFileContent = `// Failed to load content from ${query.stan}`;
-  }
-
-  const dataFileContent = await dataFilePromise;
-  if (dataFileContent !== undefined) {
-    data.dataFileContent = dataFileContent;
-  } else {
-    data.dataFileContent = `// Failed to load content from ${query.data}`;
-  }
-
-  const analysisPyFileContent = await analysisPyFilePromise;
-  if (analysisPyFileContent !== undefined) {
-    data.analysisPyFileContent = analysisPyFileContent;
-  } else {
-    data.analysisPyFileContent = `# Failed to load content from ${query["analysis_py"]}`;
-  }
-
-  const analysisRFileContent = await analysisRFilePromise;
-  if (analysisRFileContent !== undefined) {
-    data.analysisRFileContent = analysisRFileContent;
-  } else {
-    data.analysisRFileContent = `# Failed to load content from ${query["analysis_r"]}`;
-  }
-
-  const dataPyFileContent = await dataPyFilePromise;
-  if (dataPyFileContent !== undefined) {
-    data.dataPyFileContent = dataPyFileContent;
-  } else {
-    data.dataPyFileContent = `# Failed to load content from ${query["data_py"]}`;
-  }
-
-  const dataRFileContent = await dataRFilePromise;
-  if (dataRFileContent !== undefined) {
-    data.dataRFileContent = dataRFileContent;
-  } else {
-    data.dataRFileContent = `# Failed to load content from ${query["data_r"]}`;
-  }
-
-  const sampling_opts = await sampling_optsPromise;
-  if (sampling_opts === undefined) {
-    const msg = `Failed to load content from ${query["sampling_opts"]}`;
-    alert(msg);
-    console.error(msg);
-  } else if (sampling_opts !== null) {
-    try {
-      data.samplingOpts = parseSamplingOpts(sampling_opts);
-    } catch (err) {
-      console.error("Failed to parse sampling_opts", err);
-      alert("Invalid sampling options: " + sampling_opts);
-    }
-  } else {
-    if (query.num_chains) {
-      data.samplingOpts.num_chains = parseInt(query.num_chains);
-    }
-    if (query.num_warmup) {
-      data.samplingOpts.num_warmup = parseInt(query.num_warmup);
-    }
-    if (query.num_samples) {
-      data.samplingOpts.num_samples = parseInt(query.num_samples);
-    }
-    if (query.init_radius) {
-      data.samplingOpts.init_radius = parseFloat(query.init_radius);
-    }
-    if (query.seed) {
-      data.samplingOpts.seed =
-        query.seed === "undefined" ? undefined : parseInt(query.seed);
-    }
-
-    if (!validateSamplingOpts(data.samplingOpts)) {
-      console.error("Invalid sampling options", data.samplingOpts);
-      alert("Invalid sampling options: " + JSON.stringify(data.samplingOpts));
-      data.samplingOpts = defaultSamplingOpts;
-    }
-  }
+  const data: ProjectDataModel = structuredClone(initialDataModel);
 
   if (query.title) {
     data.meta.title = query.title;
   }
 
+  const fetchFileForParameter = async (
+    param: keyof typeof queryParamToDataModelFieldMap,
+    comment: string = "# ",
+  ) => {
+    if (query[param]) {
+      const value = await tryFetch(query[param]);
+      return value ?? `${comment}Failed to load content from ${query[param]}`;
+    }
+    return data[queryParamToDataModelFieldMap[param]];
+  };
+
+  [
+    data.stanFileContent,
+    data.dataFileContent,
+    data.analysisPyFileContent,
+    data.analysisRFileContent,
+    data.dataPyFileContent,
+    data.dataRFileContent,
+    data.samplingOpts,
+  ] = await Promise.all([
+    fetchFileForParameter(QueryParamKeys.StanFile, "// "),
+    fetchFileForParameter(QueryParamKeys.DataFile, "// "),
+    fetchFileForParameter(QueryParamKeys.AnalysisPyFile),
+    fetchFileForParameter(QueryParamKeys.AnalysisRFile),
+    fetchFileForParameter(QueryParamKeys.DataPyFile),
+    fetchFileForParameter(QueryParamKeys.DataRFile),
+    loadSamplingOptsFromQueryParams(query),
+  ]);
+
   return persistStateToEphemera(data);
+};
+
+const loadFromProjectParameter = async (projectParam: string) => {
+  if (projectParam.startsWith("https://gist.github.com/")) {
+    try {
+      const contentLoadedFromGist = await loadFilesFromGist(projectParam);
+      const dataFromGist = loadFromProjectFiles(
+        mapFileContentsToModel(contentLoadedFromGist.files),
+      );
+      dataFromGist.meta.title = contentLoadedFromGist.description;
+      return persistStateToEphemera(dataFromGist);
+    } catch (err) {
+      console.error("Failed to load content from gist", err);
+      alert(`Failed to load content from gist ${projectParam}`);
+    }
+  } else if (hasKnownProjectParameterPrefix(projectParam)) {
+    try {
+      const dataFromParam = deserializeProjectFromURLParameter(projectParam);
+      if (dataFromParam) {
+        return persistStateToEphemera(dataFromParam);
+      } else {
+        throw new Error("Failed to deserialize project from URL parameter");
+      }
+    } catch (err) {
+      console.error("Failed to load content from project string", err);
+      alert("Failed to load content from compressed project");
+    }
+  } else {
+    console.error("Unsupported project parameter type", projectParam);
+  }
+  return initialDataModel;
+};
+
+const loadSamplingOptsFromQueryParams = async (query: QueryParams) => {
+  // try to load json of all opts
+  if (query.sampling_opts) {
+    const sampling_opts = await tryFetch(query.sampling_opts);
+    if (sampling_opts === undefined) {
+      const msg = `Failed to load content from ${query["sampling_opts"]}`;
+      alert(msg);
+      console.error(msg);
+      return defaultSamplingOpts;
+    }
+    try {
+      return parseSamplingOpts(sampling_opts);
+    } catch (err) {
+      console.error("Failed to parse sampling_opts", err);
+      alert("Invalid sampling options: " + sampling_opts);
+    }
+  }
+
+  // load individual opts from query params
+  const samplingOpts: SamplingOpts = { ...defaultSamplingOpts };
+  if (query.num_chains) {
+    samplingOpts.num_chains = parseInt(query.num_chains);
+  }
+  if (query.num_warmup) {
+    samplingOpts.num_warmup = parseInt(query.num_warmup);
+  }
+  if (query.num_samples) {
+    samplingOpts.num_samples = parseInt(query.num_samples);
+  }
+  if (query.init_radius) {
+    samplingOpts.init_radius = parseFloat(query.init_radius);
+  }
+  if (query.seed) {
+    samplingOpts.seed =
+      query.seed === "undefined" ? undefined : parseInt(query.seed);
+  }
+
+  if (!validateSamplingOpts(samplingOpts)) {
+    console.error("Invalid sampling options", samplingOpts);
+    alert("Invalid sampling options: " + JSON.stringify(samplingOpts));
+    return defaultSamplingOpts;
+  }
+  return samplingOpts;
 };
