@@ -164,7 +164,7 @@ const ExportProjectPanel: FunctionComponent<ExportProjectProps> = ({
         </Stack>
       )}
       {exportingType === "quick" && (
-        <QuickSharePanel data={data} onClose={onClose} />
+        <QuickSharePanel data={data} onClose={onClose} onBack={onBack} />
       )}
       {exportingType === "gist" && (
         <GistExportPanel
