@@ -96,10 +96,10 @@ export const fetchRemoteProject = async (query: QueryParams) => {
     comment: string = "# ",
   ) => {
     if (query[param]) {
-      const value = await tryFetch(query[param]!);
+      const value = await tryFetch(query[param]);
       return value ?? `${comment}Failed to load content from ${query[param]}`;
     }
-    return data[queryParamToDataModelFieldMap[param]!];
+    return data[queryParamToDataModelFieldMap[param]];
   };
 
   [
