@@ -60,7 +60,7 @@ const GistUpdatePanel: FunctionComponent<GistUpdateProps> = ({
   }, [gitHubPersonalAccessToken, fileManifest, title, gistUrl]);
 
   return (
-    <div className="GistExplainer">
+    <div className="ExportExplainer">
       <h3>Update a GitHub Gist</h3>
       <div>&nbsp;</div>
       <SpecifyGistUrlToUpdateComponent

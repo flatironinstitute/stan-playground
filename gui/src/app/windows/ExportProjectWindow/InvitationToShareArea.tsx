@@ -20,7 +20,7 @@ export const InvitationToShareArea: FunctionComponent<
   );
 };
 
-const makeSPShareableLink = (project: string) => {
+export const makeSPShareableLink = (project: string) => {
   const protocol = window.location.protocol;
   const host = window.location.host;
   const url = `${protocol}//${host}?project=${project}`;

@@ -40,7 +40,7 @@ const GistExportPanel: FunctionComponent<GistExportProps> = ({
   }, [gitHubPersonalAccessToken, fileManifest, title]);
 
   return (
-    <div className="GistExplainer">
+    <div className="ExportExplainer">
       <h3>Export to GitHub Gist</h3>
       <p>
         In order to export this project as a GitHub Gist, you will need to
