@@ -1,0 +1,42 @@
+cff-version: "1.2.0"
+authors:
+- family-names: Ward
+  given-names: Brian
+  orcid: "https://orcid.org/0000-0002-9841-3342"
+- family-names: Soules
+  given-names: Jeff
+  orcid: "https://orcid.org/0000-0002-2240-1038"
+- family-names: Magland
+  given-names: Jeremy
+  orcid: "https://orcid.org/0000-0002-5286-4375"
+contact:
+- family-names: Ward
+  given-names: Brian
+  orcid: "https://orcid.org/0000-0002-9841-3342"
+doi: 10.5281/zenodo.18598808
+message: If you use this software, please cite our article in the
+  Journal of Open Source Software.
+preferred-citation:
+  authors:
+  - family-names: Ward
+    given-names: Brian
+    orcid: "https://orcid.org/0000-0002-9841-3342"
+  - family-names: Soules
+    given-names: Jeff
+    orcid: "https://orcid.org/0000-0002-2240-1038"
+  - family-names: Magland
+    given-names: Jeremy
+    orcid: "https://orcid.org/0000-0002-5286-4375"
+  date-published: 2026-02-25
+  doi: 10.21105/joss.09531
+  issn: 2475-9066
+  issue: 118
+  journal: Journal of Open Source Software
+  publisher:
+    name: Open Journals
+  start: 9531
+  title: "stan-playground: Run Stan models directly in your browser"
+  type: article
+  url: "https://joss.theoj.org/papers/10.21105/joss.09531"
+  volume: 11
+title: "stan-playground: Run Stan models directly in your browser"
