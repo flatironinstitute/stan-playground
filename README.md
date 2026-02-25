@@ -9,6 +9,8 @@ Run Stan models directly in your browser.
 
 [Visit the live site!](https://stan-playground.flatironinstitute.org)
 
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.09531/status.svg)](https://doi.org/10.21105/joss.09531)
+
 ## Overview
 
 Stan Playground is a browser-based editor and runtime environment for Stan models. Users can edit, compile, and run models, as well as analyze the results using built-in plots and statistics or custom analysis code in Python or R, all with no local installation required. This is well-suited for teaching and learning purposes and for users who want to experiment with Stan models without the hassle of setting up a local environment. You can also share your results with others using the GitHub Gist feature.
