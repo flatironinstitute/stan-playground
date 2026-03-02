@@ -46,9 +46,9 @@ Stan Playground has several built-in ways of viewing the samples, but also suppo
 
 ## 5: Sharing and saving your data
 
-Stan Playground has built-in sharing features to allow you to download a copy of your project, upload an existing project, or share via a [Github Gist](https://gist.github.com/). Sharing with a Gist provides a link you can send to other users--when clicked, the link loads your shared project in the recipient's browser.
+Stan Playground has built-in sharing features to allow you to download a copy of your project, upload an existing project, or share via a [Github Gist](https://gist.github.com/). Quick share and sharing with a Gist provides a link you can send to other users--when clicked, the link loads your shared project in the recipient's browser. Quick sharing may not work for very large projects, as all the necessary information is stored in the URL, and these can get quite long. 
 
-![5: Export window](https://github.com/user-attachments/assets/7e38761e-cfc8-48cb-9ad1-ac4ed390b9fc)
+![5: Export window](https://github.com/user-attachments/assets/fe462bad-f09a-46b9-916a-23eef54f0179)
 ![5: Load window](https://github.com/user-attachments/assets/4d2f78f6-e726-403b-ba54-d40c67eb2f88)
 
 
