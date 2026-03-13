@@ -13,12 +13,26 @@ export default defineConfig({
         codeSplitting: {
           groups: [
             {
-              name: "utilities",
-              test: /[\\/]node_modules[\\/](jszip|lz-string|@octokit\/rest|react-dropzone|pyodide|webr)[\\/]/,
-            },
-            {
-              name: "mui",
-              test: /[\\/]node_modules[\\/](\@mui\/material|\@mui\/icons-material)[\\/]/,
+              name: (moduleID) => {
+                for (const pkg of [
+                  "jszip",
+                  "lz-string",
+                  "@octokit/rest",
+                  "react-dropzone",
+                  "pyodide",
+                  "webr",
+                ]) {
+                  if (moduleID.includes(pkg)) {
+                    return "utilities";
+                  }
+                }
+                for (const pkg of ["@mui/material", "@mui/icons-material"]) {
+                  if (moduleID.includes(pkg)) {
+                    return "mui";
+                  }
+                  return null;
+                }
+              },
             },
           ],
         },

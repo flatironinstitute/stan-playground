@@ -7,7 +7,9 @@ import type { PlotParams } from "react-plotly.js";
 import createPlotlyComponent from "react-plotly.js/factory";
 const Plot = React.lazy<React.ComponentType<PlotParams>>(async () => {
   const plotly = await import("plotly-stan-playground-dist");
-  return { default: (createPlotlyComponent as any).default(plotly) }; // workaround for https://github.com/vitejs/rolldown-vite/issues/490
+  // workaround for issue with the way rolldown interacts with react-plotly-js' nonstandard export style
+  // see: https://github.com/vitejs/rolldown-vite/issues/490 and https://github.com/plotly/react-plotly.js/issues/359
+  return { default: (createPlotlyComponent as any).default(plotly) };
 });
 
 const LazyPlotlyPlot: FunctionComponent<PlotParams> = ({ data, layout }) => {
