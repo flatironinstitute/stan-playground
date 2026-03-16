@@ -1,25 +1,40 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { configDefaults, coverageConfigDefaults } from "vitest/config";
 import { codecovVitePlugin } from "@codecov/vite-plugin";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  resolve: { tsconfigPaths: true },
   optimizeDeps: { exclude: ["pyodide"] },
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks: {
-          utilities: [
-            "jszip",
-            "lz-string",
-            "@octokit/rest",
-            "react-dropzone",
-            "pyodide",
-            "webr",
+        codeSplitting: {
+          groups: [
+            {
+              name: (moduleID) => {
+                for (const pkg of [
+                  "jszip",
+                  "lz-string",
+                  "@octokit/rest",
+                  "react-dropzone",
+                  "pyodide",
+                  "webr",
+                ]) {
+                  if (moduleID.includes(pkg)) {
+                    return "utilities";
+                  }
+                }
+                for (const pkg of ["@mui/material", "@mui/icons-material"]) {
+                  if (moduleID.includes(pkg)) {
+                    return "mui";
+                  }
+                  return null;
+                }
+              },
+            },
           ],
-          mui: ["@mui/material", "@mui/icons-material"],
         },
       },
     },
@@ -35,8 +50,6 @@ export default defineConfig({
         // "**/types/*ts",
         "index.ts",
         "vite*ts",
-        // vitest seems to always reports 100% coverage for workers
-        "**/*Worker.ts",
       ],
       include: ["src/**/*.ts", "src/**/*.tsx"],
       provider: "v8",
@@ -46,7 +59,6 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    tsconfigPaths(),
     codecovVitePlugin({
       enableBundleAnalysis: process.env.CODECOV_TOKEN !== undefined,
       bundleName: "stan-playground",
@@ -68,6 +80,5 @@ export default defineConfig({
   },
   worker: {
     format: "es",
-    plugins: () => [tsconfigPaths()],
   },
 });
