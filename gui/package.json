@@ -44,7 +44,7 @@
     "webr": "^0.5.8"
   },
   "devDependencies": {
-    "@codecov/vite-plugin": "^1.9.1",
+    "@codecov/vite-plugin": "^2.0.1",
     "@eslint/js": "^10.0.1",
     "@testing-library/dom": "^10.1.0",
     "@testing-library/react": "^16.0.0",
