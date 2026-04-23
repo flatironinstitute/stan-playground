@@ -936,6 +936,7 @@ const monacoAddStanLang = (monacoInstance: typeof Monaco) => {
   monacoInstance.languages.setLanguageConfiguration("stan", conf);
 
   monacoInstance.languages.onLanguage("stan", () => {
+    // TODO figure out how to pass in pedantic mode information
     const worker = new Worker(stanLspWorkerURL, {
       name: "StanLSP",
       type: "module",

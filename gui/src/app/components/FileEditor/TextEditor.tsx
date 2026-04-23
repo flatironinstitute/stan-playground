@@ -8,7 +8,6 @@ import {
 } from "react";
 
 import Loading from "@SpComponents/Loading";
-import { FileNames } from "@SpCore/Project/FileMapping";
 import { UserSettingsContext } from "@SpCore/Settings/UserSettings";
 
 import { Editor, loader, useMonaco } from "@monaco-editor/react";
@@ -166,11 +165,7 @@ const TextEditor: FunctionComponent<Props> = ({
         defaultLanguage={language}
         aria-label={label}
         onChange={handleChange}
-        path={
-          label === FileNames.STANFILE
-            ? "file://" + FileNames.STANFILE
-            : undefined
-        }
+        path={`file://${label}`}
         onMount={(editor, _) => setEditor(editor)}
         loading={<Loading name="Monaco Editor" />}
         options={{
