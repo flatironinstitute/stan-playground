@@ -25,7 +25,7 @@ import monacoAddStanLang from "./monacoStanLanguage";
 
 loader.config({
   paths: {
-    vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs",
+    vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs",
   },
 });
 loader.init().then(monacoAddStanLang);
@@ -179,6 +179,7 @@ const TextEditor: FunctionComponent<Props> = ({
         defaultLanguage={language}
         aria-label={label}
         onChange={handleChange}
+        path={`file://${label}`}
         onMount={(editor, _) => setEditor(editor)}
         loading={<Loading name="Monaco Editor" />}
         options={{

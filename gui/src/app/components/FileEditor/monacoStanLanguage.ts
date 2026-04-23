@@ -3,8 +3,11 @@
 // See https://microsoft.github.io/monaco-editor/monarch.html
 // Adapted in part from https://github.com/WardBrian/vscode-stan-extension/blob/main/lang/syntaxes/stan.json
 
-import type { Monaco } from "@monaco-editor/react";
-import type { languages } from "monaco-editor";
+import type * as Monaco from "monaco-editor";
+
+// https://vitejs.dev/guide/assets#importing-script-as-a-worker
+// https://vitejs.dev/guide/assets#importing-asset-as-url
+import stanLspWorkerURL from "./stanLspWorker?worker&url";
 
 const BLOCKS = [
   "functions",
@@ -792,7 +795,7 @@ const OPERATORS = [
   "%=",
 ];
 
-export const conf: languages.LanguageConfiguration = {
+export const conf: Monaco.languages.LanguageConfiguration = {
   comments: {
     lineComment: "//",
     blockComment: ["/*", "*/"],
@@ -830,7 +833,7 @@ export const conf: languages.LanguageConfiguration = {
   wordPattern: /[a-zA-Z_][a-zA-Z0-9_]*/,
 };
 
-export const language = <languages.IMonarchLanguage>{
+export const language = <Monaco.languages.IMonarchLanguage>{
   defaultToken: "",
   tokenPostfix: ".stan",
 
@@ -925,12 +928,21 @@ export const language = <languages.IMonarchLanguage>{
   },
 };
 
-const monacoAddStanLang = (monacoInstance: Monaco) => {
+const monacoAddStanLang = (monacoInstance: typeof Monaco) => {
   console.log("monaco loaded! Setting up stan language");
 
   monacoInstance.languages.register({ id: "stan" });
   monacoInstance.languages.setMonarchTokensProvider("stan", language);
   monacoInstance.languages.setLanguageConfiguration("stan", conf);
+
+  monacoInstance.languages.onLanguage("stan", () => {
+    const worker = new Worker(stanLspWorkerURL, {
+      name: "StanLSP",
+      type: "module",
+    });
+    const transport = monacoInstance.lsp.createTransportToWorker(worker); //.log();
+    new monacoInstance.lsp.MonacoLspClient(transport);
+  });
 };
 
 export default monacoAddStanLang;
