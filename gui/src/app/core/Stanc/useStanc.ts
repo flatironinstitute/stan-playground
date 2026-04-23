@@ -1,7 +1,6 @@
-import { useCallback, use, useEffect, useMemo, useState } from "react";
+import { useCallback, use, useEffect, useState } from "react";
 
 import { UserSettingsContext } from "@SpCore/Settings/UserSettings";
-import { CompileContext } from "@SpCore/Compilation/CompileContextProvider";
 
 import {
   StancErrors,
@@ -83,13 +82,13 @@ const useStanc = (
     });
   }, [post, modelName, code, pedantic]);
 
-  const { setValidSyntax } = use(CompileContext);
-  const validSyntax = useMemo(() => {
-    return stancErrors.errors === undefined || stancErrors.errors.length === 0;
-  }, [stancErrors]);
-  useEffect(() => {
-    setValidSyntax(validSyntax);
-  }, [validSyntax, setValidSyntax]);
+  // const { setValidSyntax } = use(CompileContext);
+  // const validSyntax = useMemo(() => {
+  //   return stancErrors.errors === undefined || stancErrors.errors.length === 0;
+  // }, [stancErrors]);
+  // useEffect(() => {
+  //   setValidSyntax(validSyntax);
+  // }, [validSyntax, setValidSyntax]);
 
   return { stancErrors, requestFormat };
 };

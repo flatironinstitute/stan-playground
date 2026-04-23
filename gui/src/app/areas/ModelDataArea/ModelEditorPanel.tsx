@@ -1,11 +1,20 @@
-import { Split } from "@geoffcox/react-splitter";
 import { AutoFixHigh, Cancel, Help, Settings } from "@mui/icons-material";
+
+import { Split } from "@geoffcox/react-splitter";
+import { useMonaco } from "@monaco-editor/react";
+
 import TextEditor from "@SpComponents/FileEditor/TextEditor";
 import { ToolbarItem } from "@SpComponents/FileEditor/ToolBar";
-import { stancErrorsToCodeMarkers } from "@SpCore/Stanc/Linting";
 import useStanc from "@SpCore/Stanc/useStanc";
 import { CompileContext } from "@SpCore/Compilation/CompileContextProvider";
-import { FunctionComponent, use, useCallback, useMemo, useState } from "react";
+import {
+  FunctionComponent,
+  use,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
 import { ProjectKnownFiles } from "@SpCore/Project/ProjectDataModel";
 import { FileNames } from "@SpCore/Project/FileMapping";
@@ -33,14 +42,44 @@ const ModelEditorPanel: FunctionComponent = () => {
     [update],
   );
 
-  const { stancErrors, requestFormat } = useStanc(
+  const { stancErrors } = useStanc(
     "main.stan",
     data.ephemera.stanFileContent,
     setEditedFileContent,
   );
 
-  const { compileStatus, compileMessage, compile, validSyntax, isConnected } =
-    use(CompileContext);
+  const {
+    compileStatus,
+    compileMessage,
+    compile,
+    validSyntax,
+    setValidSyntax,
+    isConnected,
+  } = use(CompileContext);
+
+  // set syntax validitiy based on what the LSP returned to the editor
+  const monacoInstance = useMonaco();
+  const checkMarkers = useCallback(() => {
+    if (!monacoInstance) return;
+    const error = monacoInstance.editor
+      .getModelMarkers({
+        resource: monacoInstance.Uri.file(FileNames.STANFILE),
+      })
+      .some(
+        ({ source, severity }) =>
+          source === "stan-language-server" &&
+          severity === monacoInstance.MarkerSeverity.Error,
+      );
+    setValidSyntax(!error);
+  }, [monacoInstance, setValidSyntax]);
+
+  useEffect(() => {
+    if (!monacoInstance) return;
+    const disposable = monacoInstance.editor.onDidChangeMarkers(checkMarkers);
+    return () => {
+      disposable.dispose();
+    };
+  }, [checkMarkers, monacoInstance]);
 
   const hasWarnings = useMemo(() => {
     return stancErrors.warnings && stancErrors.warnings.length > 0;
@@ -91,7 +130,7 @@ const ModelEditorPanel: FunctionComponent = () => {
         icon: <AutoFixHigh />,
         tooltip: "Auto format this stan file",
         label: "Auto format",
-        onClick: requestFormat,
+        onClick: "format",
         color: "info",
       });
     }
@@ -130,7 +169,6 @@ const ModelEditorPanel: FunctionComponent = () => {
     data.ephemera.stanFileContent,
     data.stanFileContent,
     hasWarnings,
-    requestFormat,
     compileStatus,
     isConnected,
     compile,
@@ -158,7 +196,6 @@ const ModelEditorPanel: FunctionComponent = () => {
       onSetEditedText={setEditedFileContent}
       readOnly={isCompiling}
       toolbarItems={toolbarItems}
-      codeMarkers={stancErrorsToCodeMarkers(stancErrors)}
       contentOnEmpty="Begin editing or select an example from the left panel"
     />
   );
