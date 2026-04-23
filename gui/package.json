@@ -23,7 +23,7 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@geoffcox/react-splitter": "^2.1.2",
-    "@monaco-editor/react": "^4.6.0",
+    "@monaco-editor/react": "^4.7.0",
     "@mui/icons-material": "^6.4.1",
     "@mui/material": "^6.4.1",
     "@octokit/rest": "^21.1.1",
@@ -41,7 +41,7 @@
     "react-use-measure": "^2.1.1",
     "stanc3": "2.38.0",
     "tinystan": "^0.3.2",
-    "webr": "^0.5.8"
+    "webr": "^0.5.9"
   },
   "devDependencies": {
     "@codecov/vite-plugin": "^2.0.1",
@@ -52,8 +52,8 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@types/react-plotly.js": "^2.6.3",
-    "@typescript-eslint/eslint-plugin": "^8.57.0",
-    "@typescript-eslint/parser": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.0",
+    "@typescript-eslint/parser": "^8.59.0",
     "@vitejs/plugin-react": "^6.0.1",
     "@vitest/coverage-v8": "^4.1.0",
     "@vitest/web-worker": "^4.1.0",
@@ -62,10 +62,10 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "globals": "^17.3.0",
     "jsdom": "^26.1.0",
-    "monaco-editor": "^0.52.2",
+    "monaco-editor": "^0.55.1",
     "prettier": "^3.3.2",
     "typescript": "^6.0.2",
-    "typescript-eslint": "^8.57.0",
+    "typescript-eslint": "^8.59.0",
     "vite": "^8.0.5",
     "vitest": "^4.1.0"
   }
