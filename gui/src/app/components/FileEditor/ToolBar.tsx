@@ -23,7 +23,7 @@ export type ToolbarItem =
       tooltip?: string;
       label?: string;
       icon?: any;
-      onClick: () => void;
+      onClick: "format" | (() => void);
       color?: ColorOptions;
     }
   | {
@@ -36,6 +36,7 @@ type ToolbarProps = {
   items: ToolbarItem[];
   label: string;
   onSaveText: () => void;
+  onFormat: () => void;
   edited: boolean;
   readOnly: boolean;
 };
@@ -53,6 +54,7 @@ export const ToolBar: FunctionComponent<ToolbarProps> = ({
   items,
   label,
   onSaveText,
+  onFormat,
   edited,
   readOnly,
 }) => {
@@ -88,16 +90,17 @@ export const ToolBar: FunctionComponent<ToolbarProps> = ({
         <span className="EditorTitle">{label}</span>
         {toolBarItems &&
           toolBarItems.map((item, i) => (
-            <ToolbarItemComponent key={i} item={item} />
+            <ToolbarItemComponent key={i} item={item} onFormat={onFormat} />
           ))}
       </EditorMenuBar>
     </div>
   );
 };
 
-const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
-  item,
-}) => {
+const ToolbarItemComponent: FunctionComponent<{
+  item: ToolbarItem;
+  onFormat: () => void;
+}> = ({ item, onFormat }) => {
   const theme = useTheme();
 
   const { theme: userTheme } = use(UserSettingsContext);
@@ -112,11 +115,12 @@ const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
 
   if (item.type === "button") {
     const { onClick, label, tooltip, icon } = item;
+    const click = onClick === "format" ? onFormat : onClick;
     if (icon) {
       return (
         <span className="EditorToolbarItem" style={{ color }}>
           <IconButton
-            onClick={onClick}
+            onClick={click}
             disabled={!onClick}
             color="inherit"
             size="small"
@@ -131,7 +135,7 @@ const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
       return (
         <span className="EditorToolbarItem">
           <Link
-            onClick={onClick}
+            onClick={click}
             color={color}
             component="button"
             underline="none"

@@ -6,14 +6,17 @@ import {
   use,
   useEffect,
   useState,
+  createContext,
 } from "react";
 
-import { createContext } from "react";
+import { useMonaco } from "@monaco-editor/react";
+
 import compileStanProgram from "./compileStanProgram";
 import {
   publicCompilationServerUrl,
   UserSettingsContext,
 } from "@SpCore/Settings/UserSettings";
+import { FileNames } from "@SpCore/Project/FileMapping";
 
 export type CompileStatus =
   | "preparing"
@@ -28,7 +31,6 @@ type CompileContextType = {
   compiledMainJsUrl?: string;
   validSyntax: boolean;
   compile: () => void;
-  setValidSyntax: (valid: boolean) => void;
   isConnected: boolean;
   retryConnection: () => void;
 };
@@ -36,9 +38,8 @@ type CompileContextType = {
 export const CompileContext = createContext<CompileContextType>({
   compileStatus: "",
   compileMessage: "",
-  validSyntax: false,
+  validSyntax: true,
   compile: () => {},
-  setValidSyntax: () => {},
   isConnected: false,
   retryConnection: () => {},
 });
@@ -107,7 +108,31 @@ const CompileContextProvider: FunctionComponent<PropsWithChildren> = ({
   const [compiledMainJsUrl, setCompiledMainJsUrl] = useState<
     string | undefined
   >(undefined);
-  const [validSyntax, setValidSyntax] = useState<boolean>(false);
+  const [validSyntax, setValidSyntax] = useState<boolean>(true);
+
+  // set syntax validitiy based on what the LSP returned to the editor
+  const monacoInstance = useMonaco();
+  const checkMarkers = useCallback(() => {
+    if (!monacoInstance) return;
+    const error = monacoInstance.editor
+      .getModelMarkers({
+        resource: monacoInstance.Uri.parse(`file://${FileNames.STANFILE}`),
+      })
+      .some(
+        ({ source, severity }) =>
+          source === "stan-language-server" &&
+          severity === monacoInstance.MarkerSeverity.Error,
+      );
+    setValidSyntax(!error);
+  }, [monacoInstance, setValidSyntax]);
+
+  useEffect(() => {
+    if (!monacoInstance) return;
+    const disposable = monacoInstance.editor.onDidChangeMarkers(checkMarkers);
+    return () => {
+      disposable.dispose();
+    };
+  }, [checkMarkers, monacoInstance]);
 
   useEffect(() => {
     // if the compiled content is not the same as the current content,
@@ -166,7 +191,6 @@ const CompileContextProvider: FunctionComponent<PropsWithChildren> = ({
         compiledMainJsUrl,
         validSyntax,
         compile: handleCompile,
-        setValidSyntax,
         isConnected,
         retryConnection,
       }}

@@ -9,10 +9,8 @@ import {
 
 import Loading from "@SpComponents/Loading";
 import { UserSettingsContext } from "@SpCore/Settings/UserSettings";
-import { CodeMarker } from "@SpCore/Stanc/Linting";
-import { unreachable } from "@SpUtil/unreachable";
 
-import { Editor, loader, useMonaco, type Monaco } from "@monaco-editor/react";
+import { Editor, loader, useMonaco } from "@monaco-editor/react";
 import type { editor, IDisposable } from "monaco-editor";
 
 import { ToolBar, ToolbarItem } from "./ToolBar";
@@ -25,7 +23,7 @@ import monacoAddStanLang from "./monacoStanLanguage";
 
 loader.config({
   paths: {
-    vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs",
+    vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs",
   },
 });
 loader.init().then(monacoAddStanLang);
@@ -40,7 +38,6 @@ type Props = {
   wordWrap?: boolean;
   toolbarItems?: ToolbarItem[];
   label: string;
-  codeMarkers?: CodeMarker[];
   contentOnEmpty?: string | HTMLSpanElement;
   actions?: editor.IActionDescriptor[];
 };
@@ -54,7 +51,6 @@ const TextEditor: FunctionComponent<Props> = ({
   toolbarItems,
   language,
   label,
-  codeMarkers,
   contentOnEmpty,
   actions,
 }) => {
@@ -86,24 +82,6 @@ const TextEditor: FunctionComponent<Props> = ({
   const monacoInstance = useMonaco();
 
   useEffect(() => {
-    if (!monacoInstance) return;
-    if (!codeMarkers) return;
-    const model = editorInstance?.getModel();
-    if (!model) return;
-
-    const modelMarkers = codeMarkers.map((marker) => ({
-      ...marker,
-      severity: toMonacoMarkerSeverity(marker.severity, monacoInstance),
-    }));
-
-    monacoInstance.editor.setModelMarkers(
-      model,
-      "stan-playground",
-      modelMarkers,
-    );
-  }, [codeMarkers, monacoInstance, editorInstance]);
-
-  useEffect(() => {
     if (!editorInstance || !monacoInstance) return;
     if (!contentOnEmpty) return;
     if (text || editedText) {
@@ -122,6 +100,13 @@ const TextEditor: FunctionComponent<Props> = ({
       editorInstance.removeContentWidget(contentWidget);
     };
   }, [text, editorInstance, editedText, contentOnEmpty, monacoInstance]);
+
+  const tryFormat = useCallback(() => {
+    if (!editorInstance) return;
+    const action = editorInstance.getAction("editor.action.formatDocument");
+    if (!action || !action.isSupported()) return;
+    action.run();
+  }, [editorInstance]);
 
   useEffect(() => {
     if (!editorInstance || !monacoInstance) return;
@@ -172,6 +157,7 @@ const TextEditor: FunctionComponent<Props> = ({
         items={toolbarItems || []}
         label={label}
         onSaveText={onSaveText}
+        onFormat={tryFormat}
         edited={edited}
         readOnly={!!readOnly}
       />
@@ -179,6 +165,7 @@ const TextEditor: FunctionComponent<Props> = ({
         defaultLanguage={language}
         aria-label={label}
         onChange={handleChange}
+        path={`file://${label}`}
         onMount={(editor, _) => setEditor(editor)}
         loading={<Loading name="Monaco Editor" />}
         options={{
@@ -195,24 +182,6 @@ const TextEditor: FunctionComponent<Props> = ({
       />
     </div>
   );
-};
-
-const toMonacoMarkerSeverity = (
-  severity: CodeMarker["severity"],
-  monacoInstance: Monaco,
-) => {
-  switch (severity) {
-    case "error":
-      return monacoInstance.MarkerSeverity.Error;
-    case "warning":
-      return monacoInstance.MarkerSeverity.Warning;
-    case "hint":
-      return monacoInstance.MarkerSeverity.Hint;
-    case "info":
-      return monacoInstance.MarkerSeverity.Info;
-    default:
-      return unreachable(severity);
-  }
 };
 
 const createHintTextContentWidget = (
