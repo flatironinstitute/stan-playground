@@ -11,15 +11,16 @@ import stanLspWorkerURL from "./stanLspWorker?worker&url";
 
 // The following is a workaround for https://github.com/microsoft/monaco-editor/issues/5305
 // inspired by https://github.com/microsoft/monaco-editor/pull/5156#issuecomment-3744990436
-var settings = { warnPedantic: false };
-var notifyServerSettingsChanged: undefined | ((params: LSPAny) => void) =
-  undefined;
 
 const workspaceConfiguration = unverifiedRequest<ConfigurationParams, LSPAny[]>(
   {
     method: "workspace/configuration",
   },
 );
+
+const stanLspSettings = { warnPedantic: false };
+let notifyServerSettingsChanged: undefined | ((params: LSPAny) => void) =
+  undefined;
 
 class ConfigurationFeature {
   constructor(c: any) {
@@ -33,15 +34,15 @@ class ConfigurationFeature {
     c.connection.registerRequestHandler(
       workspaceConfiguration,
       async ({ items }: ConfigurationParams) => {
-        const result = [];
+        const ok = [];
         for (const item of items) {
           if (item.section === "stan-language-server") {
-            result.push(settings);
+            ok.push(stanLspSettings);
           } else {
-            result.push(null);
+            ok.push(null);
           }
         }
-        return { ok: result };
+        return { ok };
       },
     );
     notifyServerSettingsChanged = c.server.workspaceDidChangeConfiguration;
@@ -50,15 +51,15 @@ class ConfigurationFeature {
 }
 
 export const setWarnPedantic = (value: boolean) => {
-  settings.warnPedantic = value;
-  notifyServerSettingsChanged && notifyServerSettingsChanged(settings);
+  stanLspSettings.warnPedantic = value;
+  if (notifyServerSettingsChanged) notifyServerSettingsChanged(stanLspSettings);
 };
 
 export const setupStanLsp = (monacoInstance: typeof Monaco) => {
   class StanLspClient extends monacoInstance.lsp.MonacoLspClient {
     createFeatures() {
       const store = super.createFeatures();
-      // @ts-ignore
+      // @ts-expect-error // types not exposed in Monaco API
       store.add(new ConfigurationFeature(this._connection));
       return store;
     }

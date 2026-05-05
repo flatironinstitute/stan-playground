@@ -8,6 +8,8 @@ import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
 import { ProjectKnownFiles } from "@SpCore/Project/ProjectDataModel";
 import { FileNames } from "@SpCore/Project/FileMapping";
 
+import type { editor } from "monaco-editor";
+
 const ModelEditorPanel: FunctionComponent = () => {
   const { data, update } = use(ProjectContext);
 
@@ -31,6 +33,16 @@ const ModelEditorPanel: FunctionComponent = () => {
 
   const { compileStatus, compileMessage, compile, validSyntax, isConnected } =
     use(CompileContext);
+
+  const tryFormat = useCallback(
+    (editorInstance: editor.IStandaloneCodeEditor | undefined) => {
+      if (!editorInstance) return;
+      const action = editorInstance.getAction("editor.action.formatDocument");
+      if (!action || !action.isSupported()) return;
+      action.run();
+    },
+    [],
+  );
 
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     const ret: ToolbarItem[] = [];
@@ -58,7 +70,7 @@ const ModelEditorPanel: FunctionComponent = () => {
         icon: <AutoFixHigh />,
         tooltip: "Auto format this stan file",
         label: "Auto format",
-        onClick: "format",
+        onClick: tryFormat,
         color: "info",
       });
     }

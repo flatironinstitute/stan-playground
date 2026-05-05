@@ -1,8 +1,11 @@
 import { FunctionComponent, use, useMemo } from "react";
+import type { editor } from "monaco-editor";
+
 import { Save } from "@mui/icons-material";
 import Link from "@mui/material/Link";
 import IconButton from "@mui/material/IconButton";
 import { styled, useTheme } from "@mui/material/styles";
+
 import { UserSettingsContext } from "@SpCore/Settings/UserSettings";
 
 type Palletes =
@@ -23,7 +26,7 @@ export type ToolbarItem =
       tooltip?: string;
       label?: string;
       icon?: any;
-      onClick: "format" | (() => void);
+      onClick: (editor: editor.IStandaloneCodeEditor | undefined) => void;
       color?: ColorOptions;
     }
   | {
@@ -36,7 +39,7 @@ type ToolbarProps = {
   items: ToolbarItem[];
   label: string;
   onSaveText: () => void;
-  onFormat: () => void;
+  editorInstance: editor.IStandaloneCodeEditor | undefined;
   edited: boolean;
   readOnly: boolean;
 };
@@ -54,7 +57,7 @@ export const ToolBar: FunctionComponent<ToolbarProps> = ({
   items,
   label,
   onSaveText,
-  onFormat,
+  editorInstance,
   edited,
   readOnly,
 }) => {
@@ -90,7 +93,11 @@ export const ToolBar: FunctionComponent<ToolbarProps> = ({
         <span className="EditorTitle">{label}</span>
         {toolBarItems &&
           toolBarItems.map((item, i) => (
-            <ToolbarItemComponent key={i} item={item} onFormat={onFormat} />
+            <ToolbarItemComponent
+              key={i}
+              item={item}
+              editorInstance={editorInstance}
+            />
           ))}
       </EditorMenuBar>
     </div>
@@ -99,8 +106,8 @@ export const ToolBar: FunctionComponent<ToolbarProps> = ({
 
 const ToolbarItemComponent: FunctionComponent<{
   item: ToolbarItem;
-  onFormat: () => void;
-}> = ({ item, onFormat }) => {
+  editorInstance: editor.IStandaloneCodeEditor | undefined;
+}> = ({ item, editorInstance }) => {
   const theme = useTheme();
 
   const { theme: userTheme } = use(UserSettingsContext);
@@ -115,12 +122,11 @@ const ToolbarItemComponent: FunctionComponent<{
 
   if (item.type === "button") {
     const { onClick, label, tooltip, icon } = item;
-    const click = onClick === "format" ? onFormat : onClick;
     if (icon) {
       return (
         <span className="EditorToolbarItem" style={{ color }}>
           <IconButton
-            onClick={click}
+            onClick={() => onClick(editorInstance)}
             disabled={!onClick}
             color="inherit"
             size="small"
@@ -135,7 +141,7 @@ const ToolbarItemComponent: FunctionComponent<{
       return (
         <span className="EditorToolbarItem">
           <Link
-            onClick={click}
+            onClick={() => onClick(editorInstance)}
             color={color}
             component="button"
             underline="none"

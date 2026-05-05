@@ -101,13 +101,6 @@ const TextEditor: FunctionComponent<Props> = ({
     };
   }, [text, editorInstance, editedText, contentOnEmpty, monacoInstance]);
 
-  const tryFormat = useCallback(() => {
-    if (!editorInstance) return;
-    const action = editorInstance.getAction("editor.action.formatDocument");
-    if (!action || !action.isSupported()) return;
-    action.run();
-  }, [editorInstance]);
-
   useEffect(() => {
     if (!editorInstance || !monacoInstance) return;
 
@@ -155,8 +148,8 @@ const TextEditor: FunctionComponent<Props> = ({
       <ToolBar
         items={toolbarItems || []}
         label={label}
+        editorInstance={editorInstance}
         onSaveText={onSaveText}
-        onFormat={tryFormat}
         edited={edited}
         readOnly={!!readOnly}
       />
