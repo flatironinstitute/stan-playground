@@ -16,11 +16,11 @@ import type { editor, IDisposable } from "monaco-editor";
 import { ToolBar, ToolbarItem } from "./ToolBar";
 
 import monacoAddStanLang from "./monacoStanLanguage";
+
 // loader from @monaco-editor/react handles the loading of the monaco editor
 // importantly, it downloads from a CDN, so we need to make sure our
 // dependency on the monaco-editor package is limited to types only,
 // to avoid downloading twice.
-
 loader.config({
   paths: {
     vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs",
@@ -145,7 +145,6 @@ const TextEditor: FunctionComponent<Props> = ({
   }, [editedText, text]);
 
   const { theme: userTheme } = use(UserSettingsContext);
-
   const theme = useMemo(
     () => (userTheme === "dark" ? "vs-dark" : "vs"),
     [userTheme],
@@ -165,7 +164,7 @@ const TextEditor: FunctionComponent<Props> = ({
         defaultLanguage={language}
         aria-label={label}
         onChange={handleChange}
-        path={`file://${label}`}
+        path={label}
         onMount={(editor, _) => setEditor(editor)}
         loading={<Loading name="Monaco Editor" />}
         options={{

@@ -116,7 +116,7 @@ const CompileContextProvider: FunctionComponent<PropsWithChildren> = ({
     if (!monacoInstance) return;
     const error = monacoInstance.editor
       .getModelMarkers({
-        resource: monacoInstance.Uri.parse(`file://${FileNames.STANFILE}`),
+        resource: monacoInstance.Uri.parse(`file:///${FileNames.STANFILE}`),
       })
       .some(
         ({ source, severity }) =>

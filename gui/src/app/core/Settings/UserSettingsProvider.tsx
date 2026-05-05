@@ -15,6 +15,7 @@ import {
   publicCompilationServerUrl,
   UserSettingsContext,
 } from "./UserSettings";
+import { setWarnPedantic } from "@SpComponents/FileEditor/stanLsp";
 
 const defaultSettings = {
   pedantic: false,
@@ -35,12 +36,14 @@ const loadStoredSettings = () => {
 
 const { pedantic: defaultPedantic, serverUrl: defaultStanWasmServerUrl } =
   loadStoredSettings();
+setWarnPedantic(defaultPedantic);
 
 const UserSettingsProvider: FunctionComponent<PropsWithChildren> = ({
   children,
 }) => {
   const [settingsTab, setSettingsTab] = useState<SettingsTab>("compilation");
   const [pedantic, setPedantic] = useState<boolean>(defaultPedantic);
+
   const [stanWasmServerUrl, setStanWasmServerUrl] = useState<string>(
     defaultStanWasmServerUrl,
   );
@@ -74,7 +77,10 @@ const UserSettingsProvider: FunctionComponent<PropsWithChildren> = ({
   // ------------------- Pedantic -------------------
 
   const togglePedantic = useCallback(() => {
-    setPedantic((prev) => !prev);
+    setPedantic((prev) => {
+      setWarnPedantic(!prev);
+      return !prev;
+    });
   }, []);
 
   // ------------------- Theme -------------------

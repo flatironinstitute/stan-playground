@@ -23,6 +23,7 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@geoffcox/react-splitter": "^2.1.2",
+    "@hediet/json-rpc": "^0.5.0",
     "@monaco-editor/react": "^4.7.0",
     "@mui/icons-material": "^6.4.1",
     "@mui/material": "^6.4.1",
@@ -39,7 +40,7 @@
     "react-plotly.js": "^2.6.0",
     "react-router": "^7.12.0",
     "react-use-measure": "^2.1.1",
-    "stan-language-server": "^0.4.6",
+    "stan-language-server": "^0.4.7",
     "tinystan": "^0.3.2",
     "webr": "^0.5.9"
   },

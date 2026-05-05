@@ -723,6 +723,11 @@
   dependencies:
     react-measure "^2.5.2"
 
+"@hediet/json-rpc@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@hediet/json-rpc/-/json-rpc-0.5.0.tgz#e11900055e53336e4161ce2a9053babd435cf343"
+  integrity sha512-SApO7NbKJztClcznEqg46ZGQzO2v3Q3gVIuRVC9QE/m75J/5AipJdclxEXgT++7j4x4LI2JjEpf2xhi67Ngu9A==
+
 "@humanfs/core@^0.19.1":
   version "0.19.1"
   resolved "https://registry.yarnpkg.com/@humanfs/core/-/core-0.19.1.tgz#17c55ca7d426733fe3c561906b8173c336b40a77"
@@ -3945,10 +3950,10 @@ stackback@0.0.2:
   resolved "https://registry.yarnpkg.com/stackback/-/stackback-0.0.2.tgz#1ac8a0d9483848d1695e418b6d031a3c3ce68e3b"
   integrity sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==
 
-stan-language-server@^0.4.6:
-  version "0.4.6"
-  resolved "https://registry.yarnpkg.com/stan-language-server/-/stan-language-server-0.4.6.tgz#ddb1a49b6c41a4ebabc3afb8b91412f13a7bba41"
-  integrity sha512-D0C4H6a60kGfY5EHz8p8qTQOG1ziAlYrwuQx7XtRzXiJt7PPy7RyPdN6qDGG6G7R9iqHxHCSZuVEUbY8gCO1Vg==
+stan-language-server@^0.4.7:
+  version "0.4.7"
+  resolved "https://registry.yarnpkg.com/stan-language-server/-/stan-language-server-0.4.7.tgz#67e3837c6f8365af22a3754883155bc8bd6f735e"
+  integrity sha512-X5zFocT0fFBx8yn3Ajlpv3PStHO8LNhHoek9+PWy9G25/4UZ7I4LIX/QlqEEizc3+hv1ljebQLxTRy3nUmf+/A==
   dependencies:
     stanc3 "2.38.0"
     trie-search "2.2.1"

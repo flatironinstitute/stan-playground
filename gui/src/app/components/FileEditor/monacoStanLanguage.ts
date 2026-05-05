@@ -4,10 +4,7 @@
 // Adapted in part from https://github.com/WardBrian/vscode-stan-extension/blob/main/lang/syntaxes/stan.json
 
 import type * as Monaco from "monaco-editor";
-
-// https://vitejs.dev/guide/assets#importing-script-as-a-worker
-// https://vitejs.dev/guide/assets#importing-asset-as-url
-import stanLspWorkerURL from "./stanLspWorker?worker&url";
+import { setupStanLsp } from "./stanLsp";
 
 const BLOCKS = [
   "functions",
@@ -930,20 +927,12 @@ export const language = <Monaco.languages.IMonarchLanguage>{
 
 const monacoAddStanLang = (monacoInstance: typeof Monaco) => {
   console.log("monaco loaded! Setting up stan language");
-
   monacoInstance.languages.register({ id: "stan" });
   monacoInstance.languages.setMonarchTokensProvider("stan", language);
   monacoInstance.languages.setLanguageConfiguration("stan", conf);
-
-  monacoInstance.languages.onLanguage("stan", () => {
-    // TODO figure out how to pass in pedantic mode information
-    const worker = new Worker(stanLspWorkerURL, {
-      name: "StanLSP",
-      type: "module",
-    });
-    const transport = monacoInstance.lsp.createTransportToWorker(worker); //.log();
-    new monacoInstance.lsp.MonacoLspClient(transport);
-  });
+  monacoInstance.languages.onLanguage("stan", () =>
+    setupStanLsp(monacoInstance),
+  );
 };
 
 export default monacoAddStanLang;
