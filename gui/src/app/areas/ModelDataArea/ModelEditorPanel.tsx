@@ -122,6 +122,8 @@ const ModelEditorPanel: FunctionComponent = () => {
     data.stanFileContent,
     compileStatus,
     isConnected,
+    showError,
+    tryFormat,
     compile,
     compileMessage,
   ]);
