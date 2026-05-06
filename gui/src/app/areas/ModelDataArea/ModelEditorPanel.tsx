@@ -1,4 +1,4 @@
-import { AutoFixHigh, Help, Settings } from "@mui/icons-material";
+import { AutoFixHigh, Cancel, Help, Settings } from "@mui/icons-material";
 
 import TextEditor from "@SpComponents/FileEditor/TextEditor";
 import { ToolbarItem } from "@SpComponents/FileEditor/ToolBar";
@@ -44,6 +44,16 @@ const ModelEditorPanel: FunctionComponent = () => {
     [],
   );
 
+  const showError = useCallback(
+    (editorInstance: editor.IStandaloneCodeEditor | undefined) => {
+      if (!editorInstance) return;
+      const action = editorInstance.getAction("editor.action.marker.next");
+      if (!action || !action.isSupported()) return;
+      action.run();
+    },
+    [],
+  );
+
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     const ret: ToolbarItem[] = [];
 
@@ -58,9 +68,11 @@ const ModelEditorPanel: FunctionComponent = () => {
     // invalid syntax
     if (!validSyntax && !!data.ephemera.stanFileContent) {
       ret.push({
-        type: "text",
+        type: "button",
+        icon: <Cancel />,
         label: "Syntax error",
         color: "error.dark",
+        onClick: showError,
       });
     }
     // auto format

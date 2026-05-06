@@ -3950,10 +3950,10 @@ stackback@0.0.2:
   resolved "https://registry.yarnpkg.com/stackback/-/stackback-0.0.2.tgz#1ac8a0d9483848d1695e418b6d031a3c3ce68e3b"
   integrity sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==
 
-stan-language-server@^0.4.7:
-  version "0.4.7"
-  resolved "https://registry.yarnpkg.com/stan-language-server/-/stan-language-server-0.4.7.tgz#67e3837c6f8365af22a3754883155bc8bd6f735e"
-  integrity sha512-X5zFocT0fFBx8yn3Ajlpv3PStHO8LNhHoek9+PWy9G25/4UZ7I4LIX/QlqEEizc3+hv1ljebQLxTRy3nUmf+/A==
+stan-language-server@^0.4.8:
+  version "0.4.8"
+  resolved "https://registry.yarnpkg.com/stan-language-server/-/stan-language-server-0.4.8.tgz#be98269a89c13ed6272d159bf4e5e37701eb4921"
+  integrity sha512-Dj0a7SQ9tbXzopspJssBJ1fHO8KC3THmFMLZqwwhXN9wut4guP9U0c2tdGsBaWZIC2HZr4B5GlEDep6h6Q+bDw==
   dependencies:
     stanc3 "2.38.0"
     trie-search "2.2.1"
