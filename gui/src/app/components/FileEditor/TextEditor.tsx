@@ -137,11 +137,25 @@ const TextEditor: FunctionComponent<Props> = ({
     return editedText !== text;
   }, [editedText, text]);
 
-  const { theme: userTheme } = use(UserSettingsContext);
+  const { theme: userTheme, pedantic } = use(UserSettingsContext);
   const theme = useMemo(
     () => (userTheme === "dark" ? "vs-dark" : "vs"),
     [userTheme],
   );
+
+  // hack: monaco-lsp-client doesn't support workspace/diagnostic/refresh,
+  // so we need to trigger a re-diagnose an other way when pedantic mode changes
+  useEffect(() => {
+    if (
+      !editorInstance ||
+      editorInstance.getModel()?.getLanguageId() !== "stan"
+    )
+      return;
+
+    const value = editorInstance.getValue();
+    editorInstance.setValue(value + " ");
+    editorInstance.setValue(value);
+  }, [editorInstance, pedantic]);
 
   return (
     <div className="EditorWithToolbar">
