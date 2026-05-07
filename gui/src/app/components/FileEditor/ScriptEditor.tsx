@@ -4,7 +4,7 @@ import { Close, Help, PlayArrow } from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import { Split } from "@geoffcox/react-splitter";
 import { useMonaco } from "@monaco-editor/react";
-import { type editor } from "monaco-editor";
+import type { editor } from "monaco-editor";
 
 import { ColorOptions, ToolbarItem } from "@SpComponents/FileEditor/ToolBar";
 import { FileNames } from "@SpCore/Project/FileMapping";

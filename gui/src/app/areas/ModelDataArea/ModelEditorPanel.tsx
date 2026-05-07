@@ -1,14 +1,12 @@
 import { AutoFixHigh, Cancel, Help, Settings } from "@mui/icons-material";
 
 import TextEditor from "@SpComponents/FileEditor/TextEditor";
-import { ToolbarItem } from "@SpComponents/FileEditor/ToolBar";
+import { editorAction, ToolbarItem } from "@SpComponents/FileEditor/ToolBar";
 import { CompileContext } from "@SpCore/Compilation/CompileContextProvider";
 import { FunctionComponent, use, useCallback, useMemo } from "react";
 import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
 import { ProjectKnownFiles } from "@SpCore/Project/ProjectDataModel";
 import { FileNames } from "@SpCore/Project/FileMapping";
-
-import type { editor } from "monaco-editor";
 
 const ModelEditorPanel: FunctionComponent = () => {
   const { data, update } = use(ProjectContext);
@@ -34,26 +32,6 @@ const ModelEditorPanel: FunctionComponent = () => {
   const { compileStatus, compileMessage, compile, validSyntax, isConnected } =
     use(CompileContext);
 
-  const tryFormat = useCallback(
-    (editorInstance: editor.IStandaloneCodeEditor | undefined) => {
-      if (!editorInstance) return;
-      const action = editorInstance.getAction("editor.action.formatDocument");
-      if (!action || !action.isSupported()) return;
-      action.run();
-    },
-    [],
-  );
-
-  const showError = useCallback(
-    (editorInstance: editor.IStandaloneCodeEditor | undefined) => {
-      if (!editorInstance) return;
-      const action = editorInstance.getAction("editor.action.marker.next");
-      if (!action || !action.isSupported()) return;
-      action.run();
-    },
-    [],
-  );
-
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     const ret: ToolbarItem[] = [];
 
@@ -72,7 +50,7 @@ const ModelEditorPanel: FunctionComponent = () => {
         icon: <Cancel />,
         label: "Syntax error",
         color: "error.dark",
-        onClick: showError,
+        onClick: editorAction("editor.action.marker.next"),
       });
     }
     // auto format
@@ -82,7 +60,7 @@ const ModelEditorPanel: FunctionComponent = () => {
         icon: <AutoFixHigh />,
         tooltip: "Auto format this stan file",
         label: "Auto format",
-        onClick: tryFormat,
+        onClick: editorAction("editor.action.formatDocument"),
         color: "info",
       });
     }
@@ -122,8 +100,6 @@ const ModelEditorPanel: FunctionComponent = () => {
     data.stanFileContent,
     compileStatus,
     isConnected,
-    showError,
-    tryFormat,
     compile,
     compileMessage,
   ]);

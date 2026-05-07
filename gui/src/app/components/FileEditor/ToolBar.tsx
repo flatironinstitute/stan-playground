@@ -20,13 +20,17 @@ type Variant = "main" | "light" | "dark" | "contrastText";
 
 export type ColorOptions = `${Palletes}.${Variant}` | Palletes;
 
+export type ToolbarAction = (
+  editor: editor.IStandaloneCodeEditor | undefined,
+) => void;
+
 export type ToolbarItem =
   | {
       type: "button";
       tooltip?: string;
       label?: string;
       icon?: any;
-      onClick: (editor: editor.IStandaloneCodeEditor | undefined) => void;
+      onClick: ToolbarAction;
       color?: ColorOptions;
     }
   | {
@@ -162,4 +166,17 @@ const ToolbarItemComponent: FunctionComponent<{
   } else {
     return <span>unknown toolbar item type</span>;
   }
+};
+
+/** Returns a ToolbarAction that performs the Monaco editor action for the given id,
+ * e.g., "editor.action.addCommentLine" to comment a line.
+ * A (perhaps incomplete) list of such ids can be found at https://code.visualstudio.com/docs/reference/default-keybindings
+ */
+export const editorAction = (id: string): ToolbarAction => {
+  return (editor) => {
+    if (!editor) return;
+    const action = editor.getAction(id);
+    if (!action || !action.isSupported()) return;
+    action.run();
+  };
 };
