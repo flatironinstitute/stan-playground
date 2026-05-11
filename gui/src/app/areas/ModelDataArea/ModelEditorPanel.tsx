@@ -1,16 +1,12 @@
-import { Split } from "@geoffcox/react-splitter";
 import { AutoFixHigh, Cancel, Help, Settings } from "@mui/icons-material";
+
 import TextEditor from "@SpComponents/FileEditor/TextEditor";
-import { ToolbarItem } from "@SpComponents/FileEditor/ToolBar";
-import { stancErrorsToCodeMarkers } from "@SpCore/Stanc/Linting";
-import useStanc from "@SpCore/Stanc/useStanc";
+import { editorAction, ToolbarItem } from "@SpComponents/FileEditor/ToolBar";
 import { CompileContext } from "@SpCore/Compilation/CompileContextProvider";
-import { FunctionComponent, use, useCallback, useMemo, useState } from "react";
+import { FunctionComponent, use, useCallback, useMemo } from "react";
 import { ProjectContext } from "@SpCore/Project/ProjectContextProvider";
 import { ProjectKnownFiles } from "@SpCore/Project/ProjectDataModel";
 import { FileNames } from "@SpCore/Project/FileMapping";
-
-import StanCompileResultPanel from "./StanCompileResultPanel";
 
 const ModelEditorPanel: FunctionComponent = () => {
   const { data, update } = use(ProjectContext);
@@ -33,20 +29,8 @@ const ModelEditorPanel: FunctionComponent = () => {
     [update],
   );
 
-  const { stancErrors, requestFormat } = useStanc(
-    "main.stan",
-    data.ephemera.stanFileContent,
-    setEditedFileContent,
-  );
-
   const { compileStatus, compileMessage, compile, validSyntax, isConnected } =
     use(CompileContext);
-
-  const hasWarnings = useMemo(() => {
-    return stancErrors.warnings && stancErrors.warnings.length > 0;
-  }, [stancErrors]);
-
-  const [syntaxWindowVisible, setSyntaxWindowVisible] = useState(false);
 
   const toolbarItems: ToolbarItem[] = useMemo(() => {
     const ret: ToolbarItem[] = [];
@@ -66,24 +50,9 @@ const ModelEditorPanel: FunctionComponent = () => {
         icon: <Cancel />,
         label: "Syntax error",
         color: "error.dark",
-        tooltip: "Syntax error in Stan file",
-        onClick: () => {
-          setSyntaxWindowVisible((v) => !v);
-        },
-      });
-    } else if (hasWarnings && !!data.ephemera.stanFileContent) {
-      ret.push({
-        type: "button",
-        icon: <Cancel />,
-        label: "Compiler warning",
-        color: "info.dark",
-        tooltip: "Warning in Stan file",
-        onClick: () => {
-          setSyntaxWindowVisible((v) => !v);
-        },
+        onClick: editorAction("editor.action.marker.next"),
       });
     }
-
     // auto format
     if (data.ephemera.stanFileContent && validSyntax) {
       ret.push({
@@ -91,7 +60,7 @@ const ModelEditorPanel: FunctionComponent = () => {
         icon: <AutoFixHigh />,
         tooltip: "Auto format this stan file",
         label: "Auto format",
-        onClick: requestFormat,
+        onClick: editorAction("editor.action.formatDocument"),
         color: "info",
       });
     }
@@ -129,8 +98,6 @@ const ModelEditorPanel: FunctionComponent = () => {
     validSyntax,
     data.ephemera.stanFileContent,
     data.stanFileContent,
-    hasWarnings,
-    requestFormat,
     compileStatus,
     isConnected,
     compile,
@@ -139,16 +106,7 @@ const ModelEditorPanel: FunctionComponent = () => {
 
   const isCompiling = compileStatus === "compiling";
 
-  const compileResultWindow = syntaxWindowVisible ? (
-    <StanCompileResultPanel
-      stancErrors={stancErrors}
-      onClose={() => setSyntaxWindowVisible(false)}
-    />
-  ) : (
-    <></>
-  );
-
-  const editor = (
+  return (
     <TextEditor
       language="stan"
       label={FileNames.STANFILE}
@@ -158,20 +116,8 @@ const ModelEditorPanel: FunctionComponent = () => {
       onSetEditedText={setEditedFileContent}
       readOnly={isCompiling}
       toolbarItems={toolbarItems}
-      codeMarkers={stancErrorsToCodeMarkers(stancErrors)}
       contentOnEmpty="Begin editing or select an example from the left panel"
     />
-  );
-
-  return (
-    <Split
-      horizontal
-      initialPrimarySize={syntaxWindowVisible ? "60%" : "100%"}
-      splitterSize={syntaxWindowVisible ? "7px" : "0px"}
-    >
-      {editor}
-      {compileResultWindow}
-    </Split>
   );
 };
 

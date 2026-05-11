@@ -1,8 +1,11 @@
 import { FunctionComponent, use, useMemo } from "react";
+import type { editor } from "monaco-editor";
+
 import { Save } from "@mui/icons-material";
 import Link from "@mui/material/Link";
 import IconButton from "@mui/material/IconButton";
 import { styled, useTheme } from "@mui/material/styles";
+
 import { UserSettingsContext } from "@SpCore/Settings/UserSettings";
 
 type Palletes =
@@ -17,13 +20,17 @@ type Variant = "main" | "light" | "dark" | "contrastText";
 
 export type ColorOptions = `${Palletes}.${Variant}` | Palletes;
 
+export type ToolbarAction = (
+  editor: editor.IStandaloneCodeEditor | undefined,
+) => void;
+
 export type ToolbarItem =
   | {
       type: "button";
       tooltip?: string;
       label?: string;
       icon?: any;
-      onClick: () => void;
+      onClick: ToolbarAction;
       color?: ColorOptions;
     }
   | {
@@ -36,6 +43,7 @@ type ToolbarProps = {
   items: ToolbarItem[];
   label: string;
   onSaveText: () => void;
+  editorInstance: editor.IStandaloneCodeEditor | undefined;
   edited: boolean;
   readOnly: boolean;
 };
@@ -53,6 +61,7 @@ export const ToolBar: FunctionComponent<ToolbarProps> = ({
   items,
   label,
   onSaveText,
+  editorInstance,
   edited,
   readOnly,
 }) => {
@@ -88,16 +97,21 @@ export const ToolBar: FunctionComponent<ToolbarProps> = ({
         <span className="EditorTitle">{label}</span>
         {toolBarItems &&
           toolBarItems.map((item, i) => (
-            <ToolbarItemComponent key={i} item={item} />
+            <ToolbarItemComponent
+              key={i}
+              item={item}
+              editorInstance={editorInstance}
+            />
           ))}
       </EditorMenuBar>
     </div>
   );
 };
 
-const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
-  item,
-}) => {
+const ToolbarItemComponent: FunctionComponent<{
+  item: ToolbarItem;
+  editorInstance: editor.IStandaloneCodeEditor | undefined;
+}> = ({ item, editorInstance }) => {
   const theme = useTheme();
 
   const { theme: userTheme } = use(UserSettingsContext);
@@ -116,7 +130,7 @@ const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
       return (
         <span className="EditorToolbarItem" style={{ color }}>
           <IconButton
-            onClick={onClick}
+            onClick={() => onClick(editorInstance)}
             disabled={!onClick}
             color="inherit"
             size="small"
@@ -131,7 +145,7 @@ const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
       return (
         <span className="EditorToolbarItem">
           <Link
-            onClick={onClick}
+            onClick={() => onClick(editorInstance)}
             color={color}
             component="button"
             underline="none"
@@ -152,4 +166,17 @@ const ToolbarItemComponent: FunctionComponent<{ item: ToolbarItem }> = ({
   } else {
     return <span>unknown toolbar item type</span>;
   }
+};
+
+/** Returns a ToolbarAction that performs the Monaco editor action for the given id,
+ * e.g., "editor.action.addCommentLine" to comment a line.
+ * A (perhaps incomplete) list of such ids can be found at https://code.visualstudio.com/docs/reference/default-keybindings
+ */
+export const editorAction = (id: string): ToolbarAction => {
+  return (editor) => {
+    if (!editor) return;
+    const action = editor.getAction(id);
+    if (!action || !action.isSupported()) return;
+    action.run();
+  };
 };

@@ -9,23 +9,21 @@ import {
 
 import Loading from "@SpComponents/Loading";
 import { UserSettingsContext } from "@SpCore/Settings/UserSettings";
-import { CodeMarker } from "@SpCore/Stanc/Linting";
-import { unreachable } from "@SpUtil/unreachable";
 
-import { Editor, loader, useMonaco, type Monaco } from "@monaco-editor/react";
+import { Editor, loader, useMonaco } from "@monaco-editor/react";
 import type { editor, IDisposable } from "monaco-editor";
 
 import { ToolBar, ToolbarItem } from "./ToolBar";
 
 import monacoAddStanLang from "./monacoStanLanguage";
+
 // loader from @monaco-editor/react handles the loading of the monaco editor
 // importantly, it downloads from a CDN, so we need to make sure our
 // dependency on the monaco-editor package is limited to types only,
 // to avoid downloading twice.
-
 loader.config({
   paths: {
-    vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs",
+    vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs",
   },
 });
 loader.init().then(monacoAddStanLang);
@@ -40,7 +38,6 @@ type Props = {
   wordWrap?: boolean;
   toolbarItems?: ToolbarItem[];
   label: string;
-  codeMarkers?: CodeMarker[];
   contentOnEmpty?: string | HTMLSpanElement;
   actions?: editor.IActionDescriptor[];
 };
@@ -54,7 +51,6 @@ const TextEditor: FunctionComponent<Props> = ({
   toolbarItems,
   language,
   label,
-  codeMarkers,
   contentOnEmpty,
   actions,
 }) => {
@@ -84,24 +80,6 @@ const TextEditor: FunctionComponent<Props> = ({
   }, [editedText, editorInstance]);
 
   const monacoInstance = useMonaco();
-
-  useEffect(() => {
-    if (!monacoInstance) return;
-    if (!codeMarkers) return;
-    const model = editorInstance?.getModel();
-    if (!model) return;
-
-    const modelMarkers = codeMarkers.map((marker) => ({
-      ...marker,
-      severity: toMonacoMarkerSeverity(marker.severity, monacoInstance),
-    }));
-
-    monacoInstance.editor.setModelMarkers(
-      model,
-      "stan-playground",
-      modelMarkers,
-    );
-  }, [codeMarkers, monacoInstance, editorInstance]);
 
   useEffect(() => {
     if (!editorInstance || !monacoInstance) return;
@@ -159,18 +137,32 @@ const TextEditor: FunctionComponent<Props> = ({
     return editedText !== text;
   }, [editedText, text]);
 
-  const { theme: userTheme } = use(UserSettingsContext);
-
+  const { theme: userTheme, pedantic } = use(UserSettingsContext);
   const theme = useMemo(
     () => (userTheme === "dark" ? "vs-dark" : "vs"),
     [userTheme],
   );
+
+  // hack: monaco-lsp-client doesn't support workspace/diagnostic/refresh,
+  // so we need to trigger a re-diagnose another way when pedantic mode changes
+  useEffect(() => {
+    if (
+      !editorInstance ||
+      editorInstance.getModel()?.getLanguageId() !== "stan"
+    )
+      return;
+
+    const value = editorInstance.getValue();
+    editorInstance.setValue(value + " ");
+    editorInstance.setValue(value);
+  }, [editorInstance, pedantic]);
 
   return (
     <div className="EditorWithToolbar">
       <ToolBar
         items={toolbarItems || []}
         label={label}
+        editorInstance={editorInstance}
         onSaveText={onSaveText}
         edited={edited}
         readOnly={!!readOnly}
@@ -179,6 +171,7 @@ const TextEditor: FunctionComponent<Props> = ({
         defaultLanguage={language}
         aria-label={label}
         onChange={handleChange}
+        path={label}
         onMount={(editor, _) => setEditor(editor)}
         loading={<Loading name="Monaco Editor" />}
         options={{
@@ -195,24 +188,6 @@ const TextEditor: FunctionComponent<Props> = ({
       />
     </div>
   );
-};
-
-const toMonacoMarkerSeverity = (
-  severity: CodeMarker["severity"],
-  monacoInstance: Monaco,
-) => {
-  switch (severity) {
-    case "error":
-      return monacoInstance.MarkerSeverity.Error;
-    case "warning":
-      return monacoInstance.MarkerSeverity.Warning;
-    case "hint":
-      return monacoInstance.MarkerSeverity.Hint;
-    case "info":
-      return monacoInstance.MarkerSeverity.Info;
-    default:
-      return unreachable(severity);
-  }
 };
 
 const createHintTextContentWidget = (
