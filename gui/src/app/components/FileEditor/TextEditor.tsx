@@ -144,7 +144,7 @@ const TextEditor: FunctionComponent<Props> = ({
   );
 
   // hack: monaco-lsp-client doesn't support workspace/diagnostic/refresh,
-  // so we need to trigger a re-diagnose an other way when pedantic mode changes
+  // so we need to trigger a re-diagnose another way when pedantic mode changes
   useEffect(() => {
     if (
       !editorInstance ||
