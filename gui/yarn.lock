@@ -4383,10 +4383,10 @@ webpack-virtual-modules@^0.6.2:
   resolved "https://registry.yarnpkg.com/webpack-virtual-modules/-/webpack-virtual-modules-0.6.2.tgz#057faa9065c8acf48f24cb57ac0e77739ab9a7e8"
   integrity sha512-66/V2i5hQanC51vBQKPH4aI8NMAcBW59FVBs+rC7eGHupMyfn34q7rZIE+ETlJ+XTevqfUhVVBgSUNSW2flEUQ==
 
-webr@^0.5.9:
-  version "0.5.9"
-  resolved "https://registry.yarnpkg.com/webr/-/webr-0.5.9.tgz#57c51efbe72779199a17c7cc6ce67f31c8bfa10e"
-  integrity sha512-Hzg6AK7+GiegMz+nrHZQLWA3q3F5Ku6WNkuUPqQN2yJXYFtRXdikMebfXUXu5MAixvoeXzWXu+bZQhJgxuz1Jg==
+webr@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/webr/-/webr-0.6.0.tgz#495f51da0522fdee91495009e9a52eef43448011"
+  integrity sha512-M2b8m3/ZBk7XMIR7LD97s5k/9jUla83Z0Hl4b+WnrK7XmSMpZdajCiP3XkSzHKHDUgscHKe+lVUvk3aym8q0bw==
   dependencies:
     "@codemirror/autocomplete" "^6.8.1"
     "@codemirror/commands" "^6.2.4"
