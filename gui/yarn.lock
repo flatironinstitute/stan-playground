@@ -3950,21 +3950,21 @@ stackback@0.0.2:
   resolved "https://registry.yarnpkg.com/stackback/-/stackback-0.0.2.tgz#1ac8a0d9483848d1695e418b6d031a3c3ce68e3b"
   integrity sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==
 
-stan-language-server@^0.4.8:
-  version "0.4.8"
-  resolved "https://registry.yarnpkg.com/stan-language-server/-/stan-language-server-0.4.8.tgz#be98269a89c13ed6272d159bf4e5e37701eb4921"
-  integrity sha512-Dj0a7SQ9tbXzopspJssBJ1fHO8KC3THmFMLZqwwhXN9wut4guP9U0c2tdGsBaWZIC2HZr4B5GlEDep6h6Q+bDw==
+stan-language-server@^0.4.9:
+  version "0.4.9"
+  resolved "https://registry.yarnpkg.com/stan-language-server/-/stan-language-server-0.4.9.tgz#bf8ab5f065a247286ebcc8d9ef1ebdb8a86a27b3"
+  integrity sha512-KrQWAPJDRkBW/lTg643/aVqKXYrPv49x1RCn04YieXp6amWOuEVmh6WN4HUC4mGcgR8VfdxNUOwkoXVHMI0yRg==
   dependencies:
-    stanc3 "2.38.0"
+    stanc3 "2.39.0"
     trie-search "2.2.1"
     vscode-languageserver "9.0.1"
     vscode-languageserver-textdocument "1.0.12"
     vscode-uri "3.1.0"
 
-stanc3@2.38.0:
-  version "2.38.0"
-  resolved "https://registry.yarnpkg.com/stanc3/-/stanc3-2.38.0.tgz#ee4964a79905075f45712f8497d03956d7400b9b"
-  integrity sha512-xPQN0IwZhwZxj4ZJDyHqCDQBmOh8pSJvOHOB9OitC7omMA/UY2/Sg65cyaZjMLF0RJtvn8KzPq960czQ6yygSw==
+stanc3@2.39.0:
+  version "2.39.0"
+  resolved "https://registry.yarnpkg.com/stanc3/-/stanc3-2.39.0.tgz#49bd8e9bc9480bab8c897a7d7a5e764fe2096122"
+  integrity sha512-HKbus7PqzOGE4ZfkC6jAQ15U6UEtnMbRNvvqeVWj67NHphrMCoGLrlU1+nqkBPLfAHCWo1Xlap/ZSEefi1Nf9g==
 
 state-local@^1.0.6:
   version "1.0.7"
@@ -4108,10 +4108,10 @@ tinyrainbow@^3.0.3:
   resolved "https://registry.yarnpkg.com/tinyrainbow/-/tinyrainbow-3.1.0.tgz#1d8a623893f95cf0a2ddb9e5d11150e191409421"
   integrity sha512-Bf+ILmBgretUrdJxzXM0SgXLZ3XfiaUuOj/IKQHuTXip+05Xn+uyEYdVg0kYDipTBcLrCVyUzAPz7QmArb0mmw==
 
-tinystan@^0.3.2:
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/tinystan/-/tinystan-0.3.2.tgz#6b823dae25dcea6359e3aed64f2f0afc69dea721"
-  integrity sha512-PSqQJ0+wztxGJGEkHYx5jJGZZGWEZpOAZvCxuu3srmO26lM1CEn8uY4aQQzOPX0htmyxstrBFqEW6ZjF3eM5/Q==
+tinystan@^0.3.3:
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/tinystan/-/tinystan-0.3.3.tgz#6bb07a7522fd91f12586650f6d12cd127d43cc6b"
+  integrity sha512-qRvhT8t86q6Ac/MTcwf3jEifM3JHqJTEzspvLkld1SRErtKqsydJ14iB1DGyeQK6hegEsv0DREYoehKu+S1PWg==
 
 tldts-core@^6.1.86:
   version "6.1.86"
