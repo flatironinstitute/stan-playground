@@ -139,7 +139,9 @@ class DrawsObject:
         import arviz as az
 
         return az.from_dict(
-            posterior={pname: self.get(pname) for pname in self.parameter_names},
+            data={
+                "posterior": {pname: self.get(pname) for pname in self.parameter_names}
+            },
         )
 
     @property
