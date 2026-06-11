@@ -33,7 +33,7 @@
     "lz-string": "^1.5.0",
     "mcmc-stats": "^0.0.1",
     "plotly-stan-playground-dist": "file:./vendor/plotly-stan-playground-dist",
-    "pyodide": "^0.29.0",
+    "pyodide": "^314.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.5",

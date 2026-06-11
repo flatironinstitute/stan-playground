@@ -12,7 +12,7 @@ import { File } from "@SpUtil/files";
 
 const loadPyodideInstance = async () => {
   const pyodide = await loadPyodide({
-    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.0/full",
+    indexURL: "https://cdn.jsdelivr.net/pyodide/v314.0.0/full",
     stdout: (x: string) => {
       sendStdout(x);
     },
@@ -117,9 +117,7 @@ const run = async (
       }
       if (script.includes("requests") || script.includes("https://")) {
         patch_http = true;
-        setUpPromises.push(
-          micropip.install(["requests", "lzma", "pyodide-http"]),
-        );
+        setUpPromises.push(micropip.install(["requests", "pyodide-http"]));
       }
       setUpPromises.push(micropip.install("stanio"));
       setUpPromises.push(pyodide.loadPackagesFromImports(script));
