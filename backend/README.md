@@ -21,7 +21,7 @@ It provides the following endpoints:
 
 The server listens to the following environment variables for configuration:
 
-- `TINYSTAN` or `TINYSTAN_DIR` - the location to look for a [tinystan](github.com/WardBrian/tinystan) installation. Required.
+- `TINYSTAN` or `TINYSTAN_DIR` - the location to look for a [tinystan](https://github.com/WardBrian/tinystan) installation. Required.
 
   **Note**: This `tinystan` folder is expected to be configured to build WebAssembly. Consult the Dockerfile and `local.mk` files for
   reference.
