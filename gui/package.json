@@ -38,7 +38,7 @@
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.5",
     "react-plotly.js": "^2.6.0",
-    "react-router": "^7.15.0",
+    "react-router": "^7.15.1",
     "react-use-measure": "^2.1.1",
     "stan-language-server": "^0.4.9",
     "tinystan": "^0.3.3",
