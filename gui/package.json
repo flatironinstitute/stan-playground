@@ -63,7 +63,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "globals": "^17.3.0",
     "jsdom": "^26.1.0",
-    "monaco-editor": "^0.55.1",
+    "monaco-editor": "v0.56.0-dev-20260625",
     "prettier": "^3.3.2",
     "typescript": "^6.0.2",
     "typescript-eslint": "^8.59.0",
