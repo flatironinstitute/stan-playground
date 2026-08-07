@@ -1,0 +1,10 @@
+To build and serve the documentation locally, follow these steps:
+
+Install dependencies:
+pip install -r requirements.txt
+
+Build the docs:
+sphinx-build -b html . _build/html
+
+Serve the docs:
+npx serve _build/html
