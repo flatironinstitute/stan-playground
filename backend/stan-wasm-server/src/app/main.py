@@ -51,6 +51,8 @@ app.add_middleware(
         "https://stan-playground.flatironinstitute.org",
         "https://stan-playground.vercel.app",
         "https://stan-playground-staging.vercel.app",
+        "https://magland.github.io",  # GitHub Pages trial (fork)
+        "https://flatironinstitute.github.io",  # GitHub Pages
         "http://127.0.0.1:3000",  # yarn dev
         "http://127.0.0.1:4173",  # yarn preview
     ],
