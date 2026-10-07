@@ -19,6 +19,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # served from /<repo>/ on github.io; set to / when using a custom domain
+      SP_BASE_PATH: /${{ github.event.repository.name }}/
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -28,14 +31,19 @@ jobs:
           cache-dependency-path: gui/yarn.lock
       - name: Build
         working-directory: gui
-        env:
-          # served from /<repo>/ on github.io; set to / when using a custom domain
-          SP_BASE_PATH: /${{ github.event.repository.name }}/
         run: |
           yarn install --frozen-lockfile
           yarn build
           # SPA routing: GitHub Pages serves 404.html for unknown paths
           cp dist/index.html dist/404.html
+      # docs are served from <base>/docs/, built the same way GitHub Pages builds them
+      - name: Set docs base URL
+        run: |
+          echo "baseurl: ${SP_BASE_PATH}docs" > docs/_config.yml
+      - uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./docs
+          destination: ./gui/dist/docs
       - uses: actions/upload-pages-artifact@v3
         with:
           path: gui/dist
