@@ -26,6 +26,11 @@ if (typeof window === 'undefined') {
         if (r.cache === "only-if-cached" && r.mode !== "same-origin") {
             return;
         }
+        // stan-playground: leave the docs (<base>/docs/) without cross-origin
+        // isolation, so that their embedded playground iframes can load
+        if (r.url.startsWith(new URL("docs/", self.registration.scope).href)) {
+            return;
+        }
 
         const request = (coepCredentialless && r.mode === "no-cors")
             ? new Request(r, {
