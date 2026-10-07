@@ -1,0 +1,51 @@
+name: GitHub Pages deploy
+
+on:
+  push:
+    branches:
+      - main
+  # manual trigger
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: "yarn"
+          cache-dependency-path: gui/yarn.lock
+      - name: Build
+        working-directory: gui
+        env:
+          # served from /<repo>/ on github.io; set to / when using a custom domain
+          SP_BASE_PATH: /${{ github.event.repository.name }}/
+        run: |
+          yarn install --frozen-lockfile
+          yarn build
+          # SPA routing: GitHub Pages serves 404.html for unknown paths
+          cp dist/index.html dist/404.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: gui/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
