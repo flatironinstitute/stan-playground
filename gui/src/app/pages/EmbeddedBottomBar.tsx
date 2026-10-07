@@ -149,8 +149,7 @@ const SiteButtons: FunctionComponent = () => {
   } = use(UserSettingsContext);
 
   const openInStanPlayground = useCallback(() => {
-    const baseUrl = window.location.origin;
-    const url = new URL(baseUrl);
+    const url = new URL(import.meta.env.BASE_URL, window.location.origin);
     url.searchParams.set("stan", createDataUrl(data.stanFileContent));
     url.searchParams.set("data", createDataUrl(data.dataFileContent));
     window.open(url.toString(), "_blank");

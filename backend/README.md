@@ -47,7 +47,7 @@ own using
 docker run -p 8083:8080 -it ghcr.io/flatironinstitute/stan-wasm-server:latest
 ```
 
-See [the docs](https://flatironinstitute.github.io/stan-playground/compilation_server_setup.html) for more.
+See [the docs](https://flatironinstitute.github.io/stan-playground/docs/compilation_server_setup.html) for more.
 
 ## Building the Docker image from scratch
 

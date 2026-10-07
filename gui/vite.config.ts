@@ -5,6 +5,7 @@ import { codecovVitePlugin } from "@codecov/vite-plugin";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: process.env.SP_BASE_PATH ?? "/",
   resolve: { tsconfigPaths: true },
   optimizeDeps: { exclude: ["pyodide"] },
   build: {
