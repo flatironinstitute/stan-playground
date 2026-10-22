@@ -5,3 +5,4 @@ coverage/
 vendor/
 
 fft.ts
+public/coi-serviceworker.js
