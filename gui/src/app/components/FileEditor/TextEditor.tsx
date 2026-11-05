@@ -23,7 +23,7 @@ import monacoAddStanLang from "./monacoStanLanguage";
 // to avoid downloading twice.
 loader.config({
   paths: {
-    vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.56.0/min/vs",
+    vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.57.0/min/vs",
   },
 });
 loader.init().then(monacoAddStanLang);

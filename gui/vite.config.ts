@@ -50,6 +50,7 @@ export default defineConfig({
         // "**/types/*ts",
         "index.ts",
         "vite*ts",
+        "**/stanLspWorker.ts",
       ],
       include: ["src/**/*.ts", "src/**/*.tsx"],
       provider: "v8",
